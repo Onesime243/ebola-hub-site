@@ -1957,7 +1957,7 @@
       colorFn: (v, f) => { const z = by.get(norm(f.data_zone)); return S.zrColor === "score" ? (z ? PRIO_COL(z.score_risque || 0) : "#E9E6DF") : (ZCOL[z?.categorie] || "#E9E6DF"); },
       selected: S.zrSel || null, onClick: f => { S.zrSel = by.get(norm(f.data_zone))?.zone_sante || f.data_zone; render(); },
       labelMode: S.zrLab === "aucune" ? "none" : "all",
-      labelIf: f => { const z = by.get(norm(f.data_zone)); return !!z && z.categorie !== "Non touchée"; }, labelRank: f => by.get(norm(f.data_zone))?.score_risque || 0,
+      labelIf: f => { const z = by.get(norm(f.data_zone)); return !!z && z.categorie !== "Non touchée" && (S.zrColor !== "score" || (z.score_risque || 0) >= 30); }, labelRank: f => by.get(norm(f.data_zone))?.score_risque || 0,
       labelText: f => { const z = by.get(norm(f.data_zone)); return S.zrLab === "nom" ? f.data_zone : `${f.data_zone} · ${nf(z?.score_risque, 0)}`; },
       tip: f => { const z = by.get(norm(f.data_zone)); return `<b>${esc(f.data_zone)}</b>${z ? `<div class="row"><span>${T("Score de risque")}</span><b>${nf(z.score_risque, 0)} / 100</b></div><div class="row"><span>${T("Rang dans la province")}</span><b>${nf(z.rang_province)}</b></div><div class="row"><span>${T("Priorité")}</span><b>${esc(T(z.niveau_priorite || ""))}</b></div>` : ""}<div class="row"><span>${T("Catégorie")}</span><b>${esc(T(z?.categorie || "—"))}</b></div>${z ? `<div class="row"><span>${T("Cas 21 j")}</span><b>${nf(z.cas_21j)}</b></div><div class="row"><span>${T("Jours sans cas")}</span><b>${nf(z.jours_depuis_dernier_cas)}</b></div><div class="small" style="max-width:280px">${esc(z.explication || "")}</div>` : ""}`; },
       legendHTML: S.zrColor === "score" ? [[80, "Priorité 1 (≥ 70)"], [60, "Priorité 2 (50–69)"], [40, "Priorité 3 (30–49)"], [10, "Veille (< 30)"]].map(([v, t]) => `<span><i style="background:${PRIO_COL(v)};display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:4px"></i>${T(t)}</span>`).join(" ")
@@ -1976,8 +1976,8 @@
     const prov = S.province === "Toutes" ? T("Toutes provinces") : `${T("Province")} : ${S.province}`;
     const opt = zrMapOpts();
     Ch.reportChoropleth(opt, {
-      title: score ? T("Score de risque de résurgence par zone de santé") : T("Catégories de risque des zones de santé"),
-      subtitle: `${per} · ${prov} · ${T("étiquettes : zone · score de risque (0–100)")}`,
+      title: score ? T("Score de risque de résurgence par zone de santé — zones prioritaires (score ≥ 30)") : T("Catégories de risque des zones de santé"),
+      subtitle: `${per} · ${prov} · ${score ? T("étiquettes : zones de priorité 1 à 3 (score ≥ 30)") : T("étiquettes : zone · score de risque (0–100)")}`,
       legendTitle: score ? T("Niveau de priorité (score 0–100)") : T("Catégorie de la zone"), legend, countLabel: T("zones"),
       sideNotes: [score ? T("Score = cas 21 j (20) + tendance (12) + P(Rt>1) (12) + décès communautaires (8) + décès groupés (5) + proximité d’une incidence élevée (10) + frontière (5) + mines (5) + contacts non vus > 3 j (8) + résurgence (10) + EDS non réalisés (5).")
         : T("Rouge : cas dans les 21 derniers jours et au moins un critère d’aggravation, ou deux critères de contexte. Orange : cas < 21 j sans critère rouge.")],
@@ -2322,7 +2322,12 @@
   const capHtml = t => esc(t || "").replace(/&lt;(\/?)b&gt;/g, "<$1b>");
   function mapsView() {
     const set = PER ? MAPSET : (D.cartes || null);
-    const intro = `<div class="notice">${T("Cartes thématiques prêtes pour les rapports et présentations : titre, cadre, flèche du nord, échelle en km, légende avec bornes et effectifs par classe, limites de province, source, projection (Mercator, WGS 84) et date ; chacune est accompagnée d’un commentaire (méthode, résultats, limites) à reprendre dans le rapport.")} ${T("Fichiers PNG haute définition (A4 paysage) dans le dossier reports du projet.")}</div>`;
+    const L = D.livrables || {}, lb = L.base || "../reports/";
+    const dl = (L.rapport || L.presentation) ? panel("Rapport national et présentation", T("Produits automatiquement à chaque exécution, pour la situation complète"), `<div class="flex" style="gap:10px;flex-wrap:wrap">
+      ${L.rapport ? `<a class="btn primary" href="${lb}${encodeURIComponent(L.rapport)}" download="${esc(L.rapport)}">⤓ ${T("Rapport épidémiologique national (PDF)")}</a>` : ""}
+      ${L.presentation ? `<a class="btn" href="${lb}${encodeURIComponent(L.presentation)}" download="${esc(L.presentation)}">⤓ ${T("Présentation de la riposte (PowerPoint)")}</a>` : ""}</div>
+      <p class="small muted" style="margin-top:8px">${T("Question opérationnelle de la présentation")} : ${esc(T(L.question || ""))}</p>`) : "";
+    const intro = dl + `<div class="notice">${T("Cartes thématiques prêtes pour les rapports et présentations : titre, cadre, flèche du nord, échelle en km, légende avec bornes et effectifs par classe, limites de province, source, projection (Mercator, WGS 84) et date ; chacune est accompagnée d’un commentaire (méthode, résultats, limites) à reprendre dans le rapport.")} ${T("Fichiers PNG haute définition (A4 paysage) dans le dossier reports du projet.")}</div>`;
     if (PER && !set && isPublic) return `${intro}<div class="notice">${T("Sur le site public, les cartes sont publiées pour la situation complète : revenez à « Tout » dans la période d’analyse.")}</div>`;
     if (PER && !set) return `${intro}${panel("Cartes de la période", `${dfmt(PER.debut)} → ${dfmt(PER.fin)}`, `<div class="flex"><button class="btn primary" type="button" data-maps-run ${SERVED_P ? "" : "disabled"}>${T("Produire les cartes de cette période")}</button><span class="muted small" id="maps-state">${T("Environ 15 secondes.")}</span></div>`)}`;
     if (!set || !(set.cartes || []).length) return `${intro}<div class="empty">${T("Aucune carte produite : relancez l’analyse complète.")}</div>`;
