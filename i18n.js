@@ -824,7 +824,7 @@ Object.assign(window.HUB_EN, { "Cartes pour rapport": "Report maps", "Carte": "M
   "Produire les cartes de cette période": "Produce maps for this period", "Environ 15 secondes.": "About 15 seconds.", "Production des cartes…": "Producing maps…",
   "Cartes de la période": "Maps for the period", "Aucune carte produite : relancez l’analyse complète.": "No maps produced: rerun the full analysis.",
   "Fichiers PNG haute définition (A4 paysage) dans le dossier reports du projet.": "High-resolution PNG files (A4 landscape) in the project's reports folder." });
-Object.assign(window.HUB_EN, { "Derniers jours jusqu’au": "Last days up to", "version publique agrégée": "aggregated public version",
+Object.assign(window.HUB_EN, { "Derniers jours jusqu’au": "Last days up to", "version publique agrégée": "aggregated public version", "version publique pseudonymisée": "pseudonymised public version",
   "Sur le site public, les cartes sont publiées pour la situation complète : revenez à « Tout » dans la période d’analyse.": "On the public site, maps are published for the full situation: switch back to “All” in the analysis period." });
 /* v3.6 — SitRep PDF, Rt par zone, opérations, score de risque */
 Object.assign(window.HUB_EN, {

@@ -50,6 +50,8 @@
   const byIndex = new Map(); contacts.forEach(c => { if (!byIndex.has(c.ix)) byIndex.set(c.ix, []); byIndex.get(c.ix).push(c); });
   const idxBy = new Map(idxCases.map(x => [x.index_key, x]));
   const isPublic = !!(D.meta && D.meta.public_safe);
+  const pubParcours = isPublic && !!D.meta.public_parcours;   // site public avec parcours pseudonymisés (ID + initiales)
+  const PARCOURS_TABS = new Set(["index", "journey", "recon"]);
   /* ---- Générations du réseau de contact tracing : 1 = cas index + ses contacts ; 2 = au moins un contact devenu cas
          ayant lui-même des contacts listés ; etc. ---- */
   const strongLink = x => x.lk && (x.lkc === "Certain" || x.lkc === "Probable") && x.st !== "Doublon";
@@ -110,7 +112,7 @@
     { id: "quality", t: "Qualité & preprocessing", g: "Données", i: "M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z" },
     { id: "method", t: "Méthodologie", g: "Données", i: "M4 4h16v16H4zm3 4h10v2H7zm0 4h10v2H7zm0 4h6v2H7z" },
     { id: "terms", t: "Conditions d’utilisation", g: "Données", i: "M6 2h9l5 5v15H6zm8 1.5V8h4.5" }
-  ].filter(t => !(isPublic && t.priv));
+  ].filter(t => !(isPublic && t.priv && !(pubParcours && PARCOURS_TABS.has(t.id))));
 
   function readHash() {
     const h = decodeURIComponent(location.hash.replace(/^#\/?/, "")).split("/");
@@ -1525,7 +1527,7 @@
       ${panel("Taux d’attaque secondaire par lieu d’exposition", T("Contacts listés devenus cas ; IC de Wilson à 95 % ; test du χ² d’homogénéité"), `${sarTable(sp.lieux?.circonstance)}`)}
       ${panel("Par type de contact et par relation", "", `${sarTable(sp.lieux?.type_contact)}<div style="height:10px"></div>${sarTable(sp.lieux?.relation)}`)}
     </div>
-    ${isPublic ? "" : panel("Graphe des lieux potentiels de transmission", T("Chaque grappe = un cas index (rond rose = source avec source connue, blanc = source non identifiée) relié au lieu d’exposition (M = ménage/foyer, H = structure de santé, T = travail, F = funérailles), puis à ses contacts ; couleur = type de transmission ; anneau rouge = contact devenu cas ; carré plein = suivi de 21 jours terminé (quarantaine menée à terme), carré pointillé = suivi en cours, sans carré = perdu de vue ou suivi incomplet"),
+    ${isPublic && !pubParcours ? "" : panel("Graphe des lieux potentiels de transmission", T("Chaque grappe = un cas index (rond rose = source avec source connue, blanc = source non identifiée) relié au lieu d’exposition (M = ménage/foyer, H = structure de santé, T = travail, F = funérailles), puis à ses contacts ; couleur = type de transmission ; anneau rouge = contact devenu cas ; carré plein = suivi de 21 jours terminé (quarantaine menée à terme), carré pointillé = suivi en cours, sans carré = perdu de vue ou suivi incomplet"),
       `<div class="flex" style="margin-bottom:8px">
         <label class="field">${T("Lieu")}<select data-state="ssPlace">${["Tous", "Funérailles", "Hôpital", "Lieu du travail", "Foyer"].map(v => `<option value="${v}" ${S.ssPlace === v ? "selected" : ""}>${T(v === "Tous" ? "Tous les lieux" : HUBL[v][1])}</option>`).join("")}</select></label>
         <label class="field">${T("Taille minimale de la grappe")}<select data-state="ssMin">${["2", "5", "10", "20"].map(v => `<option value="${v}" ${S.ssMin === v ? "selected" : ""}>≥ ${v} ${T("contacts")}</option>`).join("")}</select></label>
@@ -2421,7 +2423,7 @@
       const cur = PER ? `${PER.debut}_${PER.fin}` : "";
       el.innerHTML = `<div class="pb-main"><span class="pb-title"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M7 2h2v2h6V2h2v2h3a1 1 0 0 1 1 1v15a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h3zm12 8H5v9h14zM5 8h14V6H5z"/></svg>${T("Période d’analyse")}</span>
         <div class="seg pb-presets">${STATIC_P.map(x => `<button type="button" data-ps="${x.cle}" class="${cur === x.cle ? "on" : ""}">${x.jours} ${T("j")}</button>`).join("")}<button type="button" data-ps="" class="${PER ? "" : "on"}">${T("Tout")}</button></div>
-        <span class="pb-state small">${T("Derniers jours jusqu’au")} ${dfmt(DMAX)} — ${T("version publique agrégée")}</span></div>
+        <span class="pb-state small">${T("Derniers jours jusqu’au")} ${dfmt(DMAX)} — ${T(pubParcours ? "version publique pseudonymisée" : "version publique agrégée")}</span></div>
         ${PER ? `<div class="pb-active"><b>${T("Résultats du")} ${dfmt(PER.debut)} ${T("au")} ${dfmt(PER.fin)}</b> — ${T("cas notifiés et contacts suivis pendant la période ; statuts de suivi et zones à risque à la date de fin ; Rt et prévisions estimés sur tout l’historique jusqu’à la date de fin, affichés sur la période.")}</div>` : ""}`;
       return;
     }
