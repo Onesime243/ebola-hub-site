@@ -1956,7 +1956,8 @@
       value: f => S.zrColor === "score" ? (by.get(norm(f.data_zone))?.score_risque ?? null) : (code[by.get(norm(f.data_zone))?.categorie] || null),
       colorFn: (v, f) => { const z = by.get(norm(f.data_zone)); return S.zrColor === "score" ? (z ? PRIO_COL(z.score_risque || 0) : "#E9E6DF") : (ZCOL[z?.categorie] || "#E9E6DF"); },
       selected: S.zrSel || null, onClick: f => { S.zrSel = by.get(norm(f.data_zone))?.zone_sante || f.data_zone; render(); },
-      labelIf: f => S.zrLab !== "aucune" && (by.get(norm(f.data_zone))?.score_risque || 0) >= 30, labelRank: f => by.get(norm(f.data_zone))?.score_risque || 0, maxLabels: 18,
+      labelMode: S.zrLab === "aucune" ? "none" : "all",
+      labelIf: f => { const z = by.get(norm(f.data_zone)); return !!z && z.categorie !== "Non touchée"; }, labelRank: f => by.get(norm(f.data_zone))?.score_risque || 0,
       labelText: f => { const z = by.get(norm(f.data_zone)); return S.zrLab === "nom" ? f.data_zone : `${f.data_zone} · ${nf(z?.score_risque, 0)}`; },
       tip: f => { const z = by.get(norm(f.data_zone)); return `<b>${esc(f.data_zone)}</b>${z ? `<div class="row"><span>${T("Score de risque")}</span><b>${nf(z.score_risque, 0)} / 100</b></div><div class="row"><span>${T("Rang dans la province")}</span><b>${nf(z.rang_province)}</b></div><div class="row"><span>${T("Priorité")}</span><b>${esc(T(z.niveau_priorite || ""))}</b></div>` : ""}<div class="row"><span>${T("Catégorie")}</span><b>${esc(T(z?.categorie || "—"))}</b></div>${z ? `<div class="row"><span>${T("Cas 21 j")}</span><b>${nf(z.cas_21j)}</b></div><div class="row"><span>${T("Jours sans cas")}</span><b>${nf(z.jours_depuis_dernier_cas)}</b></div><div class="small" style="max-width:280px">${esc(z.explication || "")}</div>` : ""}`; },
       legendHTML: S.zrColor === "score" ? [[80, "Priorité 1 (≥ 70)"], [60, "Priorité 2 (50–69)"], [40, "Priorité 3 (30–49)"], [10, "Veille (< 30)"]].map(([v, t]) => `<span><i style="background:${PRIO_COL(v)};display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:4px"></i>${T(t)}</span>`).join(" ")
@@ -1974,8 +1975,6 @@
     const per = PER ? `${T("Période du")} ${dfmt(PER.debut)} ${T("au")} ${dfmt(PER.fin)}` : `${T("Situation au")} ${dfmt(Z.date || D.meta.cutoff)}`;
     const prov = S.province === "Toutes" ? T("Toutes provinces") : `${T("Province")} : ${S.province}`;
     const opt = zrMapOpts();
-    const zBy = new Map(zs.map(z => [norm(z.zone_sante), z]));
-    opt.labelIf = f => { const z = zBy.get(norm(f.data_zone)); return S.zrLab !== "aucune" && !!z && z.categorie !== "Non touchée" && ((z.score_risque || 0) >= 30 || z.categorie === "Rouge"); };
     Ch.reportChoropleth(opt, {
       title: score ? T("Score de risque de résurgence par zone de santé") : T("Catégories de risque des zones de santé"),
       subtitle: `${per} · ${prov} · ${T("étiquettes : zone · score de risque (0–100)")}`,

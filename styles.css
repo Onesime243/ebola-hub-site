@@ -345,3 +345,10 @@ footer.foot{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;c
 .big-seg button{font-size:13px;padding:7px 12px}
 .prio-chip{display:inline-block;padding:4px 10px;border-radius:999px;font-weight:700;font-size:12.5px}
 .score-pill{display:inline-block;min-width:34px;text-align:center;padding:2px 8px;border-radius:999px;font-weight:700;font-variant-numeric:tabular-nums}
+/* étiquettes de carte : noms de toutes les zones */
+.map .lbl.lbl-minor{fill:#6c7176;font-weight:500;font-style:italic}
+.map .lbl-lead{stroke:#4a5056;stroke-width:.7px;stroke-opacity:.75;fill:none;pointer-events:none}
+.map .lbl-lead.minor{stroke:#9aa0a6;stroke-width:.5px}
+.map .lbl-dot{fill:#3a3f44;pointer-events:none}
+.map .lbl-dot.minor{fill:#9aa0a6}
+:root[data-theme="dark"] .map .lbl.lbl-minor{fill:#aab0b6}

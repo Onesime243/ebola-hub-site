@@ -242,28 +242,50 @@
         p.addEventListener("mouseleave", hideTip);
         p.addEventListener("click", () => opt.onClick && opt.onClick(f));
       });
-      const topSet = new Set(feats.filter(f => opt.labelIf ? opt.labelIf(f) : opt.value(f) > 0).sort((a, b) => (opt.labelRank ? opt.labelRank(b) - opt.labelRank(a) : opt.value(b) - opt.value(a))).slice(0, opt.maxLabels || 14).map(f => f.data_zone));
-      // étiquettes : par ordre d'importance ; décalées (haut, bas, côtés) si elles chevauchent une étiquette déjà placée
-      const placed = [], lblFeats = feats.filter(f => topSet.has(f.data_zone))
-        .sort((a, b) => (opt.labelRank ? opt.labelRank(b) - opt.labelRank(a) : opt.value(b) - opt.value(a)));
-      const fs = opt.labelPx || 9.5;
-      const hit = r => placed.some(o => r[0] < o[2] && r[2] > o[0] && r[1] < o[3] && r[3] > o[1]) || r[0] < 2 || r[2] > W - 2 || r[1] < 2 || r[3] > H - 2;
-      lblFeats.forEach(f => {
-        const v = opt.value(f);
+      // ÉTIQUETTES : toutes les zones visibles portent leur nom.
+      //  · zones principales (labelIf) : « nom · valeur », placement garanti (décalé avec trait de rappel si nécessaire) ;
+      //  · autres zones visibles : nom seul, en gris, placées aussi (repli en spirale avec trait de rappel).
+      const fs = opt.labelPx || 9.5, fsMin = Math.max(7.5, fs - 1.2);
+      const centroidOf = f => {                             // centre de gravité du plus grand anneau (aire signée)
         const rs = rings(f.geometry), ring = rs.reduce((a, b) => b.length > a.length ? b : a, []);
-        const c = ring.reduce((a, p) => [a[0] + p[0], a[1] + p[1]], [0, 0]).map(x => x / Math.max(ring.length, 1)), q = P(c);
-        const txt = opt.labelText ? opt.labelText(f, v) : `${f.data_zone} · ${v === null || v === undefined ? "—" : nf(v, opt.digits || 0)}`;
-        const tw = labelWidth(txt, fs) + 6, th = fs + 3, sy = th + 1;
-        const offs = [[0, 0], [0, -sy], [0, sy], [tw / 2 + 4, 0], [-tw / 2 - 4, 0], [0, -2 * sy], [0, 2 * sy], [tw / 2 + 4, -sy], [-tw / 2 - 4, sy],
-          [tw / 2 + 4, sy], [-tw / 2 - 4, -sy], [0, -3 * sy], [0, 3 * sy], [tw + 8, 0], [-tw - 8, 0]];
+        let A = 0, cx = 0, cy = 0;
+        for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) { const k = ring[j][0] * ring[i][1] - ring[i][0] * ring[j][1]; A += k; cx += (ring[j][0] + ring[i][0]) * k; cy += (ring[j][1] + ring[i][1]) * k; }
+        if (Math.abs(A) < 1e-12) { const m = ring.reduce((a, p) => [a[0] + p[0], a[1] + p[1]], [0, 0]); return P([m[0] / ring.length, m[1] / ring.length]); }
+        return P([cx / (3 * A), cy / (3 * A)]);
+      };
+      const isMain = f => opt.labelIf ? !!opt.labelIf(f) : (opt.value(f) > 0);
+      const rank = f => opt.labelRank ? opt.labelRank(f) : (opt.value(f) || 0);
+      const showAll = opt.labelAll !== false && opt.labelMode !== "none";
+      const cand = feats.map(f => ({ f, main: isMain(f), q: centroidOf(f) }))
+        .filter(o => opt.labelMode !== "none" && (o.main || showAll) && o.q[0] >= 0 && o.q[0] <= W && o.q[1] >= 0 && o.q[1] <= H)
+        .sort((a, b) => (b.main - a.main) || (rank(b.f) - rank(a.f)));
+      const placed = [];
+      const hit = r => r[0] < 2 || r[2] > W - 2 || r[1] < 2 || r[3] > H - 2 || placed.some(o => r[0] < o[2] && r[2] > o[0] && r[1] < o[3] && r[3] > o[1]);
+      const lblG = el("g", { class: "lbls" });
+      cand.forEach(({ f, main, q }) => {
+        const v = opt.value(f), size = main ? fs : fsMin;
+        const txt = main ? (opt.labelText ? opt.labelText(f, v) : `${f.data_zone} · ${v === null || v === undefined ? "—" : nf(v, opt.digits || 0)}`) : (opt.labelTextMinor ? opt.labelTextMinor(f) : f.data_zone);
+        const tw = labelWidth(txt, size) + 6, th = size + 3, sy = th + 1;
+        const rectAt = (x0, y0) => [x0 - tw / 2, y0 - th + 3, x0 + tw / 2, y0 + 3];
         let pos = null;
-        for (const [dx, dy] of offs) { const x0 = q[0] + dx, y0 = q[1] + dy, r = [x0 - tw / 2, y0 - th + 3, x0 + tw / 2, y0 + 3]; if (!hit(r)) { pos = [x0, y0, r]; break; } }
-        if (!pos) return;                                    // pas de place : l'étiquette reste visible au survol et dans le tableau
+        const near = [[0, 0], [0, -sy], [0, sy], [tw / 2 + 4, 0], [-tw / 2 - 4, 0], [tw / 2 + 4, -sy], [-tw / 2 - 4, sy], [tw / 2 + 4, sy], [-tw / 2 - 4, -sy]];
+        for (const [dx, dy] of near) { const r = rectAt(q[0] + dx, q[1] + dy); if (!hit(r)) { pos = [q[0] + dx, q[1] + dy, r]; break; } }
+        // repli : recherche en spirale autour de la zone (garantit l'affichage du nom)
+        for (let rad = sy * 2; !pos && rad < Math.max(W, H); rad += sy * .9) {
+          for (let k = 0; k < 24 && !pos; k++) { const ang = (k / 24) * 2 * Math.PI - Math.PI / 2, x0 = q[0] + Math.cos(ang) * rad * 1.6, y0 = q[1] + Math.sin(ang) * rad; const r = rectAt(x0, y0); if (!hit(r)) pos = [x0, y0, r]; }
+        }
+        if (!pos) return;
         placed.push(pos[2]);
-        if (pos[0] !== q[0] || pos[1] !== q[1]) el("line", { x1: q[0], y1: q[1], x2: pos[0], y2: pos[1] - fs * .4, class: "lbl-lead" }, svg);
-        const t = el("text", { x: pos[0], y: pos[1], "text-anchor": "middle", class: "lbl", style: opt.labelPx ? `font-size:${fs}px` : null }, svg);
+        const moved = Math.hypot(pos[0] - q[0], pos[1] - q[1]) > sy * 1.2;
+        if (moved) {
+          const ex = Math.max(pos[2][0], Math.min(pos[2][2], q[0])), ey = q[1] < pos[2][1] ? pos[2][1] : q[1] > pos[2][3] ? pos[2][3] : pos[1] - size * .4;
+          el("line", { x1: q[0], y1: q[1], x2: ex, y2: ey, class: "lbl-lead" + (main ? "" : " minor") }, lblG);
+          el("circle", { cx: q[0], cy: q[1], r: main ? 1.6 : 1.1, class: "lbl-dot" + (main ? "" : " minor") }, lblG);
+        }
+        const t = el("text", { x: pos[0], y: pos[1], "text-anchor": "middle", class: "lbl" + (main ? "" : " lbl-minor"), style: `font-size:${size}px` }, lblG);
         t.textContent = txt;
       });
+      svg.appendChild(lblG);
       container.appendChild(svg);
       container.__tbl = { cols: [window.HubT ? HubT("Zone de santé") : "Zone", stripTags(opt.unit || (window.HubT ? HubT("Valeur") : "Valeur"))],
         rows: feats.map(f => [f.data_zone, opt.value(f)]).filter(r => r[1] !== null && r[1] !== undefined).sort((a, b) => (b[1] || 0) - (a[1] || 0)) };
@@ -753,7 +775,7 @@
     box.style.cssText = `position:absolute;left:-12000px;top:0;width:${rep.width || 1000}px;background:#fff`;
     document.body.appendChild(box);
     try {
-      choropleth(box, Object.assign({}, opt, { maxLabels: rep.maxLabels || 40, labelPx: rep.labelPx || 11.5 }));
+      choropleth(box, Object.assign({}, opt, { labelPx: rep.labelPx || 11 }));
       reportMapPNG(box, rep);
     } finally { registry.delete(box); box.remove(); }
   }
