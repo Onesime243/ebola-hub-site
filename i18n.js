@@ -845,3 +845,10 @@ Object.assign(window.HUB_EN, {
   "Priorité": "Priority", "Facteurs principaux": "Main factors", "Zone la plus prioritaire": "Highest-priority zone", "Proximité incidence élevée": "Near high incidence",
   "Rang (province)": "Rank (province)", "Carte du score de risque": "Risk score map"
 });
+Object.assign(window.HUB_EN, { "Toutes provinces": "All provinces", "Zones les plus prioritaires": "Highest-priority zones", "Niveau de priorité (score 0–100)": "Priority level (score 0–100)",
+  "Catégorie de la zone": "Zone category", "Score de risque de résurgence par zone de santé": "Resurgence risk score by health zone", "Catégories de risque des zones de santé": "Risk categories of health zones",
+  "étiquettes : zone · score de risque (0–100)": "labels: zone · risk score (0–100)", "Rouge — hotspot": "Red — hotspot", "Orange — cas < 21 j": "Orange — cases < 21 d",
+  "Jaune — 22–42 j sans cas": "Yellow — 22–42 d without cases", "Verte — > 42 j sans cas": "Green — > 42 d without cases", "au": "to",
+  "Carte de rapport pour la période et la province affichées : légende des couleurs avec effectifs, scores, nord, source": "Report map for the displayed period and province: colour legend with counts, scores, north arrow, source",
+  "Score = cas 21 j (20) + tendance (12) + P(Rt>1) (12) + décès communautaires (8) + décès groupés (5) + proximité d’une incidence élevée (10) + frontière (5) + mines (5) + contacts non vus > 3 j (8) + résurgence (10) + EDS non réalisés (5).": "Score = cases 21 d (20) + trend (12) + P(Rt>1) (12) + community deaths (8) + clustered deaths (5) + proximity to high incidence (10) + border (5) + mines (5) + contacts not seen > 3 d (8) + resurgence (10) + unsafe burials (5).",
+  "Rouge : cas dans les 21 derniers jours et au moins un critère d’aggravation, ou deux critères de contexte. Orange : cas < 21 j sans critère rouge.": "Red: cases in the last 21 days and at least one aggravating criterion, or two context criteria. Orange: cases < 21 d without a red criterion." });

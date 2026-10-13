@@ -1917,12 +1917,7 @@
     ["s_proximite", "Proximité incidence élevée"], ["s_frontiere", "Frontière"], ["s_mines", "Sites miniers"], ["s_suivi_contacts", "Contacts non vus > 3 j"], ["s_resurgence", "Résurgence"], ["s_eds", "EDS non réalisés"]];
   const PRIO_COL = s => s >= 70 ? "#8f2d2a" : s >= 50 ? "#d9673f" : s >= 30 ? "#f0b48a" : "#f3e6d8";
   function mapReportBtn(file) {
-    const set = PER ? MAPSET : D.cartes;
-    if (set && (set.cartes || []).some(c => c.fichier === file)) {
-      const base = set.base || `../reports/${encodeURIComponent(set.dossier)}/`;
-      return `<a class="btn sm" href="${base}${encodeURIComponent(file)}" download="${esc(file)}" title="${T("Carte de rapport : légende des couleurs, scores, échelle, nord, source")}">⤓ ${T("Carte (PNG rapport)")}</a>`;
-    }
-    return PER && SERVED_P ? `<button class="btn sm" type="button" data-maps-run>${T("Produire la carte de la période")}</button>` : "";
+    return `<button class="btn sm" type="button" data-zr-report data-png="carte" title="${T("Carte de rapport pour la période et la province affichées : légende des couleurs avec effectifs, scores, nord, source")}">⤓ ${T("Carte (PNG rapport)")}</button>`;
   }
   function zrDetail(zs) {
     if (!zs.length) return panel("Zone sélectionnée", "", `<div class="empty">${T("Aucune zone")}</div>`);
@@ -1952,11 +1947,12 @@
         { rowClick: true, rowKey: x => x.zone_sante, sort: null, maxh: 560, limit: 150 }), { csv: "zr-rank" })}
     </div>`;
   }
-  function riskZonesCharts() {
+  function riskZonesCharts() { Ch.choropleth($("#c-zr-map"), zrMapOpts()); }
+  function zrMapOpts() {
     const Z = zrData(), by = new Map((Z.zones || []).map(z => [norm(z.zone_sante), z]));
     const code = { "Rouge": 5, "Orange": 4, "Jaune": 3, "Verte": 2, "Non touchée": 1 };
     const feats = (D.map_zones || []).filter(f => S.province === "Toutes" || norm(f.province) === norm(S.province));
-    Ch.choropleth($("#c-zr-map"), { features: feats, focus: true, focusIf: f => { const z = by.get(norm(f.data_zone)); return z && z.categorie !== "Non touchée"; },
+    return { features: feats, focus: true, focusIf: f => { const z = by.get(norm(f.data_zone)); return z && z.categorie !== "Non touchée"; },
       value: f => S.zrColor === "score" ? (by.get(norm(f.data_zone))?.score_risque ?? null) : (code[by.get(norm(f.data_zone))?.categorie] || null),
       colorFn: (v, f) => { const z = by.get(norm(f.data_zone)); return S.zrColor === "score" ? (z ? PRIO_COL(z.score_risque || 0) : "#E9E6DF") : (ZCOL[z?.categorie] || "#E9E6DF"); },
       selected: S.zrSel || null, onClick: f => { S.zrSel = by.get(norm(f.data_zone))?.zone_sante || f.data_zone; render(); },
@@ -1964,7 +1960,31 @@
       labelText: f => { const z = by.get(norm(f.data_zone)); return S.zrLab === "nom" ? f.data_zone : `${f.data_zone} · ${nf(z?.score_risque, 0)}`; },
       tip: f => { const z = by.get(norm(f.data_zone)); return `<b>${esc(f.data_zone)}</b>${z ? `<div class="row"><span>${T("Score de risque")}</span><b>${nf(z.score_risque, 0)} / 100</b></div><div class="row"><span>${T("Rang dans la province")}</span><b>${nf(z.rang_province)}</b></div><div class="row"><span>${T("Priorité")}</span><b>${esc(T(z.niveau_priorite || ""))}</b></div>` : ""}<div class="row"><span>${T("Catégorie")}</span><b>${esc(T(z?.categorie || "—"))}</b></div>${z ? `<div class="row"><span>${T("Cas 21 j")}</span><b>${nf(z.cas_21j)}</b></div><div class="row"><span>${T("Jours sans cas")}</span><b>${nf(z.jours_depuis_dernier_cas)}</b></div><div class="small" style="max-width:280px">${esc(z.explication || "")}</div>` : ""}`; },
       legendHTML: S.zrColor === "score" ? [[80, "Priorité 1 (≥ 70)"], [60, "Priorité 2 (50–69)"], [40, "Priorité 3 (30–49)"], [10, "Veille (< 30)"]].map(([v, t]) => `<span><i style="background:${PRIO_COL(v)};display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:4px"></i>${T(t)}</span>`).join(" ")
-        : ZORD.map(c => `<span><i style="background:${ZCOL[c]};display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:4px"></i>${T(c)}</span>`).join(" "), unit: S.zrColor === "score" ? T("score de risque (0–100)") : T("catégorie (5 = rouge … 1 = non touchée)") });
+        : ZORD.map(c => `<span><i style="background:${ZCOL[c]};display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:4px"></i>${T(c)}</span>`).join(" "), unit: S.zrColor === "score" ? T("score de risque (0–100)") : T("catégorie (5 = rouge … 1 = non touchée)") };
+  }
+  /* Carte de rapport des zones à risque, produite dans le navigateur pour la période et la province affichées */
+  function zrReportPNG() {
+    const Z = zrData(), zs = (Z.zones || []).filter(z => S.province === "Toutes" || norm(z.province) === norm(S.province));
+    const score = S.zrColor === "score";
+    const PR = [[70, 101, "Priorité 1 (≥ 70)", 80], [50, 70, "Priorité 2 (50–69)", 60], [30, 50, "Priorité 3 (30–49)", 40], [-1, 30, "Veille (< 30)", 10]];
+    const legend = score
+      ? PR.map(([a, b, t, v]) => ({ color: PRIO_COL(v), label: T(t), count: zs.filter(z => z.categorie !== "Non touchée" && (z.score_risque || 0) >= a && (z.score_risque || 0) < b).length }))
+      : ZORD.map(c => ({ color: ZCOL[c], label: T(c === "Rouge" ? "Rouge — hotspot" : c === "Orange" ? "Orange — cas < 21 j" : c === "Jaune" ? "Jaune — 22–42 j sans cas" : c === "Verte" ? "Verte — > 42 j sans cas" : "Non touchée"), count: zs.filter(z => z.categorie === c).length }));
+    const top = [...zs].filter(z => z.categorie !== "Non touchée").sort((a, b) => (b.score_risque || 0) - (a.score_risque || 0)).slice(0, 6);
+    const per = PER ? `${T("Période du")} ${dfmt(PER.debut)} ${T("au")} ${dfmt(PER.fin)}` : `${T("Situation au")} ${dfmt(Z.date || D.meta.cutoff)}`;
+    const prov = S.province === "Toutes" ? T("Toutes provinces") : `${T("Province")} : ${S.province}`;
+    const opt = zrMapOpts();
+    const zBy = new Map(zs.map(z => [norm(z.zone_sante), z]));
+    opt.labelIf = f => { const z = zBy.get(norm(f.data_zone)); return S.zrLab !== "aucune" && !!z && z.categorie !== "Non touchée" && ((z.score_risque || 0) >= 30 || z.categorie === "Rouge"); };
+    Ch.reportChoropleth(opt, {
+      title: score ? T("Score de risque de résurgence par zone de santé") : T("Catégories de risque des zones de santé"),
+      subtitle: `${per} · ${prov} · ${T("étiquettes : zone · score de risque (0–100)")}`,
+      legendTitle: score ? T("Niveau de priorité (score 0–100)") : T("Catégorie de la zone"), legend, countLabel: T("zones"),
+      sideNotes: [score ? T("Score = cas 21 j (20) + tendance (12) + P(Rt>1) (12) + décès communautaires (8) + décès groupés (5) + proximité d’une incidence élevée (10) + frontière (5) + mines (5) + contacts non vus > 3 j (8) + résurgence (10) + EDS non réalisés (5).")
+        : T("Rouge : cas dans les 21 derniers jours et au moins un critère d’aggravation, ou deux critères de contexte. Orange : cas < 21 j sans critère rouge.")],
+      notes: top.length ? [`${T("Zones les plus prioritaires")} : ${top.map(z => `${z.zone_sante} (${nf(z.score_risque, 0)}${z.niveau_priorite ? ", " + T(z.niveau_priorite) : ""})`).join(" ; ")}.`] : [],
+      source: `${T("Source")} : Linelist, contact tracing, SitRep · Ebola Outbreak Analytics Hub · ${per}`,
+      file: `carte_${score ? "score_risque" : "categories_zones"}_${PER ? PER.debut + "_" + PER.fin : (Z.date || D.meta.cutoff)}${S.province === "Toutes" ? "" : "_" + S.province}` });
   }
 
   /* ---------------- Linelist lln : surveillance des alertes ---------------- */
@@ -2368,6 +2388,7 @@
     const zc = t.closest("[data-zrcat]"); if (zc) { S.zrCat = S.zrCat === zc.dataset.zrcat ? "Toutes" : zc.dataset.zrcat; render(); return; }
     if (t.closest("[data-up-run]")) { e.preventDefault(); uploadRun(true); return; }
     if (t.closest("[data-up-only]")) { e.preventDefault(); uploadRun(false); return; }
+    if (t.closest("[data-zr-report]")) { zrReportPNG(); return; }
     const pn = t.closest("[data-png]"); if (pn) { Ch.downloadPNG(pn.closest(".panel"), pn.dataset.png); return; }
     if (t.closest("[data-print]")) { print(); return; }
     if (t.closest("[data-reset-idx]")) { Object.assign(S, { idxZone: "Toutes", idxConf: "Toutes", idxActive: false, gen: "0", idxPeriod: "0" }); render(); return; }

@@ -243,12 +243,26 @@
         p.addEventListener("click", () => opt.onClick && opt.onClick(f));
       });
       const topSet = new Set(feats.filter(f => opt.labelIf ? opt.labelIf(f) : opt.value(f) > 0).sort((a, b) => (opt.labelRank ? opt.labelRank(b) - opt.labelRank(a) : opt.value(b) - opt.value(a))).slice(0, opt.maxLabels || 14).map(f => f.data_zone));
-      feats.forEach(f => {
-        const v = opt.value(f); if (!topSet.has(f.data_zone)) return;
+      // étiquettes : par ordre d'importance ; décalées (haut, bas, côtés) si elles chevauchent une étiquette déjà placée
+      const placed = [], lblFeats = feats.filter(f => topSet.has(f.data_zone))
+        .sort((a, b) => (opt.labelRank ? opt.labelRank(b) - opt.labelRank(a) : opt.value(b) - opt.value(a)));
+      const fs = opt.labelPx || 9.5;
+      const hit = r => placed.some(o => r[0] < o[2] && r[2] > o[0] && r[1] < o[3] && r[3] > o[1]) || r[0] < 2 || r[2] > W - 2 || r[1] < 2 || r[3] > H - 2;
+      lblFeats.forEach(f => {
+        const v = opt.value(f);
         const rs = rings(f.geometry), ring = rs.reduce((a, b) => b.length > a.length ? b : a, []);
         const c = ring.reduce((a, p) => [a[0] + p[0], a[1] + p[1]], [0, 0]).map(x => x / Math.max(ring.length, 1)), q = P(c);
-        const t = el("text", { x: q[0], y: q[1], "text-anchor": "middle", class: "lbl" }, svg);
-        t.textContent = opt.labelText ? opt.labelText(f, v) : `${f.data_zone} · ${v === null || v === undefined ? "—" : nf(v, opt.digits || 0)}`;
+        const txt = opt.labelText ? opt.labelText(f, v) : `${f.data_zone} · ${v === null || v === undefined ? "—" : nf(v, opt.digits || 0)}`;
+        const tw = labelWidth(txt, fs) + 6, th = fs + 3, sy = th + 1;
+        const offs = [[0, 0], [0, -sy], [0, sy], [tw / 2 + 4, 0], [-tw / 2 - 4, 0], [0, -2 * sy], [0, 2 * sy], [tw / 2 + 4, -sy], [-tw / 2 - 4, sy],
+          [tw / 2 + 4, sy], [-tw / 2 - 4, -sy], [0, -3 * sy], [0, 3 * sy], [tw + 8, 0], [-tw - 8, 0]];
+        let pos = null;
+        for (const [dx, dy] of offs) { const x0 = q[0] + dx, y0 = q[1] + dy, r = [x0 - tw / 2, y0 - th + 3, x0 + tw / 2, y0 + 3]; if (!hit(r)) { pos = [x0, y0, r]; break; } }
+        if (!pos) return;                                    // pas de place : l'étiquette reste visible au survol et dans le tableau
+        placed.push(pos[2]);
+        if (pos[0] !== q[0] || pos[1] !== q[1]) el("line", { x1: q[0], y1: q[1], x2: pos[0], y2: pos[1] - fs * .4, class: "lbl-lead" }, svg);
+        const t = el("text", { x: pos[0], y: pos[1], "text-anchor": "middle", class: "lbl", style: opt.labelPx ? `font-size:${fs}px` : null }, svg);
+        t.textContent = txt;
       });
       container.appendChild(svg);
       container.__tbl = { cols: [window.HubT ? HubT("Zone de santé") : "Zone", stripTags(opt.unit || (window.HubT ? HubT("Valeur") : "Valeur"))],
@@ -715,35 +729,122 @@
     });
   }
 
+  /* largeur réelle d'une étiquette de carte (police grasse), pour éviter les chevauchements */
+  const _meas = document.createElement("canvas").getContext("2d");
+  function labelWidth(txt, fs) { _meas.font = `600 ${fs}px system-ui,-apple-system,"Segoe UI",Arial,sans-serif`; return _meas.measureText(txt).width; }
+
+  /* Halo des étiquettes à l'export : certains navigateurs ignorent paint-order quand le SVG est converti en image
+     (le contour blanc recouvre alors les lettres). On dessine un double du texte (contour seul) en dessous, puis le texte sans contour. */
+  function fixHalo(svg) {
+    svg.querySelectorAll("text").forEach(t => {
+      const st = t.style.stroke || t.getAttribute("stroke"), sw = parseFloat(t.style.strokeWidth || t.getAttribute("stroke-width") || 0);
+      if (!st || st === "none" || !(sw > 0)) return;
+      const halo = t.cloneNode(true);
+      halo.style.fill = st; halo.style.stroke = st; halo.style.strokeWidth = sw + "px"; halo.style.strokeLinejoin = "round"; halo.style.paintOrder = "normal";
+      t.parentNode.insertBefore(halo, t);
+      t.style.stroke = "none"; t.style.paintOrder = "normal";
+    });
+    svg.querySelectorAll("text").forEach(t => { if (!t.style.fontFamily) t.style.fontFamily = 'system-ui,-apple-system,"Segoe UI",Arial,sans-serif'; });
+  }
+
+  /* Carte de rapport dessinée hors écran en grand format (plus d'étiquettes lisibles), puis exportée avec légende */
+  function reportChoropleth(opt, rep) {
+    const box = document.createElement("div");
+    box.style.cssText = `position:absolute;left:-12000px;top:0;width:${rep.width || 1000}px;background:#fff`;
+    document.body.appendChild(box);
+    try {
+      choropleth(box, Object.assign({}, opt, { maxLabels: rep.maxLabels || 40, labelPx: rep.labelPx || 11.5 }));
+      reportMapPNG(box, rep);
+    } finally { registry.delete(box); box.remove(); }
+  }
+
   /* ---------------- Export PNG d'un panneau ---------------- */
   function inlineStyles(src, dst) {
     const cs = getComputedStyle(src);
-    ["fill", "stroke", "stroke-width", "stroke-dasharray", "opacity", "font-size", "font-weight", "font-family", "fill-opacity"].forEach(p => {
+    ["fill", "stroke", "stroke-width", "stroke-dasharray", "opacity", "font-size", "font-weight", "font-family", "fill-opacity",
+     "stroke-opacity", "paint-order", "stroke-linejoin", "text-anchor", "dominant-baseline", "letter-spacing"].forEach(p => {
       const v = cs.getPropertyValue(p); if (v) dst.style.setProperty(p, v);
     });
     for (let i = 0; i < src.children.length; i++) inlineStyles(src.children[i], dst.children[i]);
   }
   function downloadPNG(panel, name) {
     const svg = panel.querySelector("svg"); if (!svg) { alert("Aucun graphique à exporter dans ce panneau."); return; }
-    const clone = svg.cloneNode(true); inlineStyles(svg, clone);
+    const clone = svg.cloneNode(true); inlineStyles(svg, clone); fixHalo(clone);
     const vb = svg.viewBox.baseVal, w = vb && vb.width ? vb.width : svg.clientWidth, h = vb && vb.height ? vb.height : svg.clientHeight;
     const title = panel.querySelector(".panel-head h2")?.textContent || name || "graphique";
     clone.setAttribute("width", w); clone.setAttribute("height", h);
     const data = new XMLSerializer().serializeToString(clone);
-    const img = new Image(), sc = 2, head = 44, legendH = panel.querySelector(".legend") ? 30 : 0;
+    const items = [...panel.querySelectorAll(".legend span, .scale > span")].filter(sp => sp.querySelector("i") && sp.textContent.trim());
+    const ramp = !items.length ? panel.querySelector(".scale .ramp") : null;
+    const meas = document.createElement("canvas").getContext("2d"); meas.font = "12px system-ui,sans-serif";
+    let lines = 1, lxm = 12; items.forEach(sp => { const wd = meas.measureText(sp.textContent.trim()).width + 32; if (lxm + wd > w - 12 && lxm > 12) { lines++; lxm = 12; } lxm += wd; });
+    const img = new Image(), sc = 2, head = 44, legendH = items.length ? 10 + lines * 20 : ramp ? 30 : (panel.querySelector(".legend") ? 30 : 0);
     img.onload = () => {
       const c = document.createElement("canvas"); c.width = w * sc; c.height = (h + head + legendH + 24) * sc;
       const x = c.getContext("2d"); x.scale(sc, sc);
       x.fillStyle = col("--surface") || "#fff"; x.fillRect(0, 0, w, h + head + legendH + 24);
       x.fillStyle = col("--ink"); x.font = "600 16px system-ui,sans-serif"; x.fillText(title, 12, 26);
       x.drawImage(img, 0, head, w, h);
-      const lg = panel.querySelectorAll(".legend span"); let lx = 12;
+      let lx = 12, ly = h + head + 10;
       x.font = "12px system-ui,sans-serif";
-      lg.forEach(s => { const i = s.querySelector("i"); x.fillStyle = i ? getComputedStyle(i).backgroundColor : "#999"; x.fillRect(lx, h + head + 10, 10, 10); x.fillStyle = col("--ink-2"); x.fillText(s.textContent, lx + 14, h + head + 19); lx += x.measureText(s.textContent).width + 32; });
+      items.forEach(sp => { const tx = sp.textContent.trim(), wd = x.measureText(tx).width + 32; if (lx + wd > w - 12 && lx > 12) { lx = 12; ly += 20; }
+        const i = sp.querySelector("i"); x.fillStyle = i ? getComputedStyle(i).backgroundColor : "#999"; x.fillRect(lx, ly, 10, 10); x.fillStyle = col("--ink-2"); x.fillText(tx, lx + 14, ly + 9); lx += wd; });
+      if (ramp) { const sp = ramp.parentElement.querySelectorAll(":scope > span"), cs = [...ramp.querySelectorAll("i")].map(i => getComputedStyle(i).backgroundColor);
+        x.fillStyle = col("--ink-2"); const t0 = sp[0]?.textContent || ""; x.fillText(t0, 12, ly + 9); const rx = 18 + x.measureText(t0).width;
+        cs.forEach((c, k) => { x.fillStyle = c; x.fillRect(rx + k * 26, ly, 26, 10); }); x.fillStyle = col("--ink-2"); x.fillText(sp[1]?.textContent || "", rx + cs.length * 26 + 6, ly + 9); }
       x.fillStyle = col("--muted"); x.font = "10px system-ui,sans-serif"; x.fillText("Ebola Outbreak Analytics Hub · " + (window.DASHBOARD_DATA?.meta?.cutoff || ""), 12, h + head + legendH + 16);
       c.toBlob(b => { const a = document.createElement("a"); a.href = URL.createObjectURL(b); a.download = (name || title).replace(/[^\w\-]+/g, "_") + ".png"; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 2000); });
     };
     img.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(data);
+  }
+
+  /* Carte de rapport produite dans le navigateur (toute période) : titre, sous-titre, carte, légende avec effectifs,
+     nord, notes, source. opt = {title, subtitle, legendTitle, legend:[{color,label,count}], notes:[], source, file} */
+  function reportMapPNG(container, opt) {
+    const svg = container.querySelector("svg"); if (!svg) { alert("Carte indisponible."); return; }
+    const clone = svg.cloneNode(true); inlineStyles(svg, clone); fixHalo(clone);
+    const vb = svg.viewBox.baseVal, w = vb.width || svg.clientWidth, h = vb.height || svg.clientHeight;
+    clone.setAttribute("width", w); clone.setAttribute("height", h);
+    const img = new Image(), sc = 2.5, side = 270, head = 74, notes = opt.notes || [];
+    const W = w + side + 36;
+    const meas = document.createElement("canvas").getContext("2d"); meas.font = "11px system-ui,sans-serif";
+    const wrap = (t, mw) => { const out = []; let cur = ""; String(t).split(" ").forEach(wd => { const n = cur ? cur + " " + wd : wd; if (meas.measureText(n).width > mw && cur) { out.push(cur); cur = wd; } else cur = n; }); if (cur) out.push(cur); return out; };
+    const noteLines = notes.flatMap(n => wrap(n, W - 40));
+    const H = head + Math.max(h, 60 + (opt.legend || []).length * 24 + 90) + 20 + noteLines.length * 15 + 34;
+    img.onload = () => {
+      const c = document.createElement("canvas"); c.width = W * sc; c.height = H * sc;
+      const x = c.getContext("2d"); x.scale(sc, sc);
+      x.fillStyle = "#ffffff"; x.fillRect(0, 0, W, H);
+      x.fillStyle = "#16202a"; x.font = "700 19px system-ui,sans-serif"; x.fillText(opt.title || "", 18, 32);
+      x.fillStyle = "#4a5560"; x.font = "12.5px system-ui,sans-serif"; x.fillText(opt.subtitle || "", 18, 54);
+      x.strokeStyle = "#d8dde2"; x.beginPath(); x.moveTo(18, head - 8); x.lineTo(W - 18, head - 8); x.stroke();
+      x.drawImage(img, 18, head, w, h);
+      x.strokeStyle = "#c9ced3"; x.strokeRect(18, head, w, h);
+      // nord
+      const nx = 18 + w - 26, ny = head + 16;
+      x.fillStyle = "#16202a"; x.beginPath(); x.moveTo(nx, ny); x.lineTo(nx - 7, ny + 20); x.lineTo(nx, ny + 15); x.closePath(); x.fill();
+      x.fillStyle = "#ffffff"; x.strokeStyle = "#16202a"; x.beginPath(); x.moveTo(nx, ny); x.lineTo(nx + 7, ny + 20); x.lineTo(nx, ny + 15); x.closePath(); x.fill(); x.stroke();
+      x.fillStyle = "#16202a"; x.font = "700 12px system-ui,sans-serif"; x.textAlign = "center"; x.fillText("N", nx, ny + 33); x.textAlign = "left";
+      // légende
+      const lx = 18 + w + 18; let ly = head + 8;
+      x.fillStyle = "#16202a"; x.font = "700 13px system-ui,sans-serif"; wrap(opt.legendTitle || "Légende", side).forEach(t => { x.fillText(t, lx, ly + 12); ly += 17; });
+      if ((opt.legend || []).some(it => it.count !== undefined)) { x.fillStyle = "#6b7680"; x.font = "10.5px system-ui,sans-serif"; x.textAlign = "right"; x.fillText(opt.countLabel || "zones", lx + side - 6, ly + 10); x.textAlign = "left"; ly += 14; }
+      ly += 6; x.font = "12px system-ui,sans-serif";
+      (opt.legend || []).forEach(it => {
+        x.fillStyle = it.color; x.fillRect(lx, ly, 16, 14); x.strokeStyle = "#9aa3ab"; x.strokeRect(lx, ly, 16, 14);
+        x.fillStyle = "#26313b"; x.fillText(it.label, lx + 24, ly + 11);
+        if (it.count !== undefined) { x.fillStyle = "#6b7680"; x.textAlign = "right"; x.fillText(String(it.count), lx + side - 6, ly + 11); x.textAlign = "left"; }
+        ly += 24;
+      });
+      ly += 8; x.font = "11px system-ui,sans-serif"; x.fillStyle = "#4a5560";
+      (opt.sideNotes || []).forEach(n => wrap(n, side).forEach(t => { x.fillText(t, lx, ly + 10); ly += 15; }));
+      // notes
+      let ny2 = head + Math.max(h, ly - head) + 22; x.fillStyle = "#4a5560"; x.font = "11px system-ui,sans-serif";
+      noteLines.forEach(t => { x.fillText(t, 18, ny2); ny2 += 15; });
+      x.fillStyle = "#8a949d"; x.font = "10.5px system-ui,sans-serif"; x.fillText(opt.source || ("Ebola Outbreak Analytics Hub · " + (window.DASHBOARD_DATA?.meta?.cutoff || "")), 18, H - 12);
+      c.toBlob(b => { const a = document.createElement("a"); a.href = URL.createObjectURL(b); a.download = (opt.file || opt.title || "carte").replace(/[^\w\-]+/g, "_") + ".png"; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 2000); });
+    };
+    img.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(new XMLSerializer().serializeToString(clone));
   }
 
   /* PNG d'un panneau sans graphique SVG : rendu du tableau (40 premières lignes) sur un canevas */
@@ -771,5 +872,5 @@
     c.toBlob(b => { const a = document.createElement("a"); a.href = URL.createObjectURL(b); a.download = (name || title).replace(/[^\w\-]+/g, "_") + ".png"; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 2000); });
   }
 
-  window.HubCharts = { downloadPanelPNG, xyTable, stripTags, xy, histogram, choropleth, network, ttree, forceNet, settingNet, tracingDiagram, sexIcon, sexIconHTML, sexKey, PAL, downloadPNG, showTip, hideTip, clearRegistry, rerenderAll, col, esc, nf };
+  window.HubCharts = { downloadPanelPNG, reportMapPNG, reportChoropleth, xyTable, stripTags, xy, histogram, choropleth, network, ttree, forceNet, settingNet, tracingDiagram, sexIcon, sexIconHTML, sexKey, PAL, downloadPNG, showTip, hideTip, clearRegistry, rerenderAll, col, esc, nf };
 })();
