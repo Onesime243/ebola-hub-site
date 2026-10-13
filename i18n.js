@@ -826,3 +826,22 @@ Object.assign(window.HUB_EN, { "Cartes pour rapport": "Report maps", "Carte": "M
   "Fichiers PNG haute définition (A4 paysage) dans le dossier reports du projet.": "High-resolution PNG files (A4 landscape) in the project's reports folder." });
 Object.assign(window.HUB_EN, { "Derniers jours jusqu’au": "Last days up to", "version publique agrégée": "aggregated public version",
   "Sur le site public, les cartes sont publiées pour la situation complète : revenez à « Tout » dans la période d’analyse.": "On the public site, maps are published for the full situation: switch back to “All” in the analysis period." });
+/* v3.6 — SitRep PDF, Rt par zone, opérations, score de risque */
+Object.assign(window.HUB_EN, {
+  "Cumul des cas": "Cumulative cases", "Cumul des décès confirmés": "Cumulative confirmed deaths", "Patients en isolement / CTE": "Patients in isolation / ETC",
+  "Cumul des guéris": "Cumulative recovered", "Taux de suivi des contacts": "Contact follow-up rate", "en 24 h": "in 24 h", "Chiffres officiels nationaux — rapport du": "Official national figures — report of",
+  "publié le": "published on", "Décès confirmés / cas confirmés": "Confirmed deaths / confirmed cases", "Fin de journée, toutes provinces": "End of day, all provinces",
+  "Sorties guéries cumulées": "Cumulative recovered discharges", "SitRep : situation par province": "SitRep: situation by province", "Évolution selon les SitRep déposés": "Trend across uploaded SitReps",
+  "Concordance SitRep / Linelist par zone de santé": "SitRep / Linelist agreement by health zone", "Cumuls officiels": "Official cumulative figures",
+  "Par province et zone de santé": "By province and health zone", "Comparaison des 9 méthodes": "Comparison of the 9 methods", "Fenêtre d’estimation": "Estimation window",
+  "Affichage": "Display", "Comparer": "Compare", "Zone de santé": "Health zone", "Toute la province": "Whole province", "Dernier Rt par zone de santé": "Latest Rt by health zone",
+  "Opérations par zone (EDS, CTE, swabs, PPL)": "Operations by zone (SDB, ETC, swabs, FLW)", "EDS non réalisés": "Unsafe burials (SDB not done)", "Positifs au CTE": "Positives in ETC",
+  "Swabs": "Swabs", "PPL (personnel de première ligne)": "Front-line workers (FLW)", "Cumul": "Cumulative", "21 derniers jours": "Last 21 days", "Graphique": "Chart",
+  "Définition": "Definition", "Par province": "By province", "Par zone de santé": "By health zone", "zones les plus concernées": "most affected zones",
+  "Couleur : catégorie": "Colour: category", "Couleur : score": "Colour: score", "Étiquettes : score": "Labels: score", "Noms seuls": "Names only", "Sans étiquette": "No labels",
+  "Carte (PNG rapport)": "Map (report PNG)", "Produire la carte de la période": "Produce the period map", "Orientation opérationnelle": "Operational orientation",
+  "Contribution de chaque facteur au score": "Contribution of each factor to the score", "Priorités par province": "Priorities by province",
+  "Classement des zones par province (score de risque)": "Zone ranking by province (risk score)", "Score de risque": "Risk score", "Rang dans la province": "Rank in province",
+  "Priorité": "Priority", "Facteurs principaux": "Main factors", "Zone la plus prioritaire": "Highest-priority zone", "Proximité incidence élevée": "Near high incidence",
+  "Rang (province)": "Rank (province)", "Carte du score de risque": "Risk score map"
+});

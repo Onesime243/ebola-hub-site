@@ -248,7 +248,7 @@
         const rs = rings(f.geometry), ring = rs.reduce((a, b) => b.length > a.length ? b : a, []);
         const c = ring.reduce((a, p) => [a[0] + p[0], a[1] + p[1]], [0, 0]).map(x => x / Math.max(ring.length, 1)), q = P(c);
         const t = el("text", { x: q[0], y: q[1], "text-anchor": "middle", class: "lbl" }, svg);
-        t.textContent = `${f.data_zone} · ${v === null || v === undefined ? "—" : nf(v, opt.digits || 0)}`;
+        t.textContent = opt.labelText ? opt.labelText(f, v) : `${f.data_zone} · ${v === null || v === undefined ? "—" : nf(v, opt.digits || 0)}`;
       });
       container.appendChild(svg);
       container.__tbl = { cols: [window.HubT ? HubT("Zone de santé") : "Zone", stripTags(opt.unit || (window.HubT ? HubT("Valeur") : "Valeur"))],

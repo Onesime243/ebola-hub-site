@@ -78,7 +78,7 @@
     lab: "Tous", nowH: 30, fLevel: "National", fTerr: "National", fTarget: "confirmes", fH: 30, tables: {},
     ovStack: "aucun", netIcons: true, gen: "0", idxPeriod: "0", ssSet: "", ssPlace: "Tous", ssMin: "2", ssCases: true, dynG: "National", growBase: "dds", growWin: "12s", dyStack: "sexe", dyBase: "o", dyDays: "60", rtDays: "120",
     siCmp: false, rlWin: "28j", projH: "30", distK: "dds_notification", recZone: "", recSup: "0.3", recColor: "issue", recX: "onset", recIcons: true, recDoc: false, epiMin: "3", resZone: "", perfG: "National",
-    rtmG: "National", rtmSet: "all", rtmDays: "120", zrCat: "Toutes"
+    rtmG: "National", rtmSet: "all", rtmDays: "120", zrCat: "Toutes", rtmMode: "zones", rtzProv: "Toutes", rtzG: "National", rtzTau: "7", rtzDays: "60", opTab: "eds", opProv: "Toutes", opWin: "cumul", zrColor: "categorie", zrLab: "score", zrSel: ""
   };
   const TABS = [
     { id: "overview", t: "Vue générale", g: "Situation", i: "M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z" },
@@ -94,6 +94,7 @@
     { id: "recon", t: "Reconstruction de la transmission", g: "Contact tracing", i: "M4 5h4v4H4zm12 0h4v4h-4zM10 15h4v4h-4zM6 9v2h4v4h2v-4h4V9h-2v2H8V9z", priv: true },
     { id: "dynamics", t: "Dynamique de transmission", g: "Analyses", i: "M3 19h18v2H3zM4 15l4-6 4 3 5-8 3 2-6.6 10.3-4-3L6.2 16.4z" },
     { id: "rtm", t: "Nombre de reproduction (Rt)", g: "Analyses", i: "M3 19h18v2H3zM3 12h4l3-7 4 14 3-7h4v2h-3l-4 9-4-14-2 5H3z" },
+    { id: "ops", t: "Opérations par zone (EDS, CTE, swabs, PPL)", g: "Analyses", i: "M3 3h8v8H3zm10 0h8v8h-8zM3 13h8v8H3zm13 0h2v3h3v2h-3v3h-2v-3h-3v-2h3z" },
     { id: "children", t: "Enfants (0–18 ans)", g: "Analyses", i: "M12 2a3 3 0 1 1 0 6 3 3 0 0 1 0-6zm-4 8h8l-1 6h-1v6h-4v-6H9z" },
     { id: "labs", t: "Laboratoires", g: "Analyses", i: "M9 2h6v2h-1v5l5 9a2 2 0 0 1-2 3H7a2 2 0 0 1-2-3l5-9V4H9z" },
     { id: "nowcast", t: "Nowcasting", g: "Analyses", i: "M3 17l6-6 4 4 8-8v4h2V3h-8v2h4l-6 6-4-4-8 8z" },
@@ -184,13 +185,25 @@
     const sitRows = Object.entries(s.labels || {}).filter(([kk]) => (s.indicateurs || {})[kk] !== null && (s.indicateurs || {})[kk] !== undefined);
     const alerts = buildAlerts();
     const zs = zones().filter(z => z.confirmes_14j > 0 || z.contacts_actifs > 0).sort((a, b) => b.confirmes_14j - a.confirmes_14j || b.contacts_actifs - a.contacts_actifs);
-    return `
+    const fromPdf = !PER && s.source_pdf;
+    const plus = v => v === null || v === undefined ? "" : ` · <b>+${nf(v)}</b> ${T("en 24 h")}`;
+    const sitTiles = fromPdf ? `
+    <div class="sitrep-head"><span class="sitrep-badge">SitRep N° ${esc(String(s.numero || "—"))}</span> ${T("Chiffres officiels nationaux — rapport du")} <b>${dfmt(s.date_sitrep)}</b>${s.date_publication ? `, ${T("publié le")} ${dfmt(s.date_publication)}` : ""} · <span class="muted">${esc(s.source_pdf)}</span>${(s.avertissements || []).length ? ` · <b style="color:${col("--critical")}">⚠ ${esc(s.avertissements.join(" ; "))}</b>` : ""}</div>
+    <div class="grid g6">
+      ${kpi("Cumul des cas", nf(k.confirmes), `${T("Cas confirmés")}${plus(s.nouveaux_cas_24h)}`, { color: "--s2" })}
+      ${kpi("Cumul des décès confirmés", nf(k.deces_confirmes), `${T("Décès")}${plus(s.deces_24h)}`, { color: "--critical" })}
+      ${kpi("Létalité", pc(k.letalite_pct), T("Décès confirmés / cas confirmés"), { color: "--ink-2" })}
+      ${kpi("Patients en isolement / CTE", k.isolement === null || k.isolement === undefined ? "N/C" : nf(k.isolement), T("Fin de journée, toutes provinces"), { color: "--s1" })}
+      ${kpi("Cumul des guéris", k.gueris === null ? "N/C" : nf(k.gueris), T("Sorties guéries cumulées"), { color: "--good" })}
+      ${kpi("Taux de suivi des contacts", pc(k.suivi_contacts_pct), s.contacts_a_suivre ? `${nf(s.contacts_vus)} / ${nf(s.contacts_a_suivre)} ${T("vus (du jour) · cible 95 %")}` : T("Du jour · cible 95 %"), { color: "--st-v24", cls: k.suivi_contacts_pct < 95 ? "alert" : "good", meter: k.suivi_contacts_pct, meterColor: k.suivi_contacts_pct < 95 ? "--critical" : "--good" })}
+    </div>` : `
     <div class="grid g4">
       ${kpi("Cas confirmés", nf(k.confirmes), srcNote, { color: "--s2", cls: stale })}
       ${kpi("Décès", nf(k.deces_confirmes), srcNote, { color: "--critical", cls: stale })}
       ${kpi("Guéris", k.gueris === null ? "N/C" : nf(k.gueris), srcNote, { color: "--good", cls: stale })}
       ${kpi("Létalité", pc(k.letalite_pct), stale ? srcNote : T("Décès / confirmés"), { color: "--ink-2", cls: stale })}
-    </div>
+    </div>`;
+    return `${sitTiles}
     <div class="grid g5">
       ${kpi("Confirmés sur 14 jours", nf(p.confirmes), `${dshort(p.start)} → ${dshort(p.end)} · ${nf(p.deces_confirmes)} ${T("décès")}`)}
       ${kpi("Nouveaux cas connus comme contacts", pc(r.pct_nouveaux_cas_connus_contacts), T("Confirmés 14 j déjà listés comme contacts"), { cls: r.pct_nouveaux_cas_connus_contacts < 50 ? "alert" : "good", meter: r.pct_nouveaux_cas_connus_contacts, meterColor: r.pct_nouveaux_cas_connus_contacts < 50 ? "--critical" : "--good", go: "chains" })}
@@ -214,11 +227,42 @@
     </div>
     <div class="grid g2">
       ${panel("Délais opérationnels", T("Médiane hebdomadaire en jours — cas confirmés"), `<div class="flex small muted" style="margin-bottom:6px">${[["dds_notification", "DDS → notification"], ["dds_prelevement", "DDS → prélèvement"], ["prelevement_resultat", "Prélèvement → résultat"], ["dds_admission", "DDS → admission"]].map(([k, t]) => `<span class="badge">${T(t)} : <b>&nbsp;${nf(D.delays?.[k], 1)} j</b></span>`).join("")}</div><div id="c-delays"></div>`, { png: "delais" })}
-      ${PER ? panel("Source des chiffres clés", "", `<div class="notice">${T("En mode période, les chiffres clés sont calculés à partir de la Linelist (cas notifiés pendant la période). Le SitRep, qui donne des cumuls à la date du jour, est utilisé seulement pour la vue complète.")}</div>`) : panel("Source officielle des chiffres clés", esc(s.methode || ""), `${s.image ? `<img src="${esc(s.image)}" alt="SitRep" style="max-width:100%;max-height:300px;border-radius:8px;display:block;margin:auto">` : `<div class="empty">${T("Image SitRep non disponible")}</div>`}${sitRows.length ? `<table style="margin-top:10px"><tbody>${sitRows.map(([kk, lb]) => `<tr><td>${esc(T(lb))}</td><td class="num"><b>${kk.endsWith("_pct") ? pc(s.indicateurs[kk]) : nf(s.indicateurs[kk])}</b></td></tr>`).join("")}</tbody></table>` : ""}<div class="notice ${s.perime ? "crit" : s.validation_requise ? "warn" : ""}">${s.perime ? `<b>${T("L’image SitRep a changé mais les chiffres n’ont pas été mis à jour.")}</b> ${T("Lancez 05_METTRE_A_JOUR_SITREP (saisie guidée) ou installez Tesseract OCR, puis relancez l’actualisation.")}` : s.validation_requise ? T("Chiffres issus du fichier de validation manuelle : vérifier avant diffusion.") : T("Cohérence arithmétique OCR validée.")} ${T("Toutes les autres analyses proviennent des fichiers Linelist et Contact tracing.")}</div>`)}
+      ${PER ? panel("Source des chiffres clés", "", `<div class="notice">${T("En mode période, les chiffres clés sont calculés à partir de la Linelist (cas notifiés pendant la période). Le SitRep, qui donne des cumuls à la date du jour, est utilisé seulement pour la vue complète.")}</div>`) : fromPdf ? sitrepProvPanel() : panel("Source officielle des chiffres clés", esc(s.methode || ""), `${s.image ? `<img src="${esc(s.image)}" alt="SitRep" style="max-width:100%;max-height:300px;border-radius:8px;display:block;margin:auto">` : `<div class="empty">${T("Image SitRep non disponible")}</div>`}${sitRows.length ? `<table style="margin-top:10px"><tbody>${sitRows.map(([kk, lb]) => `<tr><td>${esc(T(lb))}</td><td class="num"><b>${kk.endsWith("_pct") ? pc(s.indicateurs[kk]) : nf(s.indicateurs[kk])}</b></td></tr>`).join("")}</tbody></table>` : ""}<div class="notice ${s.perime ? "crit" : s.validation_requise ? "warn" : ""}">${s.perime ? `<b>${T("L’image SitRep a changé mais les chiffres n’ont pas été mis à jour.")}</b> ${T("Lancez 05_METTRE_A_JOUR_SITREP (saisie guidée) ou installez Tesseract OCR, puis relancez l’actualisation.")}` : s.validation_requise ? T("Chiffres issus du fichier de validation manuelle : vérifier avant diffusion.") : T("Cohérence arithmétique OCR validée.")} ${T("Toutes les autres analyses proviennent des fichiers Linelist et Contact tracing.")}</div>`)}
     </div>
+    ${fromPdf ? sitrepExtraPanels() : ""}
     ${perfPanel()}`;
   }
+  /* ---- SitRep PDF : provinces, évolution, concordance avec la Linelist ---- */
+  function sitrepProvPanel() {
+    const s = D.sources.sitrep || {}, pil = Object.fromEntries((s.provinces_piliers || []).map(x => [x.province, x]));
+    const rows = (s.provinces || []).map(p => ({ ...p, ...(pil[p.province] || {}) }));
+    return panel("SitRep : situation par province", `${T("Tableau 1 et texte des piliers du SitRep N°")} ${esc(String(s.numero || ""))} — ${T("lus automatiquement")}`, table("sr-prov", rows, [
+      { k: "province", t: "Province" }, { k: "nouveaux_24h", t: "Nouv. 24 h", num: true }, { k: "cas", t: "Cas cumulés", num: true }, { k: "deces", t: "Décès", num: true },
+      { k: "letalite_pct", t: "Létalité", v: x => pc(x.letalite_pct, 1) }, { k: "zs_actives", t: "ZS actives", v: x => `${nf(x.zs_actives)}/${nf(x.zs_total)}` },
+      { k: "suivi_contacts_pct", t: "Suivi contacts", v: x => x.suivi_contacts_pct === undefined ? "—" : pc(x.suivi_contacts_pct, 1), sortv: x => x.suivi_contacts_pct },
+      { k: "isolement", t: "En isolement", num: true }, { k: "eds_non_realises_24h", t: "EDS non réalisés 24 h", num: true }, { k: "corps_swabes_24h", t: "Corps swabés 24 h", num: true }],
+      { search: false, sort: "cas" }), { csv: "sr-prov" });
+  }
+  function sitrepExtraPanels() {
+    const s = D.sources.sitrep || {}, h = s.historique || [], conc = D.sitrep_concordance || [];
+    const hist = h.length >= 2 ? panel("Évolution selon les SitRep déposés", `${h.length} ${T("SitRep lus")} (${dfmt(h[0].date_rapport)} → ${dfmt(h[h.length - 1].date_rapport)})`, `<div class="grid g2"><div id="c-sr-cum"></div><div id="c-sr-suivi"></div></div>`, { png: "evolution_sitrep" })
+      : `<div class="notice small">${T("Déposez chaque jour le SitRep PDF (SitRep_MVEBDB_n°_jj_mm_aaaa.pdf) dans data/ : l’outil reconstitue l’évolution des chiffres officiels à partir de tous les SitRep déposés.")}</div>`;
+    const big = conc.filter(x => Math.abs(x.ecart_cas) >= 5).length;
+    return `${hist}${conc.length ? panel("Concordance SitRep / Linelist par zone de santé", `${T("Cas et décès cumulés du tableau 2 du SitRep comparés à la Linelist ; écart = SitRep − Linelist")} — ${nf(big)} ${T("zone(s) avec un écart d’au moins 5 cas")}`, table("sr-conc", conc, [
+      { k: "province", t: "Province" }, { k: "zone_sante", t: "Zone de santé" }, { k: "cas_sitrep", t: "Cas SitRep", num: true }, { k: "cas_linelist", t: "Cas Linelist", num: true },
+      { k: "ecart_cas", t: "Écart", num: true, v: x => `<b style="color:${Math.abs(x.ecart_cas) >= 5 ? col("--critical") : "inherit"}">${x.ecart_cas > 0 ? "+" : ""}${nf(x.ecart_cas)}</b>`, sortv: x => Math.abs(x.ecart_cas) },
+      { k: "deces_sitrep", t: "Décès SitRep", num: true }, { k: "deces_linelist", t: "Décès Linelist", num: true }, { k: "nouveaux_24h", t: "Nouv. 24 h", num: true }],
+      { sort: "ecart_cas", maxh: 420 }), { csv: "sr-conc" }) : ""}`;
+  }
+  function sitrepCharts() {
+    const h = (D.sources.sitrep || {}).historique || [];
+    if (h.length < 2 || !$("#c-sr-cum")) return;
+    const rows = h.map(x => ({ date: x.date_rapport, cas: x.confirmes, deces: x.deces, gueris: x.gueris, suivi: x.suivi_contacts_pct, iso: x.isolement }));
+    Ch.xy($("#c-sr-cum"), { data: rows, x: "date", xLabel: (v, r, tip) => tip ? dfmt(v) : dshort(v), height: 230, title: T("Cumuls officiels"), series: [{ key: "cas", label: T("Cumul des cas"), color: "--s2", type: "line" }, { key: "deces", label: T("Cumul des décès confirmés"), color: "--critical", type: "line" }, { key: "gueris", label: T("Cumul des guéris"), color: "--good", type: "line" }] });
+    Ch.xy($("#c-sr-suivi"), { data: rows, x: "date", xLabel: (v, r, tip) => tip ? dfmt(v) : dshort(v), height: 230, yFmt: v => nf(v, 0) + " %", series: [{ key: "suivi", label: T("Taux de suivi des contacts"), color: "--st-v24", type: "line" }], hlines: [{ y: 95, color: "--good", legend: T("cible 95 %") }] });
+  }
   function overviewCharts() {
+    sitrepCharts();
     perfCharts();
     const cut = D.meta.cutoff, full = x => addDays(x.week, 6) <= cut;
     const w = (D.weekly || []).filter(full).slice(-24);
@@ -1357,6 +1401,7 @@
     </div>
     ${panel("Zones classées par risque de résurgence", T("Courbe = cas notifiés par semaine (20 dernières semaines) ; score 0–100 : P(hausse) 30 %, P(Rt > 1) 20 %, réintroduction 15 %, nouveaux cas sans lien 15 %, contacts perdus de vue 10 %, contacts devenus suspects 10 % (× 0,6 si la zone n’a pas encore connu de baisse)"), table("res", Z, [
       { k: "zone_sante", t: "Zone de santé" }, { k: "province", t: "Province" },
+      { k: "rang_res", t: "Rang (province)", num: true, v: x => nf(resRank(Z, x)), sortv: x => resRank(Z, x) },
       { k: "categorie", t: "Catégorie", v: x => `<span class="badge" style="background:${RESC[x.categorie]};color:#2b2b2b">${esc(T(x.categorie))}</span>`, csv: x => x.categorie },
       { k: "score", t: "Score /100", num: true, v: x => `<div class="flex" style="gap:6px;flex-wrap:nowrap"><div class="progress" style="flex:1;min-width:50px"><i style="width:${Math.min(100, x.score)}%;background:${x.score >= 60 ? TL[4] : x.score >= 40 ? TL[3] : x.score >= 20 ? TL[2] : TL[0]}"></i></div><span class="small">${nf(x.score, 0)}</span></div>`, sortv: x => x.score, csv: x => nf(x.score, 0) },
       { k: "serie", t: "20 semaines", v: x => spark(((R.series || {})[x.zone_sante] || {}).valeurs || [], RESC[x.categorie]), csv: x => (((R.series || {})[x.zone_sante] || {}).valeurs || []).join(" ") },
@@ -1651,7 +1696,7 @@
     SB: ["Bayésien séquentiel (Bettencourt & Ribeiro 2008)", "I(t+1) ~ Poisson(I(t) exp(γ (Rt − 1))), γ = 1 / moyenne du SI", "Mise à jour jour par jour", "Peu informatif quand γ est petit (Ebola) : intervalles larges"],
   };
   const rtmData = () => D.rt_methodes || { groupes: [], resultats: {}, methodes: [] };
-  function rtmView() {
+  function rtmMethodsView() {
     const R = rtmData(), gs = R.groupes || [];
     if (!gs.length) return `<div class="empty">${T("Rt multi-méthodes indisponible (série trop courte).")}</div>`;
     if (!gs.some(g => g.id === S.rtmG)) S.rtmG = gs[0].id;
@@ -1697,7 +1742,7 @@
     const prov = r.provisoire_des ? out.findIndex(x => x.date >= r.provisoire_des) : -1;
     return { rows: out, prov: prov >= 0 ? prov : null };
   }
-  function rtmCharts() {
+  function rtmMethodsCharts() {
     const { rows, prov } = rtmRows(); if (!rows.length) return;
     const keys = Object.keys(rtmData().resultats[S.rtmG]?.series || {}).filter(rtmKeep);
     const xl = (v, r, tip) => tip ? dfmt(v) : dshort(v);
@@ -1706,6 +1751,118 @@
       series: keys.map(k => ({ key: k, label: T(METH(k)), color: RTM_COL[k], type: "line", width: k === "RP" || k === "DSS" ? 2.6 : 1.6 })) });
     keys.forEach(k => Ch.xy($("#c-rtm-" + k), { data: rows, x: "date", height: 200, xLabel: xl, xTitle: T("Date"), shade, hlines: [{ y: 1, color: "--ink-2", dash: "6 4" }], tipSkipNull: true,
       bands: [{ lo: k + "_lo", hi: k + "_hi", color: RTM_COL[k], label: T("IC 95 %"), opacity: .22 }], series: [{ key: k, label: T("Rt médian"), color: RTM_COL[k], type: "line" }] }));
+  }
+
+  const resRank = (Z, x) => 1 + Z.filter(z => z.province === x.province && (z.score || 0) > (x.score || 0)).length;
+  /* ---------------- Rt par province et zone de santé (EpiEstim, fenêtres 7 / 14 / 21 j) ---------------- */
+  const TAU_COL = { "7": "--s1", "14": "--s3", "21": "--s7" };
+  function rtmView() {
+    const modes = [["zones", "Par province et zone de santé"], ["methodes", "Comparaison des 9 méthodes"]];
+    const seg = `<div class="seg big-seg" data-seg="rtmMode" style="margin-bottom:12px">${modes.map(([v, t]) => `<button data-v="${v}" class="${S.rtmMode === v ? "on" : ""}">${T(t)}</button>`).join("")}</div>`;
+    return seg + (S.rtmMode === "methodes" ? rtmMethodsView() : rtzView());
+  }
+  function rtmCharts() { if (S.rtmMode === "methodes") rtmMethodsCharts(); else rtzCharts(); }
+  const RZ = () => D.rt_zones || { groupes: [], series: {}, taus: [7, 14, 21] };
+  function rtzView() {
+    const R = RZ(), gs = R.groupes || [];
+    if (!gs.length) return `<div class="empty">${T("Rt par zone indisponible : relancez l’analyse complète.")}</div>`;
+    const provs = ["Toutes", ...new Set(gs.filter(g => g.niveau === "Province").map(g => g.nom))];
+    if (!provs.includes(S.rtzProv)) S.rtzProv = "Toutes";
+    const opts = gs.filter(g => S.rtzProv === "Toutes" ? true : (g.nom === S.rtzProv && g.niveau === "Province") || g.province === S.rtzProv);
+    if (!opts.some(g => g.id === S.rtzG)) S.rtzG = S.rtzProv === "Toutes" ? "National" : `P:${S.rtzProv}`;
+    const g = gs.find(x => x.id === S.rtzG) || gs[0];
+    const d = g.dernier || {};
+    const ref = D.meta.cutoff;
+    const old = x => x && days(x.date, ref) > 21;
+    const sig = x => !x ? "—" : x.ic95[0] > 1 ? badge("Croissance", "b-crit") : x.ic95[1] < 1 ? badge("Contrôle", "b-good") : badge("Incertain", "b-mod");
+    const zones = gs.filter(x => x.niveau === "Zone de santé" && (S.rtzProv === "Toutes" || x.province === S.rtzProv));
+    const tbl = zones.map(x => ({ id: x.id, nom: x.nom, province: x.province, cas: x.cas, cas_21j: x.cas_21j,
+      r7: x.dernier?.["7"], r14: x.dernier?.["14"], r21: x.dernier?.["21"] }));
+    const rv = k => ({ k, t: `Rt ${k.slice(1)} j`, num: true, v: x => x[k] ? `${nf(x[k].mediane, 2)}${old(x[k]) ? ` <span class="muted small" title="${T("Dernière estimation ancienne : pas de cas récents")}">(${dshort(x[k].date)})</span>` : ""}` : "—", sortv: x => x[k] ? x[k].mediane : null });
+    return `
+    <div class="flex" style="margin-bottom:12px">
+      <label class="field">${T("Province")}<select data-state="rtzProv">${provs.map(p => `<option value="${esc(p)}" ${S.rtzProv === p ? "selected" : ""}>${esc(T(p))}</option>`).join("")}</select></label>
+      <label class="field">${T("Zone de santé")}<select data-state="rtzG">${opts.map(o => `<option value="${esc(o.id)}" ${S.rtzG === o.id ? "selected" : ""}>${o.niveau === "Zone de santé" ? "— " : ""}${esc(o.niveau === "Zone de santé" ? o.nom : (o.niveau === "National" ? T("National") : `${T("Toute la province")} ${o.nom}`))}${o.niveau === "Zone de santé" ? ` (${nf(o.cas)} ${T("cas")})` : ""}</option>`).join("")}</select></label>
+      <div class="field"><span>${T("Fenêtre d’estimation")}</span><div class="seg" data-seg="rtzTau">${[["7", "7 j"], ["14", "14 j"], ["21", "21 j"], ["cmp", "Comparer"]].map(([v, t]) => `<button data-v="${v}" class="${S.rtzTau === v ? "on" : ""}">${T(t)}</button>`).join("")}</div></div>
+      <div class="field"><span>${T("Affichage")}</span><div class="seg" data-seg="rtzDays">${[["7", "7 j"], ["14", "14 j"], ["21", "21 j"], ["28", "28 j"], ["42", "42 j"], ["60", "60 j"], ["90", "90 j"], ["120", "120 j"], ["0", "Tout"]].map(([v, t]) => `<button data-v="${v}" class="${S.rtzDays === v ? "on" : ""}">${T(t)}</button>`).join("")}</div></div>
+    </div>
+    <div class="grid g4">
+      ${["7", "14", "21"].map(t => kpi(`Rt — fenêtre de ${t} jours`, d[t] ? nf(d[t].mediane, 2) : "—", d[t] ? `${T("IC 95 %")} ${nf(d[t].ic95[0], 2)}–${nf(d[t].ic95[1], 2)} · P(Rt>1) ${pc(100 * d[t].p_sup_1, 0)} · ${dshort(d[t].date)}${old(d[t]) ? ` · <b>${T("ancienne")}</b>` : ""}` : T("Trop peu de cas"), { color: TAU_COL[t] })).join("")}
+      ${kpi("Cas (21 derniers jours)", nf(g.cas_21j), `${nf(g.cas)} ${T("cas au total")} · ${esc(T(g.niveau))}`)}
+    </div>
+    ${panel(`Rt — ${g.niveau === "National" ? T("National") : esc(g.nom)}`, T("EpiEstim (Cori 2013) sur l’incidence par date de début des symptômes corrigée du retard de notification ; fenêtre glissante de 7, 14 ou 21 jours ; zone grisée : jours non consolidés ; Rt masqué quand la fenêtre compte moins de 5 cas."), `<div id="c-rtz"></div><div id="c-rtz-inc"></div>`, { png: "rt_" + g.nom })}
+    <div class="notice small"><b>${T("Lecture")} :</b> ${T("la fenêtre de 7 jours réagit vite mais fluctue ; 14 et 21 jours lissent les variations dues aux petits effectifs (zones avec peu de cas). Une zone est en croissance quand la borne inférieure de l’IC 95 % dépasse 1, en contrôle quand la borne supérieure est sous 1.")}</div>
+    ${panel(S.rtzProv === "Toutes" ? "Dernier Rt par zone de santé" : `Dernier Rt par zone de santé — ${esc(S.rtzProv)}`, T("Cliquer une zone pour afficher ses courbes ; entre parenthèses : date de la dernière estimation quand elle date de plus de 21 jours"), table("rtz-geo", tbl, [
+      { k: "nom", t: "Zone de santé" }, { k: "province", t: "Province" }, { k: "cas", t: "Cas", num: true }, { k: "cas_21j", t: "Cas 21 j", num: true }, rv("r7"), rv("r14"), rv("r21"),
+      { k: "sig", t: "Signal (7 j)", v: x => old(x.r7) ? `<span class="muted">${T("pas de cas récents")}</span>` : sig(x.r7), sortv: x => x.r7 ? x.r7.ic95[0] : null }],
+      { rowClick: true, rowKey: x => x.id, sort: "cas_21j", maxh: 460 }), { csv: "rtz-geo" })}`;
+  }
+  function rtzCharts() {
+    const R = RZ(), ser = (R.series || {})[S.rtzG]; if (!ser || !$("#c-rtz")) return;
+    const rows = Array.from({ length: ser.n }, (_, i) => ({ date: addDays(ser.debut, i), inc: ser.incidence[i] }));
+    ["7", "14", "21"].forEach(t => { const v = ser.rt[t]; if (!v) return; rows.forEach((x, i) => { const c = z => z === null || z === undefined ? null : Math.min(z, 5); x["r" + t] = c(v.med[i]); x["lo" + t] = c(v.lo[i]); x["hi" + t] = c(v.hi[i]); }); });
+    const nd = Number(S.rtzDays) || rows.length;
+    const out = rows.slice(-Math.max(nd, 2));
+    const prov = ser.provisoire_des && out.some(x => x.date >= ser.provisoire_des) ? { from: ser.provisoire_des, label: T("provisoire") } : null;
+    const xl = (v, r, tip) => tip ? dfmt(v) : dshort(v);
+    const taus = S.rtzTau === "cmp" ? ["7", "14", "21"] : [S.rtzTau];
+    Ch.xy($("#c-rtz"), { data: out, x: "date", height: 300, xLabel: xl, xTitle: T("Date"), shade: prov, noClip: true, tipSkipNull: true,
+      hlines: [{ y: 1, color: "--ink-2", dash: "6 4", label: "R = 1" }],
+      bands: taus.length === 1 ? [{ lo: "lo" + taus[0], hi: "hi" + taus[0], color: TAU_COL[taus[0]], label: T("IC 95 %"), opacity: .2 }] : [],
+      series: taus.map(t => ({ key: "r" + t, label: `Rt (${T("fenêtre")} ${t} j)`, color: TAU_COL[t], type: "line", width: 2.2 })) });
+    Ch.xy($("#c-rtz-inc"), { data: out, x: "date", height: 150, xLabel: xl, noClip: true, barWidth: .8, series: [{ key: "inc", label: T("Cas par date de début des symptômes"), color: "--seq-2" }] });
+  }
+
+  /* ---------------- Opérations par province et zone de santé : EDS, CTE, swabs, PPL ---------------- */
+  const OPS = {
+    eds: { t: "EDS non réalisés", main: "eds_non_realise", c: "--critical", def: "eds",
+      kpis: o => [["Décès (alertes décès)", nf(o.deces), `${nf(o.deces_confirmes)} ${T("confirmés")}`, "--ink-2"], ["EDS réalisés", nf(o.eds_realise), T("équipe d’enterrement"), "--good"],
+        ["EDS non réalisés", nf(o.eds_non_realise), `${pc(o.eds_realise + o.eds_non_realise ? 100 * o.eds_non_realise / (o.eds_realise + o.eds_non_realise) : null, 1)} ${T("des funérailles documentées")}`, "--critical"],
+        ["Funérailles non documentées", nf(o.eds_non_doc), `${pc(o.deces ? 100 * o.eds_non_doc / o.deces : null, 0)} ${T("des décès : à compléter dans le lln")}`, "--warn"]],
+      cols: [["deces", "Décès"], ["deces_confirmes", "Décès confirmés"], ["eds_realise", "EDS réalisés"], ["eds_non_realise", "EDS non réalisés"], ["eds_non_doc", "Non documentés"],
+        ["pct_eds_non_realises", "% non réalisés", "pct"], ["eds_non_realise_21j", "Non réalisés 21 j"], ["deces_conf_domicile", "Décès confirmés à domicile"]] },
+    cte: { t: "Positifs au CTE", main: "cte_admis", c: "--s1", def: "cte",
+      kpis: o => [["Confirmés admis en CTE", nf(o.cte_admis), `${pc(o.confirmes ? 100 * o.cte_admis / o.confirmes : null, 1)} ${T("des confirmés")}`, "--s1"], ["Encore hospitalisés", nf(o.cte_en_cours), T("admis, sans sortie ni décès"), "--s3"],
+        ["Issues au CTE", `${nf(o.cte_gueris)} / ${nf(o.cte_deces)}`, `${T("guéris / décédés")} · ${nf(o.cte_evades)} ${T("évadés")}`, "--good"], ["Confirmés sans admission enregistrée", nf(o.conf_non_admis), T("non isolés ou admission non saisie"), "--warn"]],
+      cols: [["confirmes", "Confirmés"], ["cte_admis", "Admis au CTE"], ["pct_confirmes_admis_cte", "% admis", "pct"], ["cte_en_cours", "En cours"], ["cte_gueris", "Guéris"], ["cte_deces", "Décédés"], ["cte_evades", "Évadés"], ["conf_non_admis", "Sans admission"], ["cte_admis_21j", "Admis 21 j"]] },
+    swabs: { t: "Swabs", main: "swabs", c: "--s7", def: "swabs",
+      kpis: o => [["Swabs (écouvillons)", nf(o.swabs), `${nf(o.prelevements)} ${T("prélèvements au total")}`, "--s7"], ["Swabs post-mortem", nf(o.swabs_post_mortem), `${pc(o.swabs ? 100 * o.swabs_post_mortem / o.swabs : null, 0)} ${T("des swabs")}`, "--ink-2"],
+        ["Swabs positifs", nf(o.swabs_positifs), `${T("positivité")} ${pc(o.swabs ? 100 * o.swabs_positifs / o.swabs : null, 1)}`, "--critical"], ["Swabs (21 derniers jours)", nf(o.swabs_21j), `${nf(o.swabs_positifs_21j)} ${T("positifs")}`, "--s1"]],
+      cols: [["swabs", "Swabs"], ["swabs_post_mortem", "Post-mortem"], ["swabs_positifs", "Positifs"], ["positivite_swabs_pct", "Positivité", "pct"], ["swabs_21j", "Swabs 21 j"], ["swabs_positifs_21j", "Positifs 21 j"], ["prelevements", "Tous prélèvements"]] },
+    ppl: { t: "PPL (personnel de première ligne)", main: "ppl_confirmes", c: "--s4", def: "ppl",
+      kpis: o => [["PPL confirmés", nf(o.ppl_confirmes), `${pc(o.confirmes ? 100 * o.ppl_confirmes / o.confirmes : null, 1)} ${T("des confirmés")}`, "--s4"], ["PPL confirmés (21 j)", nf(o.ppl_confirmes_21j), T("infections récentes : PCI à renforcer"), "--critical"],
+        ["PPL décédés", nf(o.ppl_deces), T("parmi les PPL confirmés"), "--ink-2"], ["Alertes chez des PPL", nf(o.ppl_alertes), T("toutes classifications"), "--s1"]],
+      cols: [["ppl_alertes", "Alertes PPL"], ["ppl_confirmes", "PPL confirmés"], ["ppl_confirmes_21j", "PPL confirmés 21 j"], ["ppl_deces", "PPL décédés"], ["pct_ppl_parmi_confirmes", "% des confirmés", "pct"], ["confirmes", "Confirmés (tous)"]] }
+  };
+  function opsView() {
+    const O = D.operations; if (!O || !O.zones) return `<div class="empty">${T("Indicateurs opérationnels indisponibles : relancez l’analyse complète.")}</div>`;
+    const cfg = OPS[S.opTab] || OPS.eds;
+    const provs = ["Toutes", ...O.provinces.filter(p => p.confirmes > 0 || p.deces > 0).map(p => p.province)];
+    if (!provs.includes(S.opProv)) S.opProv = "Toutes";
+    const zs = O.zones.filter(z => S.opProv === "Toutes" || z.province === S.opProv);
+    const tot = S.opProv === "Toutes" ? O.totaux : O.provinces.find(p => p.province === S.opProv) || {};
+    const mainK = S.opWin === "21" && (cfg.main + "_21j") in (zs[0] || {}) ? cfg.main + "_21j" : cfg.main;
+    const colDefs = [{ k: "zone_sante", t: "Zone de santé" }, { k: "province", t: "Province" }, ...cfg.cols.map(([k, t, f]) => f === "pct" ? { k, t, v: x => pc(x[k], 1), sortv: x => x[k] } : { k, t, num: true })];
+    const provRows = O.provinces.filter(p => p.confirmes > 0 || p.deces > 0);
+    const sr = O.sitrep_24h;
+    const srPanel = S.opTab === "eds" && sr ? panel(`SitRep N° ${esc(String(sr.numero || ""))} — EDS des dernières 24 h`, `${T("Lu dans le pilier PCI/EDS du SitRep du")} ${dfmt(sr.date)}`, table("op-sr", sr.provinces.filter(x => x.eds_attendus_24h !== undefined), [
+      { k: "province", t: "Province" }, { k: "eds_attendus_24h", t: "EDS attendus", num: true }, { k: "eds_realises_24h", t: "EDS réalisés", num: true },
+      { k: "eds_non_realises_24h", t: "EDS non réalisés", num: true, v: x => `<b style="color:${col("--critical")}">${nf(x.eds_non_realises_24h)}</b>`, sortv: x => x.eds_non_realises_24h },
+      { k: "pct", t: "% réalisés", v: x => pc(x.eds_attendus_24h ? 100 * x.eds_realises_24h / x.eds_attendus_24h : null, 1) }, { k: "corps_swabes_24h", t: "Corps swabés", num: true }, { k: "eds_echecs_24h", t: "Échecs", num: true }], { search: false, sort: null })) : "";
+    return `
+    <div class="seg big-seg" data-seg="opTab" style="margin-bottom:12px">${Object.entries(OPS).map(([k, c]) => `<button data-v="${k}" class="${S.opTab === k ? "on" : ""}">${T(c.t)}</button>`).join("")}</div>
+    <div class="flex" style="margin-bottom:12px">
+      <label class="field">${T("Province")}<select data-state="opProv">${provs.map(p => `<option value="${esc(p)}" ${S.opProv === p ? "selected" : ""}>${esc(T(p))}</option>`).join("")}</select></label>
+      <div class="field"><span>${T("Graphique")}</span><div class="seg" data-seg="opWin"><button data-v="cumul" class="${S.opWin === "cumul" ? "on" : ""}">${T("Cumul")}</button><button data-v="21" class="${S.opWin === "21" ? "on" : ""}">${T("21 derniers jours")}</button></div></div>
+    </div>
+    <div class="grid g4">${cfg.kpis(tot).map(([l, v, n, c]) => kpi(l, v, n, { color: c })).join("")}</div>
+    <div class="notice small"><b>${T("Définition")} :</b> ${esc(T(O.definitions[cfg.def]))}</div>
+    <div class="grid g12">
+      ${panel(`${T(cfg.t)} — ${T("zones les plus concernées")}`, `${S.opProv === "Toutes" ? T("Toutes les provinces") : esc(S.opProv)} · ${S.opWin === "21" ? T("21 derniers jours") : T("cumul")}`, hbars(zs.map(z => ({ ...z, lab: `${z.zone_sante} (${z.province})` })), "lab", mainK, { limit: 15, color: cfg.c }))}
+      ${S.opProv === "Toutes" ? panel("Par province", "", table("op-prov", provRows, colDefs.filter(c => c.k !== "zone_sante"), { search: false, sort: cfg.main }), { csv: "op-prov" }) : srPanel || panel("Province", esc(S.opProv), table("op-prov1", provRows.filter(p => p.province === S.opProv), colDefs.filter(c => c.k !== "zone_sante"), { search: false, sort: null }))}
+    </div>
+    ${S.opProv === "Toutes" ? srPanel : ""}
+    ${panel(`Par zone de santé${S.opProv === "Toutes" ? "" : " — " + esc(S.opProv)}`, T("Tri par colonne ; export CSV"), table("op-zones", zs, colDefs, { sort: cfg.main, maxh: 520 }), { csv: "op-zones" })}`;
   }
 
   /* ---------------- Zones à risque (grille de la riposte) ---------------- */
@@ -1722,37 +1879,90 @@
     return `${perNote}
     <div class="grid g5">${ZORD.map(c => `<div class="kpi clickable" data-zrcat="${c}"><div class="label"><i class="dot" style="background:${ZCOL[c]}"></i>${T(c === "Rouge" ? "Hotspot / Rouge" : c === "Orange" ? "Orange (< 21 j)" : c === "Jaune" ? "Jaune (21–42 j)" : c === "Verte" ? "Verte (> 42 j)" : "Non touchée")}</div><div class="value">${nf(cnt(c))}</div><div class="note">${T("zones de santé")}</div></div>`).join("")}</div>
     ${miss.length ? `<div class="notice"><b>${T("Données manquantes pour ce calibrage")} :</b> ${miss.map(c => esc(T(c.critere))).join(" · ")}. ${T("Ces critères sont affichés « ? » et seront intégrés au prochain calibrage dès que les données seront fournies.")}</div>` : ""}
+    <div class="grid g21">
+      ${panel(S.zrColor === "score" ? "Carte du score de risque" : "Carte des catégories de zones", `${T("Situation au")} ${dfmt(Z.date)} — ${T("survolez une zone pour le détail, cliquez pour l’analyser ; étiquettes : zone et score de risque (0–100)")}`, `
+        <div class="flex" style="margin-bottom:8px"><div class="seg" data-seg="zrColor"><button data-v="categorie" class="${S.zrColor !== "score" ? "on" : ""}">${T("Couleur : catégorie")}</button><button data-v="score" class="${S.zrColor === "score" ? "on" : ""}">${T("Couleur : score")}</button></div>
+        <div class="seg" data-seg="zrLab">${[["score", "Étiquettes : score"], ["nom", "Noms seuls"], ["aucune", "Sans étiquette"]].map(([v, t]) => `<button data-v="${v}" class="${S.zrLab === v ? "on" : ""}">${T(t)}</button>`).join("")}</div></div>
+        <div id="c-zr-map"></div>`, { tools: mapReportBtn(S.zrColor === "score" ? "03b_score_risque.png" : "03_categories_zones_risque.png") })}
+      ${zrDetail(zs)}
+    </div>
+    ${zrProvPanel(zs)}
     <div class="grid g2">
-      ${panel("Carte des catégories de zones", `${T("Situation au")} ${dfmt(Z.date)} — ${T("cliquez une catégorie ci-dessus pour filtrer le tableau")}`, `<div id="c-zr-map"></div>`, { png: "zones_risque_carte" })}
       ${panel("Règles de classement", T("Grille de la riposte ; seuils modifiables dans config/parametres.json"), `<div class="table-wrap"><table><thead><tr><th>${T("Catégorie")}</th><th>${T("Règle appliquée")}</th></tr></thead><tbody>
         <tr><td>${badge("Rouge", "", "--critical")}</td><td class="wrap">${T("Cas notifiés dans les 21 derniers jours ET au moins un critère d’aggravation (hausse > 25 % des confirmés vs semaine précédente, Rt > 1, décès communautaire testé positif, décès groupés) OU au moins deux critères de contexte (zone frontalière, sites miniers, insécurité, camps de déplacés, résistance).")}</td></tr>
         <tr><td>${T("Orange")}</td><td class="wrap">${T("Cas notifiés dans les 21 derniers jours sans critère rouge ; les critères favorables (baisse sur 21 jours, capacité de surveillance) sont indiqués.")}</td></tr>
         <tr><td>${T("Jaune")}</td><td class="wrap">${T("Dernier cas il y a 22 à 42 jours ; contacts encore en file active signalés.")}</td></tr>
         <tr><td>${T("Verte")}</td><td class="wrap">${T("Plus de 42 jours sans cas : zone de résilience.")}</td></tr>
-        <tr><td>${T("Non touchée")}</td><td class="wrap">${T("Aucun cas confirmé ou probable ; contexte (frontière, mines) affiché pour la préparation.")}</td></tr></tbody></table></div>
+        <tr><td>${T("Non touchée")}</td><td class="wrap">${T("Aucun cas confirmé ou probable ; contexte (frontière, mines, proximité) affiché pour la préparation.")}</td></tr>
+        <tr><td><b>${T("Score")}</b></td><td class="wrap">${T("Score de risque 0–100 : cas 21 j (20), tendance (12), P(Rt > 1) (12), décès communautaires (8), décès groupés (5), proximité d’une zone à incidence élevée (10), frontière (5), mines (5), contacts non vus > 3 j (8), résurgence (10), EDS non réalisés (5). Priorité 1 ≥ 70 ; priorité 2 : 50–69 ; priorité 3 : 30–49 ; veille < 30.")}</td></tr></tbody></table></div>
         <p class="small muted">${T("Références")} : ${esc(Z.references?.mines?.fichier || "—")} (${nf(Z.references?.mines?.sites)} ${T("sites")}) · ${esc(Z.references?.frontalieres?.fichier || "—")} (${nf(Z.references?.frontalieres?.zones)} ${T("zones")})</p>`)}
     </div>
     ${panel(`${T("Zones classées")} — ${T(S.zrCat)}`, T("✔ critère rempli · — non rempli · ? donnée manquante"), table("zr", shown, [
       { k: "zone_sante", t: "Zone de santé" }, { k: "province", t: "Province" },
       { k: "categorie", t: "Catégorie", v: x => `<span class="badge"><i style="background:${ZCOL[x.categorie]}"></i>${esc(T(x.categorie))}</span>`, sortv: x => ZORD.indexOf(x.categorie) },
+      { k: "score_risque", t: "Score", num: true, d: 0 }, { k: "rang_province", t: "Rang (province)", num: true },
       { k: "jours_depuis_dernier_cas", t: "Jours depuis le dernier cas", num: true }, { k: "cas_21j", t: "Cas 21 j", num: true }, { k: "cas_21j_prec", t: "21 j précédents", num: true },
       { k: "c_hausse_25", t: "Hausse > 25 %", v: x => yes(x.c_hausse_25) }, { k: "rt", t: "Rt", num: true, d: 2 }, { k: "c_deces_communautaire_pos", t: "Décès comm. +", v: x => yes(x.c_deces_communautaire_pos) },
-      { k: "c_deces_groupes", t: "Décès groupés", v: x => yes(x.c_deces_groupes) }, { k: "c_frontaliere", t: "Frontalière", v: x => yes(x.c_frontaliere) },
+      { k: "c_deces_groupes", t: "Décès groupés", v: x => yes(x.c_deces_groupes) }, { k: "c_frontaliere", t: "Frontalière", v: x => yes(x.c_frontaliere) }, { k: "c_proximite", t: "Proximité incidence élevée", v: x => yes(x.c_proximite) },
       { k: "sites_miniers", t: "Sites miniers", num: true }, { k: "c_insecurite", t: "Insécurité", v: x => yes(x.c_insecurite) }, { k: "c_deplaces", t: "Déplacés", v: x => yes(x.c_deplaces) },
       { k: "c_resistance", t: "Résistance", v: x => yes(x.c_resistance) }, { k: "eleves_confirmes_21j", t: "Élèves confirmés 21 j", num: true },
       { k: "pct_investiguees_24h", t: "% alertes investiguées ≤ 24 h", v: x => pc(x.pct_investiguees_24h, 0) }, { k: "contacts_actifs", t: "Contacts actifs", num: true },
-      { k: "explication", t: "Justification", wrap: true }], { sort: "categorie", dir: 1, limit: 80 }))}
+      { k: "explication", t: "Justification", wrap: true }], { sort: "categorie", dir: 1, limit: 80, rowClick: true, rowKey: x => x.zone_sante }))}
     ${panel("Critères et disponibilité des données", T("Chaque critère de la grille, sa source et son statut"), table("zr-crit", crit, [{ k: "critere", t: "Critère", wrap: true }, { k: "categorie", t: "Catégorie" }, { k: "type", t: "Type" }, { k: "source", t: "Source", wrap: true }, { k: "zones_concernees", t: "Zones concernées", num: true }, { k: "statut", t: "Statut", v: x => x.disponible ? badge(x.statut, "b-good") : badge(x.statut, "b-mod") }], { search: false, sort: null }))}`;
+  }
+
+  const SCORE_PARTS = [["s_cas_21j", "Cas 21 j"], ["s_tendance", "Tendance à la hausse"], ["s_rt", "P(Rt > 1)"], ["s_deces_communautaires", "Décès communautaires +"], ["s_deces_groupes", "Décès groupés"],
+    ["s_proximite", "Proximité incidence élevée"], ["s_frontiere", "Frontière"], ["s_mines", "Sites miniers"], ["s_suivi_contacts", "Contacts non vus > 3 j"], ["s_resurgence", "Résurgence"], ["s_eds", "EDS non réalisés"]];
+  const PRIO_COL = s => s >= 70 ? "#8f2d2a" : s >= 50 ? "#d9673f" : s >= 30 ? "#f0b48a" : "#f3e6d8";
+  function mapReportBtn(file) {
+    const set = PER ? MAPSET : D.cartes;
+    if (set && (set.cartes || []).some(c => c.fichier === file)) {
+      const base = set.base || `../reports/${encodeURIComponent(set.dossier)}/`;
+      return `<a class="btn sm" href="${base}${encodeURIComponent(file)}" download="${esc(file)}" title="${T("Carte de rapport : légende des couleurs, scores, échelle, nord, source")}">⤓ ${T("Carte (PNG rapport)")}</a>`;
+    }
+    return PER && SERVED_P ? `<button class="btn sm" type="button" data-maps-run>${T("Produire la carte de la période")}</button>` : "";
+  }
+  function zrDetail(zs) {
+    if (!zs.length) return panel("Zone sélectionnée", "", `<div class="empty">${T("Aucune zone")}</div>`);
+    const z = zs.find(x => x.zone_sante === S.zrSel) || [...zs].sort((a, b) => (b.score_risque || 0) - (a.score_risque || 0))[0];
+    const parts = SCORE_PARTS.map(([k, t]) => ({ t, v: z[k] || 0 })).filter(x => x.v > 0);
+    return panel(`${esc(z.zone_sante)} — ${T("score")} ${nf(z.score_risque, 0)}/100`, `${esc(T(z.province || ""))} · ${T("rang")} ${nf(z.rang_province)} ${T("dans la province")} · <span class="badge"><i style="background:${ZCOL[z.categorie]}"></i>${esc(T(z.categorie))}</span>`, `
+      <div class="prio-chip" style="background:${PRIO_COL(z.score_risque || 0)};color:${(z.score_risque || 0) >= 50 ? "#fff" : "#3a2a20"}">${esc(T(z.niveau_priorite || ""))}</div>
+      <div class="small" style="margin:8px 0"><b>${T("Orientation opérationnelle")} :</b> ${esc(T(z.orientation || ""))}</div>
+      <h3 class="small" style="margin:10px 0 6px">${T("Contribution de chaque facteur au score")}</h3>
+      ${parts.length ? hbars(parts, "t", "v", { color: "--critical", d: 1 }) : `<div class="muted small">${T("Aucun facteur de risque")}</div>`}
+      <div class="small muted" style="margin-top:8px">${esc(T(z.explication || ""))}${z.zones_voisines_incidence_elevee ? ` · ${T("Zones voisines à incidence élevée")} : ${esc(z.zones_voisines_incidence_elevee)}` : ""}</div>`);
+  }
+  function zrProvPanel(zs) {
+    const pmax = {}; zs.forEach(z => { pmax[z.province] = Math.max(pmax[z.province] || 0, z.score_risque || 0); });
+    const rows = zs.filter(z => (z.score_risque || 0) > 0 && z.province).sort((a, b) => (pmax[b.province] - pmax[a.province]) || String(a.province).localeCompare(String(b.province)) || a.rang_province - b.rang_province);
+    const byP = {};
+    zs.forEach(z => { const p = z.province || "—"; byP[p] = byP[p] || { province: p, p1: 0, p2: 0, p3: 0, veille: 0, max: 0, top: "" }; const o = byP[p], sc = z.score_risque || 0;
+      if (sc >= 70) o.p1++; else if (sc >= 50) o.p2++; else if (sc >= 30) o.p3++; else o.veille++; if (sc > o.max) { o.max = sc; o.top = z.zone_sante; } });
+    const prov = Object.values(byP).filter(o => o.max > 0 && o.province !== "—").sort((a, b) => b.max - a.max);
+    return `<div>
+      ${panel("Priorités par province", T("Nombre de zones par niveau de priorité et zone la plus prioritaire"), table("zr-pv", prov, [{ k: "province", t: "Province" }, { k: "p1", t: "Priorité 1", num: true }, { k: "p2", t: "Priorité 2", num: true }, { k: "p3", t: "Priorité 3", num: true }, { k: "veille", t: "Veille", num: true }, { k: "top", t: "Zone la plus prioritaire", v: x => `${esc(x.top)} (${nf(x.max, 0)})` }], { search: false, sort: null }), { csv: "zr-pv" })}
+      ${panel("Classement des zones par province (score de risque)", T("Cliquer une zone pour afficher sa décomposition ; l’orientation résume les actions prioritaires"), table("zr-rank", rows, [
+        { k: "province", t: "Province" }, { k: "rang_province", t: "Rang", num: true }, { k: "zone_sante", t: "Zone de santé" },
+        { k: "score_risque", t: "Score", v: x => `<span class="score-pill" style="background:${PRIO_COL(x.score_risque)};color:${x.score_risque >= 50 ? "#fff" : "#3a2a20"}">${nf(x.score_risque, 0)}</span>`, sortv: x => x.score_risque },
+        { k: "categorie", t: "Catégorie", v: x => `<span class="badge"><i style="background:${ZCOL[x.categorie]}"></i>${esc(T(x.categorie))}</span>`, sortv: x => ZORD.indexOf(x.categorie) },
+        { k: "facteurs_principaux", t: "Facteurs principaux", wrap: true, v: x => `<span class="small">${esc(x.facteurs_principaux || "")}</span>` }, { k: "orientation", t: "Orientation opérationnelle", wrap: true, v: x => `<span class="small">${esc(x.orientation || "")}</span>` }],
+        { rowClick: true, rowKey: x => x.zone_sante, sort: null, maxh: 560, limit: 150 }), { csv: "zr-rank" })}
+    </div>`;
   }
   function riskZonesCharts() {
     const Z = zrData(), by = new Map((Z.zones || []).map(z => [norm(z.zone_sante), z]));
     const code = { "Rouge": 5, "Orange": 4, "Jaune": 3, "Verte": 2, "Non touchée": 1 };
     const feats = (D.map_zones || []).filter(f => S.province === "Toutes" || norm(f.province) === norm(S.province));
     Ch.choropleth($("#c-zr-map"), { features: feats, focus: true, focusIf: f => { const z = by.get(norm(f.data_zone)); return z && z.categorie !== "Non touchée"; },
-      value: f => code[by.get(norm(f.data_zone))?.categorie] || null, colorFn: (v, f) => ZCOL[by.get(norm(f.data_zone))?.categorie] || "#E9E6DF",
-      labelIf: f => by.get(norm(f.data_zone))?.categorie === "Rouge", labelRank: f => by.get(norm(f.data_zone))?.cas_21j || 0, maxLabels: 16,
-      tip: f => { const z = by.get(norm(f.data_zone)); return `<b>${esc(f.data_zone)}</b><div class="row"><span>${T("Catégorie")}</span><b>${esc(T(z?.categorie || "—"))}</b></div>${z ? `<div class="row"><span>${T("Cas 21 j")}</span><b>${nf(z.cas_21j)}</b></div><div class="row"><span>${T("Jours sans cas")}</span><b>${nf(z.jours_depuis_dernier_cas)}</b></div><div class="small" style="max-width:280px">${esc(z.explication || "")}</div>` : ""}`; },
-      legendHTML: ZORD.map(c => `<span><i style="background:${ZCOL[c]};display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:4px"></i>${T(c)}</span>`).join(" "), unit: T("catégorie (5 = rouge … 1 = non touchée)") });
+      value: f => S.zrColor === "score" ? (by.get(norm(f.data_zone))?.score_risque ?? null) : (code[by.get(norm(f.data_zone))?.categorie] || null),
+      colorFn: (v, f) => { const z = by.get(norm(f.data_zone)); return S.zrColor === "score" ? (z ? PRIO_COL(z.score_risque || 0) : "#E9E6DF") : (ZCOL[z?.categorie] || "#E9E6DF"); },
+      selected: S.zrSel || null, onClick: f => { S.zrSel = by.get(norm(f.data_zone))?.zone_sante || f.data_zone; render(); },
+      labelIf: f => S.zrLab !== "aucune" && (by.get(norm(f.data_zone))?.score_risque || 0) >= 30, labelRank: f => by.get(norm(f.data_zone))?.score_risque || 0, maxLabels: 18,
+      labelText: f => { const z = by.get(norm(f.data_zone)); return S.zrLab === "nom" ? f.data_zone : `${f.data_zone} · ${nf(z?.score_risque, 0)}`; },
+      tip: f => { const z = by.get(norm(f.data_zone)); return `<b>${esc(f.data_zone)}</b>${z ? `<div class="row"><span>${T("Score de risque")}</span><b>${nf(z.score_risque, 0)} / 100</b></div><div class="row"><span>${T("Rang dans la province")}</span><b>${nf(z.rang_province)}</b></div><div class="row"><span>${T("Priorité")}</span><b>${esc(T(z.niveau_priorite || ""))}</b></div>` : ""}<div class="row"><span>${T("Catégorie")}</span><b>${esc(T(z?.categorie || "—"))}</b></div>${z ? `<div class="row"><span>${T("Cas 21 j")}</span><b>${nf(z.cas_21j)}</b></div><div class="row"><span>${T("Jours sans cas")}</span><b>${nf(z.jours_depuis_dernier_cas)}</b></div><div class="small" style="max-width:280px">${esc(z.explication || "")}</div>` : ""}`; },
+      legendHTML: S.zrColor === "score" ? [[80, "Priorité 1 (≥ 70)"], [60, "Priorité 2 (50–69)"], [40, "Priorité 3 (30–49)"], [10, "Veille (< 30)"]].map(([v, t]) => `<span><i style="background:${PRIO_COL(v)};display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:4px"></i>${T(t)}</span>`).join(" ")
+        : ZORD.map(c => `<span><i style="background:${ZCOL[c]};display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:4px"></i>${T(c)}</span>`).join(" "), unit: S.zrColor === "score" ? T("score de risque (0–100)") : T("catégorie (5 = rouge … 1 = non touchée)") });
   }
 
   /* ---------------- Linelist lln : surveillance des alertes ---------------- */
@@ -1956,13 +2166,13 @@
   /* ---------------- Chargement des fichiers (interface locale) ---------------- */
   const SERVED = location.protocol.startsWith("http") && !isPublic;
   const UP_SLOTS = [["linelist", "Linelist — format 1 (export DHIS2 avec les noms)", ".xls,.xlsx,.csv"], ["lln", "Linelist — format 2 (lln_mve_notifications)", ".csv,.xlsx,.xls,.gz"],
-    ["contact", "Contact tracing (export DHIS2)", ".xls,.xlsx,.csv"], ["sitrep", "Image du SitRep (chiffres clés)", ".png,.jpg,.jpeg,.jfif"],
+    ["contact", "Contact tracing (export DHIS2)", ".xls,.xlsx,.csv"], ["sitrep", "SitRep PDF (SitRep_MVEBDB_n°_jj_mm_aaaa.pdf) ou image", ".pdf,.png,.jpg,.jpeg,.jfif"],
     ["mines", "Sites miniers (x = longitude, y = latitude)", ".xlsx,.xls,.csv"], ["frontiere", "Zones frontalières (liste des zones de santé)", ".xlsx,.xls,.csv"]];
   const UP_LABEL = Object.fromEntries(UP_SLOTS.map(([k, t]) => [k, t]));
   const UP_FILES = new Map();   // créneau -> File
   function guessSlot(name, head) {
     const n = name.toUpperCase(), h = (head || "").toLowerCase();
-    if (/\.(PNG|JPE?G|JFIF|WEBP)$/.test(n)) return "sitrep";
+    if (/\.(PNG|JPE?G|JFIF|WEBP|PDF)$/.test(n)) return "sitrep";
     if (/MINE|MINIER/.test(n)) return "mines";
     if (/FRONT|BORDER/.test(n)) return "frontiere";
     if (/CONTACT/.test(n) || h.includes("mve - fs - ")) return "contact";
@@ -1999,8 +2209,8 @@
         <tr><td>${T("Zones frontalières")}</td><td>${esc(D.zones_risque?.references?.frontalieres?.fichier || "—")}</td></tr></tbody></table></div>`;
     if (!SERVED) return `${panel("Charger les données", "", `<div class="notice"><b>${T("Le chargement graphique nécessite l’interface locale.")}</b> ${T("Double-cliquez sur")} <b>00_INTERFACE</b> (${T("00_INTERFACE.bat sous Windows, 00_INTERFACE_MAC.command sur Mac")}) : ${T("le tableau de bord s’ouvre dans le navigateur ; ici, vous pourrez alors glisser vos fichiers ou les choisir avec « Parcourir », sans jamais ouvrir le dossier du projet.")}</div>`)}${panel("Fichiers actuellement utilisés", "", cur)}`;
     return `${panel("Charger les données", T("Glissez vos fichiers ici (Linelist DHIS2, Linelist lln, Contact tracing, image du SitRep, sites miniers, zones frontalières) ou cliquez pour les choisir sur l’ordinateur. Le type de chaque fichier est reconnu automatiquement ; corrigez-le si besoin. Les fichiers sont copiés dans le projet (jamais d’écrasement) et l’analyse complète est relancée."), `
-      <label class="dropzone" id="up-drop"><input type="file" id="up-input" multiple accept=".xls,.xlsx,.xlsm,.csv,.gz,.png,.jpg,.jpeg,.jfif,.webp">
-        <span class="dz-ico">⤒</span><b>${T("Déposez les fichiers ici")}</b><span class="muted small">${T("ou cliquez pour parcourir l’ordinateur")} — .xls, .xlsx, .csv, .png, .jpg</span></label>
+      <label class="dropzone" id="up-drop"><input type="file" id="up-input" multiple accept=".xls,.xlsx,.xlsm,.csv,.gz,.pdf,.png,.jpg,.jpeg,.jfif,.webp">
+        <span class="dz-ico">⤒</span><b>${T("Déposez les fichiers ici")}</b><span class="muted small">${T("ou cliquez pour parcourir l’ordinateur")} — .xls, .xlsx, .csv, .pdf (SitRep), .png, .jpg</span></label>
       <div id="up-list" class="up-list"></div>
       <div class="flex" style="margin-top:12px"><button class="btn primary" type="button" data-up-run disabled>▶ ${T("Copier les fichiers et lancer l’analyse")}</button><button class="btn" type="button" data-up-only>${T("Relancer l’analyse sans nouveau fichier")}</button><span class="muted small" id="up-state"></span></div>
       <pre id="up-log" class="logbox"></pre>`)}
@@ -2117,7 +2327,7 @@
     if (cp) { const el = $("#map-cap-" + cp.dataset.copyCap); if (el && navigator.clipboard) navigator.clipboard.writeText(el.innerText).then(() => { cp.textContent = "✓ " + T("Copié"); }); }
   });
 
-  const VIEWS = { overview: [overview, overviewCharts], territories: [territories, territoriesCharts], followup: [followup, followupCharts], index: [indexView, indexCharts], journey: [journey, journeyCharts], chains: [chainsView, chainsCharts], recon: [reconView, reconCharts], dynamics: [dynamicsView, dynamicsCharts], children: [kidsView, kidsCharts], superspreading: [superView, superCharts], resurgence: [resurgenceView, resurgenceCharts], labs: [labsView, labsCharts], nowcast: [nowcastView, nowcastCharts], forecast: [forecastView, forecastCharts], priority: [priorityView], rtm: [rtmView, rtmCharts], riskzones: [riskZonesView, riskZonesCharts], alerts: [alertsView, alertsCharts], eds: [edsView, edsCharts], clinic: [clinicView, clinicCharts], lab2: [lab2View, lab2Charts], pec: [pecView, pecCharts], fusion: [fusionView], maps: [mapsView], upload: [uploadView, uploadCharts], quality: [qualityView], method: [methodView], terms: [termsView] };
+  const VIEWS = { overview: [overview, overviewCharts], territories: [territories, territoriesCharts], followup: [followup, followupCharts], index: [indexView, indexCharts], journey: [journey, journeyCharts], chains: [chainsView, chainsCharts], recon: [reconView, reconCharts], dynamics: [dynamicsView, dynamicsCharts], children: [kidsView, kidsCharts], superspreading: [superView, superCharts], resurgence: [resurgenceView, resurgenceCharts], labs: [labsView, labsCharts], nowcast: [nowcastView, nowcastCharts], forecast: [forecastView, forecastCharts], priority: [priorityView], rtm: [rtmView, rtmCharts], riskzones: [riskZonesView, riskZonesCharts], alerts: [alertsView, alertsCharts], eds: [edsView, edsCharts], clinic: [clinicView, clinicCharts], lab2: [lab2View, lab2Charts], pec: [pecView, pecCharts], fusion: [fusionView], maps: [mapsView], ops: [opsView], upload: [uploadView, uploadCharts], quality: [qualityView], method: [methodView], terms: [termsView] };
   function buildNav() {
     let g = "";
     $("#navigation").innerHTML = TABS.map(t => { const h = t.g !== g ? `<div class="nav-group">${T(t.g)}</div>` : ""; g = t.g; return `${h}<button data-tab="${t.id}" class="${S.tab === t.id ? "active" : ""}"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="${t.i}"/></svg>${T(t.t)}</button>`; }).join("");
@@ -2171,6 +2381,8 @@
       else if (id === "ch") { S.chain = key; go("chains", key); }
       else if (id === "res") { S.resZone = key; render(); }
       else if (id === "rtm-geo") { S.rtmG = key; render(); }
+      else if (id === "zr-rank" || id === "zr") { S.zrSel = key; render(); scrollTo({ top: 0, behavior: "smooth" }); }
+      else if (id === "rtz-geo") { S.rtzG = key; render(); scrollTo({ top: 0, behavior: "smooth" }); }
       else if (id === "jr-ct") { S.nodeSel = key; $("#node-detail").innerHTML = nodeDetail(); $$("tr[data-row^='jr-ct|']").forEach(r => r.classList.toggle("selected", r === tr)); journeyCharts(); }
       return;
     }
@@ -2179,7 +2391,7 @@
   document.addEventListener("change", e => {
     const t = e.target;
     if (t.dataset.state === "caseKey") { if (t.value) go("journey", t.value); return; }
-    if (t.dataset.state) { const v = t.value; S[t.dataset.state] = /^\d+$/.test(v) && ["netDepth", "nowH", "fH"].includes(t.dataset.state) ? Number(v) : v; if (t.dataset.state === "fLevel") { S.fTerr = ""; } render(); }
+    if (t.dataset.state) { const v = t.value; S[t.dataset.state] = /^\d+$/.test(v) && ["netDepth", "nowH", "fH"].includes(t.dataset.state) ? Number(v) : v; if (t.dataset.state === "fLevel") { S.fTerr = ""; } if (t.dataset.state === "rtzProv") { S.rtzG = v === "Toutes" ? "National" : `P:${v}`; } render(); }
     if (t.dataset.check) { S[t.dataset.check] = t.checked; render(); }
   });
   let st; document.addEventListener("input", e => { const t = e.target; if (t.dataset.tsearch) { clearTimeout(st); st = setTimeout(() => { S.tables[t.dataset.tsearch].q = t.value; S.tables[t.dataset.tsearch].limit = 60; rerenderTable(t.dataset.tsearch); }, 250); } });
