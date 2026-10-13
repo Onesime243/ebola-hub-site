@@ -1437,7 +1437,7 @@
     const byZ = new Map(Z.map(z => [String(z.zone_sante).toUpperCase(), z]));
     const feats = (D.map_zones || []).filter(f => S.province === "Toutes" || norm(f.province) === norm(S.province));
     if ($("#c-resmap")) Ch.choropleth($("#c-resmap"), { features: feats, focus: "1", focusIf: f => byZ.has(String(f.data_zone).toUpperCase()), value: f => (byZ.get(String(f.data_zone).toUpperCase()) || {}).score ?? null, selected: S.resZone, digits: 0,
-      colorFn: (v, f) => { const z = byZ.get(String(f.data_zone).toUpperCase()); return z ? RESC[z.categorie] : col("--seq-0"); }, labelIf: f => { const z = byZ.get(String(f.data_zone).toUpperCase()); return !!z && /Résurgence|Alerte/.test(z.categorie); },
+      colorFn: (v, f) => { const z = byZ.get(String(f.data_zone).toUpperCase()); return z ? RESC[z.categorie] : col("--seq-0"); }, labelIf: f => !!byZ.get(String(f.data_zone).toUpperCase()),
       legendHTML: Object.entries(RESC).map(([k, c]) => `<span class="flex" style="gap:4px"><i style="display:inline-block;width:14px;height:10px;border-radius:2px;background:${c}"></i>${T(k)}</span>`).join(""),
       tip: f => { const z = byZ.get(String(f.data_zone).toUpperCase()); return z ? `<b>${esc(z.zone_sante)}</b><div>${esc(T(z.categorie))}</div><div class="row"><span>${T("Score")}</span><b>${nf(z.score, 0)}</b></div><div class="row"><span>${T("Cas 7 j / 7 j préc.")}</span><b>${nf(z.cas_7j)} / ${nf(z.cas_7j_prec)}</b></div>` : `<b>${esc(f.data_zone)}</b><div>${T("moins de 10 cas")}</div>`; },
       onClick: f => { if (byZ.has(String(f.data_zone).toUpperCase())) { S.resZone = byZ.get(String(f.data_zone).toUpperCase()).zone_sante; render(); } } });

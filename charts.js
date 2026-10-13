@@ -244,7 +244,7 @@
       });
       // ÉTIQUETTES : toutes les zones visibles portent leur nom.
       //  · zones principales (labelIf) : « nom · valeur », placement garanti (décalé avec trait de rappel si nécessaire) ;
-      //  · autres zones visibles : nom seul, en gris, placées aussi (repli en spirale avec trait de rappel).
+      //  · zones non touchées : pas de nom (sauf labelAll: true).
       const fs = opt.labelPx || 9.5, fsMin = Math.max(7.5, fs - 1.2);
       const centroidOf = f => {                             // centre de gravité du plus grand anneau (aire signée)
         const rs = rings(f.geometry), ring = rs.reduce((a, b) => b.length > a.length ? b : a, []);
@@ -255,7 +255,7 @@
       };
       const isMain = f => opt.labelIf ? !!opt.labelIf(f) : (opt.value(f) > 0);
       const rank = f => opt.labelRank ? opt.labelRank(f) : (opt.value(f) || 0);
-      const showAll = opt.labelAll !== false && opt.labelMode !== "none";
+      const showAll = opt.labelAll === true && opt.labelMode !== "none";   // noms des zones non touchées : désactivé par défaut
       const cand = feats.map(f => ({ f, main: isMain(f), q: centroidOf(f) }))
         .filter(o => opt.labelMode !== "none" && (o.main || showAll) && o.q[0] >= 0 && o.q[0] <= W && o.q[1] >= 0 && o.q[1] <= H)
         .sort((a, b) => (b.main - a.main) || (rank(b.f) - rank(a.f)));
