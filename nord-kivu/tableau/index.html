@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ebola — Province du Nord-Kivu</title>
+<script>try { var t = localStorage.getItem("zs-theme"); if (t) document.documentElement.dataset.theme = t; } catch (e) {}</script>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="province.css">
+</head>
+<body class="prov">
+<div class="shell">
+  <aside class="sidebar" id="sidebar">
+    <div class="brand"><div class="logo">EO</div><div><b>Ebola Outbreak</b><small id="brand-sub">Outil provincial</small></div></div>
+    <nav id="nav"></nav>
+    <div class="side-status" id="side-status"></div>
+  </aside>
+  <div class="workspace">
+    <header class="topbar">
+      <div class="flex" style="gap:12px;flex-wrap:nowrap">
+        <button class="btn menu-toggle" id="menu" aria-label="Menu">☰</button>
+        <div><h1 id="title">Accueil</h1><div class="sub" id="subtitle"></div></div>
+      </div>
+      <div class="controls">
+        <label class="field" id="zone-field">Zone de santé<select id="zone-select" aria-label="Zone de santé"></select></label>
+        <button class="btn" id="theme" title="Mode clair / sombre" aria-label="Mode clair ou sombre">◐</button>
+        <div class="rel" id="user"></div>
+      </div>
+    </header>
+    <section class="periodbar" id="periodbar"></section>
+    <main id="main"></main>
+    <footer class="foot"><span id="foot-l"></span><span>Pseudonymisé : aucun nom ; listes nominatives réservées à la province et à la zone concernée</span></footer>
+  </div>
+</div>
+<script src="donnees/province.js"></script>
+<script src="charts.js"></script>
+<script src="graph.js"></script>
+<script src="province.js"></script>
+</body>
+</html>
