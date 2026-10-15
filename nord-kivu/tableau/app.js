@@ -11,6 +11,17 @@
   if (!D) { $("#main").innerHTML = `<div class="empty">Aucune analyse pour cette zone de santé. <a href="index.html">Retour à la province</a> ; chargez les fichiers de la zone dans « Données des zones » puis lancez l'analyse.</div>`; $("#title").textContent = "Zone de santé"; return; }
   window.ZS_FOOT = `ZS ${D.meta.zone_de_sante} · Ebola Outbreak — outil provincial`;
   const OUT = "../sortie/zs/" + encodeURIComponent(D.meta.zone_de_sante) + "/";   // rapports, classeurs et cartes de la zone
+  const NIV_PROV = D.meta.niveau === "province";   // analyse provinciale détaillée : les unités sont les zones de santé
+  /* vocabulaire : en vue provinciale, « aire de santé » devient « zone de santé » (textes, tableaux, graphiques) */
+  function relabel(root) {
+    if (!NIV_PROV || !root) return;
+    const rep = t => t.replace(/aires de santé/g, "zones de santé").replace(/Aires de santé/g, "Zones de santé").replace(/aire de santé/g, "zone de santé").replace(/Aire de santé/g, "Zone de santé")
+      .replace(/par aire\b/g, "par zone").replace(/Toute la zone de santé/g, "Toute la province").replace(/toute la zone de santé/g, "toute la province").replace(/de la zone de santé/g, "de la province")
+      .replace(/ZS Province/g, "Province").replace(/[Zz]one de santé de Province/g, "Province");
+    const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+    for (let n = w.nextNode(); n; n = w.nextNode()) { const v = rep(n.nodeValue); if (v !== n.nodeValue) n.nodeValue = v; }
+    root.querySelectorAll("[title],[placeholder],[aria-label]").forEach(e => ["title", "placeholder", "aria-label"].forEach(a => { const v = e.getAttribute(a); if (v) e.setAttribute(a, rep(v)); }));
+  }
   const PROV = window.NK_PROVINCE || null;
   let USER = null;
   const canUp = () => !!USER && (USER.role === "province" || USER.zone === D.meta.zone_de_sante);
@@ -622,8 +633,11 @@
     ["pec", "Prise en charge, vaccination, expositions", "Riposte"],
     ["sbc", "Surveillance communautaire (SBC)", "Communauté"], ["ra", "Recherche active", "Communauté"], [PUBLIC ? "fichiers" : "fichiers", PUBLIC || !canUp() ? "État des données" : "Charger les données", "Données"]];
   if (D.notif || D.alertes_j) PAGES.splice(PAGES.findIndex(p => p[0] === "alertes"), 0, ["notif", "Alertes et cas suspects", "Riposte"]);
-  const HASDATA = { contacts: !!D.suivi, equipes: !!(D.equipes && D.contacts_liste), index: !!D.trans, journey: !!D.trans, chains: !!D.trans, recon: !!D.trans, dynamics: !!D.trans, children: !!D.trans,
-    sbc: !!D.sbc, ra: !!D.ra, alertes: !!(D.sbc || D.ra || D.suivi), deces: !!(D.cas || D.sbc), clinique: !!D.cas, labo: !!D.cas, pec: !!(D.cas || D.suivi), aires: !!(D.cas || D.suivi), cas: !!D.cas };
+  const CTX = !!(D.trans && D.contacts_liste && D.contacts_liste.rows.length);
+  const HASDATA = { contacts: !!D.suivi, equipes: !!(D.equipes && D.contacts_liste), index: CTX, journey: !!D.trans, chains: CTX, recon: !!D.trans, dynamics: !!D.trans, children: !!D.trans,
+    sbc: !!D.sbc, ra: !!D.ra, alertes: !NIV_PROV && !!(D.sbc || D.ra || D.suivi), deces: !!(D.cas || D.sbc || D.alertes_j), clinique: !!D.cas, labo: !!(D.cas || D.notif), pec: !!(D.cas || D.suivi), aires: !!(D.cas || D.suivi), cas: !!D.cas };
+  if (NIV_PROV) { PAGES.forEach(p => { if (p[0] === "aires") p[1] = "Zones de santé"; if (p[0] === "labo") p[1] = "Laboratoire et positivité"; if (p[0] === "dynamics") p[1] = "Dynamique de transmission et Rt"; }); }
+  else PAGES.forEach(p => { if (p[0] === "labo" && D.notif) p[1] = "Laboratoire et positivité"; if (p[0] === "dynamics") p[1] = "Dynamique de transmission et Rt"; });
   const NAVP = () => PAGES.filter(p => HASDATA[p[0]] !== false);
   const SUBT = { jour: () => `Situation au ${dfr(S.date)} · ${scope()} · données extraites le ${dfr(D.meta.donnees_jusqu_au)}`, aires: () => `Bulletin au ${dfr(S.date)}`,
     cas: () => `${scope()} · ${perTxt()}`, carte: () => `Situation au ${dfr(S.date)}`, contacts: () => `${scope()} · au ${dfr(S.date)}`, equipes: () => `${scope()} · au ${dfr(S.date)}`,
@@ -631,12 +645,13 @@
   function shell() {
     if (PUBLIC || (SERVED && !canUp())) { const b = document.querySelector('.controls [data-go="fichiers"]'); if (b) b.remove(); }
     if (!NAVP().find(x => x[0] === S.page)) S.page = "jour";
-    document.title = `Ebola — ZS ${D.meta.zone_de_sante}`;
-    $("#brand-sub").textContent = `Zone de santé de ${D.meta.zone_de_sante}`;
+    document.title = NIV_PROV ? `Ebola — ${D.meta.zone_de_sante} (analyses détaillées)` : `Ebola — ZS ${D.meta.zone_de_sante}`;
+    $("#brand-sub").textContent = NIV_PROV ? `${D.meta.zone_de_sante} · analyses détaillées` : `Zone de santé de ${D.meta.zone_de_sante}`;
     let g0 = "";
     const zl = PROV ? PROV.zones.filter(z => (PROV.meta.zones_detail || []).includes(z.nom)) : [];
-    const top = `<a class="back-prov" href="index.html">← Province du ${esc(D.meta.province || (PROV && PROV.meta.province) || "Nord-Kivu")}</a>`
-      + (zl.length ? `<div class="zs-switch"><select data-openzs aria-label="Changer de zone de santé">${zl.map(z => `<option value="${z.code}" ${z.nom === D.meta.zone_de_sante ? "selected" : ""}>ZS ${esc(z.nom)}</option>`).join("")}</select></div>` : "");
+    const pv = D.meta.province || (PROV && PROV.meta.province) || "Nord-Kivu";
+    const top = `<a class="back-prov" href="index.html">← Accueil de la province</a>`
+      + `<div class="zs-switch"><select data-openzs aria-label="Changer de zone de santé"><option value="${encodeURIComponent("province-du-" + pv.toLowerCase().replace(/\s+/g, "-"))}" ${NIV_PROV ? "selected" : ""}>Province du ${esc(pv)} (analyses détaillées)</option>${zl.map(z => `<option value="${z.code}" ${z.nom === D.meta.zone_de_sante ? "selected" : ""}>ZS ${esc(z.nom)}</option>`).join("")}</select></div>`;
     $("#nav").innerHTML = top + NAVP().map(([k, l, g]) => { const head = g !== g0 ? `<div class="nav-group">${g}</div>` : ""; g0 = g; return `${head}<button data-page="${k}" class="${S.page === k ? "active" : ""}"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="${I[k]}"/></svg>${l}</button>`; }).join("");
     const p = NAVP().find(x => x[0] === S.page) || PAGES[0];
     $("#title").textContent = p[1];
@@ -646,7 +661,7 @@
     $("#side-status").innerHTML = `<b><span class="pulse"></span>ZS ${esc(D.meta.zone_de_sante)}</b><span>Données jusqu'au ${dfr(D.meta.donnees_jusqu_au)}</span>
       ${SU ? `<div class="row"><span>Contacts à suivre</span><b>${nf(z.as)}</b></div><div class="row"><span>Taux de suivi</span><b>${pc(z.taux, 0)}</b></div>` : ""}<div class="row"><span>Cas 7 j</span><b>${nf(z.cs.n7)}</b></div><div class="row"><span>Cas 21 j</span><b>${nf(z.cs.n21)}</b></div>`;
     $("#foot-l").textContent = `Ebola Outbreak — outil provincial · zone de santé de ${D.meta.zone_de_sante} · analyse du ${D.meta.genere_le} · v${D.meta.version || ""}`;
-    document.title = `Ebola — ZS ${D.meta.zone_de_sante}`;
+    if (!NIV_PROV) document.title = `Ebola — ZS ${D.meta.zone_de_sante}`;
     const PR = [["7", "7 j"], ["14", "14 j"], ["21", "21 j"], ["28", "28 j"], ["42", "42 j"], ["90", "90 j"], ["tout", "Tout"]];
     $("#periodbar").innerHTML = `<div class="pb-main"><span class="pb-title"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M7 2h2v2h6V2h2v2h3v18H4V4h3zm-1 8v10h12V10z"/></svg>Période d'analyse</span>
       <label class="pb-date">Du <input type="date" id="pb-from" value="${S.from}" min="${firstDate}" max="${S.date}"></label>
@@ -679,6 +694,7 @@
     $("#main").innerHTML = html;
     POST.forEach(fn => { try { fn(); } catch (e) { console.error(e); } });
     if (v && v.charts) { try { v.charts(); } catch (e) { console.error(e); } }
+    if (NIV_PROV) { relabel($("#main")); relabel($("#sidebar")); relabel(document.querySelector(".topbar")); relabel($("#periodbar")); setTimeout(() => relabel($("#main")), 400); }
     const h = new URLSearchParams({ p: S.page, d: S.date, per: S.preset, du: S.from }); if (S.aire) h.set("a", S.aire); if (S.cas) h.set("c", S.cas);
     history.replaceState(null, "", "#" + h.toString());
     $("#sidebar").classList.remove("open");

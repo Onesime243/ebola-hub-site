@@ -6,6 +6,15 @@ window.ZS_RIPOSTE = function (H) {
   const { D, S, CAS, CT, AIRES, AN, nf, pc, esc, col, dfr, dshort, day, iso, inPer, perTxt, panel, kpi, legend, segBtns, table, Ch, $ } = H;
   const rowsToObj = blk => blk ? blk.rows.map(r => Object.fromEntries(blk.cols.map((c, i) => [c, r[i]]))) : [];
   const SBC = rowsToObj(D.sbc), RA = rowsToObj(D.ra);
+  /* sans base SBC : décès communautaires, swabs et EDS repris de la base des alertes (zone ou base chiffrée provinciale) */
+  const AJR = rowsToObj(D.alertes_j);
+  const SBC_AJ = !SBC.length && AJR.length > 0;
+  if (SBC_AJ) AJR.forEach(r => SBC.push({ date: r.date, aire: r.aire, alertes_malades: r.total_v, alertes_deces: r.total_d, investiguees: (r.inv_v || 0) + (r.inv_d || 0), validees: (r.val_v || 0) + (r.val_d || 0),
+    deces_comm_swabes: r.swab, deces_comm_eds: r.eds, orientes_cte: r.cte }));
+  const SBC_LIB = SBC_AJ ? "base des alertes" : "base SBC (CAC)";
+  /* résultats de laboratoire individuels (liste linéaire, export DHIS2 ou liste labo provinciale) */
+  const NT = rowsToObj(D.notif).filter(r => !r.hors_zs);
+  const NTR = NT.filter(r => r.resultat === "Positif" || r.resultat === "Négatif");
   const C = D.cibles || {};
   const sum = (rows, k) => rows.reduce((s, r) => s + (+r[k] || 0), 0);
   const med = a => { const s = a.filter(v => v !== null && v !== undefined && isFinite(v)).sort((x, y) => x - y); return s.length ? (s.length % 2 ? s[(s.length - 1) / 2] : (s[s.length / 2 - 1] + s[s.length / 2]) / 2) : null; };
@@ -98,26 +107,31 @@ window.ZS_RIPOSTE = function (H) {
     const ageRows = ages.map(([l, a, b]) => { const g = cs.filter(c => c.age !== null && c.age !== undefined && Math.floor(c.age) >= a && Math.floor(c.age) <= b), k = g.filter(c => c.deces).length, w = wil(k, g.length); return { l, n: g.length, k, p: ratio(k, g.length), lo: w[0], hi: w[1] }; });
     const rows = AIRES.map(a => { const c_ = cs.filter(c => c.aire === a.cle), s_ = sb.filter(r => r.aire === a.cle); const k = c_.filter(c => c.deces).length;
       return { aire: a.nom, cas: c_.length, deces: k, let: ratio(k, c_.length), adc: sum(s_, "alertes_deces"), sw: sum(s_, "deces_comm_swabes"), eds: sum(s_, "deces_comm_eds"), psw: ratio(sum(s_, "deces_comm_swabes"), sum(s_, "alertes_deces")) }; });
-    return `${notice(`<b>Décès et enterrements dignes et sécurisés (EDS)</b> — décès parmi les cas (liste des cas, « Statut du cas »), décès communautaires signalés, swabés et EDS (base SBC), contacts décédés pendant le suivi (code « 2 »). ${perTxt()}${S.aire ? " · " + esc(AN[S.aire]) : ""}.`)}
+    const pm = NTR.filter(r => r.nature === "Décès" && inPer(r.prel || r.notif) && (!S.aire || r.aire === S.aire)), pmPos = pm.filter(r => r.resultat === "Positif").length;
+    const pmRows = AIRES.map(a => { const x = pm.filter(r => r.aire === a.cle); return { aire: a.nom, n: x.length, pos: x.filter(r => r.resultat === "Positif").length, p: ratio(x.filter(r => r.resultat === "Positif").length, x.length) }; }).filter(r => r.n);
+    return `${notice(`<b>Décès et enterrements dignes et sécurisés (EDS)</b> — décès parmi les cas, décès communautaires signalés, swabés et EDS (${SBC_LIB})${NTR.length ? ", prélèvements post-mortem analysés au laboratoire" : ""}${CT.length ? ", contacts décédés pendant le suivi (code « 2 »)" : ""}. ${perTxt()}${S.aire ? " · " + esc(AN[S.aire]) : ""}.`)}
     <div class="grid g5">
       ${kpi("Décès parmi les cas", nf(dc), `${nf(cs.length)} cas sur la période`, { color: "--rc-rt" })}
       ${kpi("Létalité", pc(ratio(dc, cs.length), 1), L[0] !== null ? `IC 95 % ${nf(L[0], 1)} – ${nf(L[1], 1)} % (Wilson)` : "", { cls: "alert", color: "--critical" })}
-      ${kpi("Décès communautaires signalés", nf(adc), "Alertes « décès » des CAC (SBC)", { color: "--ink-2" })}
+      ${kpi("Décès communautaires signalés", nf(adc), SBC_AJ ? "Alertes « décès » (base des alertes)" : "Alertes « décès » des CAC (SBC)", { color: "--ink-2" })}
       ${kpi("Décès communautaires swabés", pc(ratio(sw, adc), 0), `${nf(sw)} swabés · ${nf(eds)} EDS`, { cls: adc && ratio(sw, adc) < 90 ? "alert" : "good", meter: ratio(sw, adc), color: "--s7" })}
-      ${kpi("Contacts décédés pendant le suivi", nf(ctD), "Code « 2 » de la grille J1–J21", { color: "--ink-2" })}
+      ${pm.length ? kpi("Prélèvements post-mortem positifs", pc(ratio(pmPos, pm.length), 1), `${nf(pmPos)} positifs sur ${nf(pm.length)} échantillons de personnes décédées (laboratoire)`, { color: "--rc-rt", cls: pmPos ? "alert" : "" })
+        : kpi("Contacts décédés pendant le suivi", nf(ctD), "Code « 2 » de la grille J1–J21", { color: "--ink-2" })}
     </div>
     <div class="grid g2">
       ${panel("Cas décédés et vivants par semaine", "Semaine de confirmation (ou d'isolement)", `<div id="c-dc-wk"></div><div id="c-dc-let" style="margin-top:6px"></div>`, { png: "deces_cas_semaine" })}
-      ${panel("Décès communautaires, prélèvements et EDS par semaine", "Base SBC (CAC)", `<div id="c-dc-com"></div>`, { png: "deces_communautaires" })}
+      ${panel("Décès communautaires, prélèvements et EDS par semaine", SBC_AJ ? "Base des alertes" : "Base SBC (CAC)", `<div id="c-dc-com"></div>`, { png: "deces_communautaires" })}
     </div>
     <div class="grid g2">
       ${panel("Létalité par classe d'âge", "Cas de la période ; intervalle de Wilson à 95 %", `<table class="rsum"><thead><tr><th>Âge (ans)</th><th>Cas</th><th>Décès</th><th>Létalité</th><th>IC 95 %</th></tr></thead><tbody>${ageRows.map(r => `<tr><td>${r.l}</td><td>${nf(r.n)}</td><td>${nf(r.k)}</td><td>${pc(r.p, 1)}</td><td>${r.lo !== null ? `${nf(r.lo, 1)} – ${nf(r.hi, 1)} %` : "—"}</td></tr>`).join("")}</tbody></table>`)}
       ${panel("Décès et EDS par aire de santé", perTxt(), table("dc-as", rows, [{ k: "aire", t: "Aire de santé" }, { k: "cas", t: "Cas", num: true }, { k: "deces", t: "Décès", num: true }, { k: "let", t: "Létalité", num: true, v: x => pc(x.let, 0) },
         { k: "adc", t: "Décès comm.", num: true }, { k: "sw", t: "Swabés", num: true }, { k: "psw", t: "% swabés", num: true, v: x => pc(x.psw, 0) }, { k: "eds", t: "EDS", num: true }], { sort: "deces", search: false, limit: 40 }), { csv: "dc-as" })}
     </div>
+    ${pmRows.length ? panel("Prélèvements post-mortem analysés au laboratoire", `Personnes décédées au moment du prélèvement (écouvillon) · ${perTxt()} ; un résultat positif est un décès communautaire Ebola : investiguer, lister les contacts des funérailles et vérifier l'EDS`,
+      table("dc-pm", pmRows, [{ k: "aire", t: "Unité" }, { k: "n", t: "Échantillons post-mortem", num: true }, { k: "pos", t: "Positifs", num: true }, { k: "p", t: "Positivité", num: true, v: x => pc(x.p, 1) }], { sort: "n", search: false, limit: 40 }), { csv: "dc-pm" }) : ""}
     ${interp("Lecture", [`Létalité de <b>${pc(ratio(dc, cs.length), 1)}</b> sur la période ${L[0] !== null ? `(IC 95 % ${nf(L[0], 1)} – ${nf(L[1], 1)} %)` : ""}.`,
-      adc ? `${pc(ratio(sw, adc), 0)} des décès communautaires signalés ont été prélevés (swab) et ${pc(ratio(eds, adc), 0)} ont bénéficié d'un EDS : chaque décès communautaire non prélevé est un cas potentiellement manqué et une source de transmission lors des funérailles.` : "Aucun décès communautaire saisi dans la base SBC sur la période.",
-      "Les décès communautaires confirmés positifs ne sont pas identifiables dans la base SBC (pas de résultat de laboratoire) : rapprocher avec la liste des cas si nécessaire."])}`;
+      adc ? `${pc(ratio(sw, adc), 0)} des décès communautaires signalés ont été prélevés (swab) et ${pc(ratio(eds, adc), 0)} ont bénéficié d'un EDS : chaque décès communautaire non prélevé est un cas potentiellement manqué et une source de transmission lors des funérailles.` : `Aucun décès communautaire saisi dans la ${SBC_LIB} sur la période.`,
+      pm.length ? `${nf(pmPos)} des ${nf(pm.length)} prélèvements post-mortem analysés sont positifs (${pc(ratio(pmPos, pm.length), 1)}).` : "Les décès communautaires confirmés positifs ne sont pas identifiables sans les résultats de laboratoire : rapprocher avec la liste des cas si nécessaire."])}`;
   }
 
   /* ================================================================== SYMPTÔMES ET CLINIQUE */
@@ -157,6 +171,7 @@ window.ZS_RIPOSTE = function (H) {
 
   /* ================================================================== LABORATOIRE */
   function laboView() {
+    if (NTR.length) return laboPosView();
     const cs = casRows();
     const conf = cs.filter(c => c.classe === "Confirmé"), prob = cs.filter(c => c.classe === "Probable");
     const dConf = cs.map(c => c.d_conf).filter(v => v !== null && v !== undefined);
@@ -188,6 +203,40 @@ window.ZS_RIPOSTE = function (H) {
       { k: "iso_", t: "Isolement → confirmation (médiane, j)", num: true, d: 1 }, { k: "sw", t: "Décès comm. swabés", num: true }, { k: "pre", t: "Prélevés (RA)", num: true }], { sort: "conf", search: false, limit: 40 }), { csv: "lab-as" })}`;
   }
   const days_ = (a, b) => Math.round(day(b) - day(a));
+  /* laboratoire avec résultats individuels : positivité, re-prélèvements, délais de rendu, post-mortem */
+  function laboPosView() {
+    const L = NT.filter(r => inPer(r.prel || r.notif) && (!S.aire || r.aire === S.aire)), res = L.filter(r => r.resultat === "Positif" || r.resultat === "Négatif");
+    const pos = res.filter(r => r.resultat === "Positif"), rep = L.filter(r => /re-pr/i.test(r.source || "")), pm = res.filter(r => r.nature === "Décès");
+    const dRes = med(res.map(r => r.prel && r.result ? days_(r.prel, r.result) : null).filter(v => v !== null && v >= 0 && v <= 30));
+    const dNot = med(res.map(r => r.debut && r.prel ? days_(r.debut, r.prel) : null).filter(v => v !== null && v >= 0 && v <= 60));
+    const att = L.filter(r => r.preleve && (!r.resultat || r.resultat === "En attente")).length;
+    const ws = weeks();
+    H.after(() => {
+      const data = ws.map(w => { const x = NT.filter(r => (!S.aire || r.aire === S.aire) && (r.prel || r.notif) && wk(r.prel || r.notif) === w), rr = x.filter(r => r.resultat === "Positif" || r.resultat === "Négatif");
+        return { week: iso(w), pos: rr.filter(r => r.resultat === "Positif").length, neg: rr.filter(r => r.resultat === "Négatif").length, p: rr.length ? 100 * rr.filter(r => r.resultat === "Positif").length / rr.length : null,
+          ppm: rr.filter(r => r.nature === "Décès").length ? 100 * rr.filter(r => r.nature === "Décès" && r.resultat === "Positif").length / rr.filter(r => r.nature === "Décès").length : null }; });
+      Ch.xy($("#c-pos-wk"), { data, x: "week", stacked: true, height: 240, ...wlab, series: [{ key: "pos", label: "Positifs", color: "--st-conf" }, { key: "neg", label: "Négatifs", color: "--s3" }] });
+      Ch.xy($("#c-pos-p"), { data, x: "week", height: 220, percent: true, digits: 1, ...wlab, series: [{ key: "p", label: "Positivité de tous les échantillons (%)", color: "--st-conf", type: "line" }, { key: "ppm", label: "Positivité des prélèvements post-mortem (%)", color: "--ink-2", type: "line" }] });
+    });
+    const rows = AIRES.map(a => { const x = res.filter(r => r.aire === a.cle), p_ = x.filter(r => r.resultat === "Positif").length, m_ = x.filter(r => r.nature === "Décès");
+      return { aire: a.nom, n: x.length, pos: p_, p: ratio(p_, x.length), pm: m_.length, ppm: ratio(m_.filter(r => r.resultat === "Positif").length, m_.length), rep: L.filter(r => r.aire === a.cle && /re-pr/i.test(r.source || "")).length,
+        d: med(x.map(r => r.prel && r.result ? days_(r.prel, r.result) : null).filter(v => v !== null && v >= 0 && v <= 30)) }; }).filter(r => r.n);
+    const lastRes = NTR.map(r => r.prel || r.notif).filter(Boolean).sort().pop();
+    return `${notice(`<b>Laboratoire et positivité</b> — échantillons analysés (${esc([...new Set(NT.map(r => r.source).filter(Boolean))].slice(0, 3).join(", "))}) : positivité, échantillons post-mortem, re-prélèvements et délais de rendu des résultats. ${perTxt()}${S.aire ? " · " + esc(AN[S.aire]) : ""}.${lastRes && lastRes < S.date ? ` <b>Résultats saisis jusqu'au ${dfr(lastRes)}</b> : choisissez une période plus longue (« 90 j » ou « Tout ») pour l'analyse complète.` : ""}`, lastRes && day(S.date) - day(lastRes) > 7 ? "warn" : "")}
+    <div class="grid g5">
+      ${kpi("Échantillons avec résultat", nf(res.length), `${nf(att)} en attente · ${nf(rep.length)} re-prélèvements`, { color: "--s3" })}
+      ${kpi("Positivité", pc(ratio(pos.length, res.length), 1), `${nf(pos.length)} positifs`, { color: "--st-conf", cls: ratio(pos.length, res.length) > 10 ? "alert" : "" })}
+      ${kpi("Positivité post-mortem", pc(ratio(pm.filter(r => r.resultat === "Positif").length, pm.length), 1), `${nf(pm.length)} échantillons de personnes décédées`, { color: "--ink-2" })}
+      ${kpi("Prélèvement → résultat", dRes !== null ? nf(dRes, 0) + " j" : "—", "délai médian de rendu", { color: "--s7", cls: dRes > 2 ? "alert" : "" })}
+      ${kpi("Début des signes → prélèvement", dNot !== null ? nf(dNot, 0) + " j" : "—", "délai médian (détection)", { color: "--s2", cls: dNot > 3 ? "alert" : "" })}
+    </div>
+    <div class="grid g2">
+      ${panel("Échantillons positifs et négatifs par semaine", "Semaine de prélèvement", `<div id="c-pos-wk"></div>`, { png: "positivite_semaine" })}
+      ${panel("Positivité par semaine", "Une positivité qui augmente signale une transmission active ou une surveillance trop peu sensible (trop peu de suspects testés)", `<div id="c-pos-p"></div>`, { png: "positivite_taux" })}
+    </div>
+    ${panel("Laboratoire par unité", perTxt(), table("lab-pos", rows, [{ k: "aire", t: "Unité" }, { k: "n", t: "Échantillons", num: true }, { k: "pos", t: "Positifs", num: true }, { k: "p", t: "Positivité", num: true, v: x => pc(x.p, 1) },
+      { k: "pm", t: "Post-mortem", num: true }, { k: "ppm", t: "Positivité post-mortem", num: true, v: x => pc(x.ppm, 1) }, { k: "rep", t: "Re-prélèvements", num: true }, { k: "d", t: "Prélèvement → résultat (j)", num: true }], { sort: "n", search: false, limit: 60 }), { csv: "lab-pos" })}`;
+  }
 
   /* ================================================================== PRISE EN CHARGE, VACCINATION ET EXPOSITIONS */
   const CADC = { "Structure de santé (soins, hospitalisation)": "--st-conf", "Visite au malade": "--s5", "Ménage et famille": "--s2", "Voisinage et amis": "--s4", "Lieu de culte": "--s7",

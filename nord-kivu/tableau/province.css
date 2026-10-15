@@ -121,3 +121,6 @@
 /* tableaux provinciaux : en-têtes sur plusieurs lignes */
 .prov .table-wrap th{white-space:normal;min-width:64px;vertical-align:bottom}
 .alert-item div{overflow-wrap:anywhere;min-width:0}
+.sidebar nav a.navlink{display:flex;align-items:center;gap:10px;width:100%;color:rgba(255,255,255,.82);padding:8px 10px;border-radius:8px;text-decoration:none;font-size:13.5px}
+.sidebar nav a.navlink:hover{background:rgba(255,255,255,.08);color:#fff}
+.sidebar nav a.navlink svg{width:18px;height:18px;flex:none;opacity:.9}

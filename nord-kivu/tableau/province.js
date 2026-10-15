@@ -92,7 +92,7 @@
   function alertesPer(code, t0, t1) {
     const L = AL.filter(r => r._d >= t0 && r._d <= t1 && (!code || r.zone === code));
     const s = k => L.reduce((a, r) => a + (+r[k] || 0), 0);
-    const o = { jours: new Set(L.map(r => r._d)).size }; ["total", "deces", "inv", "val", "prelev", "isolees", "src_ess", "src_ra", "src_comm", "src_contacts", "src_poe"].forEach(k => o[k] = s(k));
+    const o = { jours: new Set(L.map(r => r._d)).size }; ["total", "deces", "inv", "val", "prelev", "isolees", "src_ess", "src_ra", "src_comm", "src_contacts", "src_poe", "eds", "swab"].forEach(k => o[k] = s(k));
     o.inv_pct = ratio(o.inv, o.total); o.dernier = L.length ? iso(Math.max(...L.map(r => r._d))) : null; return o;
   }
   const lastAl = AL.length ? Math.max(...AL.map(r => r._d)) : null;
@@ -175,6 +175,11 @@
     if (P.exports && P.exports.rapport_pdf) quick.push(`<a href="${outp(P.exports.rapport_pdf)}" target="_blank" rel="noopener">${svgI("pdf")}<div><b>Rapport provincial (PDF)</b><span>Situation au ${dfr(P.meta.date_rapport)}</span></div></a>`);
     if (P.exports && P.exports.classeur) quick.push(`<a href="${outp(P.exports.classeur)}" download>${svgI("zones")}<div><b>Classeur des tableaux</b><span>Excel, sans nom</span></div></a>`);
     quick.push(`<button data-go="carte">${svgI("carte")}<div><b>Cartes pour rapport</b><span>A4 avec titre, légende et nord</span></div></button>`);
+    if (P.meta.detail_province) { const dz = encodeURIComponent(P.meta.detail_province);
+      quick.push(`<a href="zs.html?zone=${dz}#p=dynamics">${svgI("situation")}<div><b>Dynamique et Rt</b><span>Province et zones de 25 cas ou plus</span></div></a>`);
+      quick.push(`<a href="zs.html?zone=${dz}#p=chains">${svgI("zones")}<div><b>Cas index et chaînes</b><span>Parcours des cas, reconstruction</span></div></a>`);
+      quick.push(`<a href="zs.html?zone=${dz}#p=labo">${svgI("pdf")}<div><b>Laboratoire et positivité</b><span>Post-mortem, re-prélèvements, délais</span></div></a>`);
+      quick.push(`<a href="zs.html?zone=${dz}#p=deces">${svgI("alertes")}<div><b>Décès et EDS communautaires</b><span>Létalité, swabs, EDS par zone</span></div></a>`); }
     const ja = P.meta.jusqu_au || {};
     const fr = (lab, d) => { if (!d) return `<span><i class="none"></i>${lab} : non disponible</span>`; const r = t - day(d); return `<span><i class="${r > 7 ? "old" : r > 2 ? "late" : ""}"></i>${lab} : ${dfr(d)}</span>`; };
     after(() => drawMap($("#c-map-home"), "categorie", t));
@@ -187,7 +192,7 @@
         <div class="who">${me ? `<a class="btn solid" href="${openZS(me.code)}">Ma zone : ${esc(me.nom)} →</a>` : ""}${P.exports && P.exports.rapport_pdf ? `<a class="btn" href="${outp(P.exports.rapport_pdf)}" target="_blank" rel="noopener">⤓ Rapport PDF</a>` : ""}</div></div>
       <div class="hero-kpis">
         <div><div class="v">${nf(pr.n7)}</div><div class="k">cas confirmés en 7 jours</div><div class="s ${trend > 0 ? "up" : trend < 0 ? "down" : ""}">${trend > 0 ? "▲ +" : trend < 0 ? "▼ " : "= "}${nf(trend)} vs 7 jours précédents</div></div>
-        <div><div class="v">${nf(pr.n21)}</div><div class="k">cas en 21 jours</div><div class="s">${nf(pr.n)} depuis le début</div></div>
+        <div><div class="v">${P.rt ? nf(P.rt.rt, 2) : nf(pr.n21)}</div><div class="k">${P.rt ? "Rt de la province" : "cas en 21 jours"}</div><div class="s">${P.rt ? `IC 95 % ${nf(P.rt.lo, 2)}–${nf(P.rt.hi, 2)} · au ${dfr(P.rt.date, false)} · ${nf(pr.n21)} cas en 21 j` : `${nf(pr.n)} depuis le début`}</div></div>
         <div><div class="v">${nf(pr.deces21)}</div><div class="k">décès en 21 jours</div><div class="s">létalité cumulée ${pc(ratio(pr.deces, pr.n), 1)}</div></div>
         <div><div class="v">${nf(act.length)}<small style="font-size:15px;opacity:.75"> / ${nf(rows.filter(r => r.cs.n).length)}</small></div><div class="k">zones actives / touchées</div><div class="s">cas dans les 21 derniers jours</div></div>
         <div><div class="v">${nf(sp.a_suivre)}</div><div class="k">contacts à suivre</div><div class="s">${nf(sp.zones)} zones rapportées</div></div>
@@ -211,7 +216,9 @@
     if (r.s) lines.push(`Suivi des contacts : <span class="${r.s.taux >= C.taux_suivi_pct ? "ok" : "bad"}">${pc(r.s.taux, 0)}</span> de ${nf(r.s.a_suivre)} · ${nf(r.s.jmv)} jamais vus${r.s.retard ? ` <span class="muted">(au ${dfr(r.s.date, false)})</span>` : ""}`);
     if (r.al && r.al.total) lines.push(`Alertes 7 j : ${nf(r.al.total)} · <span class="${r.al.inv_pct >= 90 ? "ok" : "bad"}">${pc(r.al.inv_pct, 0)}</span> investiguées`);
     if (ind.connus_pct !== undefined && ind.connus_pct !== null) lines.push(`Cas 21 j connus comme contacts : <span class="${ind.connus_pct >= C.cas_connus_contacts_pct ? "ok" : "bad"}">${pc(ind.connus_pct, 0)}</span>`);
-    if (ind.positivite !== undefined && ind.positivite !== null) lines.push(`Positivité des prélèvements : ${pc(ind.positivite, 1)}`);
+    if (r.z.rt) lines.push(`Rt : <span class="${r.z.rt.rt < 1 ? "ok" : "bad"}">${nf(r.z.rt.rt, 2)}</span> <span class="muted">[${nf(r.z.rt.lo, 2)}–${nf(r.z.rt.hi, 2)}] au ${dfr(r.z.rt.date, false)}</span>`);
+    if (r.z.labo && r.z.labo.n) lines.push(`Positivité : ${pc(r.z.labo.p, 1)} de ${nf(r.z.labo.n)} échantillons · post-mortem ${nf(r.z.labo.pm_pos)} positifs / ${nf(r.z.labo.pm)}`);
+    else if (ind.positivite !== undefined && ind.positivite !== null) lines.push(`Positivité des prélèvements : ${pc(ind.positivite, 1)}`);
     const det = r.z.detail;
     const src = det ? (det.propres || []).length ? `Fichiers de la zone au ${dfr(det.date_rapport, false)}` : "Liste labo provinciale uniquement" : "Pas d'analyse détaillée";
     return `<div class="zcard ${me && me.code === r.code ? "mine" : ""}"><span class="bar" style="background:${CATMAP[r.cat]}"></span>
@@ -310,13 +317,17 @@
     const t = day(S.date);
     const rows = ZONES.map(z => zoneRow(z, t)).filter(r => r.cs.n || r.s || r.al?.total || DETAIL.has(r.code)).map(r => ({
       ...r, cas7: r.cs.n7, cas21: r.cs.n21, cum: r.cs.n, deces: r.cs.deces, jours: r.cs.jours, as: r.s ? r.s.a_suivre : null, taux: r.s ? r.s.taux : null, jmv: r.s ? r.s.jmv : null, pdv: r.s ? r.s.pdv : null,
-      altot: r.al ? r.al.total : null, alinv: r.al && r.al.total ? r.al.inv_pct : null, connus: r.ind.connus_pct ?? null, disol: r.ind.d_isol ?? null, dlist: r.ind.d_listage ?? null, pos: r.ind.positivite ?? null }));
+      altot: r.al ? r.al.total : null, alinv: r.al && r.al.total ? r.al.inv_pct : null, rt: r.z.rt ? r.z.rt.rt : null, rtlo: r.z.rt ? r.z.rt.lo : null, rthi: r.z.rt ? r.z.rt.hi : null,
+      posi: r.z.labo ? r.z.labo.p : null, pmpos: r.z.labo ? r.z.labo.pm_pos : null, pm: r.z.labo ? r.z.labo.pm : null, eds: r.al ? r.al.eds : null, swab: r.al ? r.al.swab : null, dcom: r.al ? r.al.deces : null, connus: r.ind.connus_pct ?? null, disol: r.ind.d_isol ?? null, dlist: r.ind.d_listage ?? null, pos: r.ind.positivite ?? null }));
     const cnt = Object.fromEntries(CO.map(c => [c, ZONES.filter(z => zoneRow(z, t).cat === c).length]));
     return `<p class="lead">${CO.filter(c => cnt[c]).map(c => `<b>${cnt[c]}</b> en ${c.toLowerCase()}`).join(", ")} au ${dfr(S.date)}. Chaque indicateur est comparé aux cibles : vert = atteinte, jaune = proche, rouge = loin de la cible. Cliquez une zone pour ouvrir son tableau de bord détaillé.</p>
       ${panel("Bulletin des zones de santé", "Cas : liste labo provinciale · suivi des contacts : dernier jour saisi dans la base chiffrée · alertes : 7 derniers jours saisis · cas connus comme contacts, délais et positivité : analyses détaillées des zones",
         table("t-zones", rows, [{ k: "nom", t: "Zone de santé", v: r => `${catSq(r.cat)}<b>${esc(r.nom)}</b>` }, { k: "cas7", t: "Cas 7 j", num: 1 }, { k: "cas21", t: "Cas 21 j", num: 1 }, { k: "cum", t: "Cumul", num: 1 }, { k: "deces", t: "Décès", num: 1 },
-          { k: "jours", t: "Jours depuis le dernier cas", num: 1 }, { k: "as", t: "Contacts à suivre", num: 1 }, { k: "taux", t: "Taux de suivi", num: 1, v: r => feu(r.taux, C.taux_suivi_pct, 75) }, { k: "jmv", t: "Jamais vus", num: 1 }, { k: "pdv", t: "PDV", num: 1 },
-          { k: "altot", t: "Alertes 7 j", num: 1 }, { k: "alinv", t: "Alertes investiguées", num: 1, v: r => feu(r.alinv, 95, 80) }, { k: "connus", t: "Cas 21 j connus comme contacts", num: 1, v: r => feu(r.connus, C.cas_connus_contacts_pct, 50) },
+          { k: "jours", t: "Jours depuis le dernier cas", num: 1 }, { k: "rt", t: "Rt (IC 95 %)", num: 1, v: r => r.rt === null ? `<span class="muted">—</span>` : `${pill(nf(r.rt, 2), r.rthi < 1 ? "ok" : r.rtlo > 1 ? "bad" : "warn")} <span class="muted small">${nf(r.rtlo, 2)}–${nf(r.rthi, 2)}</span>`, csv: r => r.rt },
+          { k: "posi", t: "Positivité (labo)", num: 1, v: r => pc(r.posi, 1) }, { k: "pmpos", t: "Post-mortem positifs", num: 1, v: r => r.pm ? `${nf(r.pmpos)} / ${nf(r.pm)}` : "—", csv: r => r.pmpos },
+          { k: "as", t: "Contacts à suivre", num: 1 }, { k: "taux", t: "Taux de suivi", num: 1, v: r => feu(r.taux, C.taux_suivi_pct, 75) }, { k: "jmv", t: "Jamais vus", num: 1 }, { k: "pdv", t: "PDV", num: 1 },
+          { k: "altot", t: "Alertes 7 j", num: 1 }, { k: "alinv", t: "Alertes investiguées", num: 1, v: r => feu(r.alinv, 95, 80) },
+          { k: "dcom", t: "Décès comm. 7 j (swabés · EDS)", num: 1, v: r => r.dcom ? `${nf(r.dcom)} <span class="muted small">(${nf(r.swab)} · ${nf(r.eds)})</span>` : (r.dcom === 0 ? "0" : "—"), csv: r => r.dcom }, { k: "connus", t: "Cas 21 j connus comme contacts", num: 1, v: r => feu(r.connus, C.cas_connus_contacts_pct, 50) },
           { k: "disol", t: "Début des signes → isolement (j)", num: 1, v: r => feu(r.disol, C.delai_isolement_j, 5, false, x => nf(x, 0) + " j") }, { k: "dlist", t: "Délai de listage (j)", num: 1, v: r => feu(r.dlist, C.delai_listage_j || 1, 3, false, x => nf(x, 0) + " j") },
           { k: "pos", t: "Positivité", num: 1, v: r => pc(r.pos, 1) }, { k: "code", t: "", v: r => zsBtn(r.code), csv: () => "" }], { sort: "cas21", rowClick: r => r.code, limit: 60 }), { csv: "t-zones" })}`;
   }
@@ -520,6 +531,11 @@
   const PAGES = [["accueil", "Accueil", "Province"], ["situation", "Situation épidémiologique", "Province"], ["zones", "Zones de santé", "Province"], ["carte", "Carte et rapports", "Province"],
     ["contacts", "Suivi des contacts", "Riposte"], ["alertes", "Surveillance des alertes", "Riposte"], ["donnees", PUBLIC ? "État des données" : "Données des zones", "Données"],
     ["comptes", "Comptes", "Administration", () => isProv()], ["publication", "Publication en ligne", "Administration", () => isProv()]];
+  const DETAIL_PAGES = [["index", "Cas index", "M4 6h16v2H4zm0 5h16v2H4zm0 5h10v2H4z"], ["journey", "Parcours des cas", "M12 2a4 4 0 1 1 0 8 4 4 0 0 1 0-8zm-7 18c0-3.9 3.1-7 7-7s7 3.1 7 7H5zM19 3l3 3-3 3"],
+    ["chains", "Chaînes de transmission", "M7 7a3 3 0 1 1-2 5.2L10 15a3 3 0 1 1-.8 1.8L4.3 14A3 3 0 0 1 7 7zm10-4a3 3 0 1 1 0 6 3 3 0 0 1 0-6z"], ["recon", "Reconstruction de la transmission", "M4 5h4v4H4zm12 0h4v4h-4zM10 15h4v4h-4zM6 9v2h4v4h2v-4h4V9h-2v2H8V9z"],
+    ["dynamics", "Dynamique et Rt", "M3 19h18v2H3zM4 15l4-6 4 3 5-8 3 2-6.6 10.3-4-3L6.2 16.4z"], ["children", "Enfants (0–18 ans)", "M12 2a3 3 0 1 1 0 6 3 3 0 0 1 0-6zm-4 8h8l-1 6h-1v6h-4v-6H9z"],
+    ["deces", "Décès et EDS communautaires", "M10 2h4v6h6v4h-6v10h-4V12H4V8h6z"], ["labo", "Laboratoire et positivité", "M9 2h6v2h-1v5l5 9a2 2 0 0 1-2 3H7a2 2 0 0 1-2-3l5-9V4H9z"],
+    ["contacts", "Suivi des contacts (bases des zones)", "M16 11c1.7 0 3-1.3 3-3s-1.3-3-3-3-3 1.3-3 3 1.3 3 3 3zm-8 0c1.7 0 3-1.3 3-3S9.7 5 8 5 5 6.3 5 8s1.3 3 3 3z"], ["pec", "Prise en charge et expositions", "M19 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm-2 10h-4v4h-2v-4H7v-2h4V7h2v4h4z"]];
   const VIEWS = { accueil: pageAccueil, situation: pageSituation, zones: pageZones, carte: pageCarte, contacts: pageContacts, alertes: pageAlertes, donnees: pageDonnees, comptes: pageComptes, publication: pagePublication };
   const PERIOD_PAGES = new Set(["situation", "contacts", "alertes", "carte"]);
   const SUBT = { accueil: () => `Situation au ${dfr(S.date)}`, zones: () => `Bulletin au ${dfr(S.date)}`, donnees: () => `Analyse provinciale du ${esc(P.meta.genere_le)}`, comptes: () => "Accès des zones de santé et de la province", publication: () => "Lien de partage en lecture seule" };
@@ -530,7 +546,9 @@
     $("#brand-sub").textContent = `Outil provincial · ${PROV}`;
     let g0 = "";
     const zl = ZONES.filter(z => DETAIL.has(z.code));
-    $("#nav").innerHTML = pages.map(([k, l, g]) => { const head = g !== g0 ? `<div class="nav-group">${g}</div>` : ""; g0 = g; return `${head}<button data-page="${k}" class="${S.page === k ? "active" : ""}">${svgI(k)}${l}</button>`; }).join("")
+    const DET = P.meta.detail_province;
+    const detLinks = DET ? `<div class="nav-group">Analyses détaillées · province</div>` + DETAIL_PAGES.map(([k, l, ic]) => `<a class="navlink" href="zs.html?zone=${encodeURIComponent(DET)}#p=${k}"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="${ic}"/></svg>${l}</a>`).join("") : "";
+    $("#nav").innerHTML = pages.map(([k, l, g]) => { const head = g !== g0 ? `<div class="nav-group">${g}</div>` : ""; g0 = g; return `${head}<button data-page="${k}" class="${S.page === k ? "active" : ""}">${svgI(k)}${l}</button>`; }).join("") + detLinks
       + (zl.length ? `<div class="nav-group">Tableaux de bord des zones</div><div class="zs-switch"><select data-openzs aria-label="Ouvrir le tableau de bord d'une zone de santé"><option value="">Ouvrir une zone de santé…</option>${zl.map(z => `<option value="${z.code}">${esc(z.nom)}${myZone() && myZone().code === z.code ? " (ma zone)" : ""}</option>`).join("")}</select></div>` : "");
     const p = pages.find(x => x[0] === S.page);
     $("#title").textContent = p[1];
