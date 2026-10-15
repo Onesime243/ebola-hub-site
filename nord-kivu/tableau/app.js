@@ -580,7 +580,7 @@
       ${box("Rapports produits", `Produits à chaque analyse pour la date du ${dfr(D.meta.date_rapport)}${S.date !== D.meta.date_rapport ? " — la date affichée est différente : utilisez « Produire pour cette date »" : ""}`,
         `<div class="filters">${link(dl.rapport_pdf, "Rapport de la zone de santé (PDF)")}${link(dl.classeur, "Classeur des tableaux (Excel)")}
           ${SERVED ? `<button class="btn" data-run-date>Produire pour le ${dfr(S.date)}</button>` : ""}</div>
-         ${PUBLIC ? `<p class="note">Version en ligne : les listes nominatives restent uniquement sur l'ordinateur de la zone de santé (outil local, dossier sortie/confidentiel).</p>` : `<h3 class="small" style="margin:14px 0 6px">Listes nominatives (confidentiel)</h3>
+         ${PUBLIC ? `<p class="note">Version en ligne : les listes nominatives restent uniquement dans l'outil local de la coordination provinciale.</p>` : SERVED && !canUp() ? `<p class="note">Listes nominatives : réservées au compte provincial et au compte de la zone de santé de ${esc(D.meta.zone_de_sante)}.</p>` : `<h3 class="small" style="margin:14px 0 6px">Listes nominatives (confidentiel)</h3>
          <p class="note warn">Noms, téléphones et quartiers des contacts à retrouver et des suspects, par aire de santé et par ReCo : pour les équipes de terrain uniquement, à ne pas diffuser.</p>
          <div class="filters">${link(dl.liste_retrouver, "Contacts à retrouver (Excel)", 1)}${link(dl.liste_suspects, "Suspects et cas sans contacts (Excel)", 1)}</div>`}`)}`;
   }
