@@ -1,0 +1,130 @@
+/* Ebola Outbreak — outil provincial : page d'accueil, connexion, fiches des zones de santé, comptes */
+.hero{position:relative;overflow:hidden;border-radius:16px;background:var(--brand);color:#fff;padding:22px 24px 18px;margin-bottom:16px;box-shadow:var(--shadow)}
+:root[data-theme="dark"] .hero{background:#101c2a;border:1px solid var(--line)}
+.hero::after{content:"";position:absolute;inset:0;pointer-events:none;opacity:.10;
+  background:radial-gradient(circle at 92% 18%,#fff 0 1.2px,transparent 1.6px) 0 0/18px 18px}
+.hero-top{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;flex-wrap:wrap;position:relative;z-index:1}
+.hero .kicker{font-size:12px;letter-spacing:.04em;opacity:.78}
+.hero h2{margin:4px 0 2px;font-size:28px;letter-spacing:-.02em;line-height:1.15}
+.hero .when{font-size:13.5px;opacity:.86}
+.hero .who{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.hero .btn{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.28);color:#fff}
+.hero .btn:hover{background:rgba(255,255,255,.18)}
+.hero .btn.solid{background:#fff;color:#16324f;border-color:#fff;font-weight:600}
+:root[data-theme="dark"] .hero .btn.solid{color:#101c2a}
+.hero-kpis{position:relative;z-index:1;display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:0;margin-top:18px;border-top:1px solid rgba(255,255,255,.18);padding-top:14px}
+.hero-kpis>div{padding:0 14px;border-left:1px solid rgba(255,255,255,.14);min-width:0}
+.hero-kpis>div:first-child{padding-left:0;border-left:0}
+.hero-kpis .v{font-size:26px;font-weight:700;letter-spacing:-.02em;line-height:1.1;font-variant-numeric:tabular-nums}
+.hero-kpis .k{font-size:12px;opacity:.86;margin-top:3px}
+.hero-kpis .s{font-size:11.5px;opacity:.66;margin-top:2px}
+.hero-kpis .up{color:#ffb4a6}.hero-kpis .down{color:#b7e6c4}
+@media (max-width:1300px){.hero-kpis{grid-template-columns:repeat(4,minmax(0,1fr));row-gap:14px}.hero-kpis>div:nth-child(5){padding-left:0;border-left:0}}
+@media (max-width:720px){.hero-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.hero-kpis>div{padding-left:0;border-left:0}}
+
+/* fraîcheur des données */
+.fresh{display:flex;gap:8px;flex-wrap:wrap;margin:-4px 0 16px}
+.fresh span{display:inline-flex;gap:6px;align-items:center;font-size:12px;color:var(--ink-2);background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:4px 10px}
+.fresh i{width:8px;height:8px;border-radius:50%;background:var(--good)}
+.fresh i.late{background:var(--warn)}.fresh i.old{background:var(--critical)}.fresh i.none{background:var(--line-2)}
+
+/* liste des zones à surveiller */
+.watch{display:flex;flex-direction:column}
+.watch .row{display:grid;grid-template-columns:14px minmax(0,1fr) auto;gap:10px;align-items:center;padding:9px 2px;border-bottom:1px solid var(--line);cursor:pointer}
+.watch .row:last-child{border-bottom:0}
+.watch .row:hover{background:var(--surface-2)}
+.watch .nm{font-weight:600}
+.watch .meta{font-size:12px;color:var(--ink-2)}
+.watch .num{text-align:right;font-variant-numeric:tabular-nums}
+.watch .num b{font-size:18px}
+.watch .num small{display:block;color:var(--muted);font-size:11px}
+.cat{display:inline-block;width:12px;height:12px;border-radius:3px;border:1px solid rgba(0,0,0,.12);vertical-align:-1px;margin-right:6px}
+.watch .row .cat{margin:0}
+
+/* fiches des zones de santé */
+.zcards{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
+.zcard{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px 12px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:8px;min-width:0;position:relative}
+.zcard .bar{position:absolute;left:0;top:10px;bottom:10px;width:4px;border-radius:0 4px 4px 0}
+.zcard h3{margin:0;font-size:15px;display:flex;justify-content:space-between;gap:8px;align-items:center}
+.zcard .catlab{font-size:11px;font-weight:600;color:var(--ink-2);background:var(--surface-2);border-radius:999px;padding:2px 8px;white-space:nowrap}
+.zcard .nums{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.zcard .nums div{background:var(--surface-2);border-radius:8px;padding:6px 8px}
+.zcard .nums b{display:block;font-size:17px;font-variant-numeric:tabular-nums}
+.zcard .nums span{font-size:11px;color:var(--muted)}
+.zcard .lines{font-size:12px;color:var(--ink-2);line-height:1.5}
+.zcard .lines .bad{color:var(--critical);font-weight:600}.zcard .lines .ok{color:color-mix(in srgb,var(--good) 75%,var(--ink));font-weight:600}
+.zcard .foot{display:flex;justify-content:space-between;gap:6px;align-items:center;margin-top:auto;padding-top:4px}
+.zcard .src{font-size:11px;color:var(--muted)}
+.zcard.mine{outline:2px solid var(--brand-2);outline-offset:-1px}
+.spark{display:block;width:100%;height:26px}
+
+/* actions rapides */
+.quick{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px}
+.quick a,.quick button{display:flex;gap:10px;align-items:center;text-align:left;text-decoration:none;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:11px 12px;cursor:pointer;font-size:13px}
+.quick a:hover,.quick button:hover{border-color:var(--accent);background:var(--surface-2)}
+.quick svg{width:20px;height:20px;flex:none;color:var(--brand-2)}
+.quick b{display:block;font-size:13.5px}.quick span{font-size:11.5px;color:var(--muted)}
+
+/* utilisateur */
+.userchip{display:flex;align-items:center;gap:8px;border:1px solid var(--line-2);background:var(--surface);border-radius:999px;padding:4px 10px 4px 4px;cursor:pointer;font-size:12.5px}
+.userchip .av{width:26px;height:26px;border-radius:50%;background:var(--brand);color:#fff;display:grid;place-items:center;font-weight:700;font-size:12px}
+:root[data-theme="dark"] .userchip .av{color:#0d0f11}
+.userchip small{display:block;color:var(--muted);font-size:10.5px;line-height:1.1}
+.menu-pop{position:absolute;right:0;top:calc(100% + 6px);background:var(--surface);border:1px solid var(--line);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.15);min-width:220px;padding:6px;z-index:80}
+.menu-pop button{display:block;width:100%;text-align:left;border:0;background:none;padding:8px 10px;border-radius:6px;cursor:pointer;font-size:13px}
+.menu-pop button:hover{background:var(--surface-2)}
+.menu-pop .who{padding:8px 10px 10px;border-bottom:1px solid var(--line);margin-bottom:4px;font-size:12px;color:var(--ink-2)}
+.rel{position:relative}
+
+/* formulaires et fenêtres */
+.form{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;align-items:end}
+.form label{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--ink-2);font-weight:600}
+.form input,.form select{background:var(--surface);border:1px solid var(--line-2);border-radius:8px;padding:8px 10px;color:var(--ink);min-width:0}
+.modal-back{position:fixed;inset:0;background:rgba(10,16,24,.45);display:grid;place-items:center;z-index:100;padding:16px}
+.modal{background:var(--surface);border-radius:14px;box-shadow:0 20px 60px rgba(0,0,0,.3);width:min(460px,100%);padding:20px 22px}
+.modal h3{margin:0 0 6px;font-size:17px}.modal p{margin:0 0 12px;color:var(--ink-2);font-size:13px}
+.modal .acts{display:flex;justify-content:flex-end;gap:8px;margin-top:14px}
+.msg{font-size:12.5px;margin-top:8px}.msg.err{color:var(--critical)}.msg.ok{color:color-mix(in srgb,var(--good) 75%,var(--ink))}
+
+/* fichiers */
+.files-tbl td .btn{padding:2px 8px}
+.kind{font-size:11px;color:var(--muted)}
+.target{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:10px}
+
+/* connexion */
+.login-page{min-height:100vh;display:grid;grid-template-columns:minmax(0,1.1fr) minmax(360px,.9fr);background:var(--page)}
+.login-side{background:var(--brand);color:#fff;padding:48px 52px;display:flex;flex-direction:column;justify-content:space-between;position:relative;overflow:hidden}
+:root[data-theme="dark"] .login-side{background:#101c2a}
+.login-side::after{content:"";position:absolute;inset:0;opacity:.09;background:radial-gradient(circle,#fff 0 1.2px,transparent 1.6px) 0 0/20px 20px;pointer-events:none}
+.login-side h1{font-size:34px;line-height:1.12;margin:18px 0 10px;letter-spacing:-.02em;max-width:16ch}
+.login-side p{opacity:.85;max-width:52ch;line-height:1.55}
+.login-side ul{list-style:none;padding:0;margin:22px 0 0;display:flex;flex-direction:column;gap:10px;opacity:.9}
+.login-side li{display:flex;gap:10px;align-items:flex-start}
+.login-side li i{flex:none;width:8px;height:8px;border-radius:50%;background:#5ad1c1;margin-top:7px}
+.login-side .brand{padding:0}
+.login-main{display:grid;place-items:center;padding:32px}
+.login-card{width:min(400px,100%)}
+.login-card h2{margin:0 0 4px;font-size:22px}.login-card p{color:var(--ink-2);margin:0 0 18px}
+.login-card label{display:flex;flex-direction:column;gap:5px;font-size:12.5px;font-weight:600;color:var(--ink-2);margin-bottom:12px}
+.login-card input{background:var(--surface);border:1px solid var(--line-2);border-radius:10px;padding:11px 12px;font-size:15px;color:var(--ink)}
+.login-card .btn{width:100%;justify-content:center;padding:11px;font-size:14.5px}
+.login-card .small{font-size:12px;color:var(--muted);margin-top:16px;line-height:1.5}
+@media (max-width:900px){.login-page{grid-template-columns:1fr}.login-side{padding:28px}}
+
+/* zone : retour vers la province */
+.back-prov{display:flex;align-items:center;gap:8px;margin:0 6px 10px;padding:8px 10px;border-radius:8px;background:rgba(255,255,255,.08);color:#fff;text-decoration:none;font-size:12.5px}
+.back-prov:hover{background:rgba(255,255,255,.14)}
+.zs-switch{margin:0 6px 8px}
+.zs-switch select{width:100%;background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.25)}
+.zs-switch select option{color:#111}
+
+/* tableaux provinciaux : en-têtes sur plusieurs lignes */
+.prov .table-wrap th{white-space:normal;min-width:64px;vertical-align:bottom}
+.alert-item div{overflow-wrap:anywhere;min-width:0}
+.sidebar nav a.navlink{display:flex;align-items:center;gap:10px;width:100%;color:rgba(255,255,255,.82);padding:8px 10px;border-radius:8px;text-decoration:none;font-size:13.5px}
+.sidebar nav a.navlink:hover{background:rgba(255,255,255,.08);color:#fff}
+.sidebar nav a.navlink svg{width:18px;height:18px;flex:none;opacity:.9}
+
+/* comptes : actions empilées */
+.cpt-acts{display:flex;flex-direction:column;gap:4px;align-items:stretch}
+.cpt-acts .btn{justify-content:center;white-space:nowrap}
