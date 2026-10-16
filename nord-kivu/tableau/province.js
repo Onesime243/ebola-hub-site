@@ -460,6 +460,8 @@
     try {
       const r = await (await fetch("/api/fichiers?zone=" + encodeURIComponent(S.upZone === "province" ? "province" : ZN[S.upZone]), { credentials: "same-origin" })).json();
       box.innerHTML = r.fichiers && r.fichiers.length ? `<div class="table-wrap files-tbl"><table><thead><tr><th>Fichiers présents</th><th class="num">Taille</th><th>Déposé le</th><th></th></tr></thead><tbody>${r.fichiers.map(f => `<tr><td>${esc(f.nom)}</td><td class="num">${nf(f.taille / 1e6, 1)} Mo</td><td>${esc(f.modifie)}</td><td><button class="btn sm" data-retirer="${esc(f.nom)}" title="Retirer de l'analyse (le fichier est déplacé dans _retires, pas supprimé)">Retirer</button></td></tr>`).join("")}</tbody></table></div>` : `<p class="note">Aucun fichier pour l'instant.</p>`;
+      const ar = r.archives || [];
+      if (ar.length) box.innerHTML += `<details class="archives" style="margin-top:12px"><summary><b>Copies datées</b> <span class="muted small">— une copie de chaque fichier chargé est gardée dans ${S.upZone === "province" ? "donnees/province" : "donnees/zs/" + esc(ZN[S.upZone] || "")}/archives/&lt;date du jour&gt;</span></summary><div class="table-wrap files-tbl"><table><thead><tr><th>Date de chargement</th><th>Fichiers</th></tr></thead><tbody>${ar.map(x => `<tr><td style="white-space:nowrap">${esc(x.date.split("-").reverse().join("/"))}</td><td>${x.fichiers.map(esc).join("<br>")}</td></tr>`).join("")}</tbody></table></div></details>`;
     } catch (e) { box.innerHTML = `<p class="note warn">Liste des fichiers indisponible.</p>`; }
   }
   async function upload(files) {
@@ -496,16 +498,16 @@
     const r = await fetch("/api/comptes", { credentials: "same-origin" });
     const j = await r.json().catch(() => ({}));
     if (!r.ok) { box.innerHTML = notice(esc(j.erreur || "Accès refusé"), "warn"); return; }
-    box.innerHTML = `<div class="table-wrap"><table><thead><tr><th>Identifiant</th><th>Nom affiché</th><th>Rôle</th><th>Zone de santé</th><th>État</th><th>Dernière connexion</th><th></th></tr></thead><tbody>${j.comptes.map(c => `<tr><td><b>${esc(c.identifiant)}</b></td><td>${esc(c.nom)}</td><td>${c.role === "province" ? "Province" : "Zone de santé"}</td><td>${esc(c.zone || "—")}</td><td>${c.actif === false ? badge("désactivé", "b-crit") : badge("actif", "b-good")}</td><td>${esc(c.derniere_connexion || "—")}</td>
-      <td class="flex" style="gap:4px;justify-content:flex-end"><button class="btn sm" data-cpt-mdp="${esc(c.identifiant)}">Nouveau mot de passe</button><button class="btn sm" data-cpt-act="${esc(c.identifiant)}" data-v="${c.actif === false ? 1 : 0}">${c.actif === false ? "Activer" : "Désactiver"}</button>${c.identifiant !== USER.identifiant ? `<button class="btn sm" data-cpt-del="${esc(c.identifiant)}">Supprimer</button>` : ""}</td></tr>`).join("")}</tbody></table></div>`;
+    box.innerHTML = `<div class="table-wrap"><table><thead><tr><th>Identifiant</th><th>Nom affiché</th><th>Rôle</th><th>Zone de santé</th><th>État</th><th>Dernière connexion</th><th></th></tr></thead><tbody>${j.comptes.map(c => `<tr><td><b>${esc(c.identifiant)}</b></td><td>${esc(c.nom)}</td><td>${c.role === "province" ? "Province" : "Zone de santé"}</td><td>${c.role === "zs" ? `<select data-cpt-zone="${esc(c.identifiant)}" aria-label="Zone de santé du compte">${ZONES.map(z => `<option ${z.nom === c.zone ? "selected" : ""}>${esc(z.nom)}</option>`).join("")}</select>${(() => { const g = guessZone(c.identifiant + " " + (c.nom || "")); return g && g.nom !== c.zone ? `<div class="msg err" style="margin-top:4px">Le nom évoque ${esc(g.nom)} : vérifiez la zone.</div>` : ""; })()}` : "—"}</td><td>${c.actif === false ? badge("désactivé", "b-crit") : badge("actif", "b-good")}</td><td>${esc(c.derniere_connexion || "—")}</td>
+      <td><div class="flex" style="gap:4px;justify-content:flex-end;flex-wrap:wrap"><button class="btn sm" data-cpt-mdp="${esc(c.identifiant)}">Nouveau mot de passe</button><button class="btn sm" data-cpt-act="${esc(c.identifiant)}" data-v="${c.actif === false ? 1 : 0}">${c.actif === false ? "Activer" : "Désactiver"}</button>${c.identifiant !== USER.identifiant ? `<button class="btn sm" data-cpt-del="${esc(c.identifiant)}">Supprimer</button>` : ""}</div></td></tr>`).join("")}</tbody></table></div>`;
   }
   function pageComptes() {
     if (!isProv()) return notice("Page réservée au compte provincial.", "warn");
     after(pageComptesLoad);
-    return `<p class="lead">Créez un compte par zone de santé : la zone pourra se connecter, charger <b>uniquement ses propres fichiers</b> et lancer l'analyse de sa zone. Tous les comptes voient la situation provinciale ; les listes nominatives restent réservées au compte provincial et à la zone concernée.</p>
+    return `<p class="lead">Créez un compte par zone de santé : la zone pourra se connecter, charger <b>uniquement ses propres fichiers</b> et lancer l'analyse de sa zone. Un compte de zone ne voit <b>que sa zone</b> : ses analyses, ses cartes, ses rapports et ses fichiers. Seul le compte provincial voit toutes les zones et la situation de la province. Vérifiez que chaque compte est rattaché à la bonne zone (colonne « Zone de santé », modifiable).</p>
       ${panel("Nouveau compte", "Communiquez l'identifiant et le mot de passe à la personne concernée ; elle pourra changer son mot de passe depuis son menu.", `<form class="form" id="f-cpt">
         <label>Rôle<select name="role" id="cpt-role"><option value="zs">Zone de santé</option><option value="province">Province (tous les droits)</option></select></label>
-        <label>Zone de santé<select name="zone" id="cpt-zone">${ZONES.map(z => `<option>${esc(z.nom)}</option>`).join("")}</select></label>
+        <label>Zone de santé<select name="zone" id="cpt-zone" required><option value="">— choisir la zone —</option>${ZONES.map(z => `<option>${esc(z.nom)}</option>`).join("")}</select></label>
         <label>Identifiant<input name="identifiant" required pattern="[a-z0-9._\\-]{3,32}" placeholder="ex. zs-butembo"></label>
         <label>Nom affiché<input name="nom" placeholder="ex. BCZ Butembo"></label>
         <label>Mot de passe (8 caractères au moins)<input name="mot_de_passe" type="text" required minlength="8" autocomplete="off"></label>
@@ -630,7 +632,15 @@
     if (t.dataset.openzs !== undefined && t.value) { location.href = openZS(t.value); return; }
     if (t.dataset.state) { S[t.dataset.state] = t.value; render(); return; }
     if (t.id === "up") upload(t.files);
-    if (t.id === "cpt-role") { const z = $("#cpt-zone"); if (z) z.disabled = t.value === "province"; }
+    if (t.id === "cpt-role") { const z = $("#cpt-zone"); if (z) { z.disabled = t.value === "province"; z.required = t.value === "zs"; } }
+    if (t.dataset.cptZone) { const id = t.dataset.cptZone; if (!confirm(`Rattacher le compte « ${id} » à la zone de santé de ${t.value} ? Il ne verra plus que les données de cette zone.`)) { pageComptesLoad(); return; }
+      cptPost({ action: "modifier", identifiant: id, zone: t.value }).then(() => pageComptesLoad()).catch(err => { alert(err.message); pageComptesLoad(); }); return; }
+  });
+  document.addEventListener("input", e => {
+    const f = e.target.form; if (!f || f.id !== "f-cpt" || !["identifiant", "nom"].includes(e.target.name)) return;
+    const z = f.zone; if (!z || (z.value && !z.dataset.auto)) return;
+    const g = guessZone(f.identifiant.value.replace(/[-_.]/g, " ") + " " + f.nom.value);
+    if (g) { z.value = g.nom; z.dataset.auto = "1"; } else if (z.dataset.auto) { z.value = ""; }
   });
   document.addEventListener("submit", async e => {
     if (e.target.id !== "f-cpt") return;
@@ -638,7 +648,7 @@
     const f = e.target, msg = $("#cpt-msg");
     try {
       const c = await cptPost({ action: "creer", role: f.role.value, zone: f.role.value === "zs" ? f.zone.value : null, identifiant: f.identifiant.value, nom: f.nom.value, mot_de_passe: f.mot_de_passe.value });
-      msg.className = "msg ok"; msg.textContent = `Compte « ${c.compte.identifiant} » créé (${c.compte.role === "zs" ? "zone de santé de " + c.compte.zone : "province"}).`; f.reset(); pageComptesLoad();
+      msg.className = "msg ok"; msg.textContent = `Compte « ${c.compte.identifiant} » créé (${c.compte.role === "zs" ? "zone de santé de " + c.compte.zone : "province"}).`; f.reset(); delete f.zone.dataset.auto; pageComptesLoad();
     } catch (err) { msg.className = "msg err"; msg.textContent = err.message; }
   });
   document.addEventListener("dragover", e => { const d = e.target.closest("#drop"); if (d) { e.preventDefault(); d.classList.add("over"); } });

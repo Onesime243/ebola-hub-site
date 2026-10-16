@@ -8,7 +8,10 @@
   const { nf, esc } = G;
   const col = Ch.col;
   const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
-  if (!D) { $("#main").innerHTML = `<div class="empty">Aucune analyse pour cette zone de santé. <a href="index.html">Retour à la province</a> ; chargez les fichiers de la zone dans « Données des zones » puis lancez l'analyse.</div>`; $("#title").textContent = "Zone de santé"; return; }
+  /* copies datées des fichiers chargés (dossier archives/AAAA-MM-JJ de la zone) */
+  const archivesHTML = arr => arr && arr.length ? `<details class="archives" style="margin-top:12px"><summary><b>Copies datées</b> <span class="muted small">— une copie de chaque fichier chargé est gardée dans le dossier archives/&lt;date du jour&gt;</span></summary><div class="table-wrap files-tbl"><table><thead><tr><th>Date de chargement</th><th>Fichiers</th></tr></thead><tbody>${arr.map(a => `<tr><td style="white-space:nowrap">${esc(a.date.split("-").reverse().join("/"))}</td><td>${a.fichiers.map(esc).join("<br>")}</td></tr>`).join("")}</tbody></table></div></details>` : "";
+  const filesHTML = r => (r.fichiers && r.fichiers.length ? `<div class="table-wrap files-tbl"><table><thead><tr><th>Fichiers présents dans le dossier de la zone</th><th class="num">Taille</th><th>Déposé le</th></tr></thead><tbody>${r.fichiers.map(f => `<tr><td>${esc(f.nom)}</td><td class="num">${nf(f.taille / 1e6, 1)} Mo</td><td>${esc(f.modifie)}</td></tr>`).join("")}</tbody></table></div>` : `<p class="note">Aucun fichier déposé pour l'instant.</p>`) + archivesHTML(r.archives);
+  if (!D) { sansAnalyse(); return; }
   window.ZS_FOOT = `ZS ${D.meta.zone_de_sante} · Ebola Outbreak — outil provincial`;
   const OUT = "../sortie/zs/" + encodeURIComponent(D.meta.zone_de_sante) + "/";   // rapports, classeurs et cartes de la zone
   const NIV_PROV = D.meta.niveau === "province";   // analyse provinciale détaillée : les unités sont les zones de santé
@@ -57,7 +60,7 @@
   /* ------------------------------------------------------------------ état */
   const lastDate = DATES.length ? DATES[DATES.length - 1] : D.meta.date_rapport;
   const firstDate = (() => { const a = [DATES[0], ...CAS.map(c => c.date)].filter(Boolean).sort(); return a[0] || lastDate; })();
-  const S = { page: "jour", date: lastDate, preset: "21", from: null, aire: null, cas: null,
+  const S = { menu: false, page: "jour", date: lastDate, preset: "21", from: null, aire: null, cas: null,
               mapInd: "categorie", ctStat: "a_retrouver", supKind: "superviseur", tables: {} };
   S.from = addDays(S.date, -20);
   try {
@@ -283,7 +286,8 @@
     const dec = casPer.filter(c => c.deces).length;
     const N = rowsToObj(D.notif).filter(r => !r.hors_zs && inPer(r.notif) && (!S.aire || r.aire === S.aire));
     const pre = N.filter(r => r.preleve), res = pre.filter(r => r.resultat === "Positif" || r.resultat === "Négatif");
-    const pz = PROV ? PROV.zones.find(z => z.nom === D.meta.zone_de_sante) : null, su = pz && pz.suivi;
+    const spv = rowsToObj(D.suivi_prov).filter(r => r.date <= S.date), sl = spv[spv.length - 1];
+    const su = sl ? { date: sl.date, a_suivre: sl.a_suivre, vus: sl.vus, jmv: sl.jmv, taux: ratio(sl.vus, sl.a_suivre) } : null;
     const di = casPer.map(c => c.d_isol).filter(v => v !== null && v !== undefined).sort((a, b) => a - b);
     after(() => epiCurve($("#c-epi-ov"), CAS.filter(c => !c.hors_zs && (!S.aire || c.aire === S.aire) && c.date && c.date <= S.date)));
     const src = D.meta.cas_origine || "liste des cas";
@@ -599,11 +603,12 @@
   /* ================================================================== FICHIERS */
   function pageFichiers() {
     const f = D.meta.fichiers || {}, srcs = D.meta.sources || {};
+    if (SERVED && canUp()) after(() => loadFiles());
     const lib = { contacts: "Base de suivi des contacts", cas: "Liste des cas", notif: "Liste linéaire des alertes et suspects", alertes: "Base des alertes", sbc: "Surveillance à base communautaire (CAC)", aires: "Paramètres des aires de santé", ra: "Recherche active", contours: "Contours des aires de santé" };
     const st = s_ => !s_ ? badge("absent", "b-crit") : /conserv/.test(s_.statut) ? badge("analyse précédente conservée", "b-mod") : s_.statut === "inchangé" ? badge("inchangé", "") : badge("mis à jour", "b-good");
     return `<p class="lead">Déposez <b>un, deux ou tous</b> les fichiers de la zone de santé (base de suivi ou listage des contacts, liste des cas, liste linéaire des suspects et confirmés, export DHIS2, base des alertes, SBC, recherche active, contours des aires). L'outil reconnaît chaque fichier par son contenu. Seules les analyses des fichiers déposés sont refaites ; pour les autres, les dernières analyses sont gardées. Les originaux ne sont jamais modifiés.${D.meta.cas_origine ? ` <br>Origine des cas : <b>${esc(D.meta.cas_origine)}</b>.` : ""}</p>
       ${SERVED && canUp() ? panel("Charger les données", `Les fichiers sont copiés dans le dossier de la zone de santé de ${esc(D.meta.zone_de_sante)} (donnees/zs/${esc(D.meta.zone_de_sante)}) ; les fichiers précédents y restent disponibles`, `<label class="drop" id="drop"><input type="file" id="up" multiple hidden accept=".xlsx,.xlsb,.xls,.xlsm,.csv,.zip,.geojson,.json"><b>Déposez les fichiers ici</b><span class="muted small">ou cliquez pour les choisir sur l'ordinateur</span></label>
-        <p><button class="btn primary" data-run>Lancer l'analyse</button></p><div class="log" id="log" hidden></div>`) : SERVED ? `<p class="note">Votre compte ne peut pas charger les fichiers de cette zone de santé (seulement ceux de votre zone, ou toutes les zones pour le compte provincial).</p>` : PUBLIC ? "" : `<p class="note">Ouvrez l'outil avec « 00_OUVRIR_OUTIL » pour déposer des fichiers depuis cette page ; sinon copiez-les dans le dossier donnees/zs/${esc(D.meta.zone_de_sante)}/ puis lancez « 02_ANALYSER ».</p>`}
+        <div id="up-files" style="margin-top:12px"></div><p style="margin-top:12px"><button class="btn primary" data-run>Lancer l'analyse</button></p><div class="log" id="log" hidden></div>`) : SERVED ? `<p class="note">Votre compte ne peut pas charger les fichiers de cette zone de santé (seulement ceux de votre zone, ou toutes les zones pour le compte provincial).</p>` : PUBLIC ? "" : `<p class="note">Ouvrez l'outil avec « 00_OUVRIR_OUTIL » pour déposer des fichiers depuis cette page ; sinon copiez-les dans le dossier donnees/zs/${esc(D.meta.zone_de_sante)}/ puis lancez « 02_ANALYSER ».</p>`}
       ${box("État des données", `Dernière analyse : ${esc(D.meta.genere_le)} · situation au ${dfr(D.meta.date_rapport)} · données jusqu'au ${dfr(D.meta.donnees_jusqu_au)}`,
         `<div class="table-wrap"><table><thead><tr><th>Données</th><th>Fichier utilisé</th><th>Données jusqu'au</th><th>État</th><th>Analyse du</th></tr></thead><tbody>${Object.entries(lib).map(([k, l]) => { const s_ = srcs[k]; return `<tr><td>${l}</td><td>${s_ ? esc(s_.fichier) : f[k] ? esc(f[k]) : "—"}</td><td>${s_ && s_.jusqu_au ? dfr(s_.jusqu_au) : "—"}</td><td>${st(s_ || (f[k] ? { statut: "mis à jour" } : null))}</td><td>${s_ ? esc(s_.maj || "") : ""}</td></tr>`; }).join("")}</tbody></table></div>
         ${(D.meta.avertissements || []).map(w => `<p class="note warn">${esc(w)}</p>`).join("")}`)}`;
@@ -638,7 +643,7 @@
     sbc: !!D.sbc, ra: !!D.ra, alertes: !NIV_PROV && !!(D.sbc || D.ra || D.suivi), deces: !!(D.cas || D.sbc || D.alertes_j), clinique: !!D.cas, labo: !!(D.cas || D.notif), pec: !!(D.cas || D.suivi), aires: !!(D.cas || D.suivi), cas: !!D.cas };
   if (NIV_PROV) { PAGES.forEach(p => { if (p[0] === "aires") p[1] = "Zones de santé"; if (p[0] === "labo") p[1] = "Laboratoire et positivité"; if (p[0] === "dynamics") p[1] = "Dynamique de transmission et Rt"; }); }
   else PAGES.forEach(p => { if (p[0] === "labo" && D.notif) p[1] = "Laboratoire et positivité"; if (p[0] === "dynamics") p[1] = "Dynamique de transmission et Rt"; });
-  const NAVP = () => PAGES.filter(p => HASDATA[p[0]] !== false);
+  const NAVP = () => PAGES.filter(p => HASDATA[p[0]] !== false).map(p => p[0] === "fichiers" ? [p[0], PUBLIC || !canUp() ? "État des données" : "Charger les données", p[2]] : p);
   const SUBT = { jour: () => `Situation au ${dfr(S.date)} · ${scope()} · données extraites le ${dfr(D.meta.donnees_jusqu_au)}`, aires: () => `Bulletin au ${dfr(S.date)}`,
     cas: () => `${scope()} · ${perTxt()}`, carte: () => `Situation au ${dfr(S.date)}`, contacts: () => `${scope()} · au ${dfr(S.date)}`, equipes: () => `${scope()} · au ${dfr(S.date)}`,
     sbc: () => `${scope()} · ${perTxt()}`, ra: () => `${scope()} · ${perTxt()}`, fichiers: () => `Analyse du ${esc(D.meta.genere_le)}` };
@@ -650,8 +655,11 @@
     let g0 = "";
     const zl = PROV ? PROV.zones.filter(z => (PROV.meta.zones_detail || []).includes(z.nom)) : [];
     const pv = D.meta.province || (PROV && PROV.meta.province) || "Nord-Kivu";
-    const top = `<a class="back-prov" href="index.html">← Accueil de la province</a>`
+    const isProvUser = !USER || USER.role === "province";
+    const top = !isProvUser ? "" : `<a class="back-prov" href="index.html">← Accueil de la province</a>`
       + `<div class="zs-switch"><select data-openzs aria-label="Changer de zone de santé"><option value="${encodeURIComponent("province-du-" + pv.toLowerCase().replace(/\s+/g, "-"))}" ${NIV_PROV ? "selected" : ""}>Province du ${esc(pv)} (analyses détaillées)</option>${zl.map(z => `<option value="${z.code}" ${z.nom === D.meta.zone_de_sante ? "selected" : ""}>ZS ${esc(z.nom)}</option>`).join("")}</select></div>`;
+    $("#user").innerHTML = USER ? `<button class="userchip" id="userchip" aria-haspopup="true"><span class="av">${esc((USER.nom || USER.identifiant).slice(0, 1).toUpperCase())}</span><span>${esc(USER.nom)}<small>${USER.role === "province" ? "Coordination provinciale" : "Zone de santé de " + esc(USER.zone)}</small></span></button>
+      ${S.menu ? `<div class="menu-pop"><div class="who">Connecté : <b>${esc(USER.identifiant)}</b></div><button data-mdp>Changer mon mot de passe</button><button data-logout>Se déconnecter</button></div>` : ""}` : "";
     $("#nav").innerHTML = top + NAVP().map(([k, l, g]) => { const head = g !== g0 ? `<div class="nav-group">${g}</div>` : ""; g0 = g; return `${head}<button data-page="${k}" class="${S.page === k ? "active" : ""}"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="${I[k]}"/></svg>${l}</button>`; }).join("");
     const p = NAVP().find(x => x[0] === S.page) || PAGES[0];
     $("#title").textContent = p[1];
@@ -702,6 +710,10 @@
   function setTheme(t) { document.documentElement.dataset.theme = t; localSet("zs-theme", t); render(); }
   document.addEventListener("click", e => {
     const t = e.target;
+    if (t.closest("#userchip")) { S.menu = !S.menu; shell(); return; }
+    if (S.menu && !t.closest(".menu-pop")) { S.menu = false; shell(); }
+    if (t.closest("[data-logout]")) { fetch("/api/deconnexion", { method: "POST", credentials: "same-origin" }).then(() => { location.href = "connexion.html"; }); return; }
+    if (t.closest("[data-mdp]")) { S.menu = false; shell(); modalMdp(); return; }
     if (t.closest("#theme")) { setTheme(document.documentElement.dataset.theme === "dark" ? "light" : "dark"); return; }
     if (t.closest("#menu")) { $("#sidebar").classList.toggle("open"); return; }
     const nav = t.closest("[data-page]"); if (nav) { go(nav.dataset.page); return; }
@@ -755,6 +767,10 @@
     setTimeout(() => host.remove(), 3000);
   }
   /* ---- dépôt de fichiers et analyse (serveur local) */
+  async function loadFiles() {
+    const box = $("#up-files"); if (!box) return;
+    try { box.innerHTML = filesHTML(await (await fetch("/api/fichiers?zone=" + encodeURIComponent(D.meta.zone_de_sante), { credentials: "same-origin" })).json()); } catch (e) { box.innerHTML = ""; }
+  }
   async function upload(files) {
     const log = $("#log"); log.hidden = false;
     for (const f of files) {
@@ -763,7 +779,8 @@
       const j = await r.json().catch(() => ({}));
       log.textContent += (r.ok ? `  ✓ copié dans donnees/zs/${D.meta.zone_de_sante}/\n` : `  ✗ ${j.erreur || r.status}\n`);
     }
-    log.textContent += "Cliquez « Lancer l'analyse ».\n";
+    log.textContent += "Une copie datée de chaque fichier est gardée dans archives/. Cliquez « Lancer l'analyse ».\n";
+    loadFiles();
   }
   async function runAnalysis(date) {
     if (!date) { S.page = "fichiers"; render(); }
@@ -777,7 +794,50 @@
   if (SERVED) {
     fetch("/api/session", { credentials: "same-origin" }).then(r => r.json()).then(s => {
       if (!s.connecte) { location.href = "connexion.html?suite=" + encodeURIComponent(location.pathname + location.search); return; }
+      if (s.role !== "province" && s.zone !== D.meta.zone_de_sante) { location.replace("zs.html?zone=" + encodeURIComponent(s.code)); return; }
       USER = s; render();
     }).catch(() => render());
   } else render();
+  function modalMdp() {
+    const m = document.createElement("div"); m.className = "modal-back";
+    m.innerHTML = `<form class="modal"><h3>Changer mon mot de passe</h3><p>8 caractères au moins.</p><div class="form" style="grid-template-columns:1fr"><label>Mot de passe actuel<input type="password" name="a" required autocomplete="current-password"></label><label>Nouveau mot de passe<input type="password" name="n" required minlength="8" autocomplete="new-password"></label><label>Confirmer<input type="password" name="c" required minlength="8" autocomplete="new-password"></label></div><div class="msg" id="m-msg"></div><div class="acts"><button type="button" class="btn" data-close>Annuler</button><button class="btn primary">Enregistrer</button></div></form>`;
+    document.body.appendChild(m);
+    m.addEventListener("click", e => { if (e.target === m || e.target.closest("[data-close]")) m.remove(); });
+    m.querySelector("form").addEventListener("submit", async e => {
+      e.preventDefault(); const f = e.target, msg = m.querySelector("#m-msg");
+      if (f.n.value !== f.c.value) { msg.className = "msg err"; msg.textContent = "Les deux saisies diffèrent."; return; }
+      const r = await fetch("/api/mot-de-passe", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ancien: f.a.value, nouveau: f.n.value }), credentials: "same-origin" });
+      const j = await r.json().catch(() => ({})); msg.className = "msg " + (r.ok ? "ok" : "err"); msg.textContent = r.ok ? "Mot de passe modifié." : (j.erreur || "Erreur"); if (r.ok) setTimeout(() => m.remove(), 900);
+    });
+  }
+  /* zone sans analyse (ou fichier de la zone refusé par le serveur) : un compte de zone est renvoyé vers sa propre zone ;
+     le compte de la zone (ou la province) peut y déposer les fichiers et lancer la première analyse */
+  function sansAnalyse() {
+    const zq = new URLSearchParams(location.search).get("zone") || "";
+    const show = (html, title) => {
+      $("#main").innerHTML = html; $("#title").textContent = title || "Zone de santé";
+      document.querySelectorAll('.controls [data-go], .controls .field, #periodbar, #side-status').forEach(e => { e.hidden = true; e.style.display = "none"; });
+    };
+    if (!location.protocol.startsWith("http")) { show(`<div class="empty">Aucune analyse pour cette zone de santé.</div>`); return; }
+    fetch("/api/session", { credentials: "same-origin" }).then(r => r.json()).then(async s => {
+      if (!s.connecte) { location.href = "connexion.html?suite=" + encodeURIComponent(location.pathname + location.search); return; }
+      if (s.role !== "province" && s.code !== zq) { location.replace("zs.html?zone=" + encodeURIComponent(s.code)); return; }
+      const zone = s.role === "province" ? (s.codes || {})[zq] : s.zone;
+      if (!zone) { show(`<div class="empty">Zone de santé inconnue. <a href="index.html">Retour à la province</a></div>`); return; }
+      show(`${s.role === "province" ? `<p><a href="index.html">← Accueil de la province</a></p>` : ""}<section class="panel"><div class="panel-head"><div><h2>Zone de santé de ${esc(zone)} — première analyse</h2><p>Aucune analyse n'a encore été produite pour cette zone. Déposez ses fichiers puis lancez l'analyse.</p></div></div>
+        <label class="drop" id="drop0"><input type="file" id="up0" multiple hidden accept=".xlsx,.xlsb,.xls,.xlsm,.csv,.zip,.geojson,.json"><b>Déposez les fichiers ici</b><span class="muted small">ou cliquez pour les choisir · l'outil reconnaît chaque fichier par son contenu</span></label>
+        <div id="up-files" style="margin-top:12px"></div><p style="margin-top:12px"><button class="btn primary" id="run0">Lancer l'analyse</button></p><div class="log" id="log" hidden></div></section>`, "ZS " + zone);
+      const list = async () => { try { $("#up-files").innerHTML = filesHTML(await (await fetch("/api/fichiers?zone=" + encodeURIComponent(zone), { credentials: "same-origin" })).json()); } catch (e) {} };
+      const send = async files => { const log = $("#log"); log.hidden = false; for (const f of files) { log.textContent += `Envoi de ${f.name}…\n`; const r = await fetch(`/api/televerser?zone=${encodeURIComponent(zone)}&nom=${encodeURIComponent(f.name)}`, { method: "POST", body: f, credentials: "same-origin" }); const j = await r.json().catch(() => ({})); log.textContent += r.ok ? "  ✓ copié (et copie datée gardée)\n" : `  ✗ ${j.erreur || r.status}\n`; } list(); };
+      $("#up0").addEventListener("change", e => send(e.target.files));
+      const dz = $("#drop0"); dz.addEventListener("dragover", e => { e.preventDefault(); dz.classList.add("over"); }); dz.addEventListener("dragleave", () => dz.classList.remove("over")); dz.addEventListener("drop", e => { e.preventDefault(); dz.classList.remove("over"); send(e.dataTransfer.files); });
+      $("#run0").addEventListener("click", async () => {
+        const r = await fetch("/api/analyser", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ zone }), credentials: "same-origin" });
+        if (!r.ok) { alert((await r.json().catch(() => ({}))).erreur || "Analyse impossible"); return; }
+        const poll = async () => { const j = await (await fetch("/api/etat", { credentials: "same-origin" })).json(); const log = $("#log"); log.hidden = false; log.textContent = j.log; log.scrollTop = log.scrollHeight; if (j.running) setTimeout(poll, 1200); else if (j.ok) location.reload(); };
+        poll();
+      });
+      list();
+    }).catch(() => show(`<div class="empty">Aucune analyse pour cette zone de santé.</div>`));
+  }
 })();
