@@ -1,3 +1,38 @@
-<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Ebola Nord-Kivu — accès protégé</title>
-<style>body{margin:0;min-height:100vh;display:grid;place-items:center;background:#16324f;color:#fff;font:16px/1.5 system-ui,sans-serif;padding:16px}main{max-width:520px}h1{font-size:24px;margin:0 0 8px}p{opacity:.85}</style></head>
-<body><main><h1>Tableau de bord du Nord-Kivu</h1><p>La version en ligne est désormais réservée aux comptes de l'outil (connexion obligatoire). Elle est en cours de mise à jour par la coordination provinciale et sera de nouveau disponible très bientôt, à la même adresse.</p></main></body></html>
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ebola — zone de santé</title>
+<script>try { var t = localStorage.getItem("zs-theme"); if (t) document.documentElement.dataset.theme = t; } catch (e) {}</script>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="province.css">
+</head>
+<body>
+<div class="shell">
+  <aside class="sidebar" id="sidebar">
+    <div class="brand"><div class="logo">EO</div><div><b>Ebola Outbreak</b><small id="brand-sub">Outil de la zone de santé</small></div></div>
+    <nav id="nav"></nav>
+    <div class="side-status" id="side-status"></div>
+  </aside>
+  <div class="workspace">
+    <header class="topbar">
+      <div class="flex" style="gap:12px;flex-wrap:nowrap">
+        <button class="btn menu-toggle" id="menu" aria-label="Menu">☰</button>
+        <div><h1 id="title">Vue générale</h1><div class="sub" id="subtitle"></div></div>
+      </div>
+      <div class="controls">
+        <button class="btn primary" data-go="fichiers">⤒ Charger les données</button>
+        <label class="field">Aire de santé<select id="aire-select" aria-label="Aire de santé"></select></label>
+        <button class="btn" id="theme" title="Mode clair / sombre" aria-label="Mode clair ou sombre">◐</button>
+        <div class="rel" id="user"></div>
+      </div>
+    </header>
+    <section class="periodbar" id="periodbar"></section>
+    <main id="main"></main>
+    <footer class="foot"><span id="foot-l"></span><span>Pseudonymisé : identifiants et initiales uniquement · listes nominatives réservées à la province et à la zone</span></footer>
+  </div>
+</div>
+<script src="en_ligne.js" data-page="zs"></script>
+</body>
+</html>
