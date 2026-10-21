@@ -572,12 +572,12 @@
         <tr>${I.mois.map(m => `<th>${esc(m.lib)}</th>`).join("")}</tr></thead><tbody>
         ${N.lignes.map(r => `<tr><td class="ind-lib">${esc(r.lib)}</td><td class="ind-seuil">${esc(r.seuil)}</td>${r.valeurs.map(v => `<td class="ind-v ${cls(v)}">${esc(v.t)}</td>`).join("")}<td class="ind-obs">${esc(r.obs)}</td></tr>`).join("")}</tbody></table></div>`;
     const prm = I.parametres || {}, pz = I.parametres_zones || {};
-    const reglages = !PUBLIC && isProv() ? panel("Paramètres des alertes attendues", "Alertes attendues par jour = population × (incidence annuelle du paludisme + taux brut de mortalité) ÷ 1000 ÷ 365. Saisissez les estimations du SGI MVE ; une valeur propre à une zone remplace la valeur provinciale.",
+    const reglages = !PUBLIC && isProv() ? panel("Paramètres des alertes attendues", "Alertes MVE attendues par jour = population × taux d'alertes MVE attendues (pour 10 000 habitants par semaine) ÷ 70 000 + décès communautaires attendus (population × taux brut de mortalité ÷ 1000 ÷ 365 ; tout décès communautaire est une alerte MVE). Saisissez les normes du SGI MVE ; une valeur propre à une zone remplace la valeur provinciale.",
       `<form class="form" id="f-ind">
-        <label>Incidence annuelle du paludisme (pour 1000)<input name="incidence_paludisme_pour_1000" type="number" step="any" min="0" value="${esc(prm.incidence_paludisme_pour_1000 ?? "")}"></label>
+        <label>Alertes MVE attendues (pour 10 000 habitants par semaine)<input name="alertes_ebola_pour_10000_par_semaine" type="number" step="any" min="0" value="${esc(prm.alertes_ebola_pour_10000_par_semaine ?? "")}"></label>
         <label>Taux brut de mortalité (pour 1000 par an)<input name="mortalite_brute_pour_1000" type="number" step="any" min="0" value="${esc(prm.mortalite_brute_pour_1000 ?? "")}"></label>
-        <details class="ind-zones"><summary>Valeurs par zone de santé (facultatif)</summary><div class="table-wrap" style="max-height:360px"><table><thead><tr><th>Zone de santé</th><th>Population (base chiffrée)</th><th>Population corrigée</th><th>Incidence paludisme ‰</th><th>Mortalité ‰</th></tr></thead><tbody>
-          ${ZONES.map(z => { const o = pz[z.nom] || {}; return `<tr data-indz="${esc(z.nom)}"><td>${esc(z.nom)}</td><td class="num">${nf(z.population)}</td><td><input type="number" min="0" data-k="population" value="${o.population ?? ""}"></td><td><input type="number" step="any" min="0" data-k="incidence_paludisme_pour_1000" value="${o.incidence_paludisme_pour_1000 ?? ""}"></td><td><input type="number" step="any" min="0" data-k="mortalite_brute_pour_1000" value="${o.mortalite_brute_pour_1000 ?? ""}"></td></tr>`; }).join("")}
+        <details class="ind-zones"><summary>Valeurs par zone de santé (facultatif)</summary><div class="table-wrap" style="max-height:360px"><table><thead><tr><th>Zone de santé</th><th>Population (base chiffrée)</th><th>Population corrigée</th><th>Alertes MVE /10 000/sem.</th><th>Mortalité ‰</th></tr></thead><tbody>
+          ${ZONES.map(z => { const o = pz[z.nom] || {}; return `<tr data-indz="${esc(z.nom)}"><td>${esc(z.nom)}</td><td class="num">${nf(z.population)}</td><td><input type="number" min="0" data-k="population" value="${o.population ?? ""}"></td><td><input type="number" step="any" min="0" data-k="alertes_ebola_pour_10000_par_semaine" value="${o.alertes_ebola_pour_10000_par_semaine ?? ""}"></td><td><input type="number" step="any" min="0" data-k="mortalite_brute_pour_1000" value="${o.mortalite_brute_pour_1000 ?? ""}"></td></tr>`; }).join("")}
         </tbody></table></div></details>
         <button class="btn primary" type="submit">Enregistrer et recalculer</button></form><div class="log" id="log" hidden></div>`) : "";
     return `<div class="target" style="margin-bottom:14px"><label class="field">Niveau<select data-state="indNiv"><option value="province">Province du ${esc(P.meta.province)}</option>
@@ -718,7 +718,7 @@
       e.preventDefault();
       const f = e.target, zones = {};
       f.querySelectorAll("tr[data-indz]").forEach(tr => { const o = {}; tr.querySelectorAll("input[data-k]").forEach(i => { if (i.value !== "") o[i.dataset.k] = Number(i.value); }); if (Object.keys(o).length) zones[tr.dataset.indz] = o; });
-      const body = { incidence_paludisme_pour_1000: f.incidence_paludisme_pour_1000.value, mortalite_brute_pour_1000: f.mortalite_brute_pour_1000.value, zones };
+      const body = { alertes_ebola_pour_10000_par_semaine: f.alertes_ebola_pour_10000_par_semaine.value, mortalite_brute_pour_1000: f.mortalite_brute_pour_1000.value, zones };
       const r = await fetch("/api/indicateurs", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body), credentials: "same-origin" });
       const j = await r.json().catch(() => ({})); if (!r.ok) { alert(j.erreur || "Erreur"); return; }
       pollJob(true); return;
