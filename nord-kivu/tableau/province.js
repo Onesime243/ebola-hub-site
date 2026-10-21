@@ -145,6 +145,7 @@
   }
   const ICON = {
     presentation: "M2 3h20v13H2zm2 2v9h16V5zm5 13h6l1 3H8zM6 12l3-4 3 2 4-4 2 1.5-6 5-3-2-1.5 1.5z",
+    indicateurs: "M3 3h18v18H3zm2 2v4h4V5zm6 0v4h8V5zm-6 6v4h4v-4zm6 0v4h8v-4zm-6 6v2h4v-2zm6 0v2h8v-2z",
     accueil: "M12 3 2 12h3v8h6v-6h2v6h6v-8h3z", situation: "M3 19h18v2H3zM5 17V9h3v8zm5 0V5h3v12zm5 0v-6h3v6z", zones: "M4 6h16v2H4zm0 5h16v2H4zm0 5h10v2H4z",
     carte: "M15 4 9 2 3 4v18l6-2 6 2 6-2V2zM9 4.4l6 2v13.2l-6-2z", contacts: "M16 11c1.7 0 3-1.3 3-3s-1.3-3-3-3-3 1.3-3 3 1.3 3 3 3zm-8 0c1.7 0 3-1.3 3-3S9.7 5 8 5 5 6.3 5 8s1.3 3 3 3zm0 2c-2.3 0-7 1.2-7 3.5V19h14v-2.5C15 14.2 10.3 13 8 13zm8 0h-1c1.2.9 2 2 2 3.5V19h6v-2.5c0-2.3-4.7-3.5-7-3.5z",
     alertes: "M12 22a2 2 0 0 0 2-2h-4a2 2 0 0 0 2 2zm6-6V11a6 6 0 0 0-5-5.9V4h-2v1.1A6 6 0 0 0 6 11v5l-2 2v1h16v-1z", donnees: "M5 20h14v-2H5zm7-16-5 5h3v6h4V9h3z",
@@ -549,6 +550,34 @@
       ${NKPres.html(base, pptx, cur ? "Zone de santé de " + cur.nom : "Province du " + P.meta.province, "situation au " + dfr(P.meta.date_rapport))}`;
   }
 
+  /* ================================================================== INDICATEURS DU PILIER SURVEILLANCE (canevas PID-MIO) */
+  function pageIndicateurs() {
+    const I = P.indicateurs_surveillance;
+    if (!I || !I.niveaux) return notice("Les indicateurs du pilier surveillance n'ont pas encore été calculés : relancez l'analyse provinciale (page « Données des zones »).", "warn");
+    const cur = S.indNiv && I.niveaux[S.indNiv] ? S.indNiv : "province", N = I.niveaux[cur], f = N.fichiers || {};
+    const href = n => "../" + (f.base || "").split("/").map(encodeURIComponent).join("/") + encodeURIComponent(n);
+    const zs = Object.entries(I.niveaux).filter(([k]) => k !== "province").sort((a, b) => a[1].nom.localeCompare(b[1].nom));
+    const cls = v => v.ok === true ? "ok" : v.ok === false ? "bad" : "";
+    const tbl = `<div class="table-wrap ind-wrap"><table class="ind-tab"><colgroup><col class="c-lib"><col class="c-seuil">${I.mois.map(() => "<col>").join("")}<col class="c-obs"></colgroup><thead><tr><th rowspan="2">Indicateurs</th><th rowspan="2">Seuil</th><th colspan="${I.mois.length}">Résultats mensuels ${esc(I.date.slice(0, 4))}</th><th rowspan="2">Observations</th></tr>
+        <tr>${I.mois.map(m => `<th>${esc(m.lib)}</th>`).join("")}</tr></thead><tbody>
+        ${N.lignes.map(r => `<tr><td class="ind-lib">${esc(r.lib)}</td><td class="ind-seuil">${esc(r.seuil)}</td>${r.valeurs.map(v => `<td class="ind-v ${cls(v)}">${esc(v.t)}</td>`).join("")}<td class="ind-obs">${esc(r.obs)}</td></tr>`).join("")}</tbody></table></div>`;
+    const prm = I.parametres || {}, pz = I.parametres_zones || {};
+    const reglages = !PUBLIC && isProv() ? panel("Paramètres des alertes attendues", "Alertes attendues par jour = population × (incidence annuelle du paludisme + taux brut de mortalité) ÷ 1000 ÷ 365. Saisissez les estimations du SGI MVE ; une valeur propre à une zone remplace la valeur provinciale.",
+      `<form class="form" id="f-ind">
+        <label>Incidence annuelle du paludisme (pour 1000)<input name="incidence_paludisme_pour_1000" type="number" step="any" min="0" value="${esc(prm.incidence_paludisme_pour_1000 ?? "")}"></label>
+        <label>Taux brut de mortalité (pour 1000 par an)<input name="mortalite_brute_pour_1000" type="number" step="any" min="0" value="${esc(prm.mortalite_brute_pour_1000 ?? "")}"></label>
+        <details class="ind-zones"><summary>Valeurs par zone de santé (facultatif)</summary><div class="table-wrap" style="max-height:360px"><table><thead><tr><th>Zone de santé</th><th>Population (base chiffrée)</th><th>Population corrigée</th><th>Incidence paludisme ‰</th><th>Mortalité ‰</th></tr></thead><tbody>
+          ${ZONES.map(z => { const o = pz[z.nom] || {}; return `<tr data-indz="${esc(z.nom)}"><td>${esc(z.nom)}</td><td class="num">${nf(z.population)}</td><td><input type="number" min="0" data-k="population" value="${o.population ?? ""}"></td><td><input type="number" step="any" min="0" data-k="incidence_paludisme_pour_1000" value="${o.incidence_paludisme_pour_1000 ?? ""}"></td><td><input type="number" step="any" min="0" data-k="mortalite_brute_pour_1000" value="${o.mortalite_brute_pour_1000 ?? ""}"></td></tr>`; }).join("")}
+        </tbody></table></div></details>
+        <button class="btn primary" type="submit">Enregistrer et recalculer</button></form><div class="log" id="log" hidden></div>`) : "";
+    return `<div class="target" style="margin-bottom:14px"><label class="field">Niveau<select data-state="indNiv"><option value="province">Province du ${esc(P.meta.province)}</option>
+        ${zs.map(([k, n]) => `<option value="${k}" ${k === cur ? "selected" : ""}>${esc(n.nom)}</option>`).join("")}</select></label>
+        ${f.xlsx ? `<a class="btn" href="${href(f.xlsx)}" download="${esc(f.xlsx)}">⤓ Excel</a>` : ""}${f.docx ? `<a class="btn primary" href="${href(f.docx)}" download="${esc(f.docx)}">⤓ Word (canevas)</a>` : ""}
+        <span class="note">${cur === "province" ? "Les fichiers de la province contiennent aussi une page par zone de santé." : ""} Calculés le ${esc(I.genere_le)} · situation au ${dfr(I.date)}.</span></div>
+      ${panel(`Collecte des indicateurs du pilier surveillance — ${esc(N.nom)}`, "Vert : seuil atteint · rouge : seuil non atteint · n.d. : donnée non disponible dans les fichiers reçus. Les définitions de calcul figurent dans la colonne Observations.", tbl)}
+      ${reglages}`;
+  }
+
   /* ================================================================== PUBLICATION */
   function pagePublication() {
     if (!isProv()) return notice("Page réservée au compte provincial.", "warn");
@@ -562,16 +591,16 @@
 
   /* ------------------------------------------------------------------ navigation */
   const PAGES = [["accueil", "Accueil", "Province"], ["situation", "Situation épidémiologique", "Province"], ["zones", "Zones de santé", "Province"], ["carte", "Carte et rapports", "Province"],
-    ["contacts", "Suivi des contacts", "Riposte"], ["alertes", "Surveillance des alertes", "Riposte"], ["presentation", "Présentation (diapositives)", "Réunions"], ["donnees", PUBLIC ? "État des données" : "Données des zones", "Données"],
+    ["contacts", "Suivi des contacts", "Riposte"], ["alertes", "Surveillance des alertes", "Riposte"], ["presentation", "Présentation (diapositives)", "Réunions"], ["indicateurs", "Indicateurs du pilier surveillance", "Réunions"], ["donnees", PUBLIC ? "État des données" : "Données des zones", "Données"],
     ["comptes", "Comptes", "Administration", () => isProv() && !PUBLIC], ["publication", "Publication en ligne", "Administration", () => isProv() && !PUBLIC]];
   const DETAIL_PAGES = [["index", "Cas index", "M4 6h16v2H4zm0 5h16v2H4zm0 5h10v2H4z"], ["journey", "Parcours des cas", "M12 2a4 4 0 1 1 0 8 4 4 0 0 1 0-8zm-7 18c0-3.9 3.1-7 7-7s7 3.1 7 7H5zM19 3l3 3-3 3"],
     ["chains", "Chaînes de transmission", "M7 7a3 3 0 1 1-2 5.2L10 15a3 3 0 1 1-.8 1.8L4.3 14A3 3 0 0 1 7 7zm10-4a3 3 0 1 1 0 6 3 3 0 0 1 0-6z"], ["recon", "Reconstruction de la transmission", "M4 5h4v4H4zm12 0h4v4h-4zM10 15h4v4h-4zM6 9v2h4v4h2v-4h4V9h-2v2H8V9z"],
     ["dynamics", "Dynamique et Rt", "M3 19h18v2H3zM4 15l4-6 4 3 5-8 3 2-6.6 10.3-4-3L6.2 16.4z"], ["children", "Enfants (0–18 ans)", "M12 2a3 3 0 1 1 0 6 3 3 0 0 1 0-6zm-4 8h8l-1 6h-1v6h-4v-6H9z"],
     ["deces", "Décès et EDS communautaires", "M10 2h4v6h6v4h-6v10h-4V12H4V8h6z"], ["labo", "Laboratoire et positivité", "M9 2h6v2h-1v5l5 9a2 2 0 0 1-2 3H7a2 2 0 0 1-2-3l5-9V4H9z"],
     ["contacts", "Suivi des contacts (bases des zones)", "M16 11c1.7 0 3-1.3 3-3s-1.3-3-3-3-3 1.3-3 3 1.3 3 3 3zm-8 0c1.7 0 3-1.3 3-3S9.7 5 8 5 5 6.3 5 8s1.3 3 3 3z"], ["pec", "Prise en charge et expositions", "M19 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm-2 10h-4v4h-2v-4H7v-2h4V7h2v4h4z"]];
-  const VIEWS = { accueil: pageAccueil, situation: pageSituation, zones: pageZones, carte: pageCarte, contacts: pageContacts, alertes: pageAlertes, donnees: pageDonnees, comptes: pageComptes, publication: pagePublication, presentation: pagePresentation };
+  const VIEWS = { accueil: pageAccueil, situation: pageSituation, zones: pageZones, carte: pageCarte, contacts: pageContacts, alertes: pageAlertes, donnees: pageDonnees, comptes: pageComptes, publication: pagePublication, presentation: pagePresentation, indicateurs: pageIndicateurs };
   const PERIOD_PAGES = new Set(["situation", "contacts", "alertes", "carte"]);
-  const SUBT = { accueil: () => `Situation au ${dfr(S.date)}`, zones: () => `Bulletin au ${dfr(S.date)}`, donnees: () => `Analyse provinciale du ${esc(P.meta.genere_le)}`, presentation: () => `Graphiques et diapositives prêts pour les réunions · situation au ${dfr(P.meta.date_rapport)}`, comptes: () => "Accès des zones de santé et de la province", publication: () => "Lien de partage en lecture seule" };
+  const SUBT = { accueil: () => `Situation au ${dfr(S.date)}`, zones: () => `Bulletin au ${dfr(S.date)}`, donnees: () => `Analyse provinciale du ${esc(P.meta.genere_le)}`, indicateurs: () => `Canevas mensuel PID-MIO · situation au ${dfr(P.meta.date_rapport)}`, presentation: () => `Graphiques et diapositives prêts pour les réunions · situation au ${dfr(P.meta.date_rapport)}`, comptes: () => "Accès des zones de santé et de la province", publication: () => "Lien de partage en lecture seule" };
   function shell() {
     const pages = PAGES.filter(p => !p[3] || p[3]());
     if (!pages.find(p => p[0] === S.page)) S.page = "accueil";
@@ -675,6 +704,15 @@
     if (g) { z.value = g.nom; z.dataset.auto = "1"; } else if (z.dataset.auto) { z.value = ""; }
   });
   document.addEventListener("submit", async e => {
+    if (e.target.id === "f-ind") {
+      e.preventDefault();
+      const f = e.target, zones = {};
+      f.querySelectorAll("tr[data-indz]").forEach(tr => { const o = {}; tr.querySelectorAll("input[data-k]").forEach(i => { if (i.value !== "") o[i.dataset.k] = Number(i.value); }); if (Object.keys(o).length) zones[tr.dataset.indz] = o; });
+      const body = { incidence_paludisme_pour_1000: f.incidence_paludisme_pour_1000.value, mortalite_brute_pour_1000: f.mortalite_brute_pour_1000.value, zones };
+      const r = await fetch("/api/indicateurs", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body), credentials: "same-origin" });
+      const j = await r.json().catch(() => ({})); if (!r.ok) { alert(j.erreur || "Erreur"); return; }
+      pollJob(true); return;
+    }
     if (e.target.id !== "f-cpt") return;
     e.preventDefault();
     const f = e.target, msg = $("#cpt-msg");

@@ -63,7 +63,14 @@
   async function fetchPlain(url) {
     const k = keyFor(url); if (!k) throw Object.assign(new Error("Accès non autorisé pour ce compte."), { refus: 1 });
     const r = await fetch(url, { cache: "no-cache" }); if (!r.ok) throw new Error("Fichier introuvable (" + r.status + ")");
-    try { return await open(await r.arrayBuffer(), await aes(k)); } catch (e) { throw Object.assign(new Error("clé"), { cle: 1 }); }
+    let buf;
+    try { buf = await open(await r.arrayBuffer(), await aes(k)); } catch (e) { throw Object.assign(new Error("clé"), { cle: 1 }); }
+    const b = new Uint8Array(buf);
+    if (b[0] === 0x1f && b[1] === 0x8b) {   // données compressées (gzip) avant chiffrement
+      if (!window.DecompressionStream) throw new Error("Ce navigateur est trop ancien pour ouvrir la version en ligne : mettez-le à jour (Chrome, Edge, Firefox ou Safari récents).");
+      return new Response(new Blob([b]).stream().pipeThrough(new DecompressionStream("gzip"))).arrayBuffer();
+    }
+    return buf;
   }
   const parseData = buf => { const t = dec.decode(buf); return JSON.parse(t.slice(t.indexOf("{"), t.lastIndexOf("}") + 1)); };
   const loadScripts = list => list.forEach(src => { const s = document.createElement("script"); s.src = src; s.async = false; document.body.appendChild(s); });

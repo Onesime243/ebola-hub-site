@@ -8,7 +8,8 @@
     ["1. Surveillance — situation du jour", [["03_indicateurs_jour", "Indicateurs du jour"], ["04_cas_du_jour", "Répartition des nouveaux cas"]]],
     ["1. Surveillance — jours sans nouveau cas", [["05_jours_sans_cas", "Jours sans nouveau cas confirmé"]]],
     ["1. Surveillance — carte", [["06_carte", "Carte de catégorisation"]]],
-    ["2. Alertes", [["07_indicateurs_alertes", "Indicateurs des alertes"], ["08_alertes_sources", "Sources des alertes"], ["09_alertes_unites", "Alertes et validées"]]],
+    ["2. Alertes", [["07_indicateurs_alertes", "Indicateurs des alertes"], ["07b_alertes_comparatif_3j", "Tableau comparatif sur 3 jours"], ["08_alertes_sources", "Sources des alertes du jour (nombre et %)"],
+      ["08b_alertes_sources_3j", "Sources des alertes sur 3 jours"], ["09_alertes_unites", "Alertes et validées"], ["09b_alertes_sources_zs", "Sources des alertes du jour par zone de santé"]]],
     ["3. Suivi des contacts", [["10_indicateurs_contacts", "Indicateurs du suivi"], ["11_contacts_non_vus", "Raisons de non-suivi"], ["12_contacts_tendance", "Taux de suivi sur 21 jours"],
       ["12_contacts_taux", "Taux de suivi par zone de santé"], ["13_contacts_suivre_vus", "Contacts à suivre et vus par zone"], ["14_tableau_contacts", "Tableau détaillé par zone de santé"]]],
     ["5. Laboratoire", [["15_indicateurs_labo", "Indicateurs du laboratoire"], ["16_labo_resultats", "Résultats positifs et négatifs"], ["17_labo_positivite", "Positivité hebdomadaire"]]],
@@ -25,7 +26,7 @@
         <a class="btn primary pres-btn" href="${base}${encodeURIComponent(pptx)}" download="${esc(pptx)}">⤓ Télécharger le PowerPoint</a></div>
         <p class="note">Chaque graphique ci-dessous se télécharge aussi en image (PNG haute définition) pour être collé dans une diapositive existante. Tout est mis à jour à chaque analyse.</p></section>
       ${PRES.map(([sec, items], si) => `<section class="panel pres-sec" data-sec="${si}"><div class="panel-head"><div><h2>${esc(sec)}</h2></div></div>
-        <div class="pres-grid">${items.map(([k, lab]) => `<figure class="pres-card${/indicateurs|tableau|carte/.test(k) ? " wide" : ""}" data-k="${k}">
+        <div class="pres-grid">${items.map(([k, lab]) => `<figure class="pres-card${/indicateurs|tableau|carte|comparatif|sources_zs/.test(k) ? " wide" : ""}" data-k="${k}">
           <a href="${base}${k}.png" target="_blank" rel="noopener" title="Agrandir"><img loading="lazy" src="${base}${k}.png?v=${v}" alt="${esc(lab)}" data-pres></a>
           <figcaption><span>${esc(lab)}</span><a class="btn sm" href="${base}${k}.png" download="${esc((titre + " " + lab).replace(/[^\wÀ-ÿ -]+/g, "").replace(/\s+/g, "_"))}.png">⤓ PNG</a></figcaption></figure>`).join("")}</div></section>`).join("")}
       <p class="note pres-empty" hidden>Aucune présentation n'a encore été produite : lancez l'analyse (la présentation est produite à la fin de l'analyse provinciale).</p>`;

@@ -139,3 +139,19 @@
 .pres-card img{display:block;width:100%;height:auto;aspect-ratio:auto}
 .pres-card figcaption{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 10px;font-size:12.5px;color:var(--ink-2)}
 .pres-card.wide{grid-column:1/-1}.pres-card.wide img{max-width:1100px;margin:0 auto}
+/* indicateurs du pilier surveillance */
+.ind-tab th{text-align:center;vertical-align:middle}
+.ind-tab td{vertical-align:top;font-size:12.5px}
+.ind-tab .ind-lib{min-width:240px;font-weight:600}
+.ind-tab .ind-seuil{white-space:nowrap;color:var(--ink-2)}
+.ind-tab .ind-v{text-align:center;min-width:110px}
+.ind-tab .ind-v.ok{background:color-mix(in srgb,var(--good,#1b9e4b) 14%,transparent)}
+.ind-tab .ind-v.bad{background:color-mix(in srgb,var(--critical,#d03b3b) 14%,transparent)}
+.ind-tab .ind-obs{min-width:260px;color:var(--ink-2);font-size:12px}
+.ind-zones{grid-column:1/-1;margin:4px 0}.ind-zones summary{cursor:pointer;font-weight:600;margin-bottom:8px}
+.ind-zones input{width:110px}
+.ind-tab{min-width:1150px;table-layout:fixed}
+.ind-tab th,.ind-tab td{white-space:normal !important;overflow-wrap:anywhere}
+.ind-tab col.c-lib{width:250px}.ind-tab col.c-seuil{width:95px}.ind-tab col.c-obs{width:270px}
+a.btn{text-decoration:none}
+.ind-wrap{max-height:none !important}
