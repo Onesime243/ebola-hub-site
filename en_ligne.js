@@ -53,7 +53,7 @@
   window.HUB_DECONNEXION = () => { try { sessionStorage.removeItem(SK); } catch (e) { /* rien */ } location.href = "connexion.html"; };
   let KEY = null;
   const key = async () => KEY || (KEY = await crypto.subtle.importKey("raw", hex(S.cle), "AES-GCM", false, ["decrypt"]));
-  const PROT = /\/(?:dashboard-data\.js|(?:periodes|cartes|rapports|assets|indicateurs)\/.+|presentation\/.+\.(?:png|pptx))$/;
+  const PROT = /\/(?:dashboard-data\.js|(?:periodes|cartes|rapports|assets|indicateurs|situation)\/.+|presentation\/.+\.(?:png|pptx))$/;
   const isProt = u => PROT.test(decodeURIComponent(new URL(u, location.href).pathname));
   async function fetchPlain(url) {
     const r = await fetch(url, { cache: "no-cache" }); if (!r.ok) throw new Error("Fichier introuvable (" + r.status + ")");

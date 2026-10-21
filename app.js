@@ -85,7 +85,7 @@
     lab: "Tous", nowH: 30, fLevel: "National", fTerr: "National", fTarget: "confirmes", fH: 30, tables: {},
     ovStack: "aucun", netIcons: true, gen: "0", idxPeriod: "0", ssSet: "", ssPlace: "Tous", ssMin: "2", ssCases: true, dynG: "National", growBase: "dds", growWin: "12s", dyStack: "sexe", dyBase: "o", dyDays: "60", rtDays: "120",
     siCmp: false, rlWin: "28j", projH: "30", distK: "dds_notification", recZone: "", recSup: "0.3", recColor: "issue", recX: "onset", recIcons: true, recDoc: false, epiMin: "3", resZone: "", perfG: "National",
-    rtmG: "National", rtmSet: "all", rtmDays: "120", zrCat: "Toutes", rtmMode: "zones", rtzProv: "Toutes", rtzG: "National", rtzTau: "7", rtzDays: "60", opTab: "eds", opProv: "Toutes", opWin: "cumul", zrColor: "categorie", zrLab: "score", zrSel: ""
+    rtmG: "National", rtmSet: "all", rtmDays: "120", zrCat: "Toutes", rtmMode: "zones", rtzProv: "Toutes", rtzG: "National", rtzTau: "7", rtzDays: "60", opTab: "eds", opProv: "Toutes", opWin: "cumul", zrColor: "categorie", zrLab: "score", zrSel: "", pplProv: "Toutes", sitNiv: "national"
   };
   const TABS = [
     { id: "overview", t: "Vue générale", g: "Situation", i: "M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z" },
@@ -101,6 +101,7 @@
     { id: "recon", t: "Reconstruction de la transmission", g: "Contact tracing", i: "M4 5h4v4H4zm12 0h4v4h-4zM10 15h4v4h-4zM6 9v2h4v4h2v-4h4V9h-2v2H8V9z", priv: true },
     { id: "dynamics", t: "Dynamique de transmission", g: "Analyses", i: "M3 19h18v2H3zM4 15l4-6 4 3 5-8 3 2-6.6 10.3-4-3L6.2 16.4z" },
     { id: "rtm", t: "Nombre de reproduction (Rt)", g: "Analyses", i: "M3 19h18v2H3zM3 12h4l3-7 4 14 3-7h4v2h-3l-4 9-4-14-2 5H3z" },
+    { id: "ppl", t: "Personnel de santé (PPL)", g: "Analyses", i: "M10 2h4v4h4v4h-4v4h-4v-4H6V6h4zM4 18h16v3H4z" },
     { id: "ops", t: "Opérations par zone (EDS, CTE, swabs, PPL)", g: "Analyses", i: "M3 3h8v8H3zm10 0h8v8h-8zM3 13h8v8H3zm13 0h2v3h3v2h-3v3h-2v-3h-3v-2h3z" },
     { id: "children", t: "Enfants (0–18 ans)", g: "Analyses", i: "M12 2a3 3 0 1 1 0 6 3 3 0 0 1 0-6zm-4 8h8l-1 6h-1v6h-4v-6H9z" },
     { id: "labs", t: "Laboratoires", g: "Analyses", i: "M9 2h6v2h-1v5l5 9a2 2 0 0 1-2 3H7a2 2 0 0 1-2-3l5-9V4H9z" },
@@ -112,6 +113,7 @@
     { id: "clinic", t: "Symptômes et clinique", g: "Linelist lln", i: "M12 21l-1.5-1.3C5.4 15.4 2 12.3 2 8.5 2 5.4 4.4 3 7.5 3c1.7 0 3.4.8 4.5 2.1C13.1 3.8 14.8 3 16.5 3 19.6 3 22 5.4 22 8.5c0 3.8-3.4 6.9-8.5 11.2z" },
     { id: "lab2", t: "Laboratoire (Ct, délais)", g: "Linelist lln", i: "M9 2h6v2h-1v5l5 9a2 2 0 0 1-2 3H7a2 2 0 0 1-2-3l5-9V4H9z" },
     { id: "pec", t: "Prise en charge, vaccination, expositions", g: "Linelist lln", i: "M19 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm-2 10h-4v4h-2v-4H7v-2h4V7h2v4h4z" },
+    { id: "situation", t: "Situation par province", g: "Réunions", i: "M4 3h16v18H4zm3 4v2h10V7zm0 4v2h10v-2zm0 4v2h6v-2z" },
     { id: "indicateurs", t: "Indicateurs du pilier surveillance", g: "Réunions", i: "M3 3h18v18H3zm2 2v4h4V5zm6 0v4h8V5zm-6 6v4h4v-4zm6 0v4h8v-4zm-6 6v2h4v-2zm6 0v2h8v-2z", role: "lecteur", pub: true },
     { id: "presentation", t: "Présentation", g: "Réunions", i: "M3 4h18v2H3zm1 3h16v10H4zm7 11h2v3h-2zm-4 3h10v1H7zM7 14l3-4 2 2 3-4 2 6z", role: "lecteur", pub: true },
     { id: "upload", t: "Charger les données", g: "Données", i: "M5 20h14v-2H5zm7-16-5 5h3v6h4V9h3z", priv: true, role: "analyste" },
@@ -1877,6 +1879,148 @@
     ${panel(`Par zone de santé${S.opProv === "Toutes" ? "" : " — " + esc(S.opProv)}`, T("Tri par colonne ; export CSV"), table("op-zones", zs, colDefs, { sort: cfg.main, maxh: 520 }), { csv: "op-zones" })}`;
   }
 
+  /* ---------------- Personnel de santé (PPL) ---------------- */
+  const SIT_BASE = () => isPublic ? "situation/" : "../reports/situation/";
+  const dlBtn = (f, lab, primary) => f ? `<a class="btn ${primary ? "primary" : ""} sm" href="${SIT_BASE()}${encodeURIComponent(f)}" download="${esc(f)}">⤓ ${T(lab)}</a>` : "";
+  function pplView() {
+    const P = D.ppl; if (!P || !P.totaux) return `<div class="empty">${PER ? T("Disponible pour la situation complète : choisissez « Tout » dans la période d’analyse.") : T("Analyse des PPL indisponible : relancez l’analyse complète.")}</div>`;
+    const provs = ["Toutes", ...P.provinces.map(p => p.province)];
+    if (!provs.includes(S.pplProv)) S.pplProv = "Toutes";
+    const all = S.pplProv === "Toutes", t = all ? P.totaux : P.provinces.find(p => p.province === S.pplProv) || {};
+    const zs = P.zones.filter(z => all || z.province === S.pplProv), ar = P.aires.filter(a => all || a.province === S.pplProv);
+    const sr = P.sitrep, srN = sr ? (all ? sr.total : Object.entries(sr.provinces || {}).find(([k]) => norm(k) === norm(S.pplProv))?.[1]) : null;
+    const ex = all ? P.exposition : Object.values(P.exposition_province.filter(r => r.province === S.pplProv).reduce((o, r) => { o[r.lieu] = { lieu: r.lieu, infectes: r.infectes }; return o; }, {}));
+    const fx = all ? P.fonctions : Object.values(P.fonctions_province.filter(r => r.province === S.pplProv).reduce((o, r) => { o[r.fonction] = { categorie: r.fonction, alertes: r.alertes, confirmes: r.confirmes, deces: r.deces }; return o; }, {}));
+    const F = D.situation?.fichiers || {}, ctx = P.contexte || {};
+    const liste = (P.liste_cas || []).filter(r => all || r.province === S.pplProv);
+    const mcols = [{ k: "alertes", t: "Alertes PPL", num: true }, { k: "preleves", t: "Prélevés", num: true }, { k: "swabs", t: "Swabs", num: true },
+      { k: "confirmes", t: "Confirmés", num: true }, { k: "probables", t: "Probables", num: true }, { k: "non_cas", t: "Non-cas", num: true }, { k: "en_attente", t: "En attente", num: true },
+      { k: "deces", t: "Décès", num: true }, { k: "deces_confirmes", t: "Décès confirmés", num: true }, { k: "confirmes_21j", t: "Confirmés 21 j", num: true },
+      { k: "positivite_pct", t: "Positivité", v: x => pc(x.positivite_pct), sortv: x => x.positivite_pct }, { k: "letalite_pct", t: "Létalité", v: x => pc(x.letalite_pct), sortv: x => x.letalite_pct },
+      { k: "pct_parmi_confirmes", t: "% des confirmés", v: x => pc(x.pct_parmi_confirmes), sortv: x => x.pct_parmi_confirmes }];
+    return `
+    <div class="flex" style="margin-bottom:12px;flex-wrap:wrap;gap:10px">
+      <label class="field">${T("Province")}<select data-state="pplProv">${provs.map(p => `<option value="${esc(p)}" ${S.pplProv === p ? "selected" : ""}>${esc(T(p))}</option>`).join("")}</select></label>
+      <div class="flex" style="gap:8px;align-items:flex-end">${dlBtn(F.ppl_docx, "Analyse détaillée des PPL (Word)", true)}${dlBtn(F.ppl_xlsx, "Tableaux et liste (Excel)")}</div>
+    </div>
+    <div class="grid g4">
+      ${kpi("PPL infectés", nf(t.infectes), `${nf(t.confirmes)} ${T("confirmés")} · ${nf(t.probables)} ${T("probables")} · ${pc(t.pct_parmi_confirmes)} ${T("des confirmés")}${srN !== undefined && srN !== null ? ` · SitRep : ${nf(srN)}` : ""}`, { color: "--critical" })}
+      ${kpi("PPL décédés", nf(t.deces), `${nf(t.deces_confirmes)} ${T("confirmés")} · ${T("létalité")} ${pc(t.letalite_pct)}`, { color: "--ink-2" })}
+      ${kpi("Prélevés / swabés", `${nf(t.preleves)} / ${nf(t.swabs)}`, `${T("positivité")} ${pc(t.positivite_pct)} · ${nf(t.swabs_post_mortem)} ${T("swabs post-mortem")}`, { color: "--s7" })}
+      ${kpi("Infections récentes", `${nf(t.confirmes_7j)} / ${nf(t.confirmes_21j)}`, T("PPL confirmés 7 j / 21 j"), { color: "--s4" })}
+    </div>
+    <div class="notice small"><b>${T("Définition")} :</b> ${esc(T(P.definition))} ${nf(t.alertes)} ${T("lignes « personnel de santé »")} (${nf(P.positions_distinctes)} ${T("valeurs différentes saisies")} ; ${nf(t.doublons)} ${T("doublons probables")}).${sr ? ` ${T("Le SitRep")} n° ${esc(String(sr.numero))} ${T("rapporte")} ${nf(sr.total)} ${T("PPL touchés : l’écart vient des PPL non encore saisis ou non identifiés dans la Linelist.")}` : ""}</div>
+    <div class="grid g21">
+      ${panel("PPL infectés par semaine", T("Confirmés et probables, semaine de début des signes (sinon de notification), par province"), `<div id="c-ppl-wk"></div>`, { png: "ppl_hebdo" })}
+      ${panel("Zones de santé ayant le plus de PPL infectés", all ? T("Toutes les provinces") : esc(S.pplProv), hbars(zs.map(z => ({ ...z, lab: `${z.zone_sante}${all ? " (" + z.province + ")" : ""}` })), "lab", "infectes", { limit: 12, color: "--critical" }))}
+    </div>
+    ${panel(all ? "Par province" : `Zones de santé — ${esc(S.pplProv)}`, T("Alertes, prélèvements, classification, décès ; tri par colonne"),
+      table("ppl-niv", all ? P.provinces : zs, [all ? { k: "province", t: "Province" } : { k: "zone_sante", t: "Zone de santé" }, ...mcols], { sort: "confirmes", search: !all, maxh: 460 }), { csv: "ppl-niv" })}
+    ${all ? panel("Par zone de santé", T("Toutes les zones ayant au moins une alerte chez un PPL"), table("ppl-zs", zs, [{ k: "zone_sante", t: "Zone de santé" }, { k: "province", t: "Province" }, ...mcols], { sort: "confirmes", maxh: 460 }), { csv: "ppl-zs" }) : ""}
+    <div class="grid g2">
+      ${panel("Fonctions des PPL", T("Valeur saisie dans « S1 - Personnel santé - position », regroupée par fonction"), hbars(fx, "categorie", "confirmes", { limit: 14, color: "--s4" }) + table("ppl-fx", fx, [{ k: "categorie", t: "Fonction" }, { k: "alertes", t: "Alertes", num: true }, { k: "confirmes", t: "Confirmés", num: true }, { k: "deces", t: "Décès", num: true }, ...(all ? [{ k: "positivite_pct", t: "Positivité", v: x => pc(x.positivite_pct), sortv: x => x.positivite_pct }] : [])], { sort: "confirmes", search: false, maxh: 300 }), { csv: "ppl-fx" })}
+      ${panel("Lieux d'exposition des PPL infectés", T("Fiche de contact (lieu déclaré), funérailles, ou contact avec un cas connu"), hbars(ex, "lieu", "infectes", { limit: 8, color: "--s1" }) + `<div class="notice small">${all ? `${T("Exposition documentée pour")} ${nf(ctx.exposition_documentee)} ${T("PPL infectés sur")} ${nf(ctx.infectes)} (${pc(ctx.pct_exposition_documentee)}) ; ${nf(ctx.connus_comme_contacts)} ${T("étaient suivis comme contacts avant leur notification.")} ` : ""}${T("Un PPL sans exposition communautaire documentée doit faire l’objet d’une investigation d’infection nosocomiale (structure, service, port des EPI, triage).")}</div>`
+        + (all ? `<h3 style="margin:14px 0 6px;font-size:13px">${T("Lieu de détection (source de l’alerte)")}</h3>` + hbars(P.detection, "source", "infectes", { limit: 8, color: "--s3" }) : ""))}
+    </div>
+    ${panel("Aires de santé les plus touchées", T("PPL infectés (confirmés + probables)"), table("ppl-as", ar, [{ k: "aire_sante", t: "Aire de santé" }, { k: "zone_sante", t: "Zone de santé" }, { k: "province", t: "Province" }, { k: "infectes", t: "PPL infectés", num: true }, { k: "confirmes", t: "Confirmés", num: true }, { k: "deces", t: "Décès", num: true }], { sort: "infectes", maxh: 360 }), { csv: "ppl-as" })}
+    ${liste.length ? panel("PPL infectés (liste pseudonymisée)", T("Identifiant et initiales uniquement"), table("ppl-list", liste, [{ k: "id", t: "Identifiant" }, { k: "ini", t: "Initiales" }, { k: "province", t: "Province" }, { k: "zone", t: "Zone" }, { k: "aire", t: "Aire" },
+      { k: "fonction", t: "Fonction" }, { k: "structure", t: "Structure mentionnée" }, { k: "cls", t: "Classification" }, { k: "date", t: "Notification", v: x => dfmt(x.date), sortv: x => x.date }, { k: "dds", t: "Début des signes", v: x => dfmt(x.dds), sortv: x => x.dds },
+      { k: "dc", t: "Décédé", v: x => x.dc ? badge("Oui", "b-crit") : "", sortv: x => x.dc ? 1 : 0 }, { k: "expo", t: "Lieu d’exposition", wrap: true }, { k: "src", t: "Source de l’alerte" }], { sort: "date", maxh: 480 }), { csv: "ppl-list" }) : ""}
+    <details class="panel" style="padding:14px 18px"><summary><b>${T("Valeurs saisies dans la colonne et fonction retenue")}</b> (${nf(P.positions_distinctes)})</summary>
+      ${table("ppl-pos", P.positions_saisies, [{ k: "position", t: "Valeur saisie" }, { k: "lignes", t: "Lignes", num: true }, { k: "fonction", t: "Fonction retenue" }], { sort: "lignes", maxh: 380 })}</details>`;
+  }
+  function pplCharts() {
+    const P = D.ppl, el = $("#c-ppl-wk"); if (!P || !el) return;
+    const H = P.hebdo || { provinces: [], rows: [] }, all = S.pplProv === "Toutes";
+    const provs = all ? H.provinces : H.provinces.filter(p => p === S.pplProv);
+    const pal = ["--s1", "--critical", "--s4", "--s3", "--s5", "--s7", "--s2", "--s6"];
+    const data = H.rows.map(r => { const o = { week: r[0] }; H.provinces.forEach((p, i) => o[p] = r[1 + i]); return o; });
+    Ch.xy(el, { data, x: "week", stacked: true, height: 260, xLabel: wkLab, xTitle: T("Semaine"), series: provs.map((p, i) => ({ key: p, label: p, color: pal[i % pal.length] })) });
+  }
+
+  /* ---------------- Situation épidémiologique par province ---------------- */
+  function sitTexte(nom, N, Sx) {
+    const a = N.alertes, c = N.contacts, p = N.ppl, hr = N.haut_risque || [];
+    const l = [`Situation épidémiologique — ${nom} — au ${dfmt(Sx.date)}`,
+      `• Alertes : ${nf(a.jour.recues)} reçues le dernier jour, ${nf(a.sept_jours.recues)} sur 7 jours (${nf(a.cumul.recues)} au total) ; ${pc(a.sept_jours.pct_investiguees)} investiguées sur 7 jours (${pc(a.sept_jours.pct_investiguees_24h)} dans les 24 h) ; ${nf(a.sept_jours.validees)} validées (${pc(a.sept_jours.pct_validees)}).`,
+      `• Suivi des contacts : ${nf(c.actifs)} contacts en cours de suivi ; taux de suivi ${pc(c.pct_vus_24h)} (vus ≤ 24 h, Linelist)${c.sitrep_pct_suivi !== null && c.sitrep_pct_suivi !== undefined ? `, ${pc(c.sitrep_pct_suivi)} selon le SitRep` : ""}.`,
+      `• Contacts devenus suspects : ${nf(c.devenus_suspects)} (${pc(c.pct_devenus_suspects)} des contacts listés) ; ${nf(c.devenus_suspects_21j)} ces 21 derniers jours (${pc(c.pct_devenus_suspects_21j)}) ; ${nf(c.devenus_cas)} contacts devenus cas confirmés.`,
+      `• PPL infectés : ${nf(p.infectes)} (${nf(p.confirmes)} confirmés, ${nf(p.probables)} probables)${N.ppl_sitrep !== null && N.ppl_sitrep !== undefined ? ` — SitRep : ${nf(N.ppl_sitrep)}` : ""} ; ${nf(p.confirmes_21j)} ces 21 derniers jours ; ${nf(p.deces)} décès.`,
+      `• Zones de santé avec le plus de PPL infectés : ${(N.zones_ppl || []).slice(0, 5).map(z => `${z.zone_sante} (${z.infectes})`).join(", ") || "aucune"}.`,
+      `• Lieux d’exposition des PPL infectés : ${(N.exposition_ppl || []).map(r => `${r.lieu} (${r.infectes})`).join(", ") || "—"}.`,
+      `• Lieux d’exposition de plus haut risque : ${hr.map(r => `${r.categorie} (${pc(r.taux_cas_pct)} des contacts devenus cas, ${nf(r.devenus_cas)}/${nf(r.contacts)})`).join(" ; ") || "—"}.`];
+    if (N.pci?.actions) l.push(`• Actions PCI (SitRep n° ${Sx.sitrep?.numero} du ${dfmt(Sx.sitrep?.date)}) : ${N.pci.actions}`);
+    return l.join("\n");
+  }
+  function sitView() {
+    const Sx = D.situation; if (!Sx || !Sx.national) return `<div class="empty">${PER ? T("Disponible pour la situation complète : choisissez « Tout » dans la période d’analyse.") : T("Situation par province indisponible : relancez l’analyse complète.")}</div>`;
+    const opts = [["national", "National (RDC)"], ...Sx.provinces.map(p => [p.code, p.province])];
+    if (!opts.some(o => o[0] === S.sitNiv)) S.sitNiv = "national";
+    const nat = S.sitNiv === "national", N = nat ? Sx.national : Sx.provinces.find(p => p.code === S.sitNiv), nom = nat ? "National (RDC)" : `Province : ${N.province}`;
+    const a = N.alertes, c = N.contacts, p = N.ppl, F = Sx.fichiers || {}, sr = Sx.sitrep || {};
+    const exL = (N.exposition_contacts || []).filter(r => r.dimension === "Lieu d'exposition"), exT = (N.exposition_contacts || []).filter(r => r.dimension !== "Lieu d'exposition");
+    const hr0 = (N.haut_risque || [])[0];
+    const exCols = [{ k: "categorie", t: "Catégorie" }, { k: "contacts", t: "Contacts", num: true }, { k: "devenus_suspects", t: "Devenus suspects", num: true }, { k: "devenus_cas", t: "Devenus cas", num: true },
+      { k: "taux_suspects_pct", t: "% suspects", v: x => pc(x.taux_suspects_pct), sortv: x => x.taux_suspects_pct },
+      { k: "taux_cas_pct", t: "% devenus cas (IC 95 %)", v: x => `<b>${pc(x.taux_cas_pct)}</b> <span class="muted">${x.ic95 && x.ic95[0] !== null ? `(${nf(x.ic95[0], 1)}–${nf(x.ic95[1], 1)})` : ""}</span>`, sortv: x => x.taux_cas_pct, csv: x => x.taux_cas_pct }];
+    const comp = nat ? panel("Comparaison des provinces", T("Indicateurs clés de la fiche, une ligne par province"), table("sit-comp", Sx.provinces.map(x => ({ province: x.province, code: x.code,
+      al7: x.alertes.sept_jours.recues, inv: x.alertes.sept_jours.pct_investiguees_24h, val: x.alertes.sept_jours.validees, act: x.contacts.actifs, suiv: x.contacts.pct_vus_24h, srs: x.contacts.sitrep_pct_suivi,
+      dsus: x.contacts.devenus_suspects, pdsus: x.contacts.pct_devenus_suspects, ppl: x.ppl.infectes, ppl21: x.ppl.confirmes_21j, hr: (x.haut_risque || [])[0]?.categorie })),
+      [{ k: "province", t: "Province", v: x => `<a href="#" data-sitniv="${esc(x.code)}">${esc(x.province)}</a>`, sortv: x => x.province, csv: x => x.province }, { k: "al7", t: "Alertes 7 j", num: true }, { k: "inv", t: "Investiguées ≤ 24 h", v: x => pc(x.inv), sortv: x => x.inv },
+        { k: "val", t: "Validées 7 j", num: true }, { k: "act", t: "Contacts suivis", num: true }, { k: "suiv", t: "Suivi ≤ 24 h", v: x => pc(x.suiv), sortv: x => x.suiv }, { k: "srs", t: "Suivi (SitRep)", v: x => pc(x.srs), sortv: x => x.srs },
+        { k: "dsus", t: "Devenus suspects", num: true }, { k: "pdsus", t: "% devenus suspects", v: x => pc(x.pdsus), sortv: x => x.pdsus }, { k: "ppl", t: "PPL infectés", num: true }, { k: "ppl21", t: "PPL conf. 21 j", num: true }, { k: "hr", t: "Lieu le plus à risque" }],
+      { sort: "al7", search: false }), { csv: "sit-comp" }) : "";
+    const pci = nat ? Sx.provinces.filter(x => x.pci?.actions).map(x => `<p><b>${esc(x.province)} :</b> ${esc(x.pci.actions)}</p>`).join("") + (sr.pci_defis ? `<p><b>${T("Défis")} :</b> ${esc(sr.pci_defis)}</p>` : "")
+      : N.pci?.actions ? `<p>${esc(N.pci.actions)}</p>` : `<div class="empty">${T("Aucune action PCI mentionnée pour cette province dans le dernier SitRep déposé.")}</div>`;
+    const eds = N.pci || {};
+    return `
+    <div class="flex" style="margin-bottom:12px;flex-wrap:wrap;gap:10px">
+      <label class="field">${T("Niveau")}<select data-state="sitNiv">${opts.map(([k, l]) => `<option value="${esc(k)}" ${S.sitNiv === k ? "selected" : ""}>${esc(T(l))}</option>`).join("")}</select></label>
+      <div class="flex" style="gap:8px;align-items:flex-end">${dlBtn(nat ? F.situation_docx : N.fichier, nat ? "Fiches national + provinces (Word)" : "Fiche de la province (Word)", true)}${dlBtn(F.situation_xlsx, "Tableaux (Excel)")}${nat ? "" : dlBtn(F.situation_docx, "Toutes les fiches (Word)")}</div>
+    </div>
+    <div class="notice small">${T("Situation au")} <b>${dfmt(Sx.date)}</b> — Linelist et suivi des contacts${sr.numero ? ` ; actions PCI et taux de suivi officiels : SitRep n° ${esc(String(sr.numero))} du ${dfmt(sr.date)}` : ""}. ${T("Mise à jour automatique à chaque analyse.")}</div>
+    <h3 style="margin:18px 0 8px;font-size:14px;color:var(--ink-2)">${T("Alertes")}</h3>
+    <div class="grid g4">
+      ${kpi("Alertes reçues", nf(a.jour.recues), `${T("dernier jour")} · ${nf(a.sept_jours.recues)} ${T("sur 7 j")} · ${nf(a.cumul.recues)} ${T("au total")}`, { color: "--s1" })}
+      ${kpi("Alertes investiguées (7 j)", nf(a.sept_jours.investiguees), `${pc(a.sept_jours.pct_investiguees)} · ${T("≤ 24 h")} : ${pc(a.sept_jours.pct_investiguees_24h)}`, { color: "--s3", meter: a.sept_jours.pct_investiguees_24h, meterColor: (a.sept_jours.pct_investiguees_24h ?? 0) >= 95 ? "--good" : "--warn" })}
+      ${kpi("Alertes validées (7 j)", nf(a.sept_jours.validees), `${pc(a.sept_jours.pct_validees)} ${T("des alertes")} · ${T("cumul")} ${nf(a.cumul.validees)}`, { color: "--s4" })}
+      ${kpi("Alertes de décès (7 j)", nf(a.sept_jours.deces), `${nf(a.sept_jours.confirmees)} ${T("alertes confirmées sur 7 j")}`, { color: "--ink-2" })}
+    </div>
+    <h3 style="margin:18px 0 8px;font-size:14px;color:var(--ink-2)">${T("Suivi des contacts")}</h3>
+    <div class="grid g4">
+      ${kpi("Contacts en cours de suivi", nf(c.actifs), `${nf(c.non_vus_3j)} ${T("non vus depuis plus de 3 j")}`, { color: "--s1" })}
+      ${kpi("Taux de suivi des contacts", pc(c.pct_vus_24h), `${T("vus ≤ 24 h (Linelist)")} · ≤ 72 h : ${pc(c.pct_vus_72h)}${c.sitrep_pct_suivi !== null && c.sitrep_pct_suivi !== undefined ? ` · SitRep : <b>${pc(c.sitrep_pct_suivi)}</b>` : ""}`, { color: "--good", meter: c.sitrep_pct_suivi ?? c.pct_vus_24h, meterColor: (c.sitrep_pct_suivi ?? c.pct_vus_24h ?? 0) >= 95 ? "--good" : "--warn" })}
+      ${kpi("Contacts devenus suspects", nf(c.devenus_suspects), `${pc(c.pct_devenus_suspects)} ${T("des contacts listés")} · 21 j : ${nf(c.devenus_suspects_21j)} (${pc(c.pct_devenus_suspects_21j)})`, { color: "--warn" })}
+      ${kpi("Contacts devenus cas", nf(c.devenus_cas), `${pc(c.pct_devenus_cas)} ${T("des")} ${nf(c.listes)} ${T("contacts listés")} · 21 j : ${nf(c.devenus_cas_21j)}`, { color: "--critical" })}
+    </div>
+    <h3 style="margin:18px 0 8px;font-size:14px;color:var(--ink-2)">${T("Personnel de santé (PPL)")}</h3>
+    <div class="grid g4">
+      ${kpi("PPL infectés", nf(p.infectes), `${nf(p.confirmes)} ${T("confirmés")} · ${nf(p.probables)} ${T("probables")}${N.ppl_sitrep !== null && N.ppl_sitrep !== undefined ? ` · SitRep : ${nf(N.ppl_sitrep)}` : ""}`, { color: "--critical", go: "ppl" })}
+      ${kpi("PPL confirmés récents", `${nf(p.confirmes_7j)} / ${nf(p.confirmes_21j)}`, T("7 j / 21 j"), { color: "--s4" })}
+      ${kpi("PPL décédés", nf(p.deces), `${nf(p.deces_confirmes)} ${T("confirmés")} · ${T("létalité")} ${pc(p.letalite_pct)}`, { color: "--ink-2" })}
+      ${kpi("Alertes chez des PPL", nf(p.alertes), `${nf(p.preleves)} ${T("prélevés")} · ${nf(p.swabs)} ${T("swabs")} · ${pc(p.pct_parmi_confirmes)} ${T("des confirmés")}`, { color: "--s1" })}
+    </div>
+    ${comp}
+    <div class="grid g2">
+      ${panel("Zones de santé ayant le plus de PPL infectés", esc(nom), N.zones_ppl.length ? table("sit-zs", N.zones_ppl, [{ k: "zone_sante", t: "Zone de santé" }, ...(nat ? [{ k: "province", t: "Province" }] : []), { k: "infectes", t: "PPL infectés", num: true }, { k: "confirmes", t: "Confirmés", num: true }, { k: "deces", t: "Décès", num: true }, { k: "confirmes_21j", t: "Confirmés 21 j", num: true }], { sort: "infectes", search: false }) : `<div class="empty">${T("Aucun PPL infecté")}</div>`, { csv: "sit-zs" })}
+      ${panel("Lieux d'exposition des PPL infectés", T("Fiche de contact, funérailles ou contact avec un cas connu"), hbars(N.exposition_ppl || [], "lieu", "infectes", { limit: 8, color: "--s1" }))}
+    </div>
+    ${panel("Lieux d'exposition et risque de devenir cas", T("Contacts listés par lieu d’exposition déclaré : part devenue suspecte ou cas (IC 95 % de Wilson)"),
+      (hr0 ? `<div class="notice crit"><b>${T("Lieu de plus haut risque")} : ${esc(T(hr0.categorie))}</b> — ${pc(hr0.taux_cas_pct)} ${T("des contacts qui y ont été exposés sont devenus des cas")} (${nf(hr0.devenus_cas)} / ${nf(hr0.contacts)}). ${T("Renforcer en priorité la PCI et le suivi des contacts autour de ce type d’exposition.")}</div>` : "")
+      + `<div class="grid g2">${table("sit-exl", exL, [{ k: "categorie", t: "Lieu d’exposition" }, ...exCols.slice(1)], { sort: "taux_cas_pct", search: false })}${table("sit-ext", exT, [{ k: "categorie", t: "Type de contact" }, ...exCols.slice(1)], { sort: "taux_cas_pct", search: false })}</div>`, { csv: "sit-exl" })}
+    ${panel("Actions PCI réalisées", sr.numero ? `SitRep n° ${esc(String(sr.numero))} du ${dfmt(sr.date)} — pilier PCI/EDS` : T("Déposez le SitRep PDF du jour dans les données"),
+      `<div class="sit-pci">${pci}</div>` + (eds.eds_realise !== null && eds.eds_realise !== undefined ? `<div class="notice small"><b>EDS</b> : ${nf(eds.eds_realise)} ${T("réalisés")}, ${nf(eds.eds_non_realise)} ${T("non réalisés")} (${T("cumul Linelist/lln")})${eds.eds_attendus_24h !== null && eds.eds_attendus_24h !== undefined ? ` ; ${T("dernières 24 h (SitRep)")} : ${nf(eds.eds_realises_24h)} / ${nf(eds.eds_attendus_24h)} ${T("EDS réalisés")}, ${nf(eds.corps_swabes_24h)} ${T("corps swabés")}` : ""}.</div>` : ""))}
+    ${panel("Texte prêt à envoyer", T("Résumé de la fiche à copier dans un message ou un rapport"), `<pre class="sit-txt" id="sit-txt" style="white-space:pre-wrap;font:inherit;font-size:13px;margin:0">${esc(sitTexte(nom, N, Sx))}</pre>`,
+      { tools: `<button class="btn sm" type="button" data-sit-copy>${T("Copier le texte")}</button>` })}
+    <details class="panel" style="padding:14px 18px"><summary><b>${T("Définitions et sources")}</b></summary>${Object.entries(Sx.definitions || {}).map(([k, v]) => `<p><b>${esc(k)}</b> : ${esc(T(v))}</p>`).join("")}</details>`;
+  }
+  document.addEventListener("click", e => {
+    const b = e.target.closest("[data-sit-copy]");
+    if (b) { const el = $("#sit-txt"); if (el && navigator.clipboard) navigator.clipboard.writeText(el.innerText).then(() => { b.textContent = "✓ " + T("Copié"); }); return; }
+    const a = e.target.closest("[data-sitniv]");
+    if (a) { e.preventDefault(); S.sitNiv = a.dataset.sitniv; render(); window.scrollTo(0, 0); }
+  });
+
   /* ---------------- Zones à risque (grille de la riposte) ---------------- */
   const ZCOL = { "Rouge": "#BD6F68", "Orange": "#EEB98A", "Jaune": "#EBDD92", "Verte": "#A3C98F", "Non touchée": "#D9D6CF" };
   const ZORD = ["Rouge", "Orange", "Jaune", "Verte", "Non touchée"];
@@ -2277,7 +2421,7 @@
     if (cp) { const el = $("#map-cap-" + cp.dataset.copyCap); if (el && navigator.clipboard) navigator.clipboard.writeText(el.innerText).then(() => { cp.textContent = "✓ " + T("Copié"); }); }
   });
 
-  const VIEWS = { overview: [overview, overviewCharts], territories: [territories, territoriesCharts], followup: [followup, followupCharts], index: [indexView, indexCharts], journey: [journey, journeyCharts], chains: [chainsView, chainsCharts], recon: [reconView, reconCharts], dynamics: [dynamicsView, dynamicsCharts], children: [kidsView, kidsCharts], superspreading: [superView, superCharts], resurgence: [resurgenceView, resurgenceCharts], labs: [labsView, labsCharts], nowcast: [nowcastView, nowcastCharts], forecast: [forecastView, forecastCharts], priority: [priorityView], rtm: [rtmView, rtmCharts], riskzones: [riskZonesView, riskZonesCharts], alerts: [alertsView, alertsCharts], eds: [edsView, edsCharts], clinic: [clinicView, clinicCharts], lab2: [lab2View, lab2Charts], pec: [pecView, pecCharts], fusion: [fusionView], maps: [mapsView], ops: [opsView], upload: [O.uploadView, O.uploadWire], presentation: [O.presView, O.presWire], indicateurs: [() => O.indView(D), O.indWire], comptes: [O.comptesView, O.comptesWire], publication: [O.pubView, O.pubWire], quality: [qualityView], method: [methodView], terms: [termsView] };
+  const VIEWS = { overview: [overview, overviewCharts], territories: [territories, territoriesCharts], followup: [followup, followupCharts], index: [indexView, indexCharts], journey: [journey, journeyCharts], chains: [chainsView, chainsCharts], recon: [reconView, reconCharts], dynamics: [dynamicsView, dynamicsCharts], children: [kidsView, kidsCharts], superspreading: [superView, superCharts], resurgence: [resurgenceView, resurgenceCharts], labs: [labsView, labsCharts], nowcast: [nowcastView, nowcastCharts], forecast: [forecastView, forecastCharts], priority: [priorityView], rtm: [rtmView, rtmCharts], riskzones: [riskZonesView, riskZonesCharts], alerts: [alertsView, alertsCharts], eds: [edsView, edsCharts], clinic: [clinicView, clinicCharts], lab2: [lab2View, lab2Charts], pec: [pecView, pecCharts], fusion: [fusionView], maps: [mapsView], ops: [opsView], ppl: [pplView, pplCharts], situation: [sitView], upload: [O.uploadView, O.uploadWire], presentation: [O.presView, O.presWire], indicateurs: [() => O.indView(D), O.indWire], comptes: [O.comptesView, O.comptesWire], publication: [O.pubView, O.pubWire], quality: [qualityView], method: [methodView], terms: [termsView] };
   function buildNav() {
     let g = "";
     $("#navigation").innerHTML = TABS.map(t => { const h = t.g !== g ? `<div class="nav-group">${T(t.g)}</div>` : ""; g = t.g; return `${h}<button data-tab="${t.id}" class="${S.tab === t.id ? "active" : ""}"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="${t.i}"/></svg>${T(t.t)}</button>`; }).join("");
