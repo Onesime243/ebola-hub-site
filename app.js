@@ -1942,7 +1942,7 @@
   function sitTexte(nom, N, Sx) {
     const a = N.alertes, c = N.contacts, p = N.ppl, hr = N.haut_risque || [];
     const l = [`Situation épidémiologique — ${nom} — au ${dfmt(Sx.date)}`,
-      `• Alertes : ${nf(a.jour.recues)} reçues le dernier jour, ${nf(a.sept_jours.recues)} sur 7 jours (${nf(a.cumul.recues)} au total) ; ${pc(a.sept_jours.pct_investiguees)} investiguées sur 7 jours (${pc(a.sept_jours.pct_investiguees_24h)} dans les 24 h) ; ${nf(a.sept_jours.validees)} validées (${pc(a.sept_jours.pct_validees)}).`,
+      `• Alertes : ${nf(a.jour.recues)} reçues le ${dfmt(Sx.jour || Sx.date)}, ${nf(a.sept_jours.recues)} sur 7 jours (${nf(a.cumul.recues)} au total) ; ${pc(a.sept_jours.pct_investiguees)} investiguées sur 7 jours (${pc(a.sept_jours.pct_investiguees_24h)} dans les 24 h) ; ${nf(a.sept_jours.validees)} validées (${pc(a.sept_jours.pct_validees)}).`,
       `• Suivi des contacts : ${nf(c.actifs)} contacts en cours de suivi ; taux de suivi ${pc(c.pct_vus_24h)} (vus ≤ 24 h, Linelist)${c.sitrep_pct_suivi !== null && c.sitrep_pct_suivi !== undefined ? `, ${pc(c.sitrep_pct_suivi)} selon le SitRep` : ""}.`,
       `• Contacts devenus suspects : ${nf(c.devenus_suspects)} (${pc(c.pct_devenus_suspects)} des contacts listés) ; ${nf(c.devenus_suspects_21j)} ces 21 derniers jours (${pc(c.pct_devenus_suspects_21j)}) ; ${nf(c.devenus_cas)} contacts devenus cas confirmés.`,
       `• PPL infectés : ${nf(p.infectes)} (${nf(p.confirmes)} confirmés, ${nf(p.probables)} probables)${N.ppl_sitrep !== null && N.ppl_sitrep !== undefined ? ` — SitRep : ${nf(N.ppl_sitrep)}` : ""} ; ${nf(p.confirmes_21j)} ces 21 derniers jours ; ${nf(p.deces)} décès.`,
@@ -1981,7 +1981,7 @@
     <div class="notice small">${T("Situation au")} <b>${dfmt(Sx.date)}</b> — Linelist et suivi des contacts${sr.numero ? ` ; actions PCI et taux de suivi officiels : SitRep n° ${esc(String(sr.numero))} du ${dfmt(sr.date)}` : ""}. ${T("Mise à jour automatique à chaque analyse.")}</div>
     <h3 style="margin:18px 0 8px;font-size:14px;color:var(--ink-2)">${T("Alertes")}</h3>
     <div class="grid g4">
-      ${kpi("Alertes reçues", nf(a.jour.recues), `${T("dernier jour")} · ${nf(a.sept_jours.recues)} ${T("sur 7 j")} · ${nf(a.cumul.recues)} ${T("au total")}`, { color: "--s1" })}
+      ${kpi("Alertes reçues", nf(a.jour.recues), `${T("le")} ${dfmt(Sx.jour || Sx.date)} · ${nf(a.sept_jours.recues)} ${T("sur 7 j")} · ${nf(a.cumul.recues)} ${T("au total")}`, { color: "--s1" })}
       ${kpi("Alertes investiguées (7 j)", nf(a.sept_jours.investiguees), `${pc(a.sept_jours.pct_investiguees)} · ${T("≤ 24 h")} : ${pc(a.sept_jours.pct_investiguees_24h)}`, { color: "--s3", meter: a.sept_jours.pct_investiguees_24h, meterColor: (a.sept_jours.pct_investiguees_24h ?? 0) >= 95 ? "--good" : "--warn" })}
       ${kpi("Alertes validées (7 j)", nf(a.sept_jours.validees), `${pc(a.sept_jours.pct_validees)} ${T("des alertes")} · ${T("cumul")} ${nf(a.cumul.validees)}`, { color: "--s4" })}
       ${kpi("Alertes de décès (7 j)", nf(a.sept_jours.deces), `${nf(a.sept_jours.confirmees)} ${T("alertes confirmées sur 7 j")}`, { color: "--ink-2" })}
