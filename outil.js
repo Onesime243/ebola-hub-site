@@ -195,12 +195,12 @@ window.HubOutil = (function () {
       </tbody></table></div>`;
     const prm = I.parametres || {}, pp = I.parametres_provinces || {};
     const provs = Object.values(I.niveaux).filter(n => n.niveau === "province").map(n => n.province);
-    const reglages = SERVED && can("analyste") ? panel("Paramètres des alertes attendues", T("Alertes attendues par jour = population × (incidence annuelle du paludisme + taux brut de mortalité) ÷ 1000 ÷ 365. Population des zones : fichier dont le nom contient POPULATION (colonnes zone de santé et population) dans config/ ou data/") + (I.population_fichier ? ` — ${T("utilisé")} : ${esc(I.population_fichier)}` : ` — ${T("aucun fichier trouvé")}`) + T(" ; ou population par province ci-dessous."),
+    const reglages = SERVED && can("analyste") ? panel("Paramètres des alertes attendues", T("Alertes MVE attendues par jour = population × taux d'alertes MVE attendues (pour 10 000 habitants par semaine, norme du SGI MVE) ÷ 70 000 + décès communautaires attendus (population × taux brut de mortalité ÷ 1000 ÷ 365 ; tout décès communautaire est une alerte MVE). Population des zones : fichier dont le nom contient POPULATION (colonnes zone de santé et population) dans config/ ou data/") + (I.population_fichier ? ` — ${T("utilisé")} : ${esc(I.population_fichier)}` : ` — ${T("aucun fichier trouvé")}`) + T(" ; ou population par province ci-dessous."),
       `<form id="f-ind" class="cpt-form">
-        <label class="field">${T("Incidence annuelle du paludisme (pour 1000)")}<input type="number" step="any" min="0" name="incidence_paludisme_pour_1000" value="${esc(prm.incidence_paludisme_pour_1000 ?? "")}"></label>
+        <label class="field">${T("Alertes MVE attendues (pour 10 000 habitants par semaine)")}<input type="number" step="any" min="0" name="alertes_ebola_pour_10000_par_semaine" value="${esc(prm.alertes_ebola_pour_10000_par_semaine ?? "")}"></label>
         <label class="field">${T("Taux brut de mortalité (pour 1000 par an)")}<input type="number" step="any" min="0" name="mortalite_brute_pour_1000" value="${esc(prm.mortalite_brute_pour_1000 ?? "")}"></label>
-        <details style="grid-column:1/-1"><summary><b>${T("Population par province (facultatif)")}</b></summary><div class="table-wrap" style="max-height:340px"><table><thead><tr><th>${T("Province")}</th><th>${T("Population")}</th><th>${T("Incidence paludisme ‰")}</th><th>${T("Mortalité ‰")}</th></tr></thead><tbody>
-          ${provs.map(p => { const o = pp[p] || {}; return `<tr data-indp="${esc(p)}"><td>${esc(p)}</td><td><input type="number" min="0" data-k="population" value="${o.population ?? ""}"></td><td><input type="number" step="any" min="0" data-k="incidence_paludisme_pour_1000" value="${o.incidence_paludisme_pour_1000 ?? ""}"></td><td><input type="number" step="any" min="0" data-k="mortalite_brute_pour_1000" value="${o.mortalite_brute_pour_1000 ?? ""}"></td></tr>`; }).join("")}
+        <details style="grid-column:1/-1"><summary><b>${T("Population par province (facultatif)")}</b></summary><div class="table-wrap" style="max-height:340px"><table><thead><tr><th>${T("Province")}</th><th>${T("Population")}</th><th>${T("Alertes MVE /10 000/sem.")}</th><th>${T("Mortalité ‰")}</th></tr></thead><tbody>
+          ${provs.map(p => { const o = pp[p] || {}; return `<tr data-indp="${esc(p)}"><td>${esc(p)}</td><td><input type="number" min="0" data-k="population" value="${o.population ?? ""}"></td><td><input type="number" step="any" min="0" data-k="alertes_ebola_pour_10000_par_semaine" value="${o.alertes_ebola_pour_10000_par_semaine ?? ""}"></td><td><input type="number" step="any" min="0" data-k="mortalite_brute_pour_1000" value="${o.mortalite_brute_pour_1000 ?? ""}"></td></tr>`; }).join("")}
         </tbody></table></div></details>
         <button class="btn primary" type="submit" data-job-btn>${T("Enregistrer et recalculer")}</button></form><span class="muted small" id="job-state"></span><pre id="job-log" class="logbox"></pre>`) : "";
     return `<div class="flex" style="margin-bottom:12px;gap:10px;flex-wrap:wrap;align-items:end"><label class="field">${T("Niveau")}<select data-ind-niv>${opts}</select></label>
@@ -215,7 +215,7 @@ window.HubOutil = (function () {
     e.preventDefault();
     const f = e.target, provinces = {};
     f.querySelectorAll("tr[data-indp]").forEach(tr => { const o = {}; tr.querySelectorAll("input[data-k]").forEach(i => { if (i.value !== "") o[i.dataset.k] = Number(i.value); }); if (Object.keys(o).length) provinces[tr.dataset.indp] = o; });
-    const j = await post("/api/indicateurs", { incidence_paludisme_pour_1000: f.incidence_paludisme_pour_1000.value, mortalite_brute_pour_1000: f.mortalite_brute_pour_1000.value, provinces });
+    const j = await post("/api/indicateurs", { alertes_ebola_pour_10000_par_semaine: f.alertes_ebola_pour_10000_par_semaine.value, mortalite_brute_pour_1000: f.mortalite_brute_pour_1000.value, provinces });
     if (!j.ok) { $("#job-state").textContent = j.error || ""; return; }
     suivre(s => { if (s.ok) location.reload(); });
   });
