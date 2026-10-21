@@ -491,8 +491,18 @@
       const j = await r.json().catch(() => ({}));
       log.textContent += r.ok ? `  ✓ copié (${S.upZone === "province" ? "donnees/province" : "donnees/zs/" + zoneName})\n` : `  ✗ ${j.erreur || r.status}\n`;
     }
-    log.textContent += "Cliquez « Analyser » pour mettre à jour les tableaux de bord.\n";
     loadFiles();
+    log.textContent += "Mise à jour automatique : analyse lancée (tableaux de bord, présentations, indicateurs)…\n";
+    autoRun(S.upZone === "province" ? "tout" : S.upZone);
+  }
+  /* analyse lancée automatiquement après un chargement ; si une autre tâche tourne, nouvel essai toutes les 10 s */
+  async function autoRun(target, essais = 180) {
+    const body = { zone: target === "tout" || target === "province" ? target : ZN[target] };
+    const r = await fetch("/api/analyser", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body), credentials: "same-origin" });
+    if (r.status === 409 && essais > 0) { const log = $("#log"); if (log && essais === 180) log.textContent += "Une autre tâche est en cours : l'analyse démarrera juste après.\n"; setTimeout(() => autoRun(target, essais - 1), 10000); return; }
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) { alert(j.erreur || "Analyse impossible"); return; }
+    pollJob();
   }
   async function runJob(target) {
     const body = { zone: target === "tout" || target === "province" ? target : ZN[target] };

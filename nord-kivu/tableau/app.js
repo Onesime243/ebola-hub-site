@@ -786,13 +786,15 @@
       const j = await r.json().catch(() => ({}));
       log.textContent += (r.ok ? `  ✓ copié dans donnees/zs/${D.meta.zone_de_sante}/\n` : `  ✗ ${j.erreur || r.status}\n`);
     }
-    log.textContent += "Une copie datée de chaque fichier est gardée dans archives/. Cliquez « Lancer l'analyse ».\n";
+    log.textContent += "Une copie datée de chaque fichier est gardée dans archives/. Mise à jour automatique : analyse lancée…\n";
     loadFiles();
+    runAnalysis(null, true);
   }
-  async function runAnalysis(date) {
-    if (!date) { S.page = "fichiers"; render(); }
-    let log = $("#log"); if (!log) { alert("Analyse lancée : patientez, la page se rechargera."); }
+  async function runAnalysis(date, auto = false, essais = 180) {
+    if (!date && !auto) { S.page = "fichiers"; render(); }
+    let log = $("#log"); if (!log && !auto) { alert("Analyse lancée : patientez, la page se rechargera."); }
     const r = await fetch("/api/analyser", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ zone: D.meta.zone_de_sante, date: date || null }), credentials: "same-origin" });
+    if (r.status === 409 && auto && essais > 0) { setTimeout(() => runAnalysis(date, true, essais - 1), 10000); return; }
     if (!r.ok) { alert((await r.json().catch(() => ({}))).erreur || "Analyse impossible"); return; }
     const poll = async () => { const s = await (await fetch("/api/etat", { credentials: "same-origin" })).json(); log = $("#log"); if (log) { log.hidden = false; log.textContent = s.log; log.scrollTop = log.scrollHeight; } if (s.running) setTimeout(poll, 1200); else if (s.ok) location.reload(); };
     poll();
@@ -835,7 +837,7 @@
         <label class="drop" id="drop0"><input type="file" id="up0" multiple hidden accept=".xlsx,.xlsb,.xls,.xlsm,.csv,.zip,.geojson,.json"><b>Déposez les fichiers ici</b><span class="muted small">ou cliquez pour les choisir · l'outil reconnaît chaque fichier par son contenu</span></label>
         <div id="up-files" style="margin-top:12px"></div><p style="margin-top:12px"><button class="btn primary" id="run0">Lancer l'analyse</button></p><div class="log" id="log" hidden></div></section>`, "ZS " + zone);
       const list = async () => { try { $("#up-files").innerHTML = filesHTML(await (await fetch("/api/fichiers?zone=" + encodeURIComponent(zone), { credentials: "same-origin" })).json()); } catch (e) {} };
-      const send = async files => { const log = $("#log"); log.hidden = false; for (const f of files) { log.textContent += `Envoi de ${f.name}…\n`; const r = await fetch(`/api/televerser?zone=${encodeURIComponent(zone)}&nom=${encodeURIComponent(f.name)}`, { method: "POST", body: f, credentials: "same-origin" }); const j = await r.json().catch(() => ({})); log.textContent += r.ok ? "  ✓ copié (et copie datée gardée)\n" : `  ✗ ${j.erreur || r.status}\n`; } list(); };
+      const send = async files => { const log = $("#log"); log.hidden = false; for (const f of files) { log.textContent += `Envoi de ${f.name}…\n`; const r = await fetch(`/api/televerser?zone=${encodeURIComponent(zone)}&nom=${encodeURIComponent(f.name)}`, { method: "POST", body: f, credentials: "same-origin" }); const j = await r.json().catch(() => ({})); log.textContent += r.ok ? "  ✓ copié (et copie datée gardée)\n" : `  ✗ ${j.erreur || r.status}\n`; } list(); log.textContent += "Analyse lancée automatiquement…\n"; $("#run0").click(); };
       $("#up0").addEventListener("change", e => send(e.target.files));
       const dz = $("#drop0"); dz.addEventListener("dragover", e => { e.preventDefault(); dz.classList.add("over"); }); dz.addEventListener("dragleave", () => dz.classList.remove("over")); dz.addEventListener("drop", e => { e.preventDefault(); dz.classList.remove("over"); send(e.dataTransfer.files); });
       $("#run0").addEventListener("click", async () => {
