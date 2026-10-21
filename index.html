@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="fr">
 <head>
+  <meta name="robots" content="noindex">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Ebola Outbreak Analytics Hub</title>
@@ -34,21 +35,7 @@
     </main>
   </div>
   <script src="site-config.js"></script>
-  <script>
-    /* Données : période choisie (?p=AAAA-MM-JJ_AAAA-MM-JJ, interface locale) ou jeu complet */
-    (function () {
-      var m = /[?&]p=(\d{4}-\d{2}-\d{2})_(\d{4}-\d{2}-\d{2})/.exec(location.search);
-      if (!m) return;
-      var S = window.HUB_STATIC, key = m[1] + "_" + m[2];
-      if (S && S.periodes && S.periodes.some(function (x) { return x.cle === key; })) document.write('<script src="periodes/' + key + '.js"><\/script>');
-      else if (!S && location.protocol.indexOf("http") === 0) document.write('<script src="/api/periode/data.js?d=' + m[1] + '&f=' + m[2] + '"><\/script>');
-    })();
-  </script>
-  <script>if (!window.DASHBOARD_DATA) document.write('<script src="dashboard-data.js"><\/script>');</script>
-  <script src="i18n.js"></script>
-  <script src="charts.js"></script>
-  <script src="xlsx.js"></script>
-  <script src="app.js"></script>
+  <script src="en_ligne.js" data-page="hub"></script>
   <div class="overlay hide" id="pb-overlay"><div class="overlay-card"><div class="spinner"></div><h3 id="pb-ov-title">Recalcul de la période…</h3><div class="muted small" id="pb-ov-sub"></div><pre class="logbox" id="pb-ov-log"></pre><button class="btn" id="pb-ov-close" type="button">Fermer</button></div></div>
 </body>
 </html>

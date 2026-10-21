@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>Connexion — Ebola Outbreak Analytics Hub</title>
+  <link rel="stylesheet" href="styles.css">
+  <script>try{var t=localStorage.getItem("hub-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+  <style>
+    .lg{min-height:100vh;display:grid;grid-template-columns:minmax(0,1.05fr) minmax(340px,.95fr)}
+    .lg-side{background:var(--brand);color:#fff;padding:48px 56px;display:flex;flex-direction:column;justify-content:space-between}
+    :root[data-theme="dark"] .lg-side{background:#101820}
+    .lg-side h1{font-size:34px;line-height:1.12;letter-spacing:-.015em;margin:28px 0 14px;max-width:16ch}
+    .lg-side p{max-width:46ch;opacity:.82;margin:0 0 10px;font-size:14.5px}
+    .lg-side small{opacity:.6;font-size:12px}
+    .lg-main{display:flex;align-items:center;justify-content:center;padding:40px 24px;background:var(--page)}
+    .lg-card{width:100%;max-width:380px}
+    .lg-card h2{font-size:21px;margin:0 0 4px}
+    .lg-card .sub{color:var(--ink-2);margin:0 0 22px;font-size:13.5px}
+    .lg-card label{display:block;font-size:12.5px;font-weight:600;color:var(--ink-2);margin:14px 0 5px}
+    .lg-card input{width:100%;background:var(--surface);border:1px solid var(--line-2);border-radius:9px;padding:10px 12px;font-size:15px;color:var(--ink)}
+    .lg-card button[type=submit]{width:100%;justify-content:center;margin-top:20px;padding:11px;font-size:15px}
+    .msg{min-height:20px;margin-top:12px;font-size:13px;color:var(--ink-2)}
+    .msg.err{color:var(--critical)}
+    .lg-hint{margin-top:26px;font-size:12.5px;color:var(--muted);border-top:1px solid var(--line);padding-top:14px}
+    @media (max-width:820px){.lg{grid-template-columns:1fr}.lg-side{padding:28px 20px}.lg-side h1{font-size:26px;margin:16px 0 8px}.lg-side p:not(:first-of-type){display:none}}
+  </style>
+</head>
+<body>
+  <div class="lg">
+    <section class="lg-side">
+      <div class="brand" style="padding:0"><div class="logo">EO</div><div><b>Ebola Outbreak</b><small>Analytics Hub · UMIE–INRB</small></div></div>
+      <div>
+        <h1>Riposte à la maladie à virus Ebola — situation nationale</h1>
+        <p>Surveillance, suivi des contacts, laboratoire, transmission et priorisation des zones de santé, pour toutes les provinces.</p>
+        <p>Les données sont réservées aux équipes de la riposte : connectez-vous avec le compte qui vous a été remis.</p>
+      </div>
+      <small>© 2026 Onesime Mbulayi &amp; Team Data UMIE–INRB</small>
+    </section>
+    <main class="lg-main">
+      <div class="lg-card">
+        <form id="f-login" hidden autocomplete="on">
+          <h2>Connexion</h2>
+          <p class="sub" id="l-sub">Identifiant et mot de passe de l'outil.</p>
+          <label for="l-id">Identifiant</label>
+          <input id="l-id" name="username" autocomplete="username" required autocapitalize="none" spellcheck="false">
+          <label for="l-mdp">Mot de passe</label>
+          <input id="l-mdp" name="password" type="password" autocomplete="current-password" required>
+          <button class="btn primary" type="submit">Se connecter</button>
+          <div class="msg" id="l-msg" role="status"></div>
+          <p class="lg-hint">Mot de passe oublié : demandez à un administrateur de l'outil de vous en donner un nouveau.</p>
+        </form>
+        <form id="f-premier" hidden autocomplete="off">
+          <h2>Première utilisation</h2>
+          <p class="sub">Créez le compte administrateur. Il pourra ensuite créer les comptes des analystes et des lecteurs.</p>
+          <label for="p-nom">Nom affiché</label>
+          <input id="p-nom" value="Administrateur national">
+          <label for="p-id">Identifiant</label>
+          <input id="p-id" required autocapitalize="none" spellcheck="false" placeholder="ex. admin.national" pattern="[a-z0-9._\-]{3,32}">
+          <label for="p-mdp">Mot de passe (8 caractères au moins)</label>
+          <input id="p-mdp" type="password" required minlength="8" autocomplete="new-password">
+          <label for="p-mdp2">Confirmer le mot de passe</label>
+          <input id="p-mdp2" type="password" required minlength="8" autocomplete="new-password">
+          <button class="btn primary" type="submit">Créer le compte administrateur</button>
+          <div class="msg" id="p-msg" role="status"></div>
+        </form>
+        <div id="l-distant" hidden>
+          <h2>Outil pas encore configuré</h2>
+          <p class="sub">Le premier compte (administrateur) se crée sur l'ordinateur où l'outil est installé : ouvrez 00_INTERFACE sur cet ordinateur.</p>
+        </div>
+      </div>
+    </main>
+  </div>
+  <script src="en_ligne.js" data-page="connexion"></script>
+</body>
+</html>

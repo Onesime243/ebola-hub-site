@@ -265,8 +265,12 @@
       cand.forEach(({ f, main, q }) => {
         const v = opt.value(f), size = main ? fs : fsMin;
         const txt = main ? (opt.labelText ? opt.labelText(f, v) : `${f.data_zone} · ${v === null || v === undefined ? "—" : nf(v, opt.digits || 0)}`) : (opt.labelTextMinor ? opt.labelTextMinor(f) : f.data_zone);
-        const tw = labelWidth(txt, size) + 6, th = size + 3, sy = th + 1;
-        const rectAt = (x0, y0) => [x0 - tw / 2, y0 - th + 3, x0 + tw / 2, y0 + 3];
+        // « nom · valeur » : le nom, et la valeur dans un cercle blanc au-dessous (comme les cartes de catégories)
+        const sep = main ? String(txt).indexOf(" · ") : -1;
+        const nm = sep >= 0 ? txt.slice(0, sep) : txt, vt = sep >= 0 ? txt.slice(sep + 3) : "";
+        const rr = vt ? Math.max(size * 1.05, labelWidth(vt, size + .5) / 2 + 4) : 0;
+        const tw = Math.max(labelWidth(nm, size) + 6, 2 * rr + 2), th = size + 3 + (vt ? 2 * rr + 2 : 0), sy = th + 1;
+        const rectAt = (x0, y0) => [x0 - tw / 2, y0 - size, x0 + tw / 2, y0 - size + th];
         let pos = null;
         const near = [[0, 0], [0, -sy], [0, sy], [tw / 2 + 4, 0], [-tw / 2 - 4, 0], [tw / 2 + 4, -sy], [-tw / 2 - 4, sy], [tw / 2 + 4, sy], [-tw / 2 - 4, -sy]];
         for (const [dx, dy] of near) { const r = rectAt(q[0] + dx, q[1] + dy); if (!hit(r)) { pos = [q[0] + dx, q[1] + dy, r]; break; } }
@@ -283,7 +287,13 @@
           el("circle", { cx: q[0], cy: q[1], r: main ? 1.6 : 1.1, class: "lbl-dot" + (main ? "" : " minor") }, lblG);
         }
         const t = el("text", { x: pos[0], y: pos[1], "text-anchor": "middle", class: "lbl" + (main ? "" : " lbl-minor"), style: `font-size:${size}px` }, lblG);
-        t.textContent = txt;
+        t.textContent = nm;
+        if (vt) {
+          const cy = pos[1] + 3 + rr;
+          el("circle", { cx: pos[0], cy, r: rr, fill: "#ffffff", stroke: "#5b6470", "stroke-width": 1.3 }, lblG);
+          const v2 = el("text", { x: pos[0], y: cy, "text-anchor": "middle", "dominant-baseline": "central", style: `font:800 ${size + .5}px system-ui,-apple-system,'Segoe UI',Arial,sans-serif;fill:#1f2328` }, lblG);
+          v2.textContent = vt;
+        }
       });
       svg.appendChild(lblG);
       container.appendChild(svg);

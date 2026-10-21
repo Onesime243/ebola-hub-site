@@ -4,7 +4,12 @@
   const D = window.DASHBOARD_DATA;
   const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
   const Ch = window.HubCharts, esc = Ch.esc, col = Ch.col;
-  if (!D) { document.getElementById("content").innerHTML = '<div class="empty">Données indisponibles : exécutez 02_ACTUALISER_TOUT.</div>'; return; }
+  const O = window.HubOutil;
+  if (!D) {
+    if (O && O.SERVED) O.standalone();
+    else document.getElementById("content").innerHTML = '<div class="empty">Données indisponibles : chargez les données dans l’outil (00_INTERFACE).</div>';
+    return;
+  }
   const PER = (D.meta && D.meta.periode) || null;   // mode période : { debut, fin }
   window.HUB_PERIOD = PER;
 
@@ -107,12 +112,17 @@
     { id: "clinic", t: "Symptômes et clinique", g: "Linelist lln", i: "M12 21l-1.5-1.3C5.4 15.4 2 12.3 2 8.5 2 5.4 4.4 3 7.5 3c1.7 0 3.4.8 4.5 2.1C13.1 3.8 14.8 3 16.5 3 19.6 3 22 5.4 22 8.5c0 3.8-3.4 6.9-8.5 11.2z" },
     { id: "lab2", t: "Laboratoire (Ct, délais)", g: "Linelist lln", i: "M9 2h6v2h-1v5l5 9a2 2 0 0 1-2 3H7a2 2 0 0 1-2-3l5-9V4H9z" },
     { id: "pec", t: "Prise en charge, vaccination, expositions", g: "Linelist lln", i: "M19 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm-2 10h-4v4h-2v-4H7v-2h4V7h2v4h4z" },
-    { id: "upload", t: "Charger les données", g: "Données", i: "M5 20h14v-2H5zm7-16-5 5h3v6h4V9h3z", priv: true },
+    { id: "indicateurs", t: "Indicateurs du pilier surveillance", g: "Réunions", i: "M3 3h18v18H3zm2 2v4h4V5zm6 0v4h8V5zm-6 6v4h4v-4zm6 0v4h8v-4zm-6 6v2h4v-2zm6 0v2h8v-2z", role: "lecteur", pub: true },
+    { id: "presentation", t: "Présentation", g: "Réunions", i: "M3 4h18v2H3zm1 3h16v10H4zm7 11h2v3h-2zm-4 3h10v1H7zM7 14l3-4 2 2 3-4 2 6z", role: "lecteur", pub: true },
+    { id: "upload", t: "Charger les données", g: "Données", i: "M5 20h14v-2H5zm7-16-5 5h3v6h4V9h3z", priv: true, role: "analyste" },
     { id: "fusion", t: "Linelist fusionnée", g: "Données", i: "M4 4h7v7H4zm9 0h7v7h-7zM4 13h7v7H4zm9 3h7v2h-7z", priv: true },
     { id: "quality", t: "Qualité & preprocessing", g: "Données", i: "M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z" },
     { id: "method", t: "Méthodologie", g: "Données", i: "M4 4h16v16H4zm3 4h10v2H7zm0 4h10v2H7zm0 4h6v2H7z" },
-    { id: "terms", t: "Conditions d’utilisation", g: "Données", i: "M6 2h9l5 5v15H6zm8 1.5V8h4.5" }
-  ].filter(t => !(isPublic && t.priv && !(pubParcours && PARCOURS_TABS.has(t.id))));
+    { id: "terms", t: "Conditions d’utilisation", g: "Données", i: "M6 2h9l5 5v15H6zm8 1.5V8h4.5" },
+    { id: "comptes", t: "Comptes", g: "Administration", i: "M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zm0 2c-4 0-8 2-8 5v1h16v-1c0-3-4-5-8-5z", priv: true, role: "admin" },
+    { id: "publication", t: "Publication en ligne", g: "Administration", i: "M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm6.9 6h-3a15 15 0 0 0-1.3-3.9A8 8 0 0 1 18.9 8zM12 4c.8 1.2 1.5 2.5 1.9 4h-3.8c.4-1.5 1.1-2.8 1.9-4zM4.3 14a8 8 0 0 1 0-4h3.4a16 16 0 0 0 0 4zm.8 2h3a15 15 0 0 0 1.3 3.9A8 8 0 0 1 5.1 16zm3-8h-3a8 8 0 0 1 4.3-3.9A15 15 0 0 0 8.1 8zM12 20c-.8-1.2-1.5-2.5-1.9-4h3.8c-.4 1.5-1.1 2.8-1.9 4zm2.3-6H9.7a14 14 0 0 1 0-4h4.6a14 14 0 0 1 0 4zm.3 5.9a15 15 0 0 0 1.3-3.9h3a8 8 0 0 1-4.3 3.9zm1.7-5.9a16 16 0 0 0 0-4h3.4a8 8 0 0 1 0 4z", priv: true, role: "admin" }
+  ].filter(t => !(isPublic && t.priv && !(pubParcours && PARCOURS_TABS.has(t.id))))
+   .filter(t => !t.role || !O || !(window.HUB_USER) || O.can(t.role));
 
   function readHash() {
     const h = decodeURIComponent(location.hash.replace(/^#\/?/, "")).split("/");
@@ -2184,92 +2194,6 @@
     ${panel("Dictionnaire des variables", T("Colonnes du fichier fusionné, source et taux de remplissage"), table("fu-d", F.dictionnaire || [], [{ k: "colonne", t: "Colonne" }, { k: "source", t: "Source" }, { k: "renseignee_pct", t: "Renseignée", v: x => pc(x.renseignee_pct, 1), sortv: x => x.renseignee_pct }], { limit: 250, maxh: 520 }))}`;
   }
 
-  /* ---------------- Chargement des fichiers (interface locale) ---------------- */
-  const SERVED = location.protocol.startsWith("http") && !isPublic;
-  const UP_SLOTS = [["linelist", "Linelist — format 1 (export DHIS2 avec les noms)", ".xls,.xlsx,.csv"], ["lln", "Linelist — format 2 (lln_mve_notifications)", ".csv,.xlsx,.xls,.gz"],
-    ["contact", "Contact tracing (export DHIS2)", ".xls,.xlsx,.csv"], ["sitrep", "SitRep PDF (SitRep_MVEBDB_n°_jj_mm_aaaa.pdf) ou image", ".pdf,.png,.jpg,.jpeg,.jfif"],
-    ["mines", "Sites miniers (x = longitude, y = latitude)", ".xlsx,.xls,.csv"], ["frontiere", "Zones frontalières (liste des zones de santé)", ".xlsx,.xls,.csv"]];
-  const UP_LABEL = Object.fromEntries(UP_SLOTS.map(([k, t]) => [k, t]));
-  const UP_FILES = new Map();   // créneau -> File
-  function guessSlot(name, head) {
-    const n = name.toUpperCase(), h = (head || "").toLowerCase();
-    if (/\.(PNG|JPE?G|JFIF|WEBP|PDF)$/.test(n)) return "sitrep";
-    if (/MINE|MINIER/.test(n)) return "mines";
-    if (/FRONT|BORDER/.test(n)) return "frontiere";
-    if (/CONTACT/.test(n) || h.includes("mve - fs - ")) return "contact";
-    if (/LLN|NOTIFICATION/.test(n) || (h.includes("enrollment_id") && h.includes("numero_epid"))) return "lln";
-    if (/LINE/.test(n) || h.includes("classification")) return "linelist";
-    return "";
-  }
-  async function addUpFiles(list) {
-    for (const f of list) {
-      let head = "";
-      if (/\.csv$/i.test(f.name)) { try { head = await f.slice(0, 4096).text(); } catch (e) { head = ""; } }
-      const slot = guessSlot(f.name, head) || "";
-      if (slot) UP_FILES.set(slot, f); else UP_FILES.set("?" + f.name, f);
-    }
-    drawUpList();
-  }
-  function drawUpList() {
-    const el = $("#up-list"); if (!el) return;
-    if (!UP_FILES.size) { el.innerHTML = `<div class="muted small">${T("Aucun fichier choisi pour l’instant.")}</div>`; $("[data-up-run]")?.setAttribute("disabled", ""); return; }
-    el.innerHTML = [...UP_FILES.entries()].map(([slot, f]) => `<div class="up-item ${slot.startsWith("?") ? "unknown" : ""}">
-        <span class="up-ico">${/\.(png|jpe?g|jfif|webp)$/i.test(f.name) ? "🖼" : "📄"}</span>
-        <div class="up-meta"><b>${esc(f.name)}</b><span class="muted small">${f.size < 1048576 ? nf(f.size / 1024, 0) + " Ko" : nf(f.size / 1048576, 1) + " Mo"}</span></div>
-        <select data-up-slot="${esc(slot)}">${slot.startsWith("?") ? `<option value="">${T("Choisir le type de fichier…")}</option>` : ""}${UP_SLOTS.map(([k, t]) => `<option value="${k}" ${k === slot ? "selected" : ""}>${T(t)}</option>`).join("")}</select>
-        <button class="btn sm" type="button" data-up-del="${esc(slot)}" title="${T("Retirer")}">✕</button></div>`).join("");
-    const ready = [...UP_FILES.keys()].every(k => !k.startsWith("?"));
-    const b = $("[data-up-run]"); if (b) { if (ready) b.removeAttribute("disabled"); else b.setAttribute("disabled", ""); }
-  }
-  function uploadView() {
-    const cur = `<div class="table-wrap"><table><tbody>
-        <tr><td>${T("Linelist format 1")}</td><td>${esc(D.sources.linelist || "—")}</td></tr>
-        <tr><td>${T("Linelist lln")}</td><td>${esc(D.sources.lln || "—")}</td></tr>
-        <tr><td>${T("Contact tracing")}</td><td>${esc(D.sources.contact_tracing || "—")}</td></tr>
-        <tr><td>${T("Sites miniers")}</td><td>${esc(D.zones_risque?.references?.mines?.fichier || "—")}</td></tr>
-        <tr><td>${T("Zones frontalières")}</td><td>${esc(D.zones_risque?.references?.frontalieres?.fichier || "—")}</td></tr></tbody></table></div>`;
-    if (!SERVED) return `${panel("Charger les données", "", `<div class="notice"><b>${T("Le chargement graphique nécessite l’interface locale.")}</b> ${T("Double-cliquez sur")} <b>00_INTERFACE</b> (${T("00_INTERFACE.bat sous Windows, 00_INTERFACE_MAC.command sur Mac")}) : ${T("le tableau de bord s’ouvre dans le navigateur ; ici, vous pourrez alors glisser vos fichiers ou les choisir avec « Parcourir », sans jamais ouvrir le dossier du projet.")}</div>`)}${panel("Fichiers actuellement utilisés", "", cur)}`;
-    return `${panel("Charger les données", T("Glissez vos fichiers ici (Linelist DHIS2, Linelist lln, Contact tracing, image du SitRep, sites miniers, zones frontalières) ou cliquez pour les choisir sur l’ordinateur. Le type de chaque fichier est reconnu automatiquement ; corrigez-le si besoin. Les fichiers sont copiés dans le projet (jamais d’écrasement) et l’analyse complète est relancée."), `
-      <label class="dropzone" id="up-drop"><input type="file" id="up-input" multiple accept=".xls,.xlsx,.xlsm,.csv,.gz,.pdf,.png,.jpg,.jpeg,.jfif,.webp">
-        <span class="dz-ico">⤒</span><b>${T("Déposez les fichiers ici")}</b><span class="muted small">${T("ou cliquez pour parcourir l’ordinateur")} — .xls, .xlsx, .csv, .pdf (SitRep), .png, .jpg</span></label>
-      <div id="up-list" class="up-list"></div>
-      <div class="flex" style="margin-top:12px"><button class="btn primary" type="button" data-up-run disabled>▶ ${T("Copier les fichiers et lancer l’analyse")}</button><button class="btn" type="button" data-up-only>${T("Relancer l’analyse sans nouveau fichier")}</button><span class="muted small" id="up-state"></span></div>
-      <pre id="up-log" class="logbox"></pre>`)}
-      ${panel("Fichiers actuellement utilisés", "", cur)}`;
-  }
-  function uploadCharts() {
-    drawUpList();
-    const dz = $("#up-drop"), inp = $("#up-input"); if (!dz || !inp) return;
-    inp.addEventListener("change", () => { addUpFiles([...inp.files]); inp.value = ""; });
-    ["dragenter", "dragover"].forEach(ev => dz.addEventListener(ev, e => { e.preventDefault(); dz.classList.add("over"); }));
-    ["dragleave", "drop"].forEach(ev => dz.addEventListener(ev, e => { e.preventDefault(); dz.classList.remove("over"); }));
-    dz.addEventListener("drop", e => addUpFiles([...(e.dataTransfer?.files || [])]));
-  }
-  document.addEventListener("change", e => {
-    const s = e.target.closest?.("[data-up-slot]"); if (!s) return;
-    const old = s.dataset.upSlot, f = UP_FILES.get(old), v = s.value; if (!f || !v) return;
-    UP_FILES.delete(old); UP_FILES.set(v, f); drawUpList();
-  });
-  document.addEventListener("click", e => { const d = e.target.closest?.("[data-up-del]"); if (d) { UP_FILES.delete(d.dataset.upDel); drawUpList(); } });
-  async function uploadRun(withFiles) {
-    const fd = new FormData(); let n = 0;
-    if (withFiles) UP_FILES.forEach((f, slot) => { if (!slot.startsWith("?")) { fd.append(slot, f, f.name); n++; } });
-    const stEl = $("#up-state"), log = $("#up-log");
-    stEl.textContent = n ? `${n} ${T("fichier(s) en cours d’envoi…")}` : T("Lancement…");
-    try {
-      const r = await fetch("/api/run", { method: "POST", body: fd });
-      const j = await r.json(); if (!j.ok) { stEl.textContent = j.error || T("Erreur"); return; }
-      UP_FILES.clear(); drawUpList();
-      const poll = async () => {
-        const s = await (await fetch("/api/status")).json();
-        log.textContent = s.log || ""; log.scrollTop = log.scrollHeight;
-        stEl.textContent = s.running ? `${T("Analyse en cours…")} ${s.elapsed || ""} s` : (s.ok ? T("Terminé : rechargement du tableau de bord…") : T("Échec — voir le journal"));
-        if (s.running) setTimeout(poll, 1500); else if (s.ok) setTimeout(() => { location.href = location.pathname + "#/overview"; }, 1200);
-      };
-      poll();
-    } catch (e) { stEl.textContent = T("Serveur local injoignable : lancez 00_INTERFACE."); }
-  }
-
   /* ---------------- Conversion contacts -> cas par génération (suivi des contacts) ---------------- */
   function genPanel() {
     const g = D.generations; if (!g || !(g.tableau || []).length) return "";
@@ -2353,11 +2277,12 @@
     if (cp) { const el = $("#map-cap-" + cp.dataset.copyCap); if (el && navigator.clipboard) navigator.clipboard.writeText(el.innerText).then(() => { cp.textContent = "✓ " + T("Copié"); }); }
   });
 
-  const VIEWS = { overview: [overview, overviewCharts], territories: [territories, territoriesCharts], followup: [followup, followupCharts], index: [indexView, indexCharts], journey: [journey, journeyCharts], chains: [chainsView, chainsCharts], recon: [reconView, reconCharts], dynamics: [dynamicsView, dynamicsCharts], children: [kidsView, kidsCharts], superspreading: [superView, superCharts], resurgence: [resurgenceView, resurgenceCharts], labs: [labsView, labsCharts], nowcast: [nowcastView, nowcastCharts], forecast: [forecastView, forecastCharts], priority: [priorityView], rtm: [rtmView, rtmCharts], riskzones: [riskZonesView, riskZonesCharts], alerts: [alertsView, alertsCharts], eds: [edsView, edsCharts], clinic: [clinicView, clinicCharts], lab2: [lab2View, lab2Charts], pec: [pecView, pecCharts], fusion: [fusionView], maps: [mapsView], ops: [opsView], upload: [uploadView, uploadCharts], quality: [qualityView], method: [methodView], terms: [termsView] };
+  const VIEWS = { overview: [overview, overviewCharts], territories: [territories, territoriesCharts], followup: [followup, followupCharts], index: [indexView, indexCharts], journey: [journey, journeyCharts], chains: [chainsView, chainsCharts], recon: [reconView, reconCharts], dynamics: [dynamicsView, dynamicsCharts], children: [kidsView, kidsCharts], superspreading: [superView, superCharts], resurgence: [resurgenceView, resurgenceCharts], labs: [labsView, labsCharts], nowcast: [nowcastView, nowcastCharts], forecast: [forecastView, forecastCharts], priority: [priorityView], rtm: [rtmView, rtmCharts], riskzones: [riskZonesView, riskZonesCharts], alerts: [alertsView, alertsCharts], eds: [edsView, edsCharts], clinic: [clinicView, clinicCharts], lab2: [lab2View, lab2Charts], pec: [pecView, pecCharts], fusion: [fusionView], maps: [mapsView], ops: [opsView], upload: [O.uploadView, O.uploadWire], presentation: [O.presView, O.presWire], indicateurs: [() => O.indView(D), O.indWire], comptes: [O.comptesView, O.comptesWire], publication: [O.pubView, O.pubWire], quality: [qualityView], method: [methodView], terms: [termsView] };
   function buildNav() {
     let g = "";
     $("#navigation").innerHTML = TABS.map(t => { const h = t.g !== g ? `<div class="nav-group">${T(t.g)}</div>` : ""; g = t.g; return `${h}<button data-tab="${t.id}" class="${S.tab === t.id ? "active" : ""}"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="${t.i}"/></svg>${T(t.t)}</button>`; }).join("");
   }
+  window.__hubRender = () => render();
   function render() {
     if (!VIEWS[S.tab]) S.tab = "overview";
     window.HubLang = lang;
@@ -2390,8 +2315,6 @@
     const ca = t.closest("[data-csv-any]"); if (ca) { panelCSV(ca.closest(".panel")); return; }
     const pa = t.closest("[data-png-any]"); if (pa) { const p = pa.closest(".panel"); Ch.downloadPanelPNG(p, (p.querySelector(".panel-head h2")?.textContent || "panneau").replace(/[^\w\-]+/g, "_")); return; }
     const zc = t.closest("[data-zrcat]"); if (zc) { S.zrCat = S.zrCat === zc.dataset.zrcat ? "Toutes" : zc.dataset.zrcat; render(); return; }
-    if (t.closest("[data-up-run]")) { e.preventDefault(); uploadRun(true); return; }
-    if (t.closest("[data-up-only]")) { e.preventDefault(); uploadRun(false); return; }
     if (t.closest("[data-zr-report]")) { zrReportPNG(); return; }
     const pn = t.closest("[data-png]"); if (pn) { Ch.downloadPNG(pn.closest(".panel"), pn.dataset.png); return; }
     if (t.closest("[data-print]")) { print(); return; }
@@ -2518,6 +2441,7 @@
   });
   $("#pb-ov-close")?.addEventListener("click", () => { clearTimeout(pbPoll); overlay(false); });
 
-  if (isPublic) $("#up-btn")?.remove(); else $("#up-btn")?.addEventListener("click", () => go("upload"));
+  if (isPublic || !TABS.some(t => t.id === "upload")) $("#up-btn")?.remove(); else $("#up-btn")?.addEventListener("click", () => go("upload"));
+  O.userChip();
   fillProv(); translateStatic(); readHash(); periodBar(); render();
 })();

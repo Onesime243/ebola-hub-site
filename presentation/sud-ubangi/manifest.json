@@ -1,0 +1,80 @@
+{
+ "code": "sud-ubangi",
+ "niveau": "province",
+ "nom": "Province : Sud Ubangi",
+ "court": "Sud Ubangi",
+ "date": "2026-10-19",
+ "genere_le": "2026-10-21 09:58",
+ "pptx": "Presentation_Reunion_Sud_Ubangi_20261019.pptx",
+ "diapositives": 7,
+ "slides": [
+  {
+   "titre": "Situation cumulée",
+   "images": [
+    "01_indicateurs_cumul",
+    "02_courbe_hebdomadaire"
+   ]
+  },
+  {
+   "titre": "Situation du jour",
+   "images": [
+    "03_indicateurs_jour"
+   ]
+  },
+  {
+   "titre": "Jours sans nouveau cas",
+   "images": [
+    "05_jours_sans_cas"
+   ]
+  },
+  {
+   "titre": "Alertes",
+   "date": "2026-10-12",
+   "images": [
+    "07_indicateurs_alertes",
+    "07b_alertes_comparatif_3j",
+    "08_alertes_sources",
+    "08b_alertes_sources_3j",
+    "08_alertes_tendance"
+   ]
+  }
+ ],
+ "images": {
+  "01_indicateurs_cumul": {
+   "fichier": "01_indicateurs_cumul.png",
+   "titre": "Situation de la MVE au 19 octobre 2026 — Province : Sud Ubangi"
+  },
+  "02_courbe_hebdomadaire": {
+   "fichier": "02_courbe_hebdomadaire.png",
+   "titre": "Évolution hebdomadaire des cas confirmés"
+  },
+  "03_indicateurs_jour": {
+   "fichier": "03_indicateurs_jour.png",
+   "titre": "Situation épidémiologique du jour — 19 octobre 2026"
+  },
+  "05_jours_sans_cas": {
+   "fichier": "05_jours_sans_cas.png",
+   "titre": "Nombre de jours sans nouveau cas confirmé par zone de santé"
+  },
+  "07_indicateurs_alertes": {
+   "fichier": "07_indicateurs_alertes.png",
+   "titre": "Situation des alertes au 12 octobre 2026"
+  },
+  "08_alertes_sources": {
+   "fichier": "08_alertes_sources.png",
+   "titre": "Sources des alertes du jour — 1 alertes"
+  },
+  "07b_alertes_comparatif_3j": {
+   "fichier": "07b_alertes_comparatif_3j.png",
+   "titre": "Tableau comparatif des alertes sur 3 jours"
+  },
+  "08b_alertes_sources_3j": {
+   "fichier": "08b_alertes_sources_3j.png",
+   "titre": "Sources des alertes sur les 3 derniers jours"
+  },
+  "08_alertes_tendance": {
+   "fichier": "08_alertes_tendance.png",
+   "titre": "Alertes notifiées par jour (14 jours)"
+  }
+ }
+}
