@@ -259,7 +259,7 @@
       color = v => v === null || v === undefined ? TL_NA : (cls.find(c => v >= c.lo && v <= c.hi) || cls[cls.length - 1]).color;
       leg = [...cls.map(c => ({ label: c.label, color: c.color })), { label: "aucune donnée", color: TL_NA }];
     }
-    leg.title = m[1];
+    leg.title = m[1] + (ind === "categorie" ? " — chiffre dans le cercle : cas confirmés des 7 derniers jours" : "");
     return { rows, val, color, leg, m };
   }
   function drawMap(el_, ind, t) {

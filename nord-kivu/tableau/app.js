@@ -419,14 +419,14 @@
       color = v => { if (v === null || v === undefined) return TL_NA; return (cls.find(c => v >= c.lo && v <= c.hi) || cls[cls.length - 1]).color; };
       leg = [...cls.map(c => ({ label: c.label, color: c.color })), { label: "aucune donnée", color: TL_NA }];
     }
-    leg.title = m[1];
+    leg.title = m[1] + (S.mapInd === "categorie" ? " — chiffre dans le cercle : cas confirmés des 7 derniers jours" : "");
     return { B, val, color, leg, m };
   }
   function drawMap(el_) {
     const { B, val, color, leg, m } = mapValues();
     G.map(el_, { areas: AIRES.map(a => ({ key: a.cle, name: a.nom })), geo: D.geo, value: val, color: v => color(v), selected: S.aire,
       dark: v => color(v) === TL[4],
-      label: k => { const v = val(k); return S.mapInd === "categorie" ? (B[k].cs.n7 ? `${B[k].cs.n7} cas 7 j` : "") : (typeof v === "number" ? (S.mapInd === "taux" ? pc(v, 0) : nf(v, m[3] || 0)) : ""); },
+      label: k => { const v = val(k); return S.mapInd === "categorie" ? (B[k].cs.n7 ? `${B[k].cs.n7}` : "") : (typeof v === "number" ? (S.mapInd === "taux" ? pc(v, 0) : nf(v, m[3] || 0)) : ""); },
       tipHtml: k => { const b = B[k]; return `<b>${esc(AN[k] || k)}</b>${b.cat} · ${nf(b.cs.n)} cas (${nf(b.cs.n21)} en 21 j)<br>${nf(b.as)} contacts à suivre · ${pc(b.taux, 0)} vus · ${nf(b.pdv)} PDV`; },
       onClick: k => { S.aire = S.aire === k ? null : k; render(); }, legend: leg, valueLabel: m[1] });
   }

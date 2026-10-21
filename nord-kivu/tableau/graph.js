@@ -185,7 +185,11 @@
       if (miss.length) {
         el("text", { x: 10, y: H + 8, style: `font:12px system-ui,sans-serif;fill:${css("--ink-2")}` }, svg).textContent = "Aires sans contour dans le fichier des contours :";
         const tw = Math.min(150, (W - 20) / miss.length);
-        miss.forEach((a, i) => {
+        if (tw < 70) {   // trop d'aires sans contour pour des vignettes lisibles : liste en texte
+          const t = el("text", { x: 10, y: H + 30, style: `font:11.5px system-ui,sans-serif;fill:${css("--ink-2")}` }, svg);
+          const noms = miss.map(a => a.name), txt = `${noms.length} aires : ${noms.join(", ")}`;
+          t.textContent = txt.length > W / 6 ? txt.slice(0, Math.floor(W / 6)) + "… (liste complète dans le tableau ▦)" : txt;
+        } else miss.forEach((a, i) => {
           const x = 10 + i * tw, v = opt.value(a.key);
           const g = el("g", { class: "tile" + (opt.selected === a.key ? " sel" : "") }, svg);
           const r = el("rect", { x, y: H + 14, width: tw - 6, height: 32, rx: 4, fill: opt.color(v, a.key), stroke: css("--line-2"), "stroke-dasharray": "3 2" }, g);
@@ -195,10 +199,14 @@
           if (opt.onClick) r.addEventListener("click", () => opt.onClick(a.key));
         });
       }
-      /* étiquettes : écartement simple des chevauchements */
-      const FS = W < 520 ? 11.5 : 12.5;
-      const L = labels.map(([q, nm, t]) => { const txt = t ? `${nm} · ${t}` : nm; return { x: q[0], y: q[1], x0: q[0], y0: q[1], txt, w: txt.length * FS * .6 + 12, h: FS + 7 }; });
-      for (let it = 0; it < 160; it++) {
+      /* étiquettes : nom de l'unité (halo blanc) et, au-dessous, la valeur dans un cercle blanc ; écartement des chevauchements */
+      const FS = W < 520 ? 11 : 12.5, FV = FS + .5;
+      const tw_ = (t, f) => String(t).length * f * .58;
+      const L = labels.map(([q, nm, t]) => {
+        const r = t ? Math.max(FV * 1.15, tw_(t, FV) / 2 + 6) : 0, nw = tw_(nm, FS) + 6;
+        return { x: q[0], y: q[1], x0: q[0], y0: q[1], nm, t, r, w: Math.max(nw, 2 * r), h: FS + 4 + (t ? 2 * r + 2 : 0) };
+      });
+      for (let it = 0; it < 200; it++) {
         let moved = false;
         for (let i = 0; i < L.length; i++) for (let j = i + 1; j < L.length; j++) {
           const A = L[i], B = L[j], ox = (A.w + B.w) / 2 - Math.abs(A.x - B.x), oy = (A.h + B.h) / 2 - Math.abs(A.y - B.y);
@@ -206,18 +214,26 @@
         }
         if (!moved) break;
       }
+      const FONT = "system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif";
       L.forEach(l => {
-        if (Math.hypot(l.x - l.x0, l.y - l.y0) > 6) {
+        if (Math.hypot(l.x - l.x0, l.y - l.y0) > 8) {
           el("line", { x1: l.x0, y1: l.y0, x2: l.x, y2: l.y, stroke: "#3a3f44", "stroke-width": .7, "stroke-opacity": .8 }, svg);
           el("circle", { cx: l.x0, cy: l.y0, r: 1.8, fill: "#3a3f44" }, svg);
         }
         const g = el("g", { class: "map-lbl", "pointer-events": "none" }, svg);
-        const bg = el("rect", { rx: 4, ry: 4, fill: "#ffffff", "fill-opacity": .92, stroke: "rgba(0,0,0,.18)", "stroke-width": .6 }, g);
-        const tx = el("text", { x: l.x, y: l.y, "text-anchor": "middle", "dominant-baseline": "central", "font-size": FS, "font-weight": 700, fill: "#111111",
-          "text-rendering": "geometricPrecision", style: `font:700 ${FS}px system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif;fill:#111111` }, g);
-        tx.textContent = l.txt;
-        let bw = l.w, bh = l.h; try { const b = tx.getBBox(); if (b.width) { bw = b.width + 10; bh = b.height + 4; } } catch (e) { /* hors document */ }
-        bg.setAttribute("x", (l.x - bw / 2).toFixed(1)); bg.setAttribute("y", (l.y - bh / 2).toFixed(1)); bg.setAttribute("width", bw.toFixed(1)); bg.setAttribute("height", bh.toFixed(1));
+        const top = l.y - l.h / 2;
+        const ny = top + FS / 2 + 2;
+        const tx = el("text", { x: l.x, y: ny, "text-anchor": "middle", "dominant-baseline": "central", "text-rendering": "geometricPrecision",
+          stroke: "#ffffff", "stroke-width": 3.2, "stroke-linejoin": "round", "paint-order": "stroke",
+          style: `font:700 ${FS}px ${FONT};fill:#2b3036;stroke:#ffffff;stroke-width:3.2px;paint-order:stroke` }, g);
+        tx.textContent = l.nm;
+        if (l.t) {
+          const cy = ny + FS / 2 + 2 + l.r;
+          el("circle", { cx: l.x, cy, r: l.r, fill: "#ffffff", stroke: "#5b6470", "stroke-width": 1.6 }, g);
+          const vt = el("text", { x: l.x, y: cy, "text-anchor": "middle", "dominant-baseline": "central", "text-rendering": "geometricPrecision",
+            style: `font:800 ${FV}px ${FONT};fill:#1f2328` }, g);
+          vt.textContent = l.t;
+        }
       });
     } else {
       const items = opt.areas, cols = Math.max(3, Math.min(8, Math.floor((W - 10) / 132)));
