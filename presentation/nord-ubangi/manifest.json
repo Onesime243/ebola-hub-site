@@ -3,9 +3,9 @@
  "niveau": "province",
  "nom": "Province : Nord Ubangi",
  "court": "Nord Ubangi",
- "date": "2026-10-19",
- "genere_le": "2026-10-21 12:43",
- "pptx": "Presentation_Reunion_Nord_Ubangi_20261019.pptx",
+ "date": "2026-10-21",
+ "genere_le": "2026-10-21 16:37",
+ "pptx": "Presentation_Reunion_Nord_Ubangi_20261021.pptx",
  "diapositives": 7,
  "slides": [
   {
@@ -42,7 +42,7 @@
  "images": {
   "01_indicateurs_cumul": {
    "fichier": "01_indicateurs_cumul.png",
-   "titre": "Situation de la MVE au 19 octobre 2026 — Province : Nord Ubangi"
+   "titre": "Situation de la MVE au 21 octobre 2026 — Province : Nord Ubangi"
   },
   "02_courbe_hebdomadaire": {
    "fichier": "02_courbe_hebdomadaire.png",
@@ -50,7 +50,7 @@
   },
   "03_indicateurs_jour": {
    "fichier": "03_indicateurs_jour.png",
-   "titre": "Situation épidémiologique du jour — 19 octobre 2026"
+   "titre": "Situation épidémiologique du jour — 21 octobre 2026"
   },
   "05_jours_sans_cas": {
    "fichier": "05_jours_sans_cas.png",

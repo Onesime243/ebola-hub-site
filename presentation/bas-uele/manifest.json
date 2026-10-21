@@ -3,9 +3,9 @@
  "niveau": "province",
  "nom": "Province : Bas Uele",
  "court": "Bas Uele",
- "date": "2026-10-19",
- "genere_le": "2026-10-21 12:43",
- "pptx": "Presentation_Reunion_Bas_Uele_20261019.pptx",
+ "date": "2026-10-21",
+ "genere_le": "2026-10-21 16:37",
+ "pptx": "Presentation_Reunion_Bas_Uele_20261021.pptx",
  "diapositives": 9,
  "slides": [
   {
@@ -29,7 +29,7 @@
   },
   {
    "titre": "Alertes",
-   "date": "2026-10-19",
+   "date": "2026-10-20",
    "images": [
     "07_indicateurs_alertes",
     "07b_alertes_comparatif_3j",
@@ -53,7 +53,7 @@
  "images": {
   "01_indicateurs_cumul": {
    "fichier": "01_indicateurs_cumul.png",
-   "titre": "Situation de la MVE au 19 octobre 2026 — Province : Bas Uele"
+   "titre": "Situation de la MVE au 21 octobre 2026 — Province : Bas Uele"
   },
   "02_courbe_hebdomadaire": {
    "fichier": "02_courbe_hebdomadaire.png",
@@ -61,7 +61,7 @@
   },
   "03_indicateurs_jour": {
    "fichier": "03_indicateurs_jour.png",
-   "titre": "Situation épidémiologique du jour — 19 octobre 2026"
+   "titre": "Situation épidémiologique du jour — 21 octobre 2026"
   },
   "05_jours_sans_cas": {
    "fichier": "05_jours_sans_cas.png",
@@ -69,11 +69,11 @@
   },
   "07_indicateurs_alertes": {
    "fichier": "07_indicateurs_alertes.png",
-   "titre": "Situation des alertes au 19 octobre 2026"
+   "titre": "Situation des alertes au 20 octobre 2026"
   },
   "08_alertes_sources": {
    "fichier": "08_alertes_sources.png",
-   "titre": "Sources des alertes du jour — 36 alertes"
+   "titre": "Sources des alertes du jour — 21 alertes"
   },
   "07b_alertes_comparatif_3j": {
    "fichier": "07b_alertes_comparatif_3j.png",

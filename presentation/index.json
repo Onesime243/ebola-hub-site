@@ -1,20 +1,19 @@
 {
- "date": "2026-10-19",
- "genere_le": "2026-10-21 12:43",
+ "date": "2026-10-21",
+ "genere_le": "2026-10-21 16:37",
  "niveaux": [
   {
    "code": "national",
    "niveau": "national",
    "nom": "Niveau national — RDC",
    "court": "RDC",
-   "date": "2026-10-19",
-   "pptx": "Presentation_Reunion_National_20261019.pptx",
+   "date": "2026-10-21",
+   "pptx": "Presentation_Reunion_National_20261021.pptx",
    "diapositives": 13,
    "images": [
     "01_indicateurs_cumul",
     "02_courbe_hebdomadaire",
     "03_indicateurs_jour",
-    "04_cas_du_jour",
     "05_jours_sans_cas",
     "06_carte",
     "06_carte_21j",
@@ -45,8 +44,7 @@
     {
      "titre": "Situation du jour",
      "images": [
-      "03_indicateurs_jour",
-      "04_cas_du_jour"
+      "03_indicateurs_jour"
      ]
     },
     {
@@ -64,7 +62,7 @@
     },
     {
      "titre": "Alertes",
-     "date": "2026-10-19",
+     "date": "2026-10-21",
      "images": [
       "07_indicateurs_alertes",
       "07b_alertes_comparatif_3j",
@@ -84,7 +82,7 @@
       "13_contacts_suivre_vus",
       "14_tableau_contacts"
      ],
-     "date": "2026-10-19"
+     "date": "2026-10-20"
     },
     {
      "titre": "Laboratoire",
@@ -93,7 +91,7 @@
       "16_labo_resultats",
       "17_labo_positivite"
      ],
-     "date": "2026-10-19"
+     "date": "2026-10-20"
     }
    ]
   },
@@ -102,14 +100,13 @@
    "niveau": "province",
    "nom": "Province : Ituri",
    "court": "Ituri",
-   "date": "2026-10-19",
-   "pptx": "Presentation_Reunion_Ituri_20261019.pptx",
+   "date": "2026-10-21",
+   "pptx": "Presentation_Reunion_Ituri_20261021.pptx",
    "diapositives": 10,
    "images": [
     "01_indicateurs_cumul",
     "02_courbe_hebdomadaire",
     "03_indicateurs_jour",
-    "04_cas_du_jour",
     "05_jours_sans_cas",
     "07_indicateurs_alertes",
     "08_alertes_sources",
@@ -135,8 +132,7 @@
     {
      "titre": "Situation du jour",
      "images": [
-      "03_indicateurs_jour",
-      "04_cas_du_jour"
+      "03_indicateurs_jour"
      ]
     },
     {
@@ -147,7 +143,7 @@
     },
     {
      "titre": "Alertes",
-     "date": "2026-10-19",
+     "date": "2026-10-21",
      "images": [
       "07_indicateurs_alertes",
       "07b_alertes_comparatif_3j",
@@ -167,7 +163,7 @@
       "13_contacts_suivre_vus",
       "14_tableau_contacts"
      ],
-     "date": "2026-10-19"
+     "date": "2026-10-20"
     }
    ]
   },
@@ -176,14 +172,13 @@
    "niveau": "province",
    "nom": "Province : Nord Kivu",
    "court": "Nord Kivu",
-   "date": "2026-10-19",
-   "pptx": "Presentation_Reunion_Nord_Kivu_20261019.pptx",
+   "date": "2026-10-21",
+   "pptx": "Presentation_Reunion_Nord_Kivu_20261021.pptx",
    "diapositives": 10,
    "images": [
     "01_indicateurs_cumul",
     "02_courbe_hebdomadaire",
     "03_indicateurs_jour",
-    "04_cas_du_jour",
     "05_jours_sans_cas",
     "07_indicateurs_alertes",
     "08_alertes_sources",
@@ -209,8 +204,7 @@
     {
      "titre": "Situation du jour",
      "images": [
-      "03_indicateurs_jour",
-      "04_cas_du_jour"
+      "03_indicateurs_jour"
      ]
     },
     {
@@ -221,7 +215,7 @@
     },
     {
      "titre": "Alertes",
-     "date": "2026-10-19",
+     "date": "2026-10-21",
      "images": [
       "07_indicateurs_alertes",
       "07b_alertes_comparatif_3j",
@@ -241,7 +235,7 @@
       "13_contacts_suivre_vus",
       "14_tableau_contacts"
      ],
-     "date": "2026-10-19"
+     "date": "2026-10-20"
     }
    ]
   },
@@ -250,14 +244,13 @@
    "niveau": "province",
    "nom": "Province : Haut Uele",
    "court": "Haut Uele",
-   "date": "2026-10-19",
-   "pptx": "Presentation_Reunion_Haut_Uele_20261019.pptx",
+   "date": "2026-10-21",
+   "pptx": "Presentation_Reunion_Haut_Uele_20261021.pptx",
    "diapositives": 10,
    "images": [
     "01_indicateurs_cumul",
     "02_courbe_hebdomadaire",
     "03_indicateurs_jour",
-    "04_cas_du_jour",
     "05_jours_sans_cas",
     "07_indicateurs_alertes",
     "08_alertes_sources",
@@ -283,8 +276,7 @@
     {
      "titre": "Situation du jour",
      "images": [
-      "03_indicateurs_jour",
-      "04_cas_du_jour"
+      "03_indicateurs_jour"
      ]
     },
     {
@@ -295,7 +287,7 @@
     },
     {
      "titre": "Alertes",
-     "date": "2026-10-19",
+     "date": "2026-10-20",
      "images": [
       "07_indicateurs_alertes",
       "07b_alertes_comparatif_3j",
@@ -315,7 +307,7 @@
       "13_contacts_suivre_vus",
       "14_tableau_contacts"
      ],
-     "date": "2026-10-19"
+     "date": "2026-10-20"
     }
    ]
   },
@@ -324,14 +316,13 @@
    "niveau": "province",
    "nom": "Province : Tshopo",
    "court": "Tshopo",
-   "date": "2026-10-19",
-   "pptx": "Presentation_Reunion_Tshopo_20261019.pptx",
+   "date": "2026-10-21",
+   "pptx": "Presentation_Reunion_Tshopo_20261021.pptx",
    "diapositives": 10,
    "images": [
     "01_indicateurs_cumul",
     "02_courbe_hebdomadaire",
     "03_indicateurs_jour",
-    "04_cas_du_jour",
     "05_jours_sans_cas",
     "07_indicateurs_alertes",
     "08_alertes_sources",
@@ -357,8 +348,7 @@
     {
      "titre": "Situation du jour",
      "images": [
-      "03_indicateurs_jour",
-      "04_cas_du_jour"
+      "03_indicateurs_jour"
      ]
     },
     {
@@ -369,7 +359,7 @@
     },
     {
      "titre": "Alertes",
-     "date": "2026-10-19",
+     "date": "2026-10-21",
      "images": [
       "07_indicateurs_alertes",
       "07b_alertes_comparatif_3j",
@@ -389,7 +379,7 @@
       "13_contacts_suivre_vus",
       "14_tableau_contacts"
      ],
-     "date": "2026-10-19"
+     "date": "2026-10-20"
     }
    ]
   },
@@ -398,8 +388,8 @@
    "niveau": "province",
    "nom": "Province : Bas Uele",
    "court": "Bas Uele",
-   "date": "2026-10-19",
-   "pptx": "Presentation_Reunion_Bas_Uele_20261019.pptx",
+   "date": "2026-10-21",
+   "pptx": "Presentation_Reunion_Bas_Uele_20261021.pptx",
    "diapositives": 9,
    "images": [
     "01_indicateurs_cumul",
@@ -439,7 +429,7 @@
     },
     {
      "titre": "Alertes",
-     "date": "2026-10-19",
+     "date": "2026-10-20",
      "images": [
       "07_indicateurs_alertes",
       "07b_alertes_comparatif_3j",
@@ -466,8 +456,8 @@
    "niveau": "province",
    "nom": "Province : Sud Kivu",
    "court": "Sud Kivu",
-   "date": "2026-10-19",
-   "pptx": "Presentation_Reunion_Sud_Kivu_20261019.pptx",
+   "date": "2026-10-21",
+   "pptx": "Presentation_Reunion_Sud_Kivu_20261021.pptx",
    "diapositives": 7,
    "images": [
     "01_indicateurs_cumul",
@@ -518,8 +508,8 @@
    "niveau": "province",
    "nom": "Province : Sud Ubangi",
    "court": "Sud Ubangi",
-   "date": "2026-10-19",
-   "pptx": "Presentation_Reunion_Sud_Ubangi_20261019.pptx",
+   "date": "2026-10-21",
+   "pptx": "Presentation_Reunion_Sud_Ubangi_20261021.pptx",
    "diapositives": 7,
    "images": [
     "01_indicateurs_cumul",
@@ -530,7 +520,9 @@
     "08_alertes_sources",
     "07b_alertes_comparatif_3j",
     "08b_alertes_sources_3j",
-    "08_alertes_tendance"
+    "08_alertes_tendance",
+    "09_alertes_unites",
+    "09b_alertes_sources_unites"
    ],
    "slides": [
     {
@@ -554,13 +546,15 @@
     },
     {
      "titre": "Alertes",
-     "date": "2026-10-12",
+     "date": "2026-10-20",
      "images": [
       "07_indicateurs_alertes",
       "07b_alertes_comparatif_3j",
       "08_alertes_sources",
       "08b_alertes_sources_3j",
-      "08_alertes_tendance"
+      "08_alertes_tendance",
+      "09_alertes_unites",
+      "09b_alertes_sources_unites"
      ]
     }
    ]
@@ -570,8 +564,8 @@
    "niveau": "province",
    "nom": "Province : Nord Ubangi",
    "court": "Nord Ubangi",
-   "date": "2026-10-19",
-   "pptx": "Presentation_Reunion_Nord_Ubangi_20261019.pptx",
+   "date": "2026-10-21",
+   "pptx": "Presentation_Reunion_Nord_Ubangi_20261021.pptx",
    "diapositives": 7,
    "images": [
     "01_indicateurs_cumul",
