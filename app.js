@@ -94,7 +94,6 @@
     { id: "riskzones", t: "Zones à risque", g: "Situation", i: "M12 2 1 21h22L12 2zm1 15h-2v2h2zm0-7h-2v5h2z" },
     { id: "index", t: "Cas index", g: "Contact tracing", i: "M4 6h16v2H4zm0 5h16v2H4zm0 5h10v2H4z", priv: true },
     { id: "journey", t: "Parcours du cas", g: "Contact tracing", i: "M12 2a4 4 0 1 1 0 8 4 4 0 0 1 0-8zm-7 18c0-3.9 3.1-7 7-7s7 3.1 7 7H5zM19 3l3 3-3 3", priv: true },
-    { id: "superspreading", t: "Super-propagation et lieux", g: "Contact tracing", i: "M12 2a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5zM4 15a2 2 0 1 1 0 4 2 2 0 0 1 0-4zm16 0a2 2 0 1 1 0 4 2 2 0 0 1 0-4zM6 9a2 2 0 1 1 0 4 2 2 0 0 1 0-4zm12 0a2 2 0 1 1 0 4 2 2 0 0 1 0-4zM11 7h2v3l5 1-.4 1.6L13 12v1l-4 3-1-1 3-3z" },
     { id: "chains", t: "Chaînes de transmission", g: "Contact tracing", i: "M7 7a3 3 0 1 1-2 5.2L10 15a3 3 0 1 1-.8 1.8L4.3 14A3 3 0 0 1 7 7zm10-4a3 3 0 1 1 0 6 3 3 0 0 1 0-6z" },
     { id: "recon", t: "Reconstruction de la transmission", g: "Contact tracing", i: "M4 5h4v4H4zm12 0h4v4h-4zM10 15h4v4h-4zM6 9v2h4v4h2v-4h4V9h-2v2H8V9z", priv: true },
     { id: "dynamics", t: "Dynamique de transmission", g: "Analyses", i: "M3 19h18v2H3zM4 15l4-6 4 3 5-8 3 2-6.6 10.3-4-3L6.2 16.4z" },
@@ -114,9 +113,6 @@
     { id: "indicateurs", t: "Indicateurs du pilier surveillance", g: "Réunions", i: "M3 3h18v18H3zm2 2v4h4V5zm6 0v4h8V5zm-6 6v4h4v-4zm6 0v4h8v-4zm-6 6v2h4v-2zm6 0v2h8v-2z", role: "lecteur", pub: true },
     { id: "presentation", t: "Présentation", g: "Réunions", i: "M3 4h18v2H3zm1 3h16v10H4zm7 11h2v3h-2zm-4 3h10v1H7zM7 14l3-4 2 2 3-4 2 6z", role: "lecteur", pub: true },
     { id: "upload", t: "Charger les données", g: "Données", i: "M5 20h14v-2H5zm7-16-5 5h3v6h4V9h3z", priv: true, role: "analyste" },
-    { id: "fusion", t: "Linelist fusionnée", g: "Données", i: "M4 4h7v7H4zm9 0h7v7h-7zM4 13h7v7H4zm9 3h7v2h-7z", priv: true },
-    { id: "method", t: "Méthodologie", g: "Données", i: "M4 4h16v16H4zm3 4h10v2H7zm0 4h10v2H7zm0 4h6v2H7z" },
-    { id: "terms", t: "Conditions d’utilisation", g: "Données", i: "M6 2h9l5 5v15H6zm8 1.5V8h4.5" },
     { id: "comptes", t: "Comptes", g: "Administration", i: "M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zm0 2c-4 0-8 2-8 5v1h16v-1c0-3-4-5-8-5z", priv: true, role: "admin" },
     { id: "publication", t: "Publication en ligne", g: "Administration", i: "M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm6.9 6h-3a15 15 0 0 0-1.3-3.9A8 8 0 0 1 18.9 8zM12 4c.8 1.2 1.5 2.5 1.9 4h-3.8c.4-1.5 1.1-2.8 1.9-4zM4.3 14a8 8 0 0 1 0-4h3.4a16 16 0 0 0 0 4zm.8 2h3a15 15 0 0 0 1.3 3.9A8 8 0 0 1 5.1 16zm3-8h-3a8 8 0 0 1 4.3-3.9A15 15 0 0 0 8.1 8zM12 20c-.8-1.2-1.5-2.5-1.9-4h3.8c-.4 1.5-1.1 2.8-1.9 4zm2.3-6H9.7a14 14 0 0 1 0-4h4.6a14 14 0 0 1 0 4zm.3 5.9a15 15 0 0 0 1.3-3.9h3a8 8 0 0 1-4.3 3.9zm1.7-5.9a16 16 0 0 0 0-4h3.4a8 8 0 0 1 0 4z", priv: true, role: "admin" }
   ].filter(t => !(isPublic && t.priv && !(pubParcours && PARCOURS_TABS.has(t.id))))
@@ -1686,6 +1682,11 @@
   }
 
   /* ================= MÉTHODOLOGIE ================= */
+  // « Priority N » en gras, en anglais dans les deux versions (demande de l'équipe), suivi du reste de l'orientation
+  function prioHtml(s) {
+    const tx = T(s || ""), m = tx.match(/^Priorit(?:é|y)\s*(\d)(.*)$/s);
+    return m ? `<b>Priority ${m[1]}</b>${esc(m[2])}` : esc(tx);
+  }
   function methodView() { return panel("Méthodologie", T("Définitions, preprocessing, alignement et modèles"), `<div class="method">${(window.HUB_METHOD || {})[lang] || ""}</div>`); }
   function termsView() { return panel("Conditions d’utilisation", "", `<div class="method">${(window.HUB_TERMS || {})[lang] || ""}</div>`); }
 
@@ -2074,8 +2075,8 @@
     const z = zs.find(x => x.zone_sante === S.zrSel) || [...zs].sort((a, b) => (b.score_risque || 0) - (a.score_risque || 0))[0];
     const parts = SCORE_PARTS.map(([k, t]) => ({ t, v: z[k] || 0 })).filter(x => x.v > 0);
     return panel(`${esc(z.zone_sante)}, ${T("score")} ${nf(z.score_risque, 0)}/100`, `${esc(T(z.province || ""))} · ${T("rang")} ${nf(z.rang_province)} ${T("dans la province")} · <span class="badge"><i style="background:${ZCOL[z.categorie]}"></i>${esc(T(z.categorie))}</span>`, `
-      <div class="prio-chip" style="background:${PRIO_COL(z.score_risque || 0)};color:${(z.score_risque || 0) >= 50 ? "#fff" : "#3a2a20"}">${esc(T(z.niveau_priorite || ""))}</div>
-      <div class="small" style="margin:8px 0"><b>${T("Orientation opérationnelle")} :</b> ${esc(T(z.orientation || ""))}</div>
+      <div class="prio-chip" style="background:${PRIO_COL(z.score_risque || 0)};color:${(z.score_risque || 0) >= 50 ? "#fff" : "#3a2a20"}">${prioHtml(z.niveau_priorite)}</div>
+      <div class="small" style="margin:8px 0"><b>${T("Orientation opérationnelle")} :</b> ${prioHtml(z.orientation)}</div>
       <h3 class="small" style="margin:10px 0 6px">${T("Contribution de chaque facteur au score")}</h3>
       ${parts.length ? hbars(parts, "t", "v", { color: "--critical", d: 1 }) : `<div class="muted small">${T("Aucun facteur de risque")}</div>`}
       <div class="small muted" style="margin-top:8px">${esc(T(z.explication || ""))}${z.zones_voisines_incidence_elevee ? ` · ${T("Zones voisines à incidence élevée")} : ${esc(z.zones_voisines_incidence_elevee)}` : ""}</div>`);
@@ -2093,7 +2094,7 @@
         { k: "province", t: "Province" }, { k: "rang_province", t: "Rang", num: true }, { k: "zone_sante", t: "Zone de santé" },
         { k: "score_risque", t: "Score", v: x => `<span class="score-pill" style="background:${PRIO_COL(x.score_risque)};color:${x.score_risque >= 50 ? "#fff" : "#3a2a20"}">${nf(x.score_risque, 0)}</span>`, sortv: x => x.score_risque },
         { k: "categorie", t: "Catégorie", v: x => `<span class="badge"><i style="background:${ZCOL[x.categorie]}"></i>${esc(T(x.categorie))}</span>`, sortv: x => ZORD.indexOf(x.categorie) },
-        { k: "facteurs_principaux", t: "Facteurs principaux", wrap: true, v: x => `<span class="small">${esc(x.facteurs_principaux || "")}</span>` }, { k: "orientation", t: "Orientation opérationnelle", wrap: true, v: x => `<span class="small">${esc(x.orientation || "")}</span>` }],
+        { k: "facteurs_principaux", t: "Facteurs principaux", wrap: true, v: x => `<span class="small">${esc(x.facteurs_principaux || "")}</span>` }, { k: "orientation", t: "Orientation opérationnelle", wrap: true, v: x => `<span class="small">${prioHtml(x.orientation)}</span>`, csv: x => x.orientation || "" }],
         { rowClick: true, rowKey: x => x.zone_sante, sort: null, maxh: 560, limit: 150 }), { csv: "zr-rank" })}
     </div>`;
   }
@@ -2132,7 +2133,7 @@
       sideNotes: [score ? T("Score = cas 21 j (20) + tendance (12) + P(Rt>1) (12) + décès communautaires (8) + décès groupés (5) + proximité d’une incidence élevée (10) + frontière (5) + mines (5) + contacts non vus > 3 j (8) + résurgence (10) + EDS non réalisés (5).")
         : T("Rouge : cas dans les 21 derniers jours et au moins un critère d’aggravation, ou deux critères de contexte. Orange : cas < 21 j sans critère rouge.")],
       notes: top.length ? [`${T("Zones les plus prioritaires")} : ${top.map(z => `${z.zone_sante} (${nf(z.score_risque, 0)}${z.niveau_priorite ? ", " + T(z.niveau_priorite) : ""})`).join(" ; ")}.`] : [],
-      source: `${T("Source")} : Linelist, contact tracing, SitRep · Ebola Outbreak Analytics Hub · ${per}`,
+      source: `${T("Source")} : Linelist, contact tracing, SitRep · Ebola Outbreak, SGI-TASK FORCE · ${per}`,
       file: `carte_${score ? "score_risque" : "categories_zones"}_${PER ? PER.debut + "_" + PER.fin : (Z.date || D.meta.cutoff)}${S.province === "Toutes" ? "" : "_" + S.province}` });
   }
 

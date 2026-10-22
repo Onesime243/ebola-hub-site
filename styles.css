@@ -399,3 +399,5 @@ a.btn{text-decoration:none}
 /* espacement des panneaux isolés (évite que filtres et cartes se touchent) */
 #content > .panel{margin-bottom:14px}
 .net-tools{z-index:2}
+
+footer.foot .sig{flex:1 1 100%;line-height:1.5}footer.foot .sig a{color:inherit}

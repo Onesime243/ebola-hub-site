@@ -848,7 +848,7 @@
       if (ramp) { const sp = ramp.parentElement.querySelectorAll(":scope > span"), cs = [...ramp.querySelectorAll("i")].map(i => getComputedStyle(i).backgroundColor);
         x.fillStyle = col("--ink-2"); const t0 = sp[0]?.textContent || ""; x.fillText(t0, 12, ly + 9); const rx = 18 + x.measureText(t0).width;
         cs.forEach((c, k) => { x.fillStyle = c; x.fillRect(rx + k * 26, ly, 26, 10); }); x.fillStyle = col("--ink-2"); x.fillText(sp[1]?.textContent || "", rx + cs.length * 26 + 6, ly + 9); }
-      x.fillStyle = col("--muted"); x.font = "10px system-ui,sans-serif"; x.fillText("Ebola Outbreak Analytics Hub · " + (window.DASHBOARD_DATA?.meta?.cutoff || ""), 12, h + head + legendH + 16);
+      x.fillStyle = col("--muted"); x.font = "10px system-ui,sans-serif"; x.fillText("Ebola Outbreak, SGI-TASK FORCE · " + (window.DASHBOARD_DATA?.meta?.cutoff || ""), 12, h + head + legendH + 16);
       c.toBlob(b => { const a = document.createElement("a"); a.href = URL.createObjectURL(b); a.download = (name || title).replace(/[^\w\-]+/g, "_") + ".png"; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 2000); });
     };
     img.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(data);
@@ -897,7 +897,7 @@
       // notes
       let ny2 = head + Math.max(h, ly - head) + 22; x.fillStyle = "#4a5560"; x.font = "11px system-ui,sans-serif";
       noteLines.forEach(t => { x.fillText(t, 18, ny2); ny2 += 15; });
-      x.fillStyle = "#8a949d"; x.font = "10.5px system-ui,sans-serif"; x.fillText(opt.source || ("Ebola Outbreak Analytics Hub · " + (window.DASHBOARD_DATA?.meta?.cutoff || "")), 18, H - 12);
+      x.fillStyle = "#8a949d"; x.font = "10.5px system-ui,sans-serif"; x.fillText(opt.source || ("Ebola Outbreak, SGI-TASK FORCE · " + (window.DASHBOARD_DATA?.meta?.cutoff || "")), 18, H - 12);
       c.toBlob(b => { const a = document.createElement("a"); a.href = URL.createObjectURL(b); a.download = (opt.file || opt.title || "carte").replace(/[^\w\-]+/g, "_") + ".png"; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 2000); });
     };
     img.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(new XMLSerializer().serializeToString(clone));
@@ -924,7 +924,7 @@
       r.forEach((v, j) => { let t = v; while (t.length > 3 && x.measureText(t).width > w[j] - 10) t = t.slice(0, -2); x.fillText(t === v ? t : t + "…", cx, y + 15); cx += w[j]; });
       x.strokeStyle = col("--line") || "#ddd"; x.beginPath(); x.moveTo(8, y + rh); x.lineTo(W - 8, y + rh); x.stroke();
     });
-    x.fillStyle = col("--muted") || "#888"; x.font = "10px system-ui,sans-serif"; x.fillText("Ebola Outbreak Analytics Hub · " + (window.DASHBOARD_DATA?.meta?.cutoff || ""), 12, H - 10);
+    x.fillStyle = col("--muted") || "#888"; x.font = "10px system-ui,sans-serif"; x.fillText("Ebola Outbreak, SGI-TASK FORCE · " + (window.DASHBOARD_DATA?.meta?.cutoff || ""), 12, H - 10);
     c.toBlob(b => { const a = document.createElement("a"); a.href = URL.createObjectURL(b); a.download = (name || title).replace(/[^\w\-]+/g, "_") + ".png"; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 2000); });
   }
 
