@@ -4,7 +4,7 @@
  "nom": "Province : Sud Ubangi",
  "court": "Sud Ubangi",
  "date": "2026-10-20",
- "genere_le": "2026-10-22 11:35",
+ "genere_le": "2026-10-22 23:23",
  "pptx": "Presentation_Reunion_Sud_Ubangi_20261020.pptx",
  "diapositives": 7,
  "slides": [
@@ -44,7 +44,7 @@
  "images": {
   "01_indicateurs_cumul": {
    "fichier": "01_indicateurs_cumul.png",
-   "titre": "Situation de la MVE au 20 octobre 2026 — Province : Sud Ubangi"
+   "titre": "Situation de la MVE au 20 octobre 2026, Province : Sud Ubangi"
   },
   "02_courbe_hebdomadaire": {
    "fichier": "02_courbe_hebdomadaire.png",
@@ -52,7 +52,7 @@
   },
   "03_indicateurs_jour": {
    "fichier": "03_indicateurs_jour.png",
-   "titre": "Situation épidémiologique du jour — 20 octobre 2026"
+   "titre": "Situation épidémiologique du jour, 20 octobre 2026"
   },
   "05_jours_sans_cas": {
    "fichier": "05_jours_sans_cas.png",
@@ -64,7 +64,7 @@
   },
   "08_alertes_sources": {
    "fichier": "08_alertes_sources.png",
-   "titre": "Sources des alertes du jour — 3 alertes"
+   "titre": "Sources des alertes du jour, 3 alertes"
   },
   "07b_alertes_comparatif_3j": {
    "fichier": "07b_alertes_comparatif_3j.png",

@@ -183,7 +183,7 @@
       const i = idxAt(ev), r = data[i];
       hl.setAttribute("x1", X(i)); hl.setAttribute("x2", X(i)); hl.setAttribute("opacity", 1);
       const rows = opt.series.filter(s => !s.hidden && !s.noTip && !(opt.tipSkipNull && (r[s.key] === null || r[s.key] === undefined))).map(s => `<div class="row"><span><i style="background:${col(s.color)}"></i>${esc(s.label)}</span><b>${r[s.key] === null || r[s.key] === undefined ? "—" : nf(Number(r[s.key]), opt.digits ?? 1)}${opt.percent || s.percent ? " %" : ""}</b></div>`).join("");
-      const band = (opt.band ? [opt.band] : []).concat(opt.bands || []).filter(b => r[b.hi] !== null && r[b.hi] !== undefined).map(b => `<div class="row"><span>${esc(b.label || "IC 95 %")}</span><b>${nf(val(r, b.lo), opt.digits ?? 1)} – ${nf(val(r, b.hi), opt.digits ?? 1)}</b></div>`).join("") + (opt.tipExtra ? opt.tipExtra(r) : "");
+      const band = (opt.band ? [opt.band] : []).concat(opt.bands || []).filter(b => r[b.hi] !== null && r[b.hi] !== undefined).map(b => `<div class="row"><span>${esc(b.label || "IC 95 %")}</span><b>${nf(val(r, b.lo), opt.digits ?? 1)}, ${nf(val(r, b.hi), opt.digits ?? 1)}</b></div>`).join("") + (opt.tipExtra ? opt.tipExtra(r) : "");
       showTip(`<b>${esc(opt.tipTitle ? opt.tipTitle(r) : (opt.xLabel ? opt.xLabel(r[opt.x], r, true) : r[opt.x]))}</b>${rows}${band}`, ev);
     });
     ov.addEventListener("mouseleave", () => { hideTip(); hl.setAttribute("opacity", 0); });
@@ -208,7 +208,7 @@
     const getters = [];
     ser.forEach(x => { cols.push(stripTags(x.label || x.key)); getters.push(r => r[x.key]); });
     const bands = [...(opt.band ? [opt.band] : []), ...(opt.bands || [])];
-    bands.forEach(b => { const lab = stripTags(b.label || "IC"); cols.push(lab + " — bas", lab + " — haut"); getters.push(r => r[b.lo], r => r[b.hi]); });
+    bands.forEach(b => { const lab = stripTags(b.label || "IC"); cols.push(lab + ", bas", lab + ", haut"); getters.push(r => r[b.lo], r => r[b.hi]); });
     const xl = r => { try { return stripTags(opt.xLabel ? opt.xLabel(r[opt.x], r, true) : r[opt.x]); } catch (e) { return r[opt.x]; } };
     const fmt = v => (v === null || v === undefined || v === "" || (typeof v === "number" && !Number.isFinite(v))) ? "" : (typeof v === "number" ? Math.round(v * 1000) / 1000 : v);
     return { cols, rows: data.map(r => [xl(r), ...getters.map(g => fmt(g(r)))]) };
@@ -329,23 +329,47 @@
       // disposition « ballons » : niveau 1 sur un anneau autour du cas index ; chaque contact
       // devenu cas porte ses propres contacts sur un cercle tourné vers l'extérieur.
       const c1 = kids.get(rootN.id) || [];
-      const step = Math.max(150, c1.length * 27 / (2 * Math.PI));
       pos.set(rootN.id, [0, 0]);
-      const ringR = n => Math.max(55, n * 25 / (2 * Math.PI));
+      // taille de chaque « ballon » calculée d'abord, pour que les ballons voisins ne se chevauchent pas
+      const gap = 2 * Math.PI * .16, NODE = 26;
+      const geo = new Map();
+      const measure = n => {
+        const cs = kids.get(n.id) || [];
+        if (!cs.length) { geo.set(n.id, { r: 0, lat: NODE / 2, out: NODE / 2 }); return geo.get(n.id); }
+        const sub = cs.map(measure);
+        const need = sub.reduce((s, g) => s + Math.max(NODE, 2 * g.lat + 10), 0);
+        const r = Math.max(55, need / (2 * Math.PI - gap));
+        const mx = Math.max(...sub.map(g => g.out));
+        const G = { r, d: r + 70, lat: r + mx, out: r + 70 + r + mx };
+        geo.set(n.id, G); return G;
+      };
+      c1.forEach(measure);
+      // rayon de l'anneau 1 : assez grand pour que la somme des secteurs tienne dans 2π
+      const angNeed = (c, R) => { const G = geo.get(c.id); return G.r ? Math.max(NODE / R, 2 * Math.atan((G.lat + 14) / (R + G.d))) : NODE / R; };
+      let step = Math.max(150, c1.length * NODE / (2 * Math.PI));
+      for (let it = 0; it < 60 && c1.reduce((s, c) => s + angNeed(c, step), 0) > 2 * Math.PI; it++) step *= 1.12;
       const balloon = (n, cx, cy, ang) => {
-        const cs = kids.get(n.id) || []; if (!cs.length) return;
-        const r = ringR(cs.length), d = r + 70;
-        const ox = cx + Math.cos(ang) * d, oy = cy + Math.sin(ang) * d;
-        const gap = 2 * Math.PI * .16;
+        const cs0 = kids.get(n.id) || []; if (!cs0.length) return;
+        // les contacts qui portent leur propre ballon sont placés côté extérieur (milieu de l'arc), les autres sur les côtés
+        const srt = [...cs0].sort((x, y) => geo.get(x.id).lat - geo.get(y.id).lat), cs = [];
+        srt.forEach((c, i) => { if (i % 2) cs.push(c); else cs.unshift(c); });
+        const G = geo.get(n.id), r = G.r;
+        const ox = cx + Math.cos(ang) * G.d, oy = cy + Math.sin(ang) * G.d;
+        const w = cs.map(c => Math.max(NODE, 2 * geo.get(c.id).lat + 10)), W = w.reduce((s, x) => s + x, 0);
+        let acc = 0;
         cs.forEach((c, k) => {
-          const a = cs.length === 1 ? ang : ang + Math.PI + gap / 2 + (2 * Math.PI - gap) * (k + .5) / cs.length;
+          const a = cs.length === 1 ? ang : ang + Math.PI + gap / 2 + (2 * Math.PI - gap) * (acc + w[k] / 2) / W;
+          acc += w[k];
           const px = ox + Math.cos(a) * r, py = oy + Math.sin(a) * r;
           pos.set(c.id, [px, py]);
           balloon(c, px, py, Math.atan2(py - oy, px - ox));
         });
       };
+      const need1 = c1.map(c => angNeed(c, step)), tot1 = need1.reduce((s, x) => s + x, 0) || 1;
+      const spare = Math.max(0, 2 * Math.PI - tot1) / Math.max(1, c1.length);
+      let acc1 = 0;
       c1.forEach((c, k) => {
-        const a = -Math.PI / 2 + 2 * Math.PI * k / Math.max(1, c1.length);
+        const a = -Math.PI / 2 + acc1 + (need1[k] + spare) / 2; acc1 += need1[k] + spare;
         const x = Math.cos(a) * step, y = Math.sin(a) * step;
         pos.set(c.id, [x, y]); balloon(c, x, y, a);
       });
@@ -904,5 +928,49 @@
     c.toBlob(b => { const a = document.createElement("a"); a.href = URL.createObjectURL(b); a.download = (name || title).replace(/[^\w\-]+/g, "_") + ".png"; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 2000); });
   }
 
-  window.HubCharts = { downloadPanelPNG, reportMapPNG, reportChoropleth, xyTable, stripTags, xy, histogram, choropleth, network, ttree, forceNet, settingNet, tracingDiagram, sexIcon, sexIconHTML, sexKey, PAL, downloadPNG, showTip, hideTip, clearRegistry, rerenderAll, col, esc, nf };
+
+  /* ---------------- Carte de rapport + commentaire (Méthode, Résultats, Limites) dans un seul PNG ---------------- */
+  async function mapCaptionPNG(img, capEl, fname) {
+    if (!img.complete || !img.naturalWidth) await new Promise((ok, ko) => { img.addEventListener("load", ok, { once: true }); img.addEventListener("error", ko, { once: true }); });
+    const W = img.naturalWidth, H = img.naturalHeight, pad = Math.round(W * 0.03), fs = Math.max(16, Math.round(W / 78)), lh = Math.round(fs * 1.5);
+    const font = (b) => `${b ? "700" : "400"} ${fs}px "Segoe UI", "Helvetica Neue", Arial, sans-serif`;
+    // texte : morceaux gras / normaux ; chaque intertitre en gras ouvre un nouveau paragraphe
+    const runs = [];
+    (capEl ? [...capEl.childNodes] : []).forEach(n => {
+      const b = n.nodeName === "B" || n.nodeName === "STRONG", s = (n.textContent || "").replace(/\s+/g, " ");
+      if (!s.trim()) return;
+      if (b && runs.length) runs.push({ br: true });
+      s.split(/(\s+)/).forEach(w => { if (w) runs.push({ w, b }); });
+    });
+    const c = document.createElement("canvas"), x = c.getContext("2d");
+    const maxW = W - 2 * pad, lines = [[]]; let cur = 0;
+    runs.forEach(r => {
+      if (r.br) { lines.push([]); cur = 0; return; }
+      x.font = font(r.b); const w = x.measureText(r.w).width;
+      if (/^\s+$/.test(r.w)) { if (cur) { lines[lines.length - 1].push({ ...r, w: " ", width: w }); cur += w; } return; }
+      if (cur + w > maxW && cur > 0) { const L = lines[lines.length - 1]; while (L.length && L[L.length - 1].w === " ") L.pop(); lines.push([]); cur = 0; }
+      lines[lines.length - 1].push({ ...r, width: w }); cur += w;
+    });
+    const paraGap = Math.round(lh * 0.35), nPara = runs.filter(r => r.br).length;
+    const textH = lines.filter(l => l.length).length ? lines.length * lh + nPara * paraGap + 2 * pad : 0;
+    c.width = W; c.height = H + textH;
+    x.fillStyle = "#ffffff"; x.fillRect(0, 0, c.width, c.height);
+    x.drawImage(img, 0, 0, W, H);
+    if (textH) {
+      x.strokeStyle = "#1b1b1b"; x.lineWidth = Math.max(2, W / 520);
+      x.strokeRect(W * 0.008, H - x.lineWidth, W * 0.984, textH - W * 0.006);
+      let y = H + pad + fs; x.textBaseline = "alphabetic";
+      lines.forEach((L, i) => {
+        if (i && L.length && L[0].b && lines[i - 1].length) y += paraGap;
+        let xx = pad;
+        L.forEach(r => { x.font = font(r.b); x.fillStyle = r.b ? "#1b1b1b" : "#333333"; x.fillText(r.w, xx, y); xx += r.width; });
+        y += lh;
+      });
+    }
+    const a = document.createElement("a");
+    a.download = fname.replace(/\.png$/i, "") + "_commentaire.png";
+    a.href = c.toDataURL("image/png"); document.body.appendChild(a); a.click(); a.remove();
+  }
+
+  window.HubCharts = { mapCaptionPNG, downloadPanelPNG, reportMapPNG, reportChoropleth, xyTable, stripTags, xy, histogram, choropleth, network, ttree, forceNet, settingNet, tracingDiagram, sexIcon, sexIconHTML, sexKey, PAL, downloadPNG, showTip, hideTip, clearRegistry, rerenderAll, col, esc, nf };
 })();

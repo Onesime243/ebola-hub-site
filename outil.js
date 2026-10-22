@@ -1,4 +1,4 @@
-/* Ebola Outbreak Analytics Hub — menus de l'outil : chargement des données (tout fichier, reconnu par son contenu),
+/* Ebola Outbreak Analytics Hub, menus de l'outil : chargement des données (tout fichier, reconnu par son contenu),
    présentations pour les réunions, comptes, publication en ligne, et menu de l'utilisateur connecté.
    Utilisé par app.js ; fonctionne aussi seul (première utilisation, avant toute analyse). */
 window.HubOutil = (function () {
@@ -55,7 +55,7 @@ window.HubOutil = (function () {
       const r = u.rec, used = u.type !== "ignorer" && INFO && INFO.utilises.includes(u.type);
       return `<div class="up-item ${u.type === "inconnu" ? "unknown" : ""}"><span class="up-ico">${used ? "✓" : "📄"}</span>
         <div class="up-meta"><b>${esc(r.nom)}</b><span class="muted small">${taille(r.taille)}${r.origine ? ` · ${T("extrait de")} ${esc(r.origine)}` : ""}${r.feuille ? ` · ${T("feuille")} « ${esc(r.feuille)} »` : ""}${r.province ? ` · ${esc(r.province)}` : ""}</span>
-        <span class="small up-det ${used ? "ok" : ""}">${esc(T(r.libelle))}${r.detail ? " — " + esc(r.detail) : ""}</span></div>
+        <span class="small up-det ${used ? "ok" : ""}">${esc(T(r.libelle))}${r.detail ? ", " + esc(r.detail) : ""}</span></div>
         ${typeSelect(i, u.type)}<button class="btn sm" type="button" data-up-del="${i}" title="${T("Retirer de la liste")}">✕</button></div>`;
     }).join("");
     const pret = UP.some(u => u.etat === "ok" && u.type !== "ignorer") && !UP.some(u => u.etat === "envoi");
@@ -119,7 +119,7 @@ window.HubOutil = (function () {
     if (!can("analyste")) return panel("Charger les données", "", `<div class="notice">${T("Votre compte (lecteur) permet de consulter les résultats, pas de charger des données.")}</div>`);
     return `${panel("Charger les données", T("Déposez tous vos fichiers, quels que soient leurs noms : Linelist DHIS2, export lln, suivi des contacts, SitRep (PDF ou image), sites miniers, zones frontalières, fichiers des provinces (labo, bases de suivi des contacts et de gestion des alertes, line lists des zones de santé…), ou une archive .zip. Chaque fichier est reconnu d'après son contenu et rangé aussitôt ; l'analyse se lance alors automatiquement et met à jour tous les menus (tableau de bord, cartes, rapports, présentations, indicateurs). Corrigez le type si besoin : l'analyse se relance."), `
       <label class="dropzone" id="up-drop"><input type="file" id="up-input" multiple>
-        <span class="dz-ico">⤒</span><b>${T("Déposez les fichiers ici")}</b><span class="muted small">${T("ou cliquez pour parcourir l'ordinateur")} — Excel (.xlsx, .xls, .xlsb), CSV, PDF, images, .zip</span></label>
+        <span class="dz-ico">⤒</span><b>${T("Déposez les fichiers ici")}</b><span class="muted small">${T("ou cliquez pour parcourir l'ordinateur")} : Excel (.xlsx, .xls, .xlsb), CSV, PDF, images, .zip</span></label>
       <div id="up-list" class="up-list"></div>
       <div class="flex" style="margin-top:12px"><button class="btn primary" type="button" data-up-only data-job-btn>↻ ${T("Relancer l'analyse")}</button><span class="muted small" id="job-state"></span></div>
       <pre id="job-log" class="logbox"></pre>
@@ -166,7 +166,7 @@ window.HubOutil = (function () {
     const titre = m.code === "national" ? "Niveau national" : "Province : " + m.court;
     const nomPng = lab => (m.court + " " + lab).replace(/[^\wÀ-ÿ -]+/g, "").replace(/\s+/g, "_") + ".png";
     root.innerHTML = `<section class="panel pres-head"><div class="pres-dl">
-        <div><h2>${T("Présentation PowerPoint")} — ${esc(T(titre))}</h2>
+        <div><h2>${T("Présentation PowerPoint")}, ${esc(T(titre))}</h2>
         <p>${T("Diapositives prêtes pour les réunions de coordination, situation au")} ${esc(m.date)} : ${T("indicateurs, courbes, cartes et tableaux, avec des graphiques modifiables dans PowerPoint (clic droit sur un graphique › Modifier les données). Seuls les piliers dont l'outil reçoit les données sont produits.")}</p></div>
         ${m.pptx ? `<a class="btn primary pres-btn" href="${base}${encodeURIComponent(m.pptx)}" download="${esc(m.pptx)}">⤓ ${T("Télécharger le PowerPoint")} (${m.diapositives} ${T("diapositives")})</a>` : ""}</div>
         <div class="seg pres-niv" role="tablist">${N.map(n => `<button type="button" data-pres-niv="${n.code}" class="${n.code === PSEL ? "on" : ""}">${esc(n.code === "national" ? T("National") : n.court)}</button>`).join("")}</div>
@@ -195,7 +195,7 @@ window.HubOutil = (function () {
       </tbody></table></div>`;
     const prm = I.parametres || {}, pp = I.parametres_provinces || {};
     const provs = Object.values(I.niveaux).filter(n => n.niveau === "province").map(n => n.province);
-    const reglages = SERVED && can("analyste") ? panel("Paramètres des alertes attendues", T("Alertes MVE attendues par jour = population × taux d'alertes MVE attendues (pour 10 000 habitants par semaine, norme du SGI MVE) ÷ 70 000 + décès communautaires attendus (population × taux brut de mortalité ÷ 1000 ÷ 365 ; tout décès communautaire est une alerte MVE). Population des zones : fichier dont le nom contient POPULATION (colonnes zone de santé et population) dans config/ ou data/") + (I.population_fichier ? ` — ${T("utilisé")} : ${esc(I.population_fichier)}` : ` — ${T("aucun fichier trouvé")}`) + T(" ; ou population par province ci-dessous."),
+    const reglages = SERVED && can("analyste") ? panel("Paramètres des alertes attendues", T("Alertes MVE attendues par jour = population × taux d'alertes MVE attendues (pour 10 000 habitants par semaine, norme du SGI MVE) ÷ 70 000 + décès communautaires attendus (population × taux brut de mortalité ÷ 1000 ÷ 365 ; tout décès communautaire est une alerte MVE). Population des zones : fichier dont le nom contient POPULATION (colonnes zone de santé et population) dans config/ ou data/") + (I.population_fichier ? `, ${T("utilisé")} : ${esc(I.population_fichier)}` : `, ${T("aucun fichier trouvé")}`) + T(" ; ou population par province ci-dessous."),
       `<form id="f-ind" class="cpt-form">
         <label class="field">${T("Alertes MVE attendues (pour 10 000 habitants par semaine)")}<input type="number" step="any" min="0" name="alertes_ebola_pour_10000_par_semaine" value="${esc(prm.alertes_ebola_pour_10000_par_semaine ?? "")}"></label>
         <label class="field">${T("Taux brut de mortalité (pour 1000 par an)")}<input type="number" step="any" min="0" name="mortalite_brute_pour_1000" value="${esc(prm.mortalite_brute_pour_1000 ?? "")}"></label>
@@ -206,7 +206,7 @@ window.HubOutil = (function () {
     return `<div class="flex" style="margin-bottom:12px;gap:10px;flex-wrap:wrap;align-items:end"><label class="field">${T("Niveau")}<select data-ind-niv>${opts}</select></label>
         ${fic.xlsx ? `<a class="btn" href="${base}${encodeURIComponent(fic.xlsx)}" download="${esc(fic.xlsx)}">⤓ Excel</a>` : ""}${fic.docx ? `<a class="btn primary" href="${base}${encodeURIComponent(fic.docx)}" download="${esc(fic.docx)}">⤓ Word (${T("canevas")})</a>` : ""}
         <span class="muted small">${T("Fichiers : niveau national et provinces ; le fichier d'une province contient aussi ses zones de santé.")} ${T("Calculés le")} ${esc(I.genere_le)}.</span></div>
-      ${panel("Collecte des indicateurs du pilier surveillance — " + N.titre, T("Vert : seuil atteint · rouge : seuil non atteint. Mode de calcul dans la colonne Observations."), tbl)}${reglages}`;
+      ${panel("Collecte des indicateurs du pilier surveillance, " + N.titre, T("Vert : seuil atteint · rouge : seuil non atteint. Mode de calcul dans la colonne Observations."), tbl)}${reglages}`;
   }
   function indWire() {}
   document.addEventListener("change", e => { const s = e.target.closest?.("[data-ind-niv]"); if (s) { INIV = s.value; const c = $("#content"); if (c && window.__hubRender) window.__hubRender(); } });
@@ -273,7 +273,7 @@ window.HubOutil = (function () {
     const [p, c] = await Promise.all([fetch("/api/publication").then(r => r.json()).catch(() => ({})), fetch("/api/comptes").then(r => r.json()).catch(() => ({}))]);
     const sans = (c.comptes || []).filter(x => x.actif && !x.en_ligne).map(x => x.identifiant);
     const el = $("#pub-info"); if (el) el.innerHTML = `${p.url ? `${T("Adresse")} : <a href="${esc(p.url)}" target="_blank" rel="noopener">${esc(p.url)}</a>` : T("Adresse non configurée (config/publication.json).")}
-      ${p.derniere ? `<br>${T("Dernière publication")} : ${esc(p.derniere.le)} ${T("par")} ${esc(p.derniere.par || "")} — ${T("situation au")} ${esc(p.derniere.situation || "")}` : ""}
+      ${p.derniere ? `<br>${T("Dernière publication")} : ${esc(p.derniere.le)} ${T("par")} ${esc(p.derniere.par || "")}, ${T("situation au")} ${esc(p.derniere.situation || "")}` : ""}
       ${sans.length ? `<br><span class="warn-txt">${T("Sans accès en ligne pour l'instant")} : ${sans.map(esc).join(", ")}</span>` : ""}`;
     fetch("/api/status").then(r => r.json()).then(s => { if (s.running || (s.type === "publication" && s.log)) suivre(() => pubWire()); }).catch(() => {});
   }

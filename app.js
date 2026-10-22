@@ -1,4 +1,4 @@
-/* Ebola Outbreak Analytics Hub — application (v3) */
+/* Ebola Outbreak Analytics Hub, application (v3) */
 (function () {
   "use strict";
   const D = window.DASHBOARD_DATA;
@@ -16,7 +16,7 @@
   /* ================= Langue ================= */
   let lang = localGet("hub-lang") || "fr";
   window.HubLang = lang;
-  const T = s => (lang === "en" && window.HUB_EN && window.HUB_EN[s]) ? window.HUB_EN[s] : s;
+  const T = s => lang !== "en" ? s : (window.HUB_EN && window.HUB_EN[s]) || (window.HubTr ? window.HubTr(s) : s);
   window.HubT = T;
   const nf = (v, d = 0) => (v === null || v === undefined || v === "" || Number.isNaN(Number(v))) ? "—" : new Intl.NumberFormat(lang === "en" ? "en-GB" : "fr-FR", { maximumFractionDigits: d }).format(Number(v));
   const pc = (v, d = 1) => v === null || v === undefined ? "—" : nf(v, d) + " %";
@@ -46,7 +46,7 @@
   const CLS = { "Confirmé": "--st-conf", "Probable": "--s5", "Suspect": "--st-susp", "Non cas": "--st-done", "En attente / non classé": "--st-inc", "Hors Linelist": "--s7" };
   const clsColor = c => CLS[c] || "--st-inc";
   const RISK = { "Critique": "b-crit", "Élevée": "b-high", "Modérée": "b-mod", "Faible": "b-low" };
-  const CONF = { "Élevée": "b-good", "Moyenne": "b-mod", "Faible": "b-high", "Faible — nom discordant": "b-crit", "Non retrouvé": "b-crit" };
+  const CONF = { "Élevée": "b-good", "Moyenne": "b-mod", "Faible": "b-high", "Faible, nom discordant": "b-crit", "Non retrouvé": "b-crit" };
   const LINKC = { "Certain": "b-crit", "Probable": "b-high", "À vérifier": "b-mod" };
 
   const cases = D.cases || [], contacts = D.contacts || [], idxCases = D.index_cases || [];
@@ -90,10 +90,8 @@
   const TABS = [
     { id: "overview", t: "Vue générale", g: "Situation", i: "M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z" },
     { id: "territories", t: "Territoires", g: "Situation", i: "M12 2C8 2 5 5 5 9c0 5 7 13 7 13s7-8 7-13c0-4-3-7-7-7zm0 9.5A2.5 2.5 0 1 1 12 6a2.5 2.5 0 0 1 0 5.5z" },
-    { id: "resurgence", t: "Risque de résurgence", g: "Situation", i: "M3 17l5-6 4 3 4-7 5 4v2l-5-4-4 7-4-3-5 6z" },
     { id: "maps", t: "Cartes pour rapport", g: "Situation", i: "M15 4 9 2 3 4v18l6-2 6 2 6-2V2zM9 4.4l6 2v13.2l-6-2z" },
     { id: "riskzones", t: "Zones à risque", g: "Situation", i: "M12 2 1 21h22L12 2zm1 15h-2v2h2zm0-7h-2v5h2z" },
-    { id: "followup", t: "Suivi des contacts", g: "Contact tracing", i: "M16 11c1.7 0 3-1.3 3-3s-1.3-3-3-3-3 1.3-3 3 1.3 3 3 3zm-8 0c1.7 0 3-1.3 3-3S9.7 5 8 5 5 6.3 5 8s1.3 3 3 3zm0 2c-2.3 0-7 1.2-7 3.5V19h14v-2.5C15 14.2 10.3 13 8 13zm8 0h-1c1.2.9 2 2 2 3.5V19h6v-2.5c0-2.3-4.7-3.5-7-3.5z" },
     { id: "index", t: "Cas index", g: "Contact tracing", i: "M4 6h16v2H4zm0 5h16v2H4zm0 5h10v2H4z", priv: true },
     { id: "journey", t: "Parcours du cas", g: "Contact tracing", i: "M12 2a4 4 0 1 1 0 8 4 4 0 0 1 0-8zm-7 18c0-3.9 3.1-7 7-7s7 3.1 7 7H5zM19 3l3 3-3 3", priv: true },
     { id: "superspreading", t: "Super-propagation et lieux", g: "Contact tracing", i: "M12 2a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5zM4 15a2 2 0 1 1 0 4 2 2 0 0 1 0-4zm16 0a2 2 0 1 1 0 4 2 2 0 0 1 0-4zM6 9a2 2 0 1 1 0 4 2 2 0 0 1 0-4zm12 0a2 2 0 1 1 0 4 2 2 0 0 1 0-4zM11 7h2v3l5 1-.4 1.6L13 12v1l-4 3-1-1 3-3z" },
@@ -107,7 +105,6 @@
     { id: "labs", t: "Laboratoires", g: "Analyses", i: "M9 2h6v2h-1v5l5 9a2 2 0 0 1-2 3H7a2 2 0 0 1-2-3l5-9V4H9z" },
     { id: "nowcast", t: "Nowcasting", g: "Analyses", i: "M3 17l6-6 4 4 8-8v4h2V3h-8v2h4l-6 6-4-4-8 8z" },
     { id: "forecast", t: "Prévisions", g: "Analyses", i: "M3 20h18v2H3zm2-3l4-5 4 3 6-8 1.6 1.2-7.2 9.6-4-3L6.6 18z" },
-    { id: "priority", t: "Priorisation", g: "Analyses", i: "M5 3v18h2v-7h6l1 2h6V5h-6l-1-2z" },
     { id: "alerts", t: "Surveillance des alertes", g: "Linelist lln", i: "M12 22a2 2 0 0 0 2-2h-4a2 2 0 0 0 2 2zm6-6V11a6 6 0 0 0-5-5.9V4h-2v1.1A6 6 0 0 0 6 11v5l-2 2v1h16v-1z" },
     { id: "eds", t: "Décès et EDS", g: "Linelist lln", i: "M10 2h4v6h6v4h-6v10h-4V12H4V8h6z" },
     { id: "clinic", t: "Symptômes et clinique", g: "Linelist lln", i: "M12 21l-1.5-1.3C5.4 15.4 2 12.3 2 8.5 2 5.4 4.4 3 7.5 3c1.7 0 3.4.8 4.5 2.1C13.1 3.8 14.8 3 16.5 3 19.6 3 22 5.4 22 8.5c0 3.8-3.4 6.9-8.5 11.2z" },
@@ -118,7 +115,6 @@
     { id: "presentation", t: "Présentation", g: "Réunions", i: "M3 4h18v2H3zm1 3h16v10H4zm7 11h2v3h-2zm-4 3h10v1H7zM7 14l3-4 2 2 3-4 2 6z", role: "lecteur", pub: true },
     { id: "upload", t: "Charger les données", g: "Données", i: "M5 20h14v-2H5zm7-16-5 5h3v6h4V9h3z", priv: true, role: "analyste" },
     { id: "fusion", t: "Linelist fusionnée", g: "Données", i: "M4 4h7v7H4zm9 0h7v7h-7zM4 13h7v7H4zm9 3h7v2h-7z", priv: true },
-    { id: "quality", t: "Qualité & preprocessing", g: "Données", i: "M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z" },
     { id: "method", t: "Méthodologie", g: "Données", i: "M4 4h16v16H4zm3 4h10v2H7zm0 4h10v2H7zm0 4h6v2H7z" },
     { id: "terms", t: "Conditions d’utilisation", g: "Données", i: "M6 2h9l5 5v15H6zm8 1.5V8h4.5" },
     { id: "comptes", t: "Comptes", g: "Administration", i: "M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zm0 2c-4 0-8 2-8 5v1h16v-1c0-3-4-5-8-5z", priv: true, role: "admin" },
@@ -202,7 +198,7 @@
     const fromPdf = !PER && s.source_pdf;
     const plus = v => v === null || v === undefined ? "" : ` · <b>+${nf(v)}</b> ${T("en 24 h")}`;
     const sitTiles = fromPdf ? `
-    <div class="sitrep-head"><span class="sitrep-badge">SitRep N° ${esc(String(s.numero || "—"))}</span> ${T("Chiffres officiels nationaux — rapport du")} <b>${dfmt(s.date_sitrep)}</b>${s.date_publication ? `, ${T("publié le")} ${dfmt(s.date_publication)}` : ""} · <span class="muted">${esc(s.source_pdf)}</span>${(s.avertissements || []).length ? ` · <b style="color:${col("--critical")}">⚠ ${esc(s.avertissements.join(" ; "))}</b>` : ""}</div>
+    <div class="sitrep-head"><span class="sitrep-badge">SitRep N° ${esc(String(s.numero || "—"))}</span> ${T("Chiffres officiels nationaux, rapport du")} <b>${dfmt(s.date_sitrep)}</b>${s.date_publication ? `, ${T("publié le")} ${dfmt(s.date_publication)}` : ""} · <span class="muted">${esc(s.source_pdf)}</span>${(s.avertissements || []).length ? ` · <b style="color:${col("--critical")}">⚠ ${esc(s.avertissements.join(" ; "))}</b>` : ""}</div>
     <div class="grid g6">
       ${kpi("Cumul des cas", nf(k.confirmes), `${T("Cas confirmés")}${plus(s.nouveaux_cas_24h)}`, { color: "--s2" })}
       ${kpi("Cumul des décès confirmés", nf(k.deces_confirmes), `${T("Décès")}${plus(s.deces_24h)}`, { color: "--critical" })}
@@ -221,16 +217,16 @@
     <div class="grid g5">
       ${kpi("Confirmés sur 14 jours", nf(p.confirmes), `${dshort(p.start)} → ${dshort(p.end)} · ${nf(p.deces_confirmes)} ${T("décès")}`)}
       ${kpi("Nouveaux cas connus comme contacts", pc(r.pct_nouveaux_cas_connus_contacts), T("Confirmés 14 j déjà listés comme contacts"), { cls: r.pct_nouveaux_cas_connus_contacts < 50 ? "alert" : "good", meter: r.pct_nouveaux_cas_connus_contacts, meterColor: r.pct_nouveaux_cas_connus_contacts < 50 ? "--critical" : "--good", go: "chains" })}
-      ${kpi("Contacts en suivi actif", nf(r.contacts_actifs), `${T("Fenêtre de 21 jours ouverte")} · ${nf(r.cas_index_suivi_en_cours)} ${T("cas index")}`, { go: "followup" })}
-      ${kpi("Contacts vus ≤24 h", pc(r.pct_contacts_vus_24h), `${nf(r.contacts_vus_24h)} / ${nf(r.contacts_actifs)} · ${dshort(r.date_reference_suivi)}`, { cls: r.pct_contacts_vus_24h < 80 ? "alert" : "good", meter: r.pct_contacts_vus_24h, meterColor: r.pct_contacts_vus_24h < 80 ? "--critical" : "--good", go: "followup" })}
-      ${kpi("Contacts non vus >3 j", nf(r.contacts_non_vus_48h), T("À rechercher en priorité"), { cls: r.contacts_non_vus_48h > 0 ? "alert" : "good", go: "followup" })}
+      ${kpi("Contacts en suivi actif", nf(r.contacts_actifs), `${T("Fenêtre de 21 jours ouverte")} · ${nf(r.cas_index_suivi_en_cours)} ${T("cas index")}`, {})}
+      ${kpi("Contacts vus ≤24 h", pc(r.pct_contacts_vus_24h), `${nf(r.contacts_vus_24h)} / ${nf(r.contacts_actifs)} · ${dshort(r.date_reference_suivi)}`, { cls: r.pct_contacts_vus_24h < 80 ? "alert" : "good", meter: r.pct_contacts_vus_24h, meterColor: r.pct_contacts_vus_24h < 80 ? "--critical" : "--good" })}
+      ${kpi("Contacts non vus >3 j", nf(r.contacts_non_vus_48h), T("À rechercher en priorité"), { cls: r.contacts_non_vus_48h > 0 ? "alert" : "good" })}
     </div>
     <div class="grid g21">
-      ${panel("Courbe épidémique hebdomadaire", T("Cas confirmés par semaine (lundi) et décès confirmés — semaine en cours exclue car incomplète"), `<div id="c-epi"></div>`, { png: "courbe_epidemique", tools: `<div class="seg" data-seg="curveBy"><button data-v="notification" class="${S.curveBy === "notification" ? "on" : ""}">${T("Notification")}</button><button data-v="dds" class="${S.curveBy === "dds" ? "on" : ""}">${T("Début des symptômes")}</button></div><div class="seg" data-seg="ovStack"><button data-v="aucun" class="${S.ovStack === "aucun" ? "on" : ""}">${T("Total")}</button><button data-v="sexe" class="${S.ovStack === "sexe" ? "on" : ""}">${T("Par sexe")}</button><button data-v="age" class="${S.ovStack === "age" ? "on" : ""}">${T("Par âge")}</button><button data-v="prov" class="${S.ovStack === "prov" ? "on" : ""}">${T("Par province")}</button></div>` })}
+      ${panel("Courbe épidémique hebdomadaire", T("Cas confirmés par semaine (lundi) et décès confirmés, semaine en cours exclue car incomplète"), `<div id="c-epi"></div>`, { png: "courbe_epidemique", tools: `<div class="seg" data-seg="curveBy"><button data-v="notification" class="${S.curveBy === "notification" ? "on" : ""}">${T("Notification")}</button><button data-v="dds" class="${S.curveBy === "dds" ? "on" : ""}">${T("Début des symptômes")}</button></div><div class="seg" data-seg="ovStack"><button data-v="aucun" class="${S.ovStack === "aucun" ? "on" : ""}">${T("Total")}</button><button data-v="sexe" class="${S.ovStack === "sexe" ? "on" : ""}">${T("Par sexe")}</button><button data-v="age" class="${S.ovStack === "age" ? "on" : ""}">${T("Par âge")}</button><button data-v="prov" class="${S.ovStack === "prov" ? "on" : ""}">${T("Par province")}</button></div>` })}
       ${panel("Points d’attention", T("Générés automatiquement à partir des données du jour"), `<div class="alerts">${alerts.map(a => `<div class="alert-item ${a.lvl}"><span class="ic">${a.lvl === "crit" ? "!" : a.lvl === "warn" ? "!" : a.lvl === "good" ? "✓" : "i"}</span><div>${a.html}</div></div>`).join("")}</div>`)}
     </div>
     <div class="grid g21">
-      ${panel("Zones de santé — 14 derniers jours", T("Cliquer une ligne pour ouvrir la zone"), table("ov-zones", zs, [
+      ${panel("Zones de santé, 14 derniers jours", T("Cliquer une ligne pour ouvrir la zone"), table("ov-zones", zs, [
         { k: "zone_sante", t: "Zone de santé" }, { k: "province", t: "Province" },
         { k: "confirmes_14j", t: "Confirmés 14 j", num: true }, { k: "deces_14j", t: "Décès 14 j", num: true },
         { k: "pct_nouveaux_cas_connus_contacts", t: "% connus contacts", num: true, v: x => x.pct_nouveaux_cas_connus_contacts === null ? "—" : pc(x.pct_nouveaux_cas_connus_contacts, 0) },
@@ -240,7 +236,7 @@
       ${panel("Pyramide des âges", T("Cas confirmés par sexe et groupe d’âge"), pyramid())}
     </div>
     <div class="grid g2">
-      ${panel("Délais opérationnels", T("Médiane hebdomadaire en jours — cas confirmés"), `<div class="flex small muted" style="margin-bottom:6px">${[["dds_notification", "DDS → notification"], ["dds_prelevement", "DDS → prélèvement"], ["prelevement_resultat", "Prélèvement → résultat"], ["dds_admission", "DDS → admission"]].map(([k, t]) => `<span class="badge">${T(t)} : <b>&nbsp;${nf(D.delays?.[k], 1)} j</b></span>`).join("")}</div><div id="c-delays"></div>`, { png: "delais" })}
+      ${panel("Délais opérationnels", T("Médiane hebdomadaire en jours, cas confirmés"), `<div class="flex small muted" style="margin-bottom:6px">${[["dds_notification", "DDS → notification"], ["dds_prelevement", "DDS → prélèvement"], ["prelevement_resultat", "Prélèvement → résultat"], ["dds_admission", "DDS → admission"]].map(([k, t]) => `<span class="badge">${T(t)} : <b>&nbsp;${nf(D.delays?.[k], 1)} j</b></span>`).join("")}</div><div id="c-delays"></div>`, { png: "delais" })}
       ${PER ? panel("Source des chiffres clés", "", `<div class="notice">${T("En mode période, les chiffres clés sont calculés à partir de la Linelist (cas notifiés pendant la période). Le SitRep, qui donne des cumuls à la date du jour, est utilisé seulement pour la vue complète.")}</div>`) : fromPdf ? sitrepProvPanel() : panel("Source officielle des chiffres clés", esc(s.methode || ""), `${s.image ? `<img src="${esc(s.image)}" alt="SitRep" style="max-width:100%;max-height:300px;border-radius:8px;display:block;margin:auto">` : `<div class="empty">${T("Image SitRep non disponible")}</div>`}${sitRows.length ? `<table style="margin-top:10px"><tbody>${sitRows.map(([kk, lb]) => `<tr><td>${esc(T(lb))}</td><td class="num"><b>${kk.endsWith("_pct") ? pc(s.indicateurs[kk]) : nf(s.indicateurs[kk])}</b></td></tr>`).join("")}</tbody></table>` : ""}<div class="notice ${s.perime ? "crit" : s.validation_requise ? "warn" : ""}">${s.perime ? `<b>${T("L’image SitRep a changé mais les chiffres n’ont pas été mis à jour.")}</b> ${T("Lancez 05_METTRE_A_JOUR_SITREP (saisie guidée) ou installez Tesseract OCR, puis relancez l’actualisation.")}` : s.validation_requise ? T("Chiffres issus du fichier de validation manuelle : vérifier avant diffusion.") : T("Cohérence arithmétique OCR validée.")} ${T("Toutes les autres analyses proviennent des fichiers Linelist et Contact tracing.")}</div>`)}
     </div>
     ${fromPdf ? sitrepExtraPanels() : ""}
@@ -250,7 +246,7 @@
   function sitrepProvPanel() {
     const s = D.sources.sitrep || {}, pil = Object.fromEntries((s.provinces_piliers || []).map(x => [x.province, x]));
     const rows = (s.provinces || []).map(p => ({ ...p, ...(pil[p.province] || {}) }));
-    return panel("SitRep : situation par province", `${T("Tableau 1 et texte des piliers du SitRep N°")} ${esc(String(s.numero || ""))} — ${T("lus automatiquement")}`, table("sr-prov", rows, [
+    return panel("SitRep : situation par province", `${T("Tableau 1 et texte des piliers du SitRep N°")} ${esc(String(s.numero || ""))}, ${T("lus automatiquement")}`, table("sr-prov", rows, [
       { k: "province", t: "Province" }, { k: "nouveaux_24h", t: "Nouv. 24 h", num: true }, { k: "cas", t: "Cas cumulés", num: true }, { k: "deces", t: "Décès", num: true },
       { k: "letalite_pct", t: "Létalité", v: x => pc(x.letalite_pct, 1) }, { k: "zs_actives", t: "ZS actives", v: x => `${nf(x.zs_actives)}/${nf(x.zs_total)}` },
       { k: "suivi_contacts_pct", t: "Suivi contacts", v: x => x.suivi_contacts_pct === undefined ? "—" : pc(x.suivi_contacts_pct, 1), sortv: x => x.suivi_contacts_pct },
@@ -262,7 +258,7 @@
     const hist = h.length >= 2 ? panel("Évolution selon les SitRep déposés", `${h.length} ${T("SitRep lus")} (${dfmt(h[0].date_rapport)} → ${dfmt(h[h.length - 1].date_rapport)})`, `<div class="grid g2"><div id="c-sr-cum"></div><div id="c-sr-suivi"></div></div>`, { png: "evolution_sitrep" })
       : `<div class="notice small">${T("Déposez chaque jour le SitRep PDF (SitRep_MVEBDB_n°_jj_mm_aaaa.pdf) dans data/ : l’outil reconstitue l’évolution des chiffres officiels à partir de tous les SitRep déposés.")}</div>`;
     const big = conc.filter(x => Math.abs(x.ecart_cas) >= 5).length;
-    return `${hist}${conc.length ? panel("Concordance SitRep / Linelist par zone de santé", `${T("Cas et décès cumulés du tableau 2 du SitRep comparés à la Linelist ; écart = SitRep − Linelist")} — ${nf(big)} ${T("zone(s) avec un écart d’au moins 5 cas")}`, table("sr-conc", conc, [
+    return `${hist}${conc.length ? panel("Concordance SitRep / Linelist par zone de santé", `${T("Cas et décès cumulés du tableau 2 du SitRep comparés à la Linelist ; écart = SitRep − Linelist")}, ${nf(big)} ${T("zone(s) avec un écart d’au moins 5 cas")}`, table("sr-conc", conc, [
       { k: "province", t: "Province" }, { k: "zone_sante", t: "Zone de santé" }, { k: "cas_sitrep", t: "Cas SitRep", num: true }, { k: "cas_linelist", t: "Cas Linelist", num: true },
       { k: "ecart_cas", t: "Écart", num: true, v: x => `<b style="color:${Math.abs(x.ecart_cas) >= 5 ? col("--critical") : "inherit"}">${x.ecart_cas > 0 ? "+" : ""}${nf(x.ecart_cas)}</b>`, sortv: x => Math.abs(x.ecart_cas) },
       { k: "deces_sitrep", t: "Décès SitRep", num: true }, { k: "deces_linelist", t: "Décès Linelist", num: true }, { k: "nouveaux_24h", t: "Nouv. 24 h", num: true }],
@@ -310,11 +306,11 @@
   }
   function buildAlerts() {
     const r = D.riposte || {}, out = [], zs = zones();
-    if (D.sources?.sitrep?.perime) out.push({ lvl: "crit", html: `<b>${T("Chiffres SitRep non mis à jour")}</b> — ${T("l’image SitRep a changé : lancez 05_METTRE_A_JOUR_SITREP.")}` });
+    if (D.sources?.sitrep?.perime) out.push({ lvl: "crit", html: `<b>${T("Chiffres SitRep non mis à jour")}</b>, ${T("l’image SitRep a changé : lancez 05_METTRE_A_JOUR_SITREP.")}` });
     (D.preprocessing?.avertissements || []).filter(w => w.startsWith("ALERTE")).forEach(w => out.push({ lvl: "crit", html: esc(w) }));
     const nv = [...zs].sort((a, b) => b.contacts_non_vus - a.contacts_non_vus).filter(z => z.contacts_non_vus > 0).slice(0, 3);
-    if (r.contacts_non_vus_48h > 0) out.push({ lvl: "crit", html: `<b>${nf(r.contacts_non_vus_48h)} ${T("contacts non vus depuis plus de 3 jours (perdus de vue)")}</b> — ${nv.map(z => `${esc(z.zone_sante)} (${nf(z.contacts_non_vus)})`).join(", ")}.` });
-    if (r.pct_nouveaux_cas_connus_contacts !== null && r.pct_nouveaux_cas_connus_contacts < 50) out.push({ lvl: "crit", html: `<b>${pc(r.pct_nouveaux_cas_connus_contacts)} ${T("des nouveaux confirmés étaient connus comme contacts")}</b> — ${T("la majorité des chaînes de transmission échappe au suivi ; renforcer l’investigation et le listage.")}` });
+    if (r.contacts_non_vus_48h > 0) out.push({ lvl: "crit", html: `<b>${nf(r.contacts_non_vus_48h)} ${T("contacts non vus depuis plus de 3 jours (perdus de vue)")}</b>, ${nv.map(z => `${esc(z.zone_sante)} (${nf(z.contacts_non_vus)})`).join(", ")}.` });
+    if (r.pct_nouveaux_cas_connus_contacts !== null && r.pct_nouveaux_cas_connus_contacts < 50) out.push({ lvl: "crit", html: `<b>${pc(r.pct_nouveaux_cas_connus_contacts)} ${T("des nouveaux confirmés étaient connus comme contacts")}</b>, ${T("la majorité des chaînes de transmission échappe au suivi ; renforcer l’investigation et le listage.")}` });
     const nc = D.nowcast || {};
     if (nc.probabilite_croissance_pct >= 70) out.push({ lvl: "warn", html: `<b>${T("Croissance probable")}</b> : ${pc(nc.probabilite_croissance_pct)} ${T("après correction des retards de notification.")}` });
     const newz = zs.filter(z => z.confirmes_14j > 0 && z.confirmes - z.confirmes_14j === 0);
@@ -398,7 +394,7 @@
       <span class="small muted">${m.per ? `${T("Indicateur calculé sur")} : <b>${perLbl}</b> (${T("jusqu’au")} ${dshort(D.meta.cutoff)})` : T("Indicateur instantané (situation du jour), indépendant de la période")}</span>
     </div>
     <div class="grid g21">
-      ${panel(`${T(m.t)}${m.per ? " — " + perLbl : ""}`, T("Couleurs épidémiologiques : vert = situation favorable, jaune = vigilance, orange = alerte, rouge = situation critique ; gris = aucune donnée"), `<div id="c-map"></div>`, { png: "carte_" + m.k + "_" + S.mapPeriod })}
+      ${panel(`${T(m.t)}${m.per ? ", " + perLbl : ""}`, T("Couleurs épidémiologiques : vert = situation favorable, jaune = vigilance, orange = alerte, rouge = situation critique ; gris = aucune donnée"), `<div id="c-map"></div>`, { png: "carte_" + m.k + "_" + S.mapPeriod })}
       <section class="panel">
         <div class="panel-head"><div><div class="eyebrow">${esc(z.province || "")}</div><h2>${esc(z.zone_sante || "—")}</h2></div><div class="panel-tools"><select data-state="zoneSel">${zs.map(x => `<option ${x.zone_sante === z.zone_sante ? "selected" : ""}>${esc(x.zone_sante)}</option>`).join("")}</select></div></div>
         ${cz ? `<div class="notice" style="border-color:${cz.color}"><b>${T(m.t)}</b> : ${zp[m.k] === null || zp[m.k] === undefined ? "—" : nf(zp[m.k], m.d ?? 0) + (m.unit === "%" ? " %" : "")} <span class="badge" style="background:${cz.color};color:#2b2b2b">${cz.label}</span></div>` : ""}
@@ -417,7 +413,7 @@
       ${panel("Tendance quotidienne (90 jours)", esc(z.zone_sante || ""), `<div id="c-zone"></div>`, { png: "tendance_zone" })}
       ${panel("Aires de santé de la zone", T("Cas et suivi des contacts"), table("ter-areas", ar, [{ k: "aire_sante", t: "Aire de santé" }, { k: "confirmes", t: "Confirmés", num: true }, { k: "deces_confirmes", t: "Décès", num: true }, { k: "contacts", t: "Contacts", num: true }, { k: "contacts_actifs", t: "Actifs", num: true }, { k: "contacts_non_vus", t: "Non vus >3 j", num: true }, { k: "taux_vus_24h_pct", t: "% vus ≤24 h", num: true, v: x => pc(x.taux_vus_24h_pct, 0) }], { sort: "confirmes", maxh: 330 }), { csv: "ter-areas" })}
     </div>
-    ${panel(`${T("Toutes les zones de santé")} — ${perLbl}`, T("Tri par colonne ; clic pour sélectionner ; la pastille reprend la couleur de la carte"), table("ter-zones", zsP, [
+    ${panel(`${T("Toutes les zones de santé")}, ${perLbl}`, T("Tri par colonne ; clic pour sélectionner ; la pastille reprend la couleur de la carte"), table("ter-zones", zsP, [
       { k: "province", t: "Province" }, { k: "zone_sante", t: "Zone de santé", v: x => { const c = classOf(cls, m, x[m.k]); return `<span class="dot" style="display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;background:${c ? c.color : col(TL_NA)}"></span>${esc(x.zone_sante)}`; }, csv: x => x.zone_sante },
       { k: "cas", t: "Conf. + prob.", num: true }, { k: "confirmes", t: "Confirmés", num: true }, { k: "suspects", t: "Suspects", num: true }, { k: "deces_confirmes", t: "Décès", num: true },
       { k: "letalite_pct", t: "Létalité %", num: true, d: 1 }, { k: "variation_pct", t: "Variation %", num: true, v: x => x.variation_pct === null || x.variation_pct === undefined ? "—" : pctS(x.variation_pct) },
@@ -475,7 +471,7 @@
     const nAct = pub ? (r.contacts_actifs || 0) : act.length, nAll = pub ? Object.values(counts).reduce((a, b) => a + b, 0) : pz.length;
     const nSoon = pub ? (r.sorties_suivi_3j || 0) : act.filter(c => days(D.meta.reference_suivi, c.fin) <= 3).length;
     return `
-    <div class="notice"><b>${T("Date de référence du suivi")} : ${dfmt(D.meta.reference_suivi)}</b> — ${T("dernière date de visite disponible. Un contact est « actif » tant que sa fenêtre de 21 jours après la dernière exposition est ouverte.")}</div>
+    <div class="notice"><b>${T("Date de référence du suivi")} : ${dfmt(D.meta.reference_suivi)}</b>, ${T("dernière date de visite disponible. Un contact est « actif » tant que sa fenêtre de 21 jours après la dernière exposition est ouverte.")}</div>
     <div class="grid g5">
       ${kpi("Contacts en suivi actif", nf(nAct), `${nf(nAll)} ${T("contacts listés au total")}`, { color: "--s1" })}
       ${kpi("Vus ≤24 h", pc(nAct ? 100 * v24 / nAct : null), `${nf(v24)} ${T("contacts")}`, { color: "--st-v24", meter: nAct ? 100 * v24 / nAct : 0, meterColor: "--good" })}
@@ -483,7 +479,7 @@
       ${kpi("Fin de suivi ≤3 jours", nf(nSoon), T("Préparer la clôture"))}
       ${kpi("Suivi complet sur 21 jours", pc(r.pct_suivi_complet_21j), `${T("Complétude moyenne des visites")} : ${pc(r.completude_moyenne_suivi_pct, 0)}`, { meter: r.pct_suivi_complet_21j })}
     </div>
-    ${panel("Statut de suivi de tous les contacts", `${T("Répartition à la date de référence (1 contact = 1 statut)")} — ${T("pourcentages calculés sur")} ${nf(nAll)} ${T("contacts listés (hors doublons pour les taux)")}`, `${stackbar(counts)}<div style="height:10px"></div>${statusTable(counts)}`)}
+    ${panel("Statut de suivi de tous les contacts", `${T("Répartition à la date de référence (1 contact = 1 statut)")}, ${T("pourcentages calculés sur")} ${nf(nAll)} ${T("contacts listés (hors doublons pour les taux)")}`, `${stackbar(counts)}<div style="height:10px"></div>${statusTable(counts)}`)}
     ${suspectPanel(pz, pub)}
     ${recoPanel()}
     <div class="grid g2">
@@ -500,14 +496,14 @@
     ${isPublic ? "" : panel("Télécharger les listes (Excel)", `${T("Un onglet par province, trié par zone de santé puis aire de santé ; un onglet de synthèse.")} ${S.province === "Toutes" ? T("Toutes les provinces") : `${T("Province")} : ${esc(S.province)}`}`, `
       <div class="flex" style="margin-bottom:12px"><span class="small muted">${T("Période")}</span>${periodSeg("dlPeriod")}<span class="small muted">${Number(S.dlPeriod) ? `${dshort(winStart(S.dlPeriod))} → ${dshort(REF())}` : T("Toute la période")}</span></div>
       <div class="grid g3" style="margin-bottom:0">
-        ${[["suspects", "Contacts suspects — issue à documenter", "--st-susp", "Déclarés suspects dans la période, ni confirmés ni redevenus « Non cas »"],
+        ${[["suspects", "Contacts suspects, issue à documenter", "--st-susp", "Déclarés suspects dans la période, ni confirmés ni redevenus « Non cas »"],
            ["nonvus", "Contacts non vus (>3 j)", "--st-nv", "Dernière visite où le contact a été vu (ou enregistrement s’il n’a jamais été vu) dans la période"],
            ["incomplet", "Suivi clôturé incomplet", "--st-inc", "Fin de la fenêtre de 21 jours dans la période"]].map(([k, t, c2, h]) => { const n = listRows(k).length;
           return `<div class="kpi"><div class="label"><i class="dot" style="background:${col(c2)}"></i>${T(t)}</div><div class="value">${nf(n)}</div><div class="note">${T(h)}</div><button class="btn primary" style="margin-top:10px" data-xlsx="${k}" ${n ? "" : "disabled"}>⤓ ${T("Télécharger Excel")}</button></div>`; }).join("")}
       </div>
       <div class="notice">${T("Listes pseudonymisées (identifiant et initiales). Les mêmes listes avec les noms sont générées à chaque actualisation dans outputs/confidentiel/LISTES_AAAAMMJJ/.")}</div>`)}
     ${isPublic ? "" : `<div class="grid g2">
-      ${panel("Contacts à rechercher (non vus >3 j)", T("Liste pseudonymisée — la liste nominative est dans outputs/confidentiel"), table("fu-nv", nv, [
+      ${panel("Contacts à rechercher (non vus >3 j)", T("Liste pseudonymisée, la liste nominative est dans outputs/confidentiel"), table("fu-nv", nv, [
         { k: "id", t: "ID contact" }, { k: "ini", t: "Init." }, { k: "zs", t: "Zone" }, { k: "as", t: "Aire" },
         { k: "vl", t: "Dernier vu", v: x => x.vl ? dshort(x.vl) : T("jamais"), sortv: x => x.vl || "" },
         { k: "jdv", t: "Jours sans visite", num: true, v: x => x.vl ? nf(days(x.vl, D.meta.reference_suivi)) : "—", sortv: x => x.vl ? days(x.vl, D.meta.reference_suivi) : 999 },
@@ -541,7 +537,7 @@
     if (!n) return "";
     const allCas = pub || !pz.length ? r.contacts_devenus_cas : pz.filter(c => c.st === "Devenu confirmé").length;
     const k = (lab, v, den, denLab, color, note) => `<div class="kpi"><div class="label"><i class="dot" style="background:${col(color)}"></i>${T(lab)}</div><div class="value">${nf(v)}</div><div class="note"><b>${pc(den ? 100 * v / den : null, 1)}</b> ${T("de")} ${nf(den)} ${T(denLab)}${note ? `<br>${note}` : ""}</div></div>`;
-    return panel("Contacts devenus suspects", `${S.province === "Toutes" ? T("Toutes les provinces") : esc(S.province)} — ${T("contact déclaré « suspect » (ou symptômes notés) à au moins une visite, puis issue documentée au suivi ou dans la Linelist")}`, `
+    return panel("Contacts devenus suspects", `${S.province === "Toutes" ? T("Toutes les provinces") : esc(S.province)}, ${T("contact déclaré « suspect » (ou symptômes notés) à au moins une visite, puis issue documentée au suivi ou dans la Linelist")}`, `
       <div class="grid g4" style="margin-bottom:8px">
         ${k("Devenus suspects (cumul)", n, nAll, "contacts listés", "--st-susp")}
         ${k("Suspects devenus cas", conf, n, "suspects", "--st-conf", `${T("soit")} ${pc(allCas ? 100 * conf / allCas : null, 0)} ${T("des contacts devenus cas étaient d’abord signalés suspects")}`)}
@@ -628,16 +624,16 @@
       ...(kind === "suspects" ? [c.ds, c.vl] : kind === "nonvus" ? [c.vl || T("jamais"), c.vl ? days(c.vl, REF()) : null, c.rnv] : [c.vl || T("jamais"), `${c.jv}/${c.ja}`, c.comp]), T(c.st), ""];
     const sortFn = (a, b) => String(a.zs || "~").localeCompare(String(b.zs || "~")) || String(a.as || "~").localeCompare(String(b.as || "~")) ||
       (kind === "nonvus" ? String(a.vl || "").localeCompare(String(b.vl || "")) : String(a.ds || a.fin || "").localeCompare(String(b.ds || b.fin || "")));
-    const title = { suspects: "Contacts suspects — issue à documenter", nonvus: "Contacts non vus depuis plus de 3 jours (perdus de vue)", incomplet: "Contacts — suivi clôturé incomplet" }[kind];
+    const title = { suspects: "Contacts suspects, issue à documenter", nonvus: "Contacts non vus depuis plus de 3 jours (perdus de vue)", incomplet: "Contacts, suivi clôturé incomplet" }[kind];
     const perTxt = n ? `${winStart(n)} → ${REF()} (${n} ${T("derniers jours")})` : T("Toute la période");
     const provs = [...new Set(rows.map(c => c.prov || T("Province non renseignée")))].sort();
-    const summary = { name: T("Synthèse"), title: `${T(title)} — ${perTxt} — ${T("situation au")} ${D.meta.cutoff}`, columns: [{ t: T("Province"), w: 18 }, { t: T("Zone de santé"), w: 22 }, { t: T("Contacts"), w: 10 }],
+    const summary = { name: T("Synthèse"), title: `${T(title)}, ${perTxt}, ${T("situation au")} ${D.meta.cutoff}`, columns: [{ t: T("Province"), w: 18 }, { t: T("Zone de santé"), w: 22 }, { t: T("Contacts"), w: 10 }],
       rows: [] };
     const sheets = provs.map(pv => {
       const g = rows.filter(c => (c.prov || T("Province non renseignée")) === pv).sort(sortFn);
       const byZ = {}; g.forEach(c => { byZ[c.zs || "—"] = (byZ[c.zs || "—"] || 0) + 1; });
       Object.keys(byZ).sort().forEach(z => summary.rows.push([pv, z, byZ[z]]));
-      return { name: pv, title: `${T(title)} — ${pv} — ${perTxt}`, columns: allCols, rows: g.map(line) };
+      return { name: pv, title: `${T(title)}, ${pv}, ${perTxt}`, columns: allCols, rows: g.map(line) };
     });
     summary.rows.push([T("Total"), "", rows.length]);
     const fname = `${{ suspects: "Contacts_devenus_suspects", nonvus: "Contacts_perdus_de_vue_3j", incomplet: "Suivi_cloture_incomplet" }[kind]}_${S.province === "Toutes" ? "toutes_provinces" : S.province.replace(/\W+/g, "_")}_${n ? n + "j_" : ""}${D.meta.cutoff}`;
@@ -682,14 +678,14 @@
         <label class="flex small" style="margin-top:14px"><input type="checkbox" data-check="idxActive" ${S.idxActive ? "checked" : ""}> ${T("Suivi en cours uniquement")}</label>
         <button class="btn sm" data-reset-idx style="margin-top:14px">↺ ${T("Réinitialiser les filtres")}</button>
       </div>
-      <div class="small muted" style="margin-top:8px">${T("Filtres actifs")} : <b>${filtTxt || T("aucun")}</b> — ${nf(rows.length)} ${T("cas index sur")} ${nf(all.length)}</div>
+      <div class="small muted" style="margin-top:8px">${T("Filtres actifs")} : <b>${filtTxt || T("aucun")}</b>, ${nf(rows.length)} ${T("cas index sur")} ${nf(all.length)}</div>
     </section>
     <div class="grid g5">
       ${kpi("Cas index (filtrés)", nf(rows.length), `${T("Médiane")} ${nf(med)} ${T("contacts par cas index")}`)}
       ${kpi("Contacts listés", nf(nc), `${nf(nAct)} ${T("actifs")} · ${nAct ? pc(100 * v24 / nAct, 0) : "—"} ${T("vus ≤24 h")}`, { color: "--s1" })}
       ${kpi("Perdus de vue > 3 j", nf(sum("non_vus_48h")), T("À rechercher en priorité"), { cls: sum("non_vus_48h") ? "alert" : "good", color: "--st-nv" })}
       ${kpi("Contacts devenus cas", nf(dc), `${T("Taux d’attaque secondaire")} ${nc ? pc(100 * dc / nc, 2) : "—"}`, { color: "--st-conf" })}
-      ${kpi("Liens à vérifier", nf(verif), T("Confiance moyenne, faible ou nom discordant"), { cls: verif ? "alert" : "", go: "quality" })}
+      ${kpi("Liens à vérifier", nf(verif), T("Confiance moyenne, faible ou nom discordant"), { cls: verif ? "alert" : "" })}
     </div>
     <div class="grid g2">
       ${panel("Cas index par nombre de générations", T("Profondeur du réseau de contact tracing (tous les cas index de la province) ; cliquer pour filtrer"), `<div class="hbars">${genCount.map(x => `<div class="hbar clickable" data-gen-pick="${x.g.slice(1)}" style="grid-template-columns:60px 1fr 70px"><span>${x.g}</span><div class="track"><i style="width:${Math.max(1, 100 * x.n / Math.max(1, ...genCount.map(y => y.n)))}%;background:${col(["--s1", "--s3", "--s4", "--critical"][Number(x.g.slice(1)) - 1])}"></i></div><b>${nf(x.n)}</b></div>`).join("")}</div><div class="small muted" style="margin-top:6px">${T("G1 = cas index et ses contacts ; G2 = au moins un contact devenu cas a lui-même des contacts listés ; G3, G4 = chaînes de contacts plus longues.")}</div>`)}
@@ -750,7 +746,7 @@
     <div class="flex between" style="margin-bottom:12px">
       <div class="search-box"><input type="search" id="case-search" placeholder="${T("Rechercher un cas : identifiant, initiales, zone…")}" autocomplete="off"><div id="case-results" class="search-results hide"></div></div>
       <div class="flex small"><span class="muted">${T("Période")}</span>${periodSeg("jrPeriod")}<span class="muted">${T("Générations")}</span>${segBtns("gen", GENS)}
-        <select data-state="caseKey" title="${T("Cas index actifs sur la période")}" style="max-width:280px"><option value="">${T("Cas index — période et génération choisies")} (${nf(activeIdx.length)})</option>${activeIdx.slice(0, 400).map(x => `<option value="${esc(x.index_key)}" ${x.index_key === c.k ? "selected" : ""}>${esc(x.id_cas || x.index_key)} · ${esc(x.zone_sante || "")} · G${NET.depth(x.index_key)} · ${nf(NET.info(x.index_key).size)} ${T("contacts")}</option>`).join("")}</select></div>
+        <select data-state="caseKey" title="${T("Cas index actifs sur la période")}" style="max-width:280px"><option value="">${T("Cas index, période et génération choisies")} (${nf(activeIdx.length)})</option>${activeIdx.slice(0, 400).map(x => `<option value="${esc(x.index_key)}" ${x.index_key === c.k ? "selected" : ""}>${esc(x.id_cas || x.index_key)} · ${esc(x.zone_sante || "")} · G${NET.depth(x.index_key)} · ${nf(NET.info(x.index_key).size)} ${T("contacts")}</option>`).join("")}</select></div>
       <div class="flex small muted">${T("Navigation")} :
         <button class="btn sm" data-nav="prev">← ${T("Cas précédent")}</button><button class="btn sm" data-nav="next">${T("Cas suivant")} →</button></div>
     </div>
@@ -785,7 +781,7 @@
         { png: "graphe_contacts_" + (c.id || c.k), tools: `${Number(S.gen) ? `<span class="badge">${T("Générations affichées")} : ${S.gen}</span>` : `<label class="small muted">${T("Profondeur")}</label><select data-state="netDepth">${[1, 2, 3, 4].map(n => `<option value="${n}" ${S.netDepth == n ? "selected" : ""}>${T("Niveau")} ${n}</option>`).join("")}</select>`}<div class="seg" data-seg="netLayout"><button data-v="radial" class="${S.netLayout === "radial" ? "on" : ""}">${T("Radial")}</button><button data-v="tree" class="${S.netLayout === "tree" ? "on" : ""}">${T("Arbre")}</button></div><label class="small flex" style="gap:4px"><input type="checkbox" data-check="netIcons" ${S.netIcons ? "checked" : ""}>${T("Homme / femme")}</label>` })}
       ${panel("Nœud sélectionné", T("Cliquer un nœud du graphe"), `<div id="node-detail">${nodeDetail()}</div><h3 class="small" style="margin:16px 0 6px">${T("Statut des contacts directs")}</h3>${stackbar(counts)}${legend(STATUS.filter(x => counts[x.k]).map(x => ({ t: x.k, c: x.c, n: counts[x.k] })))}`)}
     </div>
-    ${panel("Contacts du cas index", `${T("Suivi individuel sur 21 jours — pseudonymisé")} · ${perTxt}`, table("jr-ct", ct, [
+    ${panel("Contacts du cas index", `${T("Suivi individuel sur 21 jours, pseudonymisé")} · ${perTxt}`, table("jr-ct", ct, [
       { k: "id", t: "ID contact", v: x => `<b>${esc(x.id)}</b> <span class="muted">${esc(x.ini)}</span>`, csv: x => x.id }, { k: "age", t: "Âge", num: true, d: 0 }, { k: "sexe", t: "Sexe" },
       { k: "rel", t: "Relation" }, { k: "type", t: "Exposition", v: x => esc(T(String(x.type || "—").replace(/^\d\.\s*/, ""))) + (x.hr ? " " + badge("Haut risque", "b-high") : "") + (x.hosp ? " " + badge("Soins", "b-info") : ""), csv: x => x.type },
       { k: "as", t: "Aire" }, { k: "exp", t: "Dernière exposition", v: x => dshort(x.exp) }, { k: "fin", t: "Fin de suivi", v: x => dshort(x.fin) },
@@ -936,7 +932,7 @@
   const SEXL = { M: "Hommes", F: "Femmes", I: "Sexe non renseigné" }, SEXC = { M: "--sex-m", F: "--sex-f", I: "--sex-i" };
   const AGEC = ["#3288BD", "#9ED1A3", "#FDAE61", "#E8684F", "#B0213A", "--sex-i"];
   const fmtR = v => v === null || v === undefined ? "—" : nf(v, 2);
-  const ci = (a, b, d = 2) => (a === null || a === undefined) ? "" : `[${nf(a, d)} – ${nf(b, d)}]`;
+  const ci = (a, b, d = 2) => (a === null || a === undefined) ? "" : `[${nf(a, d)}, ${nf(b, d)}]`;
   const sexIco = (s, size) => Ch.sexIconHTML(s, col(SEXC[s] || "--sex-i"), size);
   function dyGroups() { return DY.groupes || []; }
   function dyGroup() {
@@ -970,8 +966,8 @@
   function growthText(f, name) {
     if (!f || f.r === undefined) return [];
     const up = f.sens === "croissance", down = f.sens === "decroissance";
-    const dbl = f.sens === "incertain" ? "" : f.temps_doublement ? `${T("temps de doublement")} ${nf(f.temps_doublement, 1)} ${T("j")}${f.temps_doublement_ic95 ? ` (IC 95 % ${nf(f.temps_doublement_ic95[0], 1)} – ${f.temps_doublement_ic95[1] ? nf(f.temps_doublement_ic95[1], 1) : "∞"} ${T("j")})` : ""}` : "";
-    const half = f.sens === "incertain" ? "" : f.temps_demi ? `${T("temps de division par deux")} ${nf(f.temps_demi, 1)} ${T("j")}${f.temps_demi_ic95 ? ` (IC 95 % ${nf(f.temps_demi_ic95[0], 1)} – ${f.temps_demi_ic95[1] ? nf(f.temps_demi_ic95[1], 1) : "∞"} ${T("j")})` : ""}` : "";
+    const dbl = f.sens === "incertain" ? "" : f.temps_doublement ? `${T("temps de doublement")} ${nf(f.temps_doublement, 1)} ${T("j")}${f.temps_doublement_ic95 ? ` (IC 95 % ${nf(f.temps_doublement_ic95[0], 1)}, ${f.temps_doublement_ic95[1] ? nf(f.temps_doublement_ic95[1], 1) : "∞"} ${T("j")})` : ""}` : "";
+    const half = f.sens === "incertain" ? "" : f.temps_demi ? `${T("temps de division par deux")} ${nf(f.temps_demi, 1)} ${T("j")}${f.temps_demi_ic95 ? ` (IC 95 % ${nf(f.temps_demi_ic95[0], 1)}, ${f.temps_demi_ic95[1] ? nf(f.temps_demi_ic95[1], 1) : "∞"} ${T("j")})` : ""}` : "";
     return [
       `${T("Taux de croissance journalier")} r = <b>${nf(f.r, 4)}</b> ${ci(f.r_ic95[0], f.r_ic95[1], 4)}, ${T("soit une variation hebdomadaire de")} <b>${pctS(f.variation_hebdo_pct)}</b> ${ci(f.variation_hebdo_ic95[0], f.variation_hebdo_ic95[1], 1)} ; ${dbl || half || T("aucune tendance nette")}.`,
       up ? `<b>${T("Croissance exponentielle significative")}</b> : ${T("l’intervalle de confiance de r est entièrement positif.")}` : down ? `<b>${T("Décroissance significative")}</b> : ${T("l’intervalle de confiance de r est entièrement négatif.")}` : `<b>${T("Tendance non significative")}</b> : ${T("l’intervalle de confiance de r contient 0 (plateau ou données insuffisantes) ; le temps de doublement n’est pas interprétable.")}`,
@@ -995,23 +991,23 @@
       <div class="small muted">${T("Cas confirmés et probables par date de début des symptômes")} · ${nf(imp.dds_imputee)} ${T("dates imputées")} (${pc(imp.pct_imputee, 0)}) · ${T("dernier jour consolidé")} : ${dshort(cons.date)}</div>
     </div>
     <div class="grid g5">
-      ${kpi("Rt consolidé", cons.mediane !== undefined ? fmtR(cons.mediane) : "—", cons.mediane !== undefined ? `IC 95 % ${fmtR(cons.q025)} – ${fmtR(cons.q975)} · ${dshort(cons.date)} · P(R>1) = ${pc(100 * cons.p_sup_1, 0)}` : "", { cls: cons.q025 > 1 ? "alert" : cons.q975 < 1 ? "good" : "", color: "--rc-rt" })}
-      ${kpi("Rt provisoire (derniers jours)", last.mediane !== undefined ? fmtR(last.mediane) : "—", last.mediane !== undefined ? `IC 95 % ${fmtR(last.q025)} – ${fmtR(last.q975)} · ${dshort(last.date)} · ${T("à confirmer")}` : "", { color: "--muted" })}
+      ${kpi("Rt consolidé", cons.mediane !== undefined ? fmtR(cons.mediane) : "—", cons.mediane !== undefined ? `IC 95 % ${fmtR(cons.q025)}, ${fmtR(cons.q975)} · ${dshort(cons.date)} · P(R>1) = ${pc(100 * cons.p_sup_1, 0)}` : "", { cls: cons.q025 > 1 ? "alert" : cons.q975 < 1 ? "good" : "", color: "--rc-rt" })}
+      ${kpi("Rt provisoire (derniers jours)", last.mediane !== undefined ? fmtR(last.mediane) : "—", last.mediane !== undefined ? `IC 95 % ${fmtR(last.q025)}, ${fmtR(last.q975)} · ${dshort(last.date)} · ${T("à confirmer")}` : "", { color: "--muted" })}
       ${kpi("Variation hebdomadaire", fit && fit.r !== undefined ? pctS(fit.variation_hebdo_pct) : fit && fit.apres ? pctS(fit.apres.variation_hebdo_pct) : "—", fit && fit.r !== undefined ? (fit.sens === "croissance" ? `${T("Doublement")} ${nf(fit.temps_doublement, 0)} ${T("j")} · ` : fit.sens === "decroissance" ? `${T("Division par deux")} ${nf(fit.temps_demi, 0)} ${T("j")} · ` : "") + `${T(fit.sens === "croissance" ? "croissance significative" : fit.sens === "decroissance" ? "décroissance significative" : "tendance non significative (plateau)")} · ${T(S.growWin === "6s" ? "6 sem." : S.growWin === "12s" ? "12 sem." : S.growWin === "pic" ? "depuis le pic" : "toute la période")}` : T("Modèle à 2 phases"), { color: "--s2" })}
-      ${kpi("R (vraisemblance, 28 j)", l28.R_ml !== undefined ? fmtR(l28.R_ml) : "—", l28.R_ml !== undefined ? `IC 95 % ${fmtR(l28.ic95[0])} – ${fmtR(l28.ic95[1])} · ${nf(l28.cas, 0)} ${T("cas")}` : "", { color: "--rc-r1" })}
-      ${kpi("Cas projetés sur 14 jours", p14.mediane !== undefined ? nf(p14.mediane) : "—", p14.mediane !== undefined ? `${T("Intervalle 80 %")} ${nf(p14.q10)} – ${nf(p14.q90)} · P(0 ${T("cas")}) ${pc(100 * p14.p_aucun_cas, 0)}` : "", { color: "--s7" })}
+      ${kpi("R (vraisemblance, 28 j)", l28.R_ml !== undefined ? fmtR(l28.R_ml) : "—", l28.R_ml !== undefined ? `IC 95 % ${fmtR(l28.ic95[0])}, ${fmtR(l28.ic95[1])} · ${nf(l28.cas, 0)} ${T("cas")}` : "", { color: "--rc-r1" })}
+      ${kpi("Cas projetés sur 14 jours", p14.mediane !== undefined ? nf(p14.mediane) : "—", p14.mediane !== undefined ? `${T("Intervalle 80 %")} ${nf(p14.q10)}, ${nf(p14.q90)} · P(0 ${T("cas")}) ${pc(100 * p14.p_aucun_cas, 0)}` : "", { color: "--s7" })}
     </div>
-    ${rt.dernier_consolide ? `<div class="notice ${cons.q025 > 1 ? "crit" : ""}"><b>${T("Synthèse")} — ${esc(T(grp.nom))}</b> : ${rtTrend}. ${T("Intervalle sériel utilisé")} : ${nf(siu.moyenne, 1)} ± ${nf(siu.ecart_type, 1)} ${T("j")} (${esc(T(siu.source || ""))}). ${T("Les derniers jours restent incomplets malgré la correction du retard de notification : privilégier le Rt consolidé pour la décision.")}</div>` : ""}
+    ${rt.dernier_consolide ? `<div class="notice ${cons.q025 > 1 ? "crit" : ""}"><b>${T("Synthèse")}, ${esc(T(grp.nom))}</b> : ${rtTrend}. ${T("Intervalle sériel utilisé")} : ${nf(siu.moyenne, 1)} ± ${nf(siu.ecart_type, 1)} ${T("j")} (${esc(T(siu.source || ""))}). ${T("Les derniers jours restent incomplets malgré la correction du retard de notification : privilégier le Rt consolidé pour la décision.")}</div>` : ""}
 
-    ${panel("Courbe épidémique hebdomadaire et ajustement log-linéaire", T("incidence::fit — régression du logarithme de l’incidence hebdomadaire ; la courbe et sa bande donnent la tendance exponentielle et son IC 95 %"),
+    ${panel("Courbe épidémique hebdomadaire et ajustement log-linéaire", T("incidence::fit, régression du logarithme de l’incidence hebdomadaire ; la courbe et sa bande donnent la tendance exponentielle et son IC 95 %"),
       `<div id="c-grow"></div><div class="statgrid" id="grow-stats"></div><div id="grow-interp"></div>`,
       { png: "croissance_loglineaire", tools: `${segBtns("growBase", [["dds", "Début des symptômes (corrigé)"], ["notification", "Notification"]])}${segBtns("growWin", winOpts)}` })}
 
-    ${panel("Courbe épidémique quotidienne — hommes et femmes", T("Un carré = un cas lorsque les effectifs sont faibles (incidence::plot, show_cases) ; zone grisée = jours encore incomplets"),
+    ${panel("Courbe épidémique quotidienne, hommes et femmes", T("Un carré = un cas lorsque les effectifs sont faibles (incidence::plot, show_cases) ; zone grisée = jours encore incomplets"),
       `<div id="c-dsex"></div><div id="dsex-interp"></div>`,
       { png: "courbe_quotidienne_sexe", tools: `${segBtns("dyStack", [["sexe", "Sexe"], ["age", "Classe d’âge"]])}${segBtns("dyBase", [["o", "Début des symptômes"], ["n", "Notification"]])}${segBtns("dyDays", [["30", "30 j"], ["60", "60 j"], ["120", "120 j"]])}` })}
 
-    ${panel("Nombre de reproduction effectif Rt (EpiEstim)", T("Fenêtres glissantes de 7 jours, intervalle sériel paramétrique avec incertitude ; en haut l’incidence, en bas Rt (médiane, IC 50 % et 95 %) — ligne pointillée : seuil R = 1"),
+    ${panel("Nombre de reproduction effectif Rt (EpiEstim)", T("Fenêtres glissantes de 7 jours, intervalle sériel paramétrique avec incertitude ; en haut l’incidence, en bas Rt (médiane, IC 50 % et 95 %), ligne pointillée : seuil R = 1"),
       `<div class="chart-stack"><div id="c-rt-inc"></div><div id="c-rt"></div></div><div id="rt-interp"></div>`,
       { png: "rt_epiestim", tools: `${segBtns("rtDays", [["60", "60 j"], ["120", "120 j"], ["200", "Tout"]])}${gid === "National" ? `<label class="small flex" style="gap:4px"><input type="checkbox" data-check="siCmp" ${S.siCmp ? "checked" : ""}>${T("Comparer SI OMS 2014")}</label>` : ""}` })}
 
@@ -1020,12 +1016,12 @@
       ${panel("Force d’infection λ", T("λt = Σ I(t−s)·w(s) : cas attendus si R = 1 (barres) ; cas observés (tiges pointillées)"), `<div id="c-lambda"></div><div id="lambda-interp"></div>`, { png: "force_infection" })}
     </div>
 
-    ${panel("Projections à court terme (processus de branchement)", `${T("projections::project — 1 000 simulations, R tiré du posterior du dernier Rt consolidé et supposé constant")} · ${T("départ")} ${dshort(pj.depart)}`,
+    ${panel("Projections à court terme (processus de branchement)", `${T("projections::project, 1 000 simulations, R tiré du posterior du dernier Rt consolidé et supposé constant")} · ${T("départ")} ${dshort(pj.depart)}`,
       `<div id="c-proj"></div><div id="proj-table"></div><div id="proj-interp"></div>`,
       { png: "projections", tools: segBtns("projH", [["14", "14 j"], ["30", "30 j"]]) })}
 
     <div class="grid g2">
-      ${panel("Intervalle sériel", T("Histogramme (saumon) et loi gamma discrétisée ajustée (points violets) — epitrix::fit_disc_gamma" + " · " + T("Ensemble des données (national)")), `<div id="c-si-fit"></div><div id="si-sum"></div>`, { png: "intervalle_seriel_ajuste" })}
+      ${panel("Intervalle sériel", T("Histogramme (saumon) et loi gamma discrétisée ajustée (points violets), epitrix::fit_disc_gamma" + " · " + T("Ensemble des données (national)")), `<div id="c-si-fit"></div><div id="si-sum"></div>`, { png: "intervalle_seriel_ajuste" })}
       ${panel("Période d’incubation", T("Dernière exposition déclarée du contact → début des symptômes du cas (contacts devenus cas, lien certain ou probable)" + " · " + T("Ensemble des données (national)")), `<div id="c-inc-fit"></div><div id="inc-sum"></div>`, { png: "incubation_ajustee" })}
     </div>
     ${panel("Autres délais épidémiologiques", T("Distribution observée et loi gamma discrétisée ajustée (cas débutés il y a plus de 30 jours pour limiter la troncature)" + " · " + T("Ensemble des données (national)")), `<div id="c-dl-fit"></div><div id="dl-sum"></div>`,
@@ -1045,15 +1041,15 @@
       ${r.connus_contacts !== null && r.connus_contacts !== undefined ? `<div class="row"><span>${T("Connus comme contacts")}</span><b>${nf(r.connus_contacts)} (${pc(100 * r.connus_contacts / Math.max(r.cas, 1), 1)})</b></div>` : ""}</div></div>`;
     const m = sx.find(r => r.code === "M"), f = sx.find(r => r.code === "F"), tst = dm.test_letalite_sexe;
     const items = m && f ? [
-      `${T("Rapport de masculinité")} (H/F) : <b>${nf(dm.sex_ratio_MF, 2)}</b> — ${dm.sex_ratio_MF < 1 ? T("les femmes sont majoritaires parmi les cas, ce qui est classique pour Ebola (soins aux malades, rites funéraires).") : T("les hommes sont majoritaires parmi les cas.")}`,
-      `${T("Létalité")} : ${T("hommes")} ${pc(m.letalite_pct, 1)} vs ${T("femmes")} ${pc(f.letalite_pct, 1)}${tst ? ` (χ² = ${nf(tst.chi2, 2)}, p = ${tst.p < .001 ? "< 0,001" : nf(tst.p, 3)} — ${tst.p < .05 ? T("différence statistiquement significative") : T("différence non significative")})` : ""}.`,
+      `${T("Rapport de masculinité")} (H/F) : <b>${nf(dm.sex_ratio_MF, 2)}</b>, ${dm.sex_ratio_MF < 1 ? T("les femmes sont majoritaires parmi les cas, ce qui est classique pour Ebola (soins aux malades, rites funéraires).") : T("les hommes sont majoritaires parmi les cas.")}`,
+      `${T("Létalité")} : ${T("hommes")} ${pc(m.letalite_pct, 1)} vs ${T("femmes")} ${pc(f.letalite_pct, 1)}${tst ? ` (χ² = ${nf(tst.chi2, 2)}, p = ${tst.p < .001 ? "< 0,001" : nf(tst.p, 3)}, ${tst.p < .05 ? T("différence statistiquement significative") : T("différence non significative")})` : ""}.`,
       ct.length ? `${T("Contacts devenus cas")} : ${ct.filter(c => c.code !== "I").map(c => `${T(SEXL[c.code])} ${pc(c.taux_pct, 2)} ${ci(c.taux_ic95[0], c.taux_ic95[1], 2)}`).join(" · ")}.` : ""
     ] : [];
     const ctTable = ct.length ? `<h3 class="small" style="margin:14px 0 4px">${T("Contacts suivis par sexe")}</h3><div class="table-wrap"><table class="rsum"><thead><tr><th>${T("Sexe")}</th><th>${T("Contacts")}</th><th>${T("Devenus cas")}</th><th>${T("Taux")} (IC 95 %)</th><th>${T("Devenus suspects")}</th><th>${T("Âge médian")}</th></tr></thead><tbody>${ct.map(r => `<tr><td>${sexIco(r.code, 14)} ${T(SEXL[r.code])}</td><td>${nf(r.contacts)}</td><td>${nf(r.devenus_cas)}</td><td>${pc(r.taux_pct, 2)} <span class="muted">${ci(r.taux_ic95[0], r.taux_ic95[1], 2)}</span></td><td>${nf(r.devenus_suspects)}</td><td>${nf(r.age_median, 0)}</td></tr>`).join("")}</tbody></table></div>` : "";
     const ages = (dm.par_age || []).filter(r => r.classe_age !== "Inconnu");
     const ageTable = ages.length ? `<div class="table-wrap" style="margin-top:10px"><table class="rsum"><thead><tr><th>${T("Âge")}</th><th>${sexIco("M", 13)} ${T("cas")}</th><th>${sexIco("M", 13)} ${T("létalité")}</th><th>${sexIco("F", 13)} ${T("cas")}</th><th>${sexIco("F", 13)} ${T("létalité")}</th></tr></thead><tbody>${ages.map(r => `<tr><td>${esc(r.classe_age)}</td><td>${nf(r.cas_M)}</td><td>${pc(r.letalite_M, 1)}</td><td>${nf(r.cas_F)}</td><td>${pc(r.letalite_F, 1)}</td></tr>`).join("")}</tbody></table></div>` : "";
     return `<div class="grid g2">
-      ${panel("Hommes et femmes — profil des cas", T("Cas confirmés et probables ; létalité avec intervalle de Wilson à 95 %") + " · " + T("Ensemble des données (national)"), `<div class="sexcards">${sx.filter(r => r.code !== "I").map(card).join("")}</div>${ctTable}${interp("Lecture", items)}`)}
+      ${panel("Hommes et femmes, profil des cas", T("Cas confirmés et probables ; létalité avec intervalle de Wilson à 95 %") + " · " + T("Ensemble des données (national)"), `<div class="sexcards">${sx.filter(r => r.code !== "I").map(card).join("")}</div>${ctTable}${interp("Lecture", items)}`)}
       ${panel("Létalité par classe d’âge et sexe", T("Classes d’âge des practicals RECON (0–10, 11–20, 21–30, 31–40, 41+)") + " · " + T("Ensemble des données (national)"), `<div id="c-cfr-age"></div>${ageTable}`, { png: "letalite_age_sexe" })}
     </div>`;
   }
@@ -1079,7 +1075,7 @@
     const r = d.resume, f = d.ajustement || {};
     return `<table class="rsum"><thead><tr><th>${T("Résumé")}</th><th>Min.</th><th>1st Qu.</th><th>${T("Médiane")}</th><th>${T("Moyenne")}</th><th>3rd Qu.</th><th>Max.</th><th>n</th></tr></thead>
       <tbody><tr><td>${T("Observé")}</td><td>${nf(r.min)}</td><td>${nf(r.q1, 1)}</td><td>${nf(r.mediane, 1)}</td><td>${nf(r.moyenne, 2)}</td><td>${nf(r.q3, 1)}</td><td>${nf(r.max)}</td><td>${nf(d.n)}</td></tr></tbody></table>
-      ${f.moyenne ? `<div class="statgrid">${stat("Moyenne μ (gamma)", `${nf(f.moyenne, 2)} ${T("j")}`, `IC 95 % ${nf(f.moyenne_ic95[0], 2)} – ${nf(f.moyenne_ic95[1], 2)}`)}${stat("Écart-type σ", `${nf(f.ecart_type, 2)} ${T("j")}`, `CV = ${nf(f.cv, 3)}`)}${stat("Forme / échelle", `${nf(f.shape, 3)} / ${nf(f.scale, 3)}`, `log-vraisemblance ${nf(f.loglik, 1)}`)}${stat("Médiane / 95e percentile", `${nf(f.mediane, 1)} / ${nf(f.p95, 1)} ${T("j")}`, "")}</div>` : ""}
+      ${f.moyenne ? `<div class="statgrid">${stat("Moyenne μ (gamma)", `${nf(f.moyenne, 2)} ${T("j")}`, `IC 95 % ${nf(f.moyenne_ic95[0], 2)}, ${nf(f.moyenne_ic95[1], 2)}`)}${stat("Écart-type σ", `${nf(f.ecart_type, 2)} ${T("j")}`, `CV = ${nf(f.cv, 3)}`)}${stat("Forme / échelle", `${nf(f.shape, 3)} / ${nf(f.scale, 3)}`, `log-vraisemblance ${nf(f.loglik, 1)}`)}${stat("Médiane / 95e percentile", `${nf(f.mediane, 1)} / ${nf(f.p95, 1)} ${T("j")}`, "")}</div>` : ""}
       ${(d.exclus_negatifs || d.exclus_sup_60 || d.exclus_inf_1) ? `<div class="small muted" style="margin-top:6px">${T("Exclus")} : ${nf(d.exclus_negatifs || 0)} ${T("valeurs négatives")} · ${nf(d.exclus_sup_60 || 0)} > 60 ${T("j")}${d.exclus_inf_1 ? ` · ${nf(d.exclus_inf_1)} < 1 ${T("j")} (${T("exposition déclarée après le début des symptômes")})` : ""}</div>` : ""}
       ${ref ? `<div class="interp"><b>${T("Comparaison")}</b> : ${ref}</div>` : ""}`;
   }
@@ -1096,7 +1092,7 @@
       const split = win === "split" && fit && fit.avant;
       if (split) { put(fit.avant, 1); put(fit.apres, 2); } else if (fit) put(fit, 1);
       Ch.xy($("#c-grow"), { data: wk, x: "week", height: 290, xLabel: (v, r, tip) => tip ? `${T("Semaine du")} ${dfmt(v)}` : dshort(v), tipSkipNull: true,
-        bands: [{ lo: "lo1", hi: "hi1", color: "--s2", label: T("IC 95 % de l’ajustement"), opacity: .18 }, ...(split ? [{ lo: "lo2", hi: "hi2", color: "--s7", label: T("IC 95 % — phase 2"), opacity: .18 }] : [])],
+        bands: [{ lo: "lo1", hi: "hi1", color: "--s2", label: T("IC 95 % de l’ajustement"), opacity: .18 }, ...(split ? [{ lo: "lo2", hi: "hi2", color: "--s7", label: T("IC 95 %, phase 2"), opacity: .18 }] : [])],
         vlines: split ? [{ x: fit.separation, color: "--ink-2", label: T("Changement de phase") }] : [],
         series: [{ key: "n", label: S.growBase === "dds" ? T("Cas / semaine (début des symptômes, corrigé)") : T("Cas / semaine (notification)"), color: "--rc-bar" },
           { key: "fit1", label: split ? T("Phase 1 (croissance)") : T("Ajustement log-linéaire"), color: "--s2", type: "line", markers: false, width: 2.5 },
@@ -1106,10 +1102,10 @@
         stat(`${lab ? T(lab) + " · " : ""}r ${T("par jour")}`, nf(f.r, 4), ci(f.r_ic95[0], f.r_ic95[1], 4)),
         stat(`${lab ? T(lab) + " · " : ""}${T("Variation hebdomadaire")}`, pctS(f.variation_hebdo_pct), ci(f.variation_hebdo_ic95[0], f.variation_hebdo_ic95[1], 1)),
         stat(`${lab ? T(lab) + " · " : ""}${f.r >= 0 ? T("Temps de doublement") : T("Temps de division par deux")}`, f.sens === "incertain" ? T("non interprétable") : f.r >= 0 ? (f.temps_doublement ? nf(f.temps_doublement, 1) + " " + T("j") : "—") : (f.temps_demi ? nf(f.temps_demi, 1) + " " + T("j") : "—"),
-          f.r >= 0 ? (f.temps_doublement_ic95 ? `[${nf(f.temps_doublement_ic95[0], 1)} – ${f.temps_doublement_ic95[1] ? nf(f.temps_doublement_ic95[1], 1) : "∞"}]` : "") : (f.temps_demi_ic95 ? `[${nf(f.temps_demi_ic95[0], 1)} – ${f.temps_demi_ic95[1] ? nf(f.temps_demi_ic95[1], 1) : "∞"}]` : "")),
+          f.r >= 0 ? (f.temps_doublement_ic95 ? `[${nf(f.temps_doublement_ic95[0], 1)}, ${f.temps_doublement_ic95[1] ? nf(f.temps_doublement_ic95[1], 1) : "∞"}]` : "") : (f.temps_demi_ic95 ? `[${nf(f.temps_demi_ic95[0], 1)}, ${f.temps_demi_ic95[1] ? nf(f.temps_demi_ic95[1], 1) : "∞"}]` : "")),
         stat(`${lab ? T(lab) + " · " : ""}${T("R implicite")}`, fmtR(f.R_implicite), f.R_implicite_ic95 && f.R_implicite_ic95[0] ? ci(f.R_implicite_ic95[0], f.R_implicite_ic95[1]) : ""),
         stat(`${lab ? T(lab) + " · " : ""}R²`, nf(f.r2, 3), `${nf(f.semaines)} ${T("semaines")}`)].join("")).join("");
-      const items = split ? [`${T("Meilleure séparation en deux phases (incidence::fit_optim_split) le")} <b>${dfmt(fit.separation)}</b>.`, ...growthText(fit.avant).slice(0, 2).map(x => `${T("Phase 1")} — ${x}`), ...growthText(fit.apres).slice(0, 3).map(x => `${T("Phase 2")} — ${x}`)] : growthText(fit);
+      const items = split ? [`${T("Meilleure séparation en deux phases (incidence::fit_optim_split) le")} <b>${dfmt(fit.separation)}</b>.`, ...growthText(fit.avant).slice(0, 2).map(x => `${T("Phase 1")}, ${x}`), ...growthText(fit.apres).slice(0, 3).map(x => `${T("Phase 2")}, ${x}`)] : growthText(fit);
       $("#grow-interp").innerHTML = interp("Interprétation", [...items, S.growBase === "dds" ? T("Base « début des symptômes » : les semaines dont la complétude moyenne est < 80 % sont exclues ; l’incidence est corrigée du retard de notification.") : T("Base « notification » : reflète aussi l’effort de détection et les retards de saisie ; la semaine en cours est exclue.")],
         T("Limites : modèle exponentiel simple (pas de saturation), sensible aux changements de détection ; le temps de doublement n’a de sens que si r est significativement différent de 0."));
     }
@@ -1129,7 +1125,7 @@
         shade: prov !== null ? { from: prov, label: T("incomplet") } : null });
       const tot = data.reduce((s, r) => ({ M: s.M + r.M, F: s.F + r.F, I: s.I + r.I }), { M: 0, F: 0, I: 0 });
       const all = tot.M + tot.F + tot.I;
-      $("#dsex-interp").innerHTML = interp("Lecture", [`${T("Sur les")} ${nd} ${T("derniers jours")} (${esc(T(grp.nom))}) : <b>${nf(all)}</b> ${T("cas")} — ${sexIco("M", 14)} ${nf(tot.M)} ${T("hommes")} (${pc(100 * tot.M / Math.max(all, 1), 0)}) · ${sexIco("F", 14)} ${nf(tot.F)} ${T("femmes")} (${pc(100 * tot.F / Math.max(all, 1), 0)})${tot.I ? ` · ${nf(tot.I)} ${T("non renseignés")}` : ""}.`,
+      $("#dsex-interp").innerHTML = interp("Lecture", [`${T("Sur les")} ${nd} ${T("derniers jours")} (${esc(T(grp.nom))}) : <b>${nf(all)}</b> ${T("cas")}, ${sexIco("M", 14)} ${nf(tot.M)} ${T("hommes")} (${pc(100 * tot.M / Math.max(all, 1), 0)}) · ${sexIco("F", 14)} ${nf(tot.F)} ${T("femmes")} (${pc(100 * tot.F / Math.max(all, 1), 0)})${tot.I ? ` · ${nf(tot.I)} ${T("non renseignés")}` : ""}.`,
         base === "o" ? T("Par date de début des symptômes, les derniers jours sont sous-estimés tant que les cas n’ont pas été notifiés (zone grisée).") : T("Par date de notification, les 3 derniers jours peuvent être incomplets (saisie en cours).")]);
     }
     /* --- Rt --- */
@@ -1175,7 +1171,7 @@
         $("#rlik-interp").innerHTML = interp("Interprétation", [`${T("Estimation du maximum de vraisemblance")} : <b>R = ${nf(L0.R_ml, 3)}</b> ${ci(L0.ic95[0], L0.ic95[1], 3)} ${T("sur")} ${L0.fenetre_jours} ${T("jours")} (${nf(L0.cas, 0)} ${T("cas")}) ; P(R > 1) = ${pc(100 * L0.p_sup_1, 1)}.`,
           (L0.ic95[1] < 1) ? T("R = 1 est en dehors de l’intervalle : la décroissance est nette sur cette fenêtre.") : (L0.ic95[0] > 1) ? T("R = 1 est en dehors de l’intervalle : la croissance est nette sur cette fenêtre.") : T("R = 1 est compatible avec les données de cette fenêtre."),
           S.rlWin === "tout" ? T("Sur toute la période, R constant est une hypothèse forte (earlyR est conçu pour le début d’épidémie) : comparer avec Rt.") : T("Comparer la fenêtre de 14 j à celle de 28 j : une valeur plus basse sur 14 j indique un ralentissement récent (ou des notifications tardives).")],
-          T("Hypothèse clé : R constant et intervalle sériel connu — c’est la principale limite soulignée dans les practicals RECON."));
+          T("Hypothèse clé : R constant et intervalle sériel connu, c’est la principale limite soulignée dans les practicals RECON."));
       }
       const lam = (lk.lambda || []).map(a => ({ date: a[0], lam: a[1], obs: a[2] })).slice(-60);
       Ch.xy($("#c-lambda"), { data: lam, x: "date", height: 250, xLabel: (v, r, tip) => tip ? dfmt(v) : dshort(v), digits: 1,
@@ -1199,13 +1195,13 @@
       const pick = P.filter(r => r.date > end && r.date <= stop).filter((r, i, a) => i % 7 === 6 || i === 0 || i === a.length - 1);
       const tt = pj.totaux || {};
       $("#proj-table").innerHTML = `<table class="rsum"><thead><tr><th>${T("Date")}</th><th>Min.</th><th>1st Qu.</th><th>${T("Médiane")}</th><th>${T("Moyenne")}</th><th>3rd Qu.</th><th>Max.</th><th>P(≥ 1 ${T("cas")})</th></tr></thead><tbody>${pick.map(r => `<tr><td>${dfmt(r.date)}</td><td>${nf(r.min)}</td><td>${nf(r.q25)}</td><td>${nf(r.mediane)}</td><td>${nf(r.moyenne, 2)}</td><td>${nf(r.q75)}</td><td>${nf(r.max)}</td><td>${pc(100 * r.p_au_moins_1, 1)}</td></tr>`).join("")}</tbody></table>
-        <div class="statgrid">${["7j", "14j", "30j"].filter(k => tt[k]).map(k => stat(`${T("Total sur")} ${k.replace("j", " " + T("jours"))}`, nf(tt[k].mediane), `80 % : ${nf(tt[k].q10)} – ${nf(tt[k].q90)} · 95 % : ${nf(tt[k].q025)} – ${nf(tt[k].q975)}`)).join("")}${stat("R utilisé", `${fmtR(pj.R_utilise?.mediane)}`, ci(pj.R_utilise?.q025, pj.R_utilise?.q975))}</div>`;
+        <div class="statgrid">${["7j", "14j", "30j"].filter(k => tt[k]).map(k => stat(`${T("Total sur")} ${k.replace("j", " " + T("jours"))}`, nf(tt[k].mediane), `80 % : ${nf(tt[k].q10)}, ${nf(tt[k].q90)} · 95 % : ${nf(tt[k].q025)}, ${nf(tt[k].q975)}`)).join("")}${stat("R utilisé", `${fmtR(pj.R_utilise?.mediane)}`, ci(pj.R_utilise?.q025, pj.R_utilise?.q975))}</div>`;
       const t14 = tt["14j"] || {};
       const back = fut.filter(r => r.date <= end && r.corr !== null && r.corr !== undefined);
       const inside = back.filter(r => r.corr >= r.q025 && r.corr <= r.q975).length;
       $("#proj-interp").innerHTML = interp("Interprétation", [
-        `${T("Si la transmission reste au niveau du dernier Rt consolidé")} (${fmtR(pj.R_utilise?.mediane)}), ${T("on attend environ")} <b>${nf(t14.mediane)}</b> ${T("nouveaux cas (date de début) sur les 14 prochains jours")} (80 % : ${nf(t14.q10)} – ${nf(t14.q90)}).`,
-        t14.p_aucun_cas !== undefined ? `${T("Probabilité qu’aucun cas n’apparaisse sur 14 jours")} : <b>${pc(100 * t14.p_aucun_cas, 1)}</b> — ${t14.p_aucun_cas < .05 ? T("la fin de l’épidémie n’est pas en vue à court terme ; ne pas réduire la riposte.") : T("la probabilité d’extinction devient non négligeable, mais la surveillance doit être maintenue 42 jours.")}` : "",
+        `${T("Si la transmission reste au niveau du dernier Rt consolidé")} (${fmtR(pj.R_utilise?.mediane)}), ${T("on attend environ")} <b>${nf(t14.mediane)}</b> ${T("nouveaux cas (date de début) sur les 14 prochains jours")} (80 % : ${nf(t14.q10)}, ${nf(t14.q90)}).`,
+        t14.p_aucun_cas !== undefined ? `${T("Probabilité qu’aucun cas n’apparaisse sur 14 jours")} : <b>${pc(100 * t14.p_aucun_cas, 1)}</b>, ${t14.p_aucun_cas < .05 ? T("la fin de l’épidémie n’est pas en vue à court terme ; ne pas réduire la riposte.") : T("la probabilité d’extinction devient non négligeable, mais la surveillance doit être maintenue 42 jours.")}` : "",
         back.length ? `${T("Contrôle")} : ${inside}/${back.length} ${T("jours déjà partiellement observés (entre le départ de la projection et aujourd’hui) tombent dans l’intervalle 95 %.")}` : ""
       ], T("Limites : R constant (pas d’effet des interventions futures), incidence par date de début (différente des notifications), pas d’importations ; au-delà de 2–3 semaines, ce sont des scénarios."));
     }
@@ -1222,8 +1218,8 @@
     const dm = DY.demographie || {};
     if ($("#c-cfr-age") && dm.par_age) {
       const a = dm.par_age.filter(r => r.classe_age !== "Inconnu");
-      Ch.xy($("#c-cfr-age"), { data: a, x: "classe_age", height: 230, percent: true, digits: 1, xLabel: (v, r, tip) => tip ? `${v} ${T("ans")} — ${nf(r.cas_M)} H / ${nf(r.cas_F)} F` : v,
-        series: [{ key: "letalite_M", label: T("Létalité — hommes"), color: "--sex-m" }, { key: "letalite_F", label: T("Létalité — femmes"), color: "--sex-f" }] });
+      Ch.xy($("#c-cfr-age"), { data: a, x: "classe_age", height: 230, percent: true, digits: 1, xLabel: (v, r, tip) => tip ? `${v} ${T("ans")}, ${nf(r.cas_M)} H / ${nf(r.cas_F)} F` : v,
+        series: [{ key: "letalite_M", label: T("Létalité, hommes"), color: "--sex-m" }, { key: "letalite_F", label: T("Létalité, femmes"), color: "--sex-f" }] });
     }
   }
 
@@ -1234,20 +1230,20 @@
     if (S.recZone && !zones.includes(S.recZone)) S.recZone = "";
     if (!S.recZone) { const cnt = {}; (RC.liens || []).forEach(l => { if (l[2] >= Number(S.recSup)) { const c = caseBy.get(l[1]); if (c && c.zs && inProv(c)) cnt[c.zs] = (cnt[c.zs] || 0) + 1; } }); S.recZone = Object.entries(cnt).sort((a, b) => b[1] - a[1])[0]?.[0] || zones[0] || ""; }
     return `
-    <div class="notice"><b>${T("Reconstruction probabiliste de la transmission")}</b> — ${T("inspirée d’outbreaker2 (practicals RECON), sans données génomiques")} : ${T("pour chaque cas, les infecteurs candidats sont les cas de la même aire de santé débutés 1 à 60 jours avant (modèle A, temporel seul), auxquels s’ajoutent les liens documentés par le suivi des contacts et l’investigation, fortement favorisés (modèle B, temporel + contacts, ε = 0,05). Le support d’un lien est la probabilité a posteriori que ce cas soit l’infecteur.")}</div>
+    <div class="notice"><b>${T("Reconstruction probabiliste de la transmission")}</b>, ${T("inspirée d’outbreaker2 (practicals RECON), sans données génomiques")} : ${T("pour chaque cas, les infecteurs candidats sont les cas de la même aire de santé débutés 1 à 60 jours avant (modèle A, temporel seul), auxquels s’ajoutent les liens documentés par le suivi des contacts et l’investigation, fortement favorisés (modèle B, temporel + contacts, ε = 0,05). Le support d’un lien est la probabilité a posteriori que ce cas soit l’infecteur.")}</div>
     <div class="grid g5">
       ${kpi("Cas analysés", nf(s.cas), T("Confirmés et probables avec date de début"))}
       ${kpi("Infecteur probable identifié", pc(100 * (RC.liens || []).filter(l => l[2] >= .5).length / Math.max(s.cas, 1), 1), `${nf((RC.liens || []).filter(l => l[2] >= .5).length)} ${T("cas avec un lien de support ≥ 0,5 (modèle B)")}`, { color: "--rc-purple" })}
       ${kpi("Support médian", `${nf(A.support_median, 2)} → ${nf(B.support_median, 2)}`, T("Modèle A (temporel) → modèle B (temporel + contacts)"))}
       ${kpi("Liens documentés retenus", nf(B.liens_documentes), T("Contact suivi devenu cas ou source déclarée"), { color: "--st-conf" })}
-      ${kpi("Dispersion k", nb.k !== undefined ? nf(nb.k, 2) : "—", nb.k !== undefined ? `IC 95 % ${nf(nb.k_ic95?.[0], 2)} – ${nf(nb.k_ic95?.[1], 2)} · ${pc(100 * nb.part_cas_80pct, 1)} ${T("des cas → 80 % des transmissions identifiées")}` : "", { color: "--s2" })}
+      ${kpi("Dispersion k", nb.k !== undefined ? nf(nb.k, 2) : "—", nb.k !== undefined ? `IC 95 % ${nf(nb.k_ic95?.[0], 2)}, ${nf(nb.k_ic95?.[1], 2)} · ${pc(100 * nb.part_cas_80pct, 1)} ${T("des cas → 80 % des transmissions identifiées")}` : "", { color: "--s2" })}
     </div>
     <div class="grid g2">
-      ${panel("Support des liens — modèle A (temporel seul)", T("Consensus : infecteur de support maximal pour chaque cas"), `<div id="c-supA"></div>`, { png: "support_modele_A" })}
-      ${panel("Support des liens — modèle B (temporel + contacts)", T("L’ajout des données de contact déplace les supports vers 1 pour les liens documentés"), `<div id="c-supB"></div>`, { png: "support_modele_B" })}
+      ${panel("Support des liens, modèle A (temporel seul)", T("Consensus : infecteur de support maximal pour chaque cas"), `<div id="c-supA"></div>`, { png: "support_modele_A" })}
+      ${panel("Support des liens, modèle B (temporel + contacts)", T("L’ajout des données de contact déplace les supports vers 1 pour les liens documentés"), `<div id="c-supB"></div>`, { png: "support_modele_B" })}
     </div>
     ${interp("Interprétation", [
-      `${T("Modèle A")} : ${T("support médian")} <b>${nf(A.support_median, 2)}</b>, ${pc(A.pct_sup_05, 1)} ${T("des liens ≥ 0,5")} — ${T("la seule chronologie ne permet pas de savoir « qui a infecté qui » quand beaucoup de cas surviennent au même endroit au même moment (résolution faible, comme dans les practicals RECON).")}`,
+      `${T("Modèle A")} : ${T("support médian")} <b>${nf(A.support_median, 2)}</b>, ${pc(A.pct_sup_05, 1)} ${T("des liens ≥ 0,5")}, ${T("la seule chronologie ne permet pas de savoir « qui a infecté qui » quand beaucoup de cas surviennent au même endroit au même moment (résolution faible, comme dans les practicals RECON).")}`,
       `${T("Modèle B")} : ${T("support médian")} <b>${nf(B.support_median, 2)}</b>, ${pc(B.pct_sup_05, 1)} ${T("des liens ≥ 0,5")} ; ${nf(B.liens_documentes)} ${T("liens documentés retenus.")} ${T("Les données de contact rendent les liens beaucoup plus certains, mais elles ne couvrent qu’une petite partie des cas.")}`,
       T("Conséquence pour la riposte : la plupart des cas n’ont pas de source identifiée ; améliorer l’investigation (source MA‑1/2/3), le listage des contacts et le séquençage (INRB) est la priorité pour reconstruire les chaînes.")
     ], T("Peut-on toujours se fier aux données de contact ? Non : erreurs d’identifiants, contacts non listés ; c’est pourquoi le modèle garde une probabilité ε de transmission hors contacts."))}
@@ -1261,8 +1257,8 @@
         <label class="small flex" style="gap:4px"><input type="checkbox" data-check="recDoc" ${S.recDoc ? "checked" : ""}>${T("Liens documentés uniquement")}</label>
       </div><div id="c-ttree"></div><div id="ttree-legend"></div>`, { png: "arbre_transmission_" + S.recZone })}
     <div class="grid g21">
-      ${panel("Distribution du nombre de cas secondaires (R_i)", T("Liens consensus de support ≥ 0,5 ; cas débutés il y a plus de 30 jours ; points : binomiale négative ajustée"), `<div id="c-off"></div>${nb.k !== undefined ? interp("Interprétation", [`${T("Moyenne")} ${nf(nb.R_moyen, 3)} ${T("cas secondaires identifiés par cas")} ; ${T("dispersion")} <b>k = ${nf(nb.k, 2)}</b> ${ci(nb.k_ic95?.[0], nb.k_ic95?.[1])} ; ${pc(100 * nb.part_zero, 1)} ${T("des cas sans cas secondaire identifié")}.`, nb.k < 1 ? T("k < 1 : transmission très hétérogène (« super-propagation ») — une minorité de cas (souvent soins à domicile, funérailles, structures de santé) produit la majorité des cas secondaires ; cibler ces contextes.") : T("k ≥ 1 : transmission relativement homogène."), T("La moyenne est très inférieure à Rt car la majorité des transmissions ne sont pas documentées : k décrit l’hétérogénéité des transmissions identifiées, pas la totalité.")]) : ""}`, { png: "cas_secondaires" })}
-      ${panel("Principaux propagateurs identifiés", T("Cas ayant le plus de cas secondaires (support ≥ 0,5) — pseudonymisé"), table("rec-top", cases.filter(c => c.ri > 0 && inProv(c)).sort((a, b) => b.ri - a.ri).slice(0, 60), [{ k: "id", t: "Cas", v: x => `<a href="#/journey/${encodeURIComponent(x.k)}">${esc(x.id)}</a> <span class="muted">${esc(x.ini || "")}</span>`, csv: x => x.id }, { k: "sexe", t: "Sexe", v: x => `${sexIco(Ch.sexKey(x.sexe), 14)} ${esc(T(x.sexe || "—"))}`, csv: x => x.sexe }, { k: "age", t: "Âge", num: true }, { k: "zs", t: "Zone" }, { k: "on", t: "Début", v: x => dshort(x.on) }, { k: "ri", t: "Cas secondaires", num: true }, { k: "hcw", t: "Agent de santé", v: x => x.hcw ? badge("Oui", "b-info") : "" }, { k: "dc", t: "Décédé", v: x => x.dc ? badge("Oui", "b-crit") : "" }], { sort: "ri", maxh: 420, search: false }), { csv: "rec-top" })}
+      ${panel("Distribution du nombre de cas secondaires (R_i)", T("Liens consensus de support ≥ 0,5 ; cas débutés il y a plus de 30 jours ; points : binomiale négative ajustée"), `<div id="c-off"></div>${nb.k !== undefined ? interp("Interprétation", [`${T("Moyenne")} ${nf(nb.R_moyen, 3)} ${T("cas secondaires identifiés par cas")} ; ${T("dispersion")} <b>k = ${nf(nb.k, 2)}</b> ${ci(nb.k_ic95?.[0], nb.k_ic95?.[1])} ; ${pc(100 * nb.part_zero, 1)} ${T("des cas sans cas secondaire identifié")}.`, nb.k < 1 ? T("k < 1 : transmission très hétérogène (« super-propagation »), une minorité de cas (souvent soins à domicile, funérailles, structures de santé) produit la majorité des cas secondaires ; cibler ces contextes.") : T("k ≥ 1 : transmission relativement homogène."), T("La moyenne est très inférieure à Rt car la majorité des transmissions ne sont pas documentées : k décrit l’hétérogénéité des transmissions identifiées, pas la totalité.")]) : ""}`, { png: "cas_secondaires" })}
+      ${panel("Principaux propagateurs identifiés", T("Cas ayant le plus de cas secondaires (support ≥ 0,5), pseudonymisé"), table("rec-top", cases.filter(c => c.ri > 0 && inProv(c)).sort((a, b) => b.ri - a.ri).slice(0, 60), [{ k: "id", t: "Cas", v: x => `<a href="#/journey/${encodeURIComponent(x.k)}">${esc(x.id)}</a> <span class="muted">${esc(x.ini || "")}</span>`, csv: x => x.id }, { k: "sexe", t: "Sexe", v: x => `${sexIco(Ch.sexKey(x.sexe), 14)} ${esc(T(x.sexe || "—"))}`, csv: x => x.sexe }, { k: "age", t: "Âge", num: true }, { k: "zs", t: "Zone" }, { k: "on", t: "Début", v: x => dshort(x.on) }, { k: "ri", t: "Cas secondaires", num: true }, { k: "hcw", t: "Agent de santé", v: x => x.hcw ? badge("Oui", "b-info") : "" }, { k: "dc", t: "Décédé", v: x => x.dc ? badge("Oui", "b-crit") : "" }], { sort: "ri", maxh: 420, search: false }), { csv: "rec-top" })}
     </div>
     ${panel("Réseau des cas reliés (epicontacts)", T("Tous les liens documentés entre cas (contact suivi devenu cas, source déclarée) ; formes = homme / femme, couleur = classification, anneau = décédé ; chaque grappe est une chaîne"),
       `<div class="flex" style="margin-bottom:8px"><span class="small muted">${T("Taille minimale des chaînes")}</span>${segBtns("epiMin", [["2", "≥ 2 cas"], ["3", "≥ 3 cas"], ["5", "≥ 5 cas"]])}</div><div id="c-epinet"></div>${legend([{ t: "Confirmé", c: "--st-conf" }, { t: "Probable", c: "--s5" }, { t: "Lien contact suivi → cas", c: "--st-conf" }, { t: "Lien source déclarée", c: "--ink-2" }])}<div class="legend">${["M", "F", "I"].map(k => `<span>${sexIco(k, 15)}${T(SEXL[k])}</span>`).join("")}</div>`, { png: "reseau_cas" })}`;
@@ -1279,7 +1275,7 @@
     if ($("#c-off") && off.histogramme) {
       const n = off.n_cas || 1;
       const data = off.histogramme.map((v, i) => ({ k: i, p: v / n, nb: nb ? nb.pmf[i] : null }));
-      Ch.xy($("#c-off"), { data, x: "k", height: 230, digits: 4, barWidth: .9, barStroke: "--surface", yFmt: v => nf(v, 2), xLabel: (v, r, tip) => tip ? `${v} ${T("cas secondaires")} — ${nf(off.histogramme[v])} ${T("cas")}` : v,
+      Ch.xy($("#c-off"), { data, x: "k", height: 230, digits: 4, barWidth: .9, barStroke: "--surface", yFmt: v => nf(v, 2), xLabel: (v, r, tip) => tip ? `${v} ${T("cas secondaires")}, ${nf(off.histogramme[v])} ${T("cas")}` : v,
         series: [{ key: "p", label: T("Proportion observée"), color: "--rc-salmon" }, ...(nb ? [{ key: "nb", label: T("Binomiale négative ajustée"), color: "--rc-purple", type: "line", dash: "5 4", markers: true, r: 2.6 }] : [])] });
     }
     /* arbre daté */
@@ -1343,11 +1339,11 @@
     const fromAdults = M.length ? [0, 1, 2].reduce((s, j) => s + M[3][j], 0) : 0;
     const ctRows = G.map(g => ({ ...g.contacts, groupe: g.groupe, cle: g.cle }));
     return `
-    <div class="notice"><b>${T("Analyses pédiatriques")}</b> — ${T("classes d’âge")} ${esc(E.bornes || "")}. ${E.age_douteux ? `<b>${nf(E.age_douteux)}</b> ${T("cas enregistrés « 0 an, 0 mois » (âge très probablement non saisi) sont exclus des classes d’âge ;")} ${nf(E.age_inconnu)} ${T("cas au total sans âge exploitable.")}` : ""} ${T("Cas confirmés et probables ; Rt calculé sur l’incidence de chaque classe (date de début des symptômes corrigée du retard de notification) avec l’intervalle sériel global ; intervalle sériel de chaque classe estimé sur les paires dont le cas secondaire appartient à la classe.")}</div>
+    <div class="notice"><b>${T("Analyses pédiatriques")}</b>, ${T("classes d’âge")} ${esc(E.bornes || "")}. ${E.age_douteux ? `<b>${nf(E.age_douteux)}</b> ${T("cas enregistrés « 0 an, 0 mois » (âge très probablement non saisi) sont exclus des classes d’âge ;")} ${nf(E.age_inconnu)} ${T("cas au total sans âge exploitable.")}` : ""} ${T("Cas confirmés et probables ; Rt calculé sur l’incidence de chaque classe (date de début des symptômes corrigée du retard de notification) avec l’intervalle sériel global ; intervalle sériel de chaque classe estimé sur les paires dont le cas secondaire appartient à la classe.")}</div>
     <div class="grid g4">${G.map(card).join("")}</div>
     ${interp("Synthèse", [
       `${T("Les enfants de moins de 18 ans représentent")} <b>${pc(100 * nk / Math.max(tot, 1), 1)}</b> ${T("des cas")} (${nf(nk)}).`,
-      kids[0] ? `${T("Létalité chez les 0–5 ans")} : <b>${pc(kids[0].letalite_pct, 1)}</b> ${ci(kids[0].letalite_ic95[0], kids[0].letalite_ic95[1], 1)} ${T("contre")} ${pc(ad.letalite_pct, 1)} ${T("chez les adultes")} — ${kids[0].letalite_ic95[0] > (ad.letalite_ic95 || [0, 0])[1] ? T("surmortalité significative des jeunes enfants : prise en charge pédiatrique précoce et nutrition prioritaires.") : T("différence non significative.")}` : "",
+      kids[0] ? `${T("Létalité chez les 0–5 ans")} : <b>${pc(kids[0].letalite_pct, 1)}</b> ${ci(kids[0].letalite_ic95[0], kids[0].letalite_ic95[1], 1)} ${T("contre")} ${pc(ad.letalite_pct, 1)} ${T("chez les adultes")}, ${kids[0].letalite_ic95[0] > (ad.letalite_ic95 || [0, 0])[1] ? T("surmortalité significative des jeunes enfants : prise en charge pédiatrique précoce et nutrition prioritaires.") : T("différence non significative.")}` : "",
       M.length ? `${T("Parmi les")} ${nf(kidsAsTarget)} ${T("enfants dont la source est documentée,")} ${nf(fromAdults)} (${pc(100 * fromAdults / Math.max(kidsAsTarget, 1), 0)}) ${T("ont été infectés par un adulte : la transmission aux enfants est surtout intrafamiliale (soins aux parents malades, allaitement).")}` : "",
       T("Rt et intervalle sériel par classe d’âge reposent sur des effectifs plus faibles : lire les intervalles de crédibilité avant de conclure.")])}
     <div class="grid g21">
@@ -1395,7 +1391,7 @@
   }
 
   /* ================= RISQUE DE RÉSURGENCE ================= */
-  const RESC = { "Résurgence en cours": "#BD6F68", "Alerte de remontée": "#E0927C", "Transmission active (pas de baisse)": "#EEB98A", "En baisse — sous surveillance": "#EBDD92", "Sans cas récent": "#C9DDB0", "Éteinte (≥ 42 j sans cas)": "#A3C98F" };
+  const RESC = { "Résurgence en cours": "#BD6F68", "Alerte de remontée": "#E0927C", "Transmission active (pas de baisse)": "#EEB98A", "En baisse, sous surveillance": "#EBDD92", "Sans cas récent": "#C9DDB0", "Éteinte (≥ 42 j sans cas)": "#A3C98F" };
   const spark = (vals, color) => { const mx = Math.max(1, ...vals), w = 4; return `<svg width="${vals.length * (w + 1)}" height="22" viewBox="0 0 ${vals.length * (w + 1)} 22" aria-hidden="true">${vals.map((v, i) => `<rect x="${i * (w + 1)}" y="${22 - 20 * v / mx}" width="${w}" height="${Math.max(.5, 20 * v / mx)}" fill="${color}"/>`).join("")}</svg>`; };
   function resurgenceView() {
     const R = D.resurgence || {}, Z = (R.zones || []).filter(inProv);
@@ -1405,8 +1401,8 @@
     const ser = (R.series || {})[z.zone_sante];
     const top = Z.filter(x => /Résurgence|Alerte/.test(x.categorie));
     return `
-    <div class="notice"><b>${T("Risque de flambée dans les zones où les cas avaient baissé")}</b> — ${esc(T(R.methode || ""))}</div>
-    <div class="grid g5">${cats.filter(c => c !== "Sans cas récent").map(c => kpi(c, nf(cnt(c)), T(c === "Résurgence en cours" ? "Hausse nette après une baisse" : c === "Alerte de remontée" ? "Signal de reprise à confirmer" : c === "En baisse — sous surveillance" ? "Baisse confirmée, pas de signal" : c === "Éteinte (≥ 42 j sans cas)" ? "Aucun cas depuis 42 jours" : "Pas encore de baisse"), { color: RESC[c], cls: c === "Résurgence en cours" && cnt(c) ? "alert" : "" })).join("")}</div>
+    <div class="notice"><b>${T("Risque de flambée dans les zones où les cas avaient baissé")}</b>, ${esc(T(R.methode || ""))}</div>
+    <div class="grid g5">${cats.filter(c => c !== "Sans cas récent").map(c => kpi(c, nf(cnt(c)), T(c === "Résurgence en cours" ? "Hausse nette après une baisse" : c === "Alerte de remontée" ? "Signal de reprise à confirmer" : c === "En baisse, sous surveillance" ? "Baisse confirmée, pas de signal" : c === "Éteinte (≥ 42 j sans cas)" ? "Aucun cas depuis 42 jours" : "Pas encore de baisse"), { color: RESC[c], cls: c === "Résurgence en cours" && cnt(c) ? "alert" : "" })).join("")}</div>
     <div class="grid g21">
       ${panel("Carte du risque de résurgence", T("Catégorie de chaque zone de santé (zones ayant au moins 10 cas)"), `<div id="c-resmap"></div>`, { png: "carte_resurgence" })}
       ${panel(`${esc(z.zone_sante || "—")}`, `${esc(T(z.categorie || ""))} · ${T("score")} ${nf(z.score, 0)}/100`, `<div id="c-reszone"></div>
@@ -1432,7 +1428,7 @@
     if (z.baisse_observee) out.push(`${T("Pic de")} ${nf(z.pic_7j)} ${T("cas sur 7 jours le")} ${dshort(z.date_pic)}, ${T("creux de")} ${nf(z.creux_7j)} ${T("le")} ${dshort(z.date_creux)} ; ${T("maintenant")} ${nf(z.cas_7j)} ${T("cas sur 7 jours")} (${T("probabilité de hausse")} ${pc(100 * z.p_hausse, 0)}).`);
     else out.push(`${T("La zone n’a pas encore connu de baisse nette")} : ${nf(z.cas_7j)} ${T("cas sur 7 jours")} (${T("7 jours précédents")} : ${nf(z.cas_7j_prec)}).`);
     if (z.rt !== null && z.rt !== undefined) out.push(`Rt ${fmtR(z.rt)} (P(R > 1) = ${pc(100 * z.rt_p_sup_1, 0)}).`);
-    if (z.reintroduction) out.push(`${T("Réintroduction")} : ${T("nouveaux cas après")} ${nf(z.jours_sans_cas_avant_reprise)} ${T("jours sans cas — rechercher l’origine (déplacement, chaîne non suivie).")}`);
+    if (z.reintroduction) out.push(`${T("Réintroduction")} : ${T("nouveaux cas après")} ${nf(z.jours_sans_cas_avant_reprise)} ${T("jours sans cas, rechercher l’origine (déplacement, chaîne non suivie).")}`);
     if (z.pct_nouveaux_non_lies !== null && z.pct_nouveaux_non_lies !== undefined && z.pct_nouveaux_non_lies > 50) out.push(`${pc(z.pct_nouveaux_non_lies, 0)} ${T("des nouveaux cas sans lien connu : transmission non détectée probable.")}`);
     if (z.contacts_perdus_de_vue > 0) out.push(`${nf(z.contacts_perdus_de_vue)} ${T("contacts perdus de vue (> 3 jours) à retrouver.")}`);
     return out;
@@ -1505,30 +1501,30 @@
     const kTxt = nb.k < .1 ? T("hétérogénéité extrême (super-propagation très marquée)") : nb.k < 1 ? T("transmission hétérogène : une minorité de cas génère la majorité des cas secondaires") : T("transmission relativement homogène");
     const setNames = { index: "Cas index suivis", tous: "Tous les cas (liens documentés)", chaines: "Cas des chaînes documentées" };
     return `
-    <div class="notice"><b>${T("Super-propagation")}</b> — ${T("le nombre de cas secondaires par cas (distribution de descendance) est ajusté par une loi binomiale négative de moyenne R et de dispersion k (fitdistrplus / superspreading, Epiverse-TRACE). Plus k est petit, plus la transmission est concentrée sur quelques cas : c’est ce qui rend le traçage rétrograde (vers la source) particulièrement rentable.")}</div>
+    <div class="notice"><b>${T("Super-propagation")}</b>, ${T("le nombre de cas secondaires par cas (distribution de descendance) est ajusté par une loi binomiale négative de moyenne R et de dispersion k (fitdistrplus / superspreading, Epiverse-TRACE). Plus k est petit, plus la transmission est concentrée sur quelques cas : c’est ce qui rend le traçage rétrograde (vers la source) particulièrement rentable.")}</div>
     <div class="flex" style="margin-bottom:12px"><span class="small muted">${T("Jeu de données")}</span>${segBtns("ssSet", Object.keys(sp.jeux || {}).map(k => [k, setNames[k] || k]))}<span class="small muted">${esc(T(set.nom))} · n = ${nf(set.n)} ${T("cas")} · ${nf(set.total_secondaires)} ${T("cas secondaires")}</span></div>
     <div class="grid g5">
-      ${kpi("Dispersion k", nf(nb.k, 2), nb.k_ic95 ? `IC 95 % ${nf(nb.k_ic95[0], 2)} – ${nf(nb.k_ic95[1], 2)}` : "", { color: "--rc-purple", cls: nb.k < 1 ? "alert" : "" })}
-      ${kpi("Cas secondaires par cas (R)", nf(nb.R, 2), nb.R_ic95 ? `IC 95 % ${nf(nb.R_ic95[0], 2)} – ${nf(nb.R_ic95[1], 2)} · ${pc(set.zeros_pct, 0)} ${T("sans cas secondaire")}` : "", { color: "--rc-rt" })}
+      ${kpi("Dispersion k", nf(nb.k, 2), nb.k_ic95 ? `IC 95 % ${nf(nb.k_ic95[0], 2)}, ${nf(nb.k_ic95[1], 2)}` : "", { color: "--rc-purple", cls: nb.k < 1 ? "alert" : "" })}
+      ${kpi("Cas secondaires par cas (R)", nf(nb.R, 2), nb.R_ic95 ? `IC 95 % ${nf(nb.R_ic95[0], 2)}, ${nf(nb.R_ic95[1], 2)} · ${pc(set.zeros_pct, 0)} ${T("sans cas secondaire")}` : "", { color: "--rc-rt" })}
       ${kpi("Cas responsables de 80 % de la transmission", pc(set.pct_cas_80, 1), `${T("observé")} : ${pc(set.pct_cas_80_empirique, 1)} · ${T("les 20 % les plus infectieux")} → ${pc(set.part_top20, 0)}`, { color: "--s2" })}
       ${kpi("Événements de super-propagation", nf(set.n_sse), `${T("cas ayant infecté plus de")} ${nf(set.seuil_sse)} ${T("personnes (99e percentile de Poisson)")} · ${pc(set.transmission_sse_pct, 0)} ${T("de la transmission")}`, { color: "--critical" })}
       ${kpi("Gain du traçage rétrograde", "× " + nf(set.gain_retrograde, 1), `${T("cas « frères » attendus par source retrouvée")} : ${nf(set.retrograde_freres, 2)} ${T("contre")} ${nf(nb.R, 2)} ${T("en prospectif")}`, { color: "--s1" })}
     </div>
     ${interp("Interprétation (lecture d’épidémiologiste)", [
       `k = <b>${nf(nb.k, 2)}</b> ${nb.k_ic95 ? ci(nb.k_ic95[0], nb.k_ic95[1]) : ""} : ${kTxt}.`,
-      `${T("La binomiale négative est le meilleur modèle")} (ΔAIC ${T("Poisson")} = ${nf((set.modeles.find(m => m.modele === "Poisson") || {}).delta_AIC, 1)}) : ${T("la variance")} (${nf(set.variance, 2)}) ${T("dépasse largement la moyenne")} (${nf(set.moyenne, 2)}) — ${T("surdispersion")}.`,
+      `${T("La binomiale négative est le meilleur modèle")} (ΔAIC ${T("Poisson")} = ${nf((set.modeles.find(m => m.modele === "Poisson") || {}).delta_AIC, 1)}) : ${T("la variance")} (${nf(set.variance, 2)}) ${T("dépasse largement la moyenne")} (${nf(set.moyenne, 2)}), ${T("surdispersion")}.`,
       `${pc(set.pct_cas_80, 1)} ${T("des cas expliquent 80 % de la transmission (règle 20/80 de Woolhouse : la proportion est d’autant plus faible que k est petit).")}`,
       S.ssSet === "tous" ? T("Attention : sur « tous les cas », la grande majorité des cas n’a aucun lien documenté ; les zéros sont gonflés par le sous-enregistrement des liens, ce qui exagère l’hétérogénéité. Le jeu « cas index suivis » (dénominateur complet, suivi clos) est la référence.") : S.ssSet === "chaines" ? T("Sur les seuls cas des chaînes documentées, les cas sans descendance sont sous-représentés : k est surestimé (hétérogénéité sous-estimée). À lire comme une borne.") : T("Jeu de référence : cas index dont tous les contacts ont terminé leur suivi ; le nombre de contacts devenus cas mesure directement la descendance observée par le traçage."),
       T("Conséquence opérationnelle : quand k < 1, chercher en priorité la SOURCE et l’ÉVÉNEMENT (funérailles, soins à domicile, structure de santé) de chaque nouveau cas, puis lister tous les participants : c’est là que se trouvent les grappes.")])}
     <div class="grid g2">
-      ${panel("Distribution du nombre de cas secondaires", T("Histogramme observé (saumon), binomiale négative ajustée (violet) et Poisson de même moyenne (gris) — epicontacts::get_degree + fitdistrplus::fitdist"), `<div id="c-ss-off"></div><div class="table-wrap" style="margin-top:8px"><table class="rsum"><thead><tr><th>${T("Modèle")}</th><th>${T("Paramètres")}</th><th>log-L</th><th>AIC</th><th>BIC</th><th>ΔAIC</th><th>${T("Poids AIC")}</th></tr></thead><tbody>${set.modeles.map(m => `<tr><td>${m.delta_AIC === 0 ? "<b>" + T(m.modele) + "</b>" : T(m.modele)}</td><td>${m.parametres}</td><td>${nf(m.loglik, 1)}</td><td>${nf(m.AIC, 1)}</td><td>${nf(m.BIC, 1)}</td><td>${nf(m.delta_AIC, 1)}</td><td>${pc(100 * m.poids_AIC, 1)}</td></tr>`).join("")}</tbody></table></div>`, { png: "distribution_descendance" })}
+      ${panel("Distribution du nombre de cas secondaires", T("Histogramme observé (saumon), binomiale négative ajustée (violet) et Poisson de même moyenne (gris), epicontacts::get_degree + fitdistrplus::fitdist"), `<div id="c-ss-off"></div><div class="table-wrap" style="margin-top:8px"><table class="rsum"><thead><tr><th>${T("Modèle")}</th><th>${T("Paramètres")}</th><th>log-L</th><th>AIC</th><th>BIC</th><th>ΔAIC</th><th>${T("Poids AIC")}</th></tr></thead><tbody>${set.modeles.map(m => `<tr><td>${m.delta_AIC === 0 ? "<b>" + T(m.modele) + "</b>" : T(m.modele)}</td><td>${m.parametres}</td><td>${nf(m.loglik, 1)}</td><td>${nf(m.AIC, 1)}</td><td>${nf(m.BIC, 1)}</td><td>${nf(m.delta_AIC, 1)}</td><td>${pc(100 * m.poids_AIC, 1)}</td></tr>`).join("")}</tbody></table></div>`, { png: "distribution_descendance" })}
       ${panel("Concentration de la transmission", T("Part cumulée de la transmission (y) due à la part x des cas les plus infectieux ; diagonale = transmission homogène ; courbes de référence (Ebola, SARS)"), `<div id="c-ss-lor"></div>`, { png: "concentration_transmission" })}
     </div>
     <div class="grid g2">
-      ${panel("Probabilité d’appartenir à une grappe", T("superspreading::proportion_cluster_size — probabilité qu’un cas détecté appartienne à une grappe (cas secondaires d’une même source) d’au moins c cas"), `<div id="c-ss-cl"></div>${interp("Lecture", [`${T("Un nouveau cas a")} <b>${pc(100 * (set.grappes["5"] || 0), 1)}</b> ${T("de probabilité (modèle) de provenir d’une grappe d’au moins 5 cas")} (${T("observé")} : ${pc(100 * (set.grappes_empiriques["5"] || 0), 1)}) ${T("et")} ${pc(100 * (set.grappes["2"] || 0), 0)} ${T("d’une grappe d’au moins 2 cas : remonter à la source permet de découvrir les autres cas de la grappe.")}`])}`, { png: "probabilite_grappes" })}
-      ${panel("Probabilité qu’une introduction déclenche une épidémie", T("Processus de branchement à descendance binomiale négative : 1 − q, avec q = (1 + R(1 − q)/k)^−k"), `<div class="table-wrap"><table class="rsum"><thead><tr><th>R</th><th>k ${T("local")} (${nf(nb.k, 2)})</th><th>k = 5,1 (${T("Ebola, homogène")})</th></tr></thead><tbody>${(pe.scenarios || []).map(r => `<tr><td>${nf(r.R, 1)}</td><td>${pc(100 * r.p_k_local, 1)}</td><td>${pc(100 * r.p_k_homogene, 1)}</td></tr>`).join("")}</tbody></table></div>${interp("Lecture", [pe.R_actuel ? `${T("Avec le Rt actuel")} (${fmtR(pe.R_actuel)}), ${pe.R_actuel < 1 ? T("une nouvelle introduction s’éteint presque toujours.") : `${T("probabilité d’épidémie")} : ${pc(100 * pe.p_actuel, 1)}.`}` : "", T("Plus k est petit, plus une introduction a de chances de s’éteindre seule — mais quand elle ne s’éteint pas, elle démarre souvent par une flambée explosive (super-propagation). La surveillance doit donc détecter très tôt les événements à risque.")])}`)}
+      ${panel("Probabilité d’appartenir à une grappe", T("superspreading::proportion_cluster_size, probabilité qu’un cas détecté appartienne à une grappe (cas secondaires d’une même source) d’au moins c cas"), `<div id="c-ss-cl"></div>${interp("Lecture", [`${T("Un nouveau cas a")} <b>${pc(100 * (set.grappes["5"] || 0), 1)}</b> ${T("de probabilité (modèle) de provenir d’une grappe d’au moins 5 cas")} (${T("observé")} : ${pc(100 * (set.grappes_empiriques["5"] || 0), 1)}) ${T("et")} ${pc(100 * (set.grappes["2"] || 0), 0)} ${T("d’une grappe d’au moins 2 cas : remonter à la source permet de découvrir les autres cas de la grappe.")}`])}`, { png: "probabilite_grappes" })}
+      ${panel("Probabilité qu’une introduction déclenche une épidémie", T("Processus de branchement à descendance binomiale négative : 1 − q, avec q = (1 + R(1 − q)/k)^−k"), `<div class="table-wrap"><table class="rsum"><thead><tr><th>R</th><th>k ${T("local")} (${nf(nb.k, 2)})</th><th>k = 5,1 (${T("Ebola, homogène")})</th></tr></thead><tbody>${(pe.scenarios || []).map(r => `<tr><td>${nf(r.R, 1)}</td><td>${pc(100 * r.p_k_local, 1)}</td><td>${pc(100 * r.p_k_homogene, 1)}</td></tr>`).join("")}</tbody></table></div>${interp("Lecture", [pe.R_actuel ? `${T("Avec le Rt actuel")} (${fmtR(pe.R_actuel)}), ${pe.R_actuel < 1 ? T("une nouvelle introduction s’éteint presque toujours.") : `${T("probabilité d’épidémie")} : ${pc(100 * pe.p_actuel, 1)}.`}` : "", T("Plus k est petit, plus une introduction a de chances de s’éteindre seule, mais quand elle ne s’éteint pas, elle démarre souvent par une flambée explosive (super-propagation). La surveillance doit donc détecter très tôt les événements à risque.")])}`)}
     </div>
-    ${panel("Contrôler la super-propagation par le traçage des contacts", T("Traçage prospectif (vers les contacts du cas) et rétrograde (vers la source et ses autres contacts) — Endo et al. 2020 ; Raymenants et al. 2022"), `<div id="c-ss-trace"></div>
+    ${panel("Contrôler la super-propagation par le traçage des contacts", T("Traçage prospectif (vers les contacts du cas) et rétrograde (vers la source et ses autres contacts) : Endo et al. 2020 ; Raymenants et al. 2022"), `<div id="c-ss-trace"></div>
       <div class="grid g4" style="margin-top:10px">${kpi("Traçage prospectif réussi", pc(tr.prospectif_pct, 1), `${nf(tr.prospectif)} / ${nf(tr.cas)} ${T("confirmés (28 j) déjà listés comme contacts")}`, { color: "#7E9BD1" })}${kpi("Traçage rétrograde réussi", pc(tr.retrograde_pct, 1), `${nf(tr.retrograde)} ${T("confirmés avec une source identifiée")}`, { color: "#B98D6B" })}${kpi("Cas avec contacts listés", pc(tr.avec_contacts_listes_pct, 1), `${nf(tr.avec_contacts_listes)} ${T("confirmés (28 j) ayant au moins un contact listé")}`)}${kpi("Aucun lien", pc(tr.aucun_pct, 1), `${nf(tr.aucun)} ${T("confirmés (28 j) ni connus comme contacts, ni reliés à une source")}`, { cls: tr.aucun_pct > 50 ? "alert" : "", color: "#D08B5B" })}</div>
       ${interp("Interprétation (expertise épidémiologique)", [
         `${T("Avec k =")} ${nf(nb.k, 2)}, ${T("la source d’un cas a en moyenne")} <b>${nf(set.retrograde_freres, 2)}</b> ${T("autres cas secondaires (R(1 + 1/k)), contre")} ${nf(nb.R, 2)} ${T("cas secondaires attendus pour un cas pris au hasard : retrouver la source rapporte environ")} <b>${nf(set.gain_retrograde, 1)} ${T("fois")}</b> ${T("plus de cas que le seul traçage prospectif.")}`,
@@ -1556,7 +1552,7 @@
     const { sp, set } = ssData(); if (!set) return;
     const n = set.n || 1;
     const off = set.histogramme.map((v, i) => ({ k: i, p: v / n, nb: set.pmf_nb[i], po: set.pmf_poisson[i] }));
-    Ch.xy($("#c-ss-off"), { data: off, x: "k", height: 240, barWidth: .9, barStroke: "--surface", digits: 4, yFmt: v => nf(v, 2), xLabel: (v, r, tip) => tip ? `${v} ${T("cas secondaires")} — ${nf(set.histogramme[v])} ${T("cas")}` : v, xLabelWidth: 22,
+    Ch.xy($("#c-ss-off"), { data: off, x: "k", height: 240, barWidth: .9, barStroke: "--surface", digits: 4, yFmt: v => nf(v, 2), xLabel: (v, r, tip) => tip ? `${v} ${T("cas secondaires")}, ${nf(set.histogramme[v])} ${T("cas")}` : v, xLabelWidth: 22,
       vlines: [{ i: Math.min(set.seuil_sse + 1, off.length - 1), edge: true, color: "--critical", label: `${T("seuil SSE")} > ${set.seuil_sse}` }],
       series: [{ key: "p", label: T("Proportion observée"), color: "--rc-salmon" }, { key: "nb", label: T("Binomiale négative"), color: "--rc-purple", type: "line", dash: "5 4", markers: true, r: 2.6 }, { key: "po", label: T("Poisson (même moyenne)"), color: "--ink-2", type: "line", dash: "2 3", markers: false }] });
     const L = set.lorenz.map((a, i) => ({ x: Math.round(100 * a[0]) + " %", nb: 100 * a[1], emp: set.lorenz_empirique[i] ? 100 * set.lorenz_empirique[i][1] : null, homo: 100 * a[0],
@@ -1597,7 +1593,7 @@
       ${panel("Échantillons analysés par semaine", T("Positifs et négatifs (barres empilées)"), `<div id="c-lab1"></div>`, { png: "labo_volumes", tools: `<select data-state="lab"><option value="Tous">${T("Tous les laboratoires")}</option>${labs.map(l => `<option ${S.lab === l.laboratoire ? "selected" : ""}>${esc(l.laboratoire)}</option>`).join("")}</select>` })}
       ${panel("Taux de positivité hebdomadaire", T("Positifs / échantillons analysés"), `<div id="c-lab2"></div>`, { png: "labo_positivite" })}
     </div>
-    ${panel("Comparaison des laboratoires", T("Intervalle de confiance de Wilson à 95 %"), table("labs", labs, [{ k: "laboratoire", t: "Laboratoire" }, { k: "tests_valides", t: "Analysés", num: true }, { k: "positifs", t: "Positifs", num: true }, { k: "negatifs", t: "Négatifs", num: true }, { k: "taux_positivite_pct", t: "Positivité %", num: true, d: 1 }, { k: "ic", t: "IC 95 %", v: x => `${nf(x.ic95_inf_pct, 1)} – ${nf(x.ic95_sup_pct, 1)}` }], { sort: "tests_valides" }), { csv: "labs" })}`;
+    ${panel("Comparaison des laboratoires", T("Intervalle de confiance de Wilson à 95 %"), table("labs", labs, [{ k: "laboratoire", t: "Laboratoire" }, { k: "tests_valides", t: "Analysés", num: true }, { k: "positifs", t: "Positifs", num: true }, { k: "negatifs", t: "Négatifs", num: true }, { k: "taux_positivite_pct", t: "Positivité %", num: true, d: 1 }, { k: "ic", t: "IC 95 %", v: x => `${nf(x.ic95_inf_pct, 1)}, ${nf(x.ic95_sup_pct, 1)}` }], { sort: "tests_valides" }), { csv: "labs" })}`;
   }
   function labWeekly() {
     if (S.lab === "Tous") return D.lab_weekly || [];
@@ -1643,8 +1639,8 @@
       <label class="field">${T("Indicateur")}<select data-state="fTarget">${tg.map(x => `<option value="${x}" ${S.fTarget === x ? "selected" : ""}>${T(FT[x] || x)}</option>`).join("")}</select></label>
       <label class="field">${T("Horizon")}<select data-state="fH">${[14, 30, 60, 90, 120].map(x => `<option value="${x}" ${S.fH == x ? "selected" : ""}>${x} ${T("jours")}</option>`).join("")}</select></label>
     </div>
-    <div class="grid g3">${kpi("Total attendu sur l’horizon", nf(tot), `${T("Intervalle 95 %")} : ${nf(lo)} – ${nf(hi)}`, { color: "--s2" })}${kpi("Moyenne attendue par jour", nf(rows.length ? tot / rows.length : null, 1), "")}${kpi("Horizon", `${S.fH} ${T("jours")}`, T("Au-delà de 30 jours : scénarios exploratoires"))}</div>
-    ${panel(`${T(FT[S.fTarget] || S.fTarget)} — ${esc(S.fTerr)}`, T("Historique récent observé puis prévision de l’ensemble pondéré"), `<div id="c-fc"></div>`, { png: "prevision" })}
+    <div class="grid g3">${kpi("Total attendu sur l’horizon", nf(tot), `${T("Intervalle 95 %")} : ${nf(lo)}, ${nf(hi)}`, { color: "--s2" })}${kpi("Moyenne attendue par jour", nf(rows.length ? tot / rows.length : null, 1), "")}${kpi("Horizon", `${S.fH} ${T("jours")}`, T("Au-delà de 30 jours : scénarios exploratoires"))}</div>
+    ${panel(`${T(FT[S.fTarget] || S.fTarget)}, ${esc(S.fTerr)}`, T("Historique récent observé puis prévision de l’ensemble pondéré"), `<div id="c-fc"></div>`, { png: "prevision" })}
     ${panel("Validation rétrospective des modèles", T("Erreur sur les derniers jours retenus ; poids de l’ensemble inversement proportionnels à la MAE"), table("fv", (D.forecast_validation || []).filter(x => x.target === S.fTarget), [{ k: "modele", t: "Modèle" }, { k: "MAE", t: "MAE", num: true, d: 2 }, { k: "RMSE", t: "RMSE", num: true, d: 2 }, { k: "WIS95", t: "WIS95", num: true, d: 2 }, { k: "couverture_95_pct", t: "Couverture 95 %", num: true, d: 0 }], { search: false }))}`;
   }
   function forecastCharts() {
@@ -1668,7 +1664,7 @@
   function priorityView() {
     const r = (D.risk_scores || []).filter(inProv).map(x => ({ ...x, c: { ...x.contributions, autres: (x.contributions?.delai_notification_jours || 0) + (x.contributions?.couverture_geo_pct || 0) } }));
     const mx = Math.max(1, ...r.map(x => x.risk_score));
-    return `<div class="notice"><b>${T("Score de risque additif et explicable")}</b> — ${T("somme pondérée d’indicateurs normalisés entre zones : nouveaux confirmés 22 %, croissance 16 %, décès 14 %, contacts non vus 12 %, contacts devenus suspects/cas 10 %, nouveaux cas hors listes de contacts 10 %, positivité 7 %, délai de notification 5 %, couverture géographique 4 %.")}</div>
+    return `<div class="notice"><b>${T("Score de risque additif et explicable")}</b>, ${T("somme pondérée d’indicateurs normalisés entre zones : nouveaux confirmés 22 %, croissance 16 %, décès 14 %, contacts non vus 12 %, contacts devenus suspects/cas 10 %, nouveaux cas hors listes de contacts 10 %, positivité 7 %, délai de notification 5 %, couverture géographique 4 %.")}</div>
     ${panel("Classement des zones", T("Longueur = score ; couleurs = contribution de chaque facteur"), `<div class="hbars">${r.slice(0, 25).map(x => `<div class="hbar" style="grid-template-columns:minmax(90px,160px) 1fr 110px"><span>${esc(x.zone_sante)}</span><div class="track" style="display:flex;width:${100 * x.risk_score / mx}%;background:none">${CONTRIB.map(([k, t, c]) => (x.c[k] || 0) > 0 ? `<i title="${T(t)} : ${nf(x.c[k], 1)}" style="width:${100 * x.c[k] / Math.max(x.risk_score, 1e-9)}%;background:${col(c)};border-radius:0"></i>` : "").join("")}</div><b>${nf(x.risk_score, 1)} ${badge(x.niveau_risque, RISK[x.niveau_risque])}</b></div>`).join("")}</div>${legend(CONTRIB.map(([k, t, c]) => ({ t, c })))}`)}
     ${panel("Détail des indicateurs", "", table("prio", r, [{ k: "zone_sante", t: "Zone" }, { k: "risk_score", t: "Score", num: true, d: 1 }, { k: "niveau_risque", t: "Niveau", v: x => badge(x.niveau_risque, RISK[x.niveau_risque]), csv: x => x.niveau_risque }, { k: "nouveaux_confirmes", t: "Confirmés 7 j", num: true }, { k: "croissance", t: "Croissance", num: true, d: 2 }, { k: "deces_14j", t: "Décès 14 j", num: true }, { k: "contacts_non_vus", t: "Non vus >3 j", num: true }, { k: "nouveaux_cas_hors_contacts_pct", t: "% hors contacts", num: true }, { k: "positivite_pct", t: "Positivité %", num: true, d: 1 }, { k: "explication", t: "Explication", wrap: true }], { sort: "risk_score" }), { csv: "prio" })}`;
   }
@@ -1695,7 +1691,7 @@
 
   /* ================= Rendu ================= */
   /* ======================================================================
-     v3.4 — Rt multi-méthodes, zones à risque, analyses lln, Linelist fusionnée, chargement des fichiers
+     v3.4 : Rt multi-méthodes, zones à risque, analyses lln, Linelist fusionnée, chargement des fichiers
      ====================================================================== */
   const RTM_COL = { RP: "--s1", RPa: "--s5", WT: "--s3", EG: "--s4", DSS: "--s2", BPS: "--s6", FBI: "--s7", FBIs: "--s8", SB: "--ink-2" };
   const RTM_INFO = {
@@ -1706,7 +1702,7 @@
     DSS: ["Lissage spline par dérivée (Barro et al. 2026)", "P-spline de Poisson (vraisemblance marginale), dérivée de log μ(t), puis fonction génératrice des moments", "Le plus précis (biais, EQM) et le mieux calibré en transmission forte ou faible dans l’article", "Effets de bord en fin de série ; dépend de la qualité de la courbe"],
     BPS: ["P-splines bayésiennes (Gressani 2022, EpiLPS)", "Binomiale négative + P-spline, approximation de Laplace (LPSMAP), Rt = μt / Σ μ(t−s) ws", "Gère la surdispersion ; courbe lisse", "Le moins robuste pour R0 dans l’article (queues longues, sous-couverture)"],
     FBI: ["Filtrage bayésien (Parag 2021, EpiFilter)", "Rt suit une marche aléatoire ; filtre récursif sur grille (η = 0,1)", "Robuste quand les cas sont peu nombreux ; temps réel", "Surestimation et transitions lissées selon η (article)"],
-    FBIs: ["EpiFilter — lisseur avant–arrière", "Même modèle, utilise aussi les données futures", "Meilleure précision rétrospective", "Non opérationnel en temps réel (révisé quand arrivent de nouvelles données)"],
+    FBIs: ["EpiFilter, lisseur avant–arrière", "Même modèle, utilise aussi les données futures", "Meilleure précision rétrospective", "Non opérationnel en temps réel (révisé quand arrivent de nouvelles données)"],
     SB: ["Bayésien séquentiel (Bettencourt & Ribeiro 2008)", "I(t+1) ~ Poisson(I(t) exp(γ (Rt − 1))), γ = 1 / moyenne du SI", "Mise à jour jour par jour", "Peu informatif quand γ est petit (Ebola) : intervalles larges"],
   };
   const rtmData = () => D.rt_methodes || { groupes: [], resultats: {}, methodes: [] };
@@ -1722,12 +1718,12 @@
     const sigBadge = s => badge(s, s === "Croissance" ? "b-crit" : s === "Contrôle" ? "b-good" : "b-mod");
     return `
     <div class="flex" style="margin-bottom:12px">
-      <label class="field">${T("Territoire")}<select data-state="rtmG">${gs.map(g => `<option value="${esc(g.id)}" ${S.rtmG === g.id ? "selected" : ""}>${esc(T(g.niveau))} — ${esc(g.nom)}</option>`).join("")}</select></label>
+      <label class="field">${T("Territoire")}<select data-state="rtmG">${gs.map(g => `<option value="${esc(g.id)}" ${S.rtmG === g.id ? "selected" : ""}>${esc(T(g.niveau))}, ${esc(g.nom)}</option>`).join("")}</select></label>
       <label class="field">${T("Méthodes")}<select data-state="rtmSet">${[["all", "Toutes"], ["rt", "Temps réel seulement"], ["smooth", "Lissage et rétrospectives"]].map(([v, t]) => `<option value="${v}" ${S.rtmSet === v ? "selected" : ""}>${T(t)}</option>`).join("")}</select></label>
       <div class="seg" data-seg="rtmDays">${[["60", "60 j"], ["120", "120 j"], ["0", "Tout"]].map(([v, t]) => `<button data-v="${v}" class="${S.rtmDays === v ? "on" : ""}">${T(t)}</button>`).join("")}</div>
     </div>
     <div class="grid g4">
-      ${kpi("Consensus (médiane des méthodes)", nf(cons.mediane, 2), `${T("Étendue")} ${nf(cons.min, 2)} – ${nf(cons.max, 2)}`, { color: cons.mediane > 1 ? "--critical" : "--s2" })}
+      ${kpi("Consensus (médiane des méthodes)", nf(cons.mediane, 2), `${T("Étendue")} ${nf(cons.min, 2)}, ${nf(cons.max, 2)}`, { color: cons.mediane > 1 ? "--critical" : "--s2" })}
       ${kpi("Méthodes en croissance", `${nf(cons.n_croissance)} / ${nf(cons.n_methodes)}`, T("Borne inférieure de l’IC > 1"), { color: "--critical" })}
       ${kpi("Méthodes en contrôle", `${nf(cons.n_controle)} / ${nf(cons.n_methodes)}`, T("Borne supérieure de l’IC < 1"), { color: "--s2" })}
       ${kpi("Meilleure prévision à 1 jour", best ? esc(T(best.libelle)) : "—", best ? `${T("Couverture IC 95 %")} : ${pc(best.couverture_95_pct, 0)}` : "")}
@@ -1736,8 +1732,8 @@
     ${panel("Rt estimé par chaque méthode", T("Médianes ; ligne pointillée : seuil R = 1 ; zone grisée : jours non consolidés (notifications tardives)"), `<div id="c-rtm-all"></div>`, { png: "rt_toutes_methodes" })}
     <div class="grid g3">${(r.series ? Object.keys(r.series) : []).filter(rtmKeep).map(k => panel(METH(k), esc(T(RTM_INFO[k]?.[1] || "")), `<div id="c-rtm-${k}"></div>`, { png: "rt_" + k, cls: "compact" })).join("")}</div>
     <div class="grid g2">
-      ${panel("Dernier Rt par méthode", `${T("Dernier jour consolidé ; Wallinga–Teunis s’arrête plus tôt (descendance non encore observée)")}`, table("rtm-last", last, [{ k: "libelle", t: "Méthode", v: x => esc(T(x.libelle)) }, { k: "date", t: "Date", v: x => dfmt(x.date) }, { k: "mediane", t: "Rt médian", num: true, d: 2 }, { k: "ic", t: "IC 95 %", v: x => `${nf(x.ic95[0], 2)} – ${nf(x.ic95[1], 2)}` }, { k: "signal", t: "Signal", v: x => sigBadge(x.signal) }, { k: "temps_reel", t: "Temps réel", v: x => x.temps_reel ? T("Oui") : T("Non") }], { search: false, sort: null }))}
-      ${panel("R0 de la phase initiale", `${T("Médiane de Rt jusqu’au point t* où le taux de croissance est maximal")} (${dfmt(r.t_star)}) — ${T("méthode de l’article")}`, table("rtm-r0", r0, [{ k: "libelle", t: "Méthode" }, { k: "R0", t: "R0", num: true, d: 2 }, { k: "lo", t: "IC bas", num: true, d: 2 }, { k: "hi", t: "IC haut", num: true, d: 2 }], { search: false, sort: null }))}
+      ${panel("Dernier Rt par méthode", `${T("Dernier jour consolidé ; Wallinga–Teunis s’arrête plus tôt (descendance non encore observée)")}`, table("rtm-last", last, [{ k: "libelle", t: "Méthode", v: x => esc(T(x.libelle)) }, { k: "date", t: "Date", v: x => dfmt(x.date) }, { k: "mediane", t: "Rt médian", num: true, d: 2 }, { k: "ic", t: "IC 95 %", v: x => `${nf(x.ic95[0], 2)}, ${nf(x.ic95[1], 2)}` }, { k: "signal", t: "Signal", v: x => sigBadge(x.signal) }, { k: "temps_reel", t: "Temps réel", v: x => x.temps_reel ? T("Oui") : T("Non") }], { search: false, sort: null }))}
+      ${panel("R0 de la phase initiale", `${T("Médiane de Rt jusqu’au point t* où le taux de croissance est maximal")} (${dfmt(r.t_star)}), ${T("méthode de l’article")}`, table("rtm-r0", r0, [{ k: "libelle", t: "Méthode" }, { k: "R0", t: "R0", num: true, d: 2 }, { k: "lo", t: "IC bas", num: true, d: 2 }, { k: "hi", t: "IC haut", num: true, d: 2 }], { search: false, sort: null }))}
     </div>
     ${panel("Calibration empirique : prévision à 1 jour", T("Pour chaque méthode temps réel, Rt(t) × Λ(t+1) prédit les cas du lendemain sur les 60 derniers jours consolidés. Score logarithmique (plus bas = meilleur), erreur absolue moyenne et couverture de l’intervalle à 95 % (idéal : 95 %)."), table("rtm-perf", perf, [{ k: "libelle", t: "Méthode", v: x => esc(T(x.libelle)) }, { k: "score_log", t: "Score log", num: true, d: 2 }, { k: "mae", t: "Erreur absolue moyenne", num: true, d: 1 }, { k: "couverture_95_pct", t: "Couverture IC 95 %", v: x => pc(x.couverture_95_pct, 0) }, { k: "jours", t: "Jours", num: true }], { search: false, sort: null }))}
     ${panel("Comparaison par territoire", T("Dernier Rt consolidé ; consensus = médiane des méthodes ; nombre de méthodes signalant une croissance / un contrôle"), table("rtm-geo", byGroup, [{ k: "nom", t: "Territoire" }, { k: "niveau", t: "Niveau", v: x => T(x.niveau) }, { k: "cons", t: "Consensus", num: true, d: 2 }, { k: "min", t: "Min", num: true, d: 2 }, { k: "max", t: "Max", num: true, d: 2 }, { k: "RP", t: "EpiEstim", num: true, d: 2 }, { k: "DSS", t: "DSS", num: true, d: 2 }, { k: "BPS", t: "EpiLPS", num: true, d: 2 }, { k: "FBI", t: "EpiFilter", num: true, d: 2 }, { k: "nc", t: "Croissance", num: true }, { k: "nd", t: "Contrôle", num: true }], { rowClick: true, rowKey: x => x.id, sort: "cons", dir: -1 }))}
@@ -1801,12 +1797,12 @@
       <div class="field"><span>${T("Affichage")}</span><div class="seg" data-seg="rtzDays">${[["7", "7 j"], ["14", "14 j"], ["21", "21 j"], ["28", "28 j"], ["42", "42 j"], ["60", "60 j"], ["90", "90 j"], ["120", "120 j"], ["0", "Tout"]].map(([v, t]) => `<button data-v="${v}" class="${S.rtzDays === v ? "on" : ""}">${T(t)}</button>`).join("")}</div></div>
     </div>
     <div class="grid g4">
-      ${["7", "14", "21"].map(t => kpi(`Rt — fenêtre de ${t} jours`, d[t] ? nf(d[t].mediane, 2) : "—", d[t] ? `${T("IC 95 %")} ${nf(d[t].ic95[0], 2)}–${nf(d[t].ic95[1], 2)} · P(Rt>1) ${pc(100 * d[t].p_sup_1, 0)} · ${dshort(d[t].date)}${old(d[t]) ? ` · <b>${T("ancienne")}</b>` : ""}` : T("Trop peu de cas"), { color: TAU_COL[t] })).join("")}
+      ${["7", "14", "21"].map(t => kpi(`Rt, fenêtre de ${t} jours`, d[t] ? nf(d[t].mediane, 2) : "—", d[t] ? `${T("IC 95 %")} ${nf(d[t].ic95[0], 2)}–${nf(d[t].ic95[1], 2)} · P(Rt>1) ${pc(100 * d[t].p_sup_1, 0)} · ${dshort(d[t].date)}${old(d[t]) ? ` · <b>${T("ancienne")}</b>` : ""}` : T("Trop peu de cas"), { color: TAU_COL[t] })).join("")}
       ${kpi("Cas (21 derniers jours)", nf(g.cas_21j), `${nf(g.cas)} ${T("cas au total")} · ${esc(T(g.niveau))}`)}
     </div>
-    ${panel(`Rt — ${g.niveau === "National" ? T("National") : esc(g.nom)}`, T("EpiEstim (Cori 2013) sur l’incidence par date de début des symptômes corrigée du retard de notification ; fenêtre glissante de 7, 14 ou 21 jours ; zone grisée : jours non consolidés ; Rt masqué quand la fenêtre compte moins de 5 cas."), `<div id="c-rtz"></div><div id="c-rtz-inc"></div>`, { png: "rt_" + g.nom })}
+    ${panel(`Rt, ${g.niveau === "National" ? T("National") : esc(g.nom)}`, T("EpiEstim (Cori 2013) sur l’incidence par date de début des symptômes corrigée du retard de notification ; fenêtre glissante de 7, 14 ou 21 jours ; zone grisée : jours non consolidés ; Rt masqué quand la fenêtre compte moins de 5 cas."), `<div id="c-rtz"></div><div id="c-rtz-inc"></div>`, { png: "rt_" + g.nom })}
     <div class="notice small"><b>${T("Lecture")} :</b> ${T("la fenêtre de 7 jours réagit vite mais fluctue ; 14 et 21 jours lissent les variations dues aux petits effectifs (zones avec peu de cas). Une zone est en croissance quand la borne inférieure de l’IC 95 % dépasse 1, en contrôle quand la borne supérieure est sous 1.")}</div>
-    ${panel(S.rtzProv === "Toutes" ? "Dernier Rt par zone de santé" : `Dernier Rt par zone de santé — ${esc(S.rtzProv)}`, T("Cliquer une zone pour afficher ses courbes ; entre parenthèses : date de la dernière estimation quand elle date de plus de 21 jours"), table("rtz-geo", tbl, [
+    ${panel(S.rtzProv === "Toutes" ? "Dernier Rt par zone de santé" : `Dernier Rt par zone de santé, ${esc(S.rtzProv)}`, T("Cliquer une zone pour afficher ses courbes ; entre parenthèses : date de la dernière estimation quand elle date de plus de 21 jours"), table("rtz-geo", tbl, [
       { k: "nom", t: "Zone de santé" }, { k: "province", t: "Province" }, { k: "cas", t: "Cas", num: true }, { k: "cas_21j", t: "Cas 21 j", num: true }, rv("r7"), rv("r14"), rv("r21"),
       { k: "sig", t: "Signal (7 j)", v: x => old(x.r7) ? `<span class="muted">${T("pas de cas récents")}</span>` : sig(x.r7), sortv: x => x.r7 ? x.r7.ic95[0] : null }],
       { rowClick: true, rowKey: x => x.id, sort: "cas_21j", maxh: 460 }), { csv: "rtz-geo" })}`;
@@ -1859,7 +1855,7 @@
     const colDefs = [{ k: "zone_sante", t: "Zone de santé" }, { k: "province", t: "Province" }, ...cfg.cols.map(([k, t, f]) => f === "pct" ? { k, t, v: x => pc(x[k], 1), sortv: x => x[k] } : { k, t, num: true })];
     const provRows = O.provinces.filter(p => p.confirmes > 0 || p.deces > 0);
     const sr = O.sitrep_24h;
-    const srPanel = S.opTab === "eds" && sr ? panel(`SitRep N° ${esc(String(sr.numero || ""))} — EDS des dernières 24 h`, `${T("Lu dans le pilier PCI/EDS du SitRep du")} ${dfmt(sr.date)}`, table("op-sr", sr.provinces.filter(x => x.eds_attendus_24h !== undefined), [
+    const srPanel = S.opTab === "eds" && sr ? panel(`SitRep N° ${esc(String(sr.numero || ""))} : EDS des dernières 24 h`, `${T("Lu dans le pilier PCI/EDS du SitRep du")} ${dfmt(sr.date)}`, table("op-sr", sr.provinces.filter(x => x.eds_attendus_24h !== undefined), [
       { k: "province", t: "Province" }, { k: "eds_attendus_24h", t: "EDS attendus", num: true }, { k: "eds_realises_24h", t: "EDS réalisés", num: true },
       { k: "eds_non_realises_24h", t: "EDS non réalisés", num: true, v: x => `<b style="color:${col("--critical")}">${nf(x.eds_non_realises_24h)}</b>`, sortv: x => x.eds_non_realises_24h },
       { k: "pct", t: "% réalisés", v: x => pc(x.eds_attendus_24h ? 100 * x.eds_realises_24h / x.eds_attendus_24h : null, 1) }, { k: "corps_swabes_24h", t: "Corps swabés", num: true }, { k: "eds_echecs_24h", t: "Échecs", num: true }], { search: false, sort: null })) : "";
@@ -1872,11 +1868,11 @@
     <div class="grid g4">${cfg.kpis(tot).map(([l, v, n, c]) => kpi(l, v, n, { color: c })).join("")}</div>
     <div class="notice small"><b>${T("Définition")} :</b> ${esc(T(O.definitions[cfg.def]))}</div>
     <div class="grid g12">
-      ${panel(`${T(cfg.t)} — ${T("zones les plus concernées")}`, `${S.opProv === "Toutes" ? T("Toutes les provinces") : esc(S.opProv)} · ${S.opWin === "21" ? T("21 derniers jours") : T("cumul")}`, hbars(zs.map(z => ({ ...z, lab: `${z.zone_sante} (${z.province})` })), "lab", mainK, { limit: 15, color: cfg.c }))}
+      ${panel(`${T(cfg.t)}, ${T("zones les plus concernées")}`, `${S.opProv === "Toutes" ? T("Toutes les provinces") : esc(S.opProv)} · ${S.opWin === "21" ? T("21 derniers jours") : T("cumul")}`, hbars(zs.map(z => ({ ...z, lab: `${z.zone_sante} (${z.province})` })), "lab", mainK, { limit: 15, color: cfg.c }))}
       ${S.opProv === "Toutes" ? panel("Par province", "", table("op-prov", provRows, colDefs.filter(c => c.k !== "zone_sante"), { search: false, sort: cfg.main }), { csv: "op-prov" }) : srPanel || panel("Province", esc(S.opProv), table("op-prov1", provRows.filter(p => p.province === S.opProv), colDefs.filter(c => c.k !== "zone_sante"), { search: false, sort: null }))}
     </div>
     ${S.opProv === "Toutes" ? srPanel : ""}
-    ${panel(`Par zone de santé${S.opProv === "Toutes" ? "" : " — " + esc(S.opProv)}`, T("Tri par colonne ; export CSV"), table("op-zones", zs, colDefs, { sort: cfg.main, maxh: 520 }), { csv: "op-zones" })}`;
+    ${panel(`Par zone de santé${S.opProv === "Toutes" ? "" : ", " + esc(S.opProv)}`, T("Tri par colonne ; export CSV"), table("op-zones", zs, colDefs, { sort: cfg.main, maxh: 520 }), { csv: "op-zones" })}`;
   }
 
   /* ---------------- Personnel de santé (PPL) ---------------- */
@@ -1914,7 +1910,7 @@
       ${panel("PPL infectés par semaine", T("Confirmés et probables, semaine de début des signes (sinon de notification), par province"), `<div id="c-ppl-wk"></div>`, { png: "ppl_hebdo" })}
       ${panel("Zones de santé ayant le plus de PPL infectés", all ? T("Toutes les provinces") : esc(S.pplProv), hbars(zs.map(z => ({ ...z, lab: `${z.zone_sante}${all ? " (" + z.province + ")" : ""}` })), "lab", "infectes", { limit: 12, color: "--critical" }))}
     </div>
-    ${panel(all ? "Par province" : `Zones de santé — ${esc(S.pplProv)}`, T("Alertes, prélèvements, classification, décès ; tri par colonne"),
+    ${panel(all ? "Par province" : `Zones de santé, ${esc(S.pplProv)}`, T("Alertes, prélèvements, classification, décès ; tri par colonne"),
       table("ppl-niv", all ? P.provinces : zs, [all ? { k: "province", t: "Province" } : { k: "zone_sante", t: "Zone de santé" }, ...mcols], { sort: "confirmes", search: !all, maxh: 460 }), { csv: "ppl-niv" })}
     ${all ? panel("Par zone de santé", T("Toutes les zones ayant au moins une alerte chez un PPL"), table("ppl-zs", zs, [{ k: "zone_sante", t: "Zone de santé" }, { k: "province", t: "Province" }, ...mcols], { sort: "confirmes", maxh: 460 }), { csv: "ppl-zs" }) : ""}
     <div class="grid g2">
@@ -1941,11 +1937,11 @@
   /* ---------------- Situation épidémiologique par province ---------------- */
   function sitTexte(nom, N, Sx) {
     const a = N.alertes, c = N.contacts, p = N.ppl, hr = N.haut_risque || [];
-    const l = [`Situation épidémiologique — ${nom} — au ${dfmt(Sx.date)}`,
+    const l = [`Situation épidémiologique, ${nom}, au ${dfmt(Sx.date)}`,
       `• Alertes : ${nf(a.jour.recues)} reçues le ${dfmt(Sx.jour || Sx.date)}, ${nf(a.sept_jours.recues)} sur 7 jours (${nf(a.cumul.recues)} au total) ; ${pc(a.sept_jours.pct_investiguees)} investiguées sur 7 jours (${pc(a.sept_jours.pct_investiguees_24h)} dans les 24 h) ; ${nf(a.sept_jours.validees)} validées (${pc(a.sept_jours.pct_validees)}).`,
       `• Suivi des contacts : ${nf(c.actifs)} contacts en cours de suivi ; taux de suivi ${pc(c.pct_vus_24h)} (vus ≤ 24 h, Linelist)${c.sitrep_pct_suivi !== null && c.sitrep_pct_suivi !== undefined ? `, ${pc(c.sitrep_pct_suivi)} selon le SitRep` : ""}.`,
       `• Contacts devenus suspects : ${nf(c.devenus_suspects)} (${pc(c.pct_devenus_suspects)} des contacts listés) ; ${nf(c.devenus_suspects_21j)} ces 21 derniers jours (${pc(c.pct_devenus_suspects_21j)}) ; ${nf(c.devenus_cas)} contacts devenus cas confirmés.`,
-      `• PPL infectés : ${nf(p.infectes)} (${nf(p.confirmes)} confirmés, ${nf(p.probables)} probables)${N.ppl_sitrep !== null && N.ppl_sitrep !== undefined ? ` — SitRep : ${nf(N.ppl_sitrep)}` : ""} ; ${nf(p.confirmes_21j)} ces 21 derniers jours ; ${nf(p.deces)} décès.`,
+      `• PPL infectés : ${nf(p.infectes)} (${nf(p.confirmes)} confirmés, ${nf(p.probables)} probables)${N.ppl_sitrep !== null && N.ppl_sitrep !== undefined ? ` : SitRep : ${nf(N.ppl_sitrep)}` : ""} ; ${nf(p.confirmes_21j)} ces 21 derniers jours ; ${nf(p.deces)} décès.`,
       `• Zones de santé avec le plus de PPL infectés : ${(N.zones_ppl || []).slice(0, 5).map(z => `${z.zone_sante} (${z.infectes})`).join(", ") || "aucune"}.`,
       `• Lieux d’exposition des PPL infectés : ${(N.exposition_ppl || []).map(r => `${r.lieu} (${r.infectes})`).join(", ") || "—"}.`,
       `• Lieux d’exposition de plus haut risque : ${hr.map(r => `${r.categorie} (${pc(r.taux_cas_pct)} des contacts devenus cas, ${nf(r.devenus_cas)}/${nf(r.contacts)})`).join(" ; ") || "—"}.`];
@@ -1978,7 +1974,7 @@
       <label class="field">${T("Niveau")}<select data-state="sitNiv">${opts.map(([k, l]) => `<option value="${esc(k)}" ${S.sitNiv === k ? "selected" : ""}>${esc(T(l))}</option>`).join("")}</select></label>
       <div class="flex" style="gap:8px;align-items:flex-end">${dlBtn(nat ? F.situation_docx : N.fichier, nat ? "Fiches national + provinces (Word)" : "Fiche de la province (Word)", true)}${dlBtn(F.situation_xlsx, "Tableaux (Excel)")}${nat ? "" : dlBtn(F.situation_docx, "Toutes les fiches (Word)")}</div>
     </div>
-    <div class="notice small">${T("Situation au")} <b>${dfmt(Sx.date)}</b> — Linelist et suivi des contacts${sr.numero ? ` ; actions PCI et taux de suivi officiels : SitRep n° ${esc(String(sr.numero))} du ${dfmt(sr.date)}` : ""}. ${T("Mise à jour automatique à chaque analyse.")}</div>
+    <div class="notice small">${T("Situation au")} <b>${dfmt(Sx.date)}</b> : Linelist et suivi des contacts${sr.numero ? ` ; actions PCI et taux de suivi officiels : SitRep n° ${esc(String(sr.numero))} du ${dfmt(sr.date)}` : ""}. ${T("Mise à jour automatique à chaque analyse.")}</div>
     <h3 style="margin:18px 0 8px;font-size:14px;color:var(--ink-2)">${T("Alertes")}</h3>
     <div class="grid g4">
       ${kpi("Alertes reçues", nf(a.jour.recues), `${T("le")} ${dfmt(Sx.jour || Sx.date)} · ${nf(a.sept_jours.recues)} ${T("sur 7 j")} · ${nf(a.cumul.recues)} ${T("au total")}`, { color: "--s1" })}
@@ -2006,9 +2002,9 @@
       ${panel("Lieux d'exposition des PPL infectés", T("Fiche de contact, funérailles ou contact avec un cas connu"), hbars(N.exposition_ppl || [], "lieu", "infectes", { limit: 8, color: "--s1" }))}
     </div>
     ${panel("Lieux d'exposition et risque de devenir cas", T("Contacts listés par lieu d’exposition déclaré : part devenue suspecte ou cas (IC 95 % de Wilson)"),
-      (hr0 ? `<div class="notice crit"><b>${T("Lieu de plus haut risque")} : ${esc(T(hr0.categorie))}</b> — ${pc(hr0.taux_cas_pct)} ${T("des contacts qui y ont été exposés sont devenus des cas")} (${nf(hr0.devenus_cas)} / ${nf(hr0.contacts)}). ${T("Renforcer en priorité la PCI et le suivi des contacts autour de ce type d’exposition.")}</div>` : "")
+      (hr0 ? `<div class="notice crit"><b>${T("Lieu de plus haut risque")} : ${esc(T(hr0.categorie))}</b>, ${pc(hr0.taux_cas_pct)} ${T("des contacts qui y ont été exposés sont devenus des cas")} (${nf(hr0.devenus_cas)} / ${nf(hr0.contacts)}). ${T("Renforcer en priorité la PCI et le suivi des contacts autour de ce type d’exposition.")}</div>` : "")
       + `<div class="grid g2">${table("sit-exl", exL, [{ k: "categorie", t: "Lieu d’exposition" }, ...exCols.slice(1)], { sort: "taux_cas_pct", search: false })}${table("sit-ext", exT, [{ k: "categorie", t: "Type de contact" }, ...exCols.slice(1)], { sort: "taux_cas_pct", search: false })}</div>`, { csv: "sit-exl" })}
-    ${panel("Actions PCI réalisées", sr.numero ? `SitRep n° ${esc(String(sr.numero))} du ${dfmt(sr.date)} — pilier PCI/EDS` : T("Déposez le SitRep PDF du jour dans les données"),
+    ${panel("Actions PCI réalisées", sr.numero ? `SitRep n° ${esc(String(sr.numero))} du ${dfmt(sr.date)}, pilier PCI/EDS` : T("Déposez le SitRep PDF du jour dans les données"),
       `<div class="sit-pci">${pci}</div>` + (eds.eds_realise !== null && eds.eds_realise !== undefined ? `<div class="notice small"><b>EDS</b> : ${nf(eds.eds_realise)} ${T("réalisés")}, ${nf(eds.eds_non_realise)} ${T("non réalisés")} (${T("cumul Linelist/lln")})${eds.eds_attendus_24h !== null && eds.eds_attendus_24h !== undefined ? ` ; ${T("dernières 24 h (SitRep)")} : ${nf(eds.eds_realises_24h)} / ${nf(eds.eds_attendus_24h)} ${T("EDS réalisés")}, ${nf(eds.corps_swabes_24h)} ${T("corps swabés")}` : ""}.</div>` : ""))}
     ${panel("Texte prêt à envoyer", T("Résumé de la fiche à copier dans un message ou un rapport"), `<pre class="sit-txt" id="sit-txt" style="white-space:pre-wrap;font:inherit;font-size:13px;margin:0">${esc(sitTexte(nom, N, Sx))}</pre>`,
       { tools: `<button class="btn sm" type="button" data-sit-copy>${T("Copier le texte")}</button>` })}
@@ -2036,7 +2032,7 @@
     <div class="grid g5">${ZORD.map(c => `<div class="kpi clickable" data-zrcat="${c}"><div class="label"><i class="dot" style="background:${ZCOL[c]}"></i>${T(c === "Rouge" ? "Hotspot / Rouge" : c === "Orange" ? "Orange (< 21 j)" : c === "Jaune" ? "Jaune (21–42 j)" : c === "Verte" ? "Verte (> 42 j)" : "Non touchée")}</div><div class="value">${nf(cnt(c))}</div><div class="note">${T("zones de santé")}</div></div>`).join("")}</div>
     ${miss.length ? `<div class="notice"><b>${T("Données manquantes pour ce calibrage")} :</b> ${miss.map(c => esc(T(c.critere))).join(" · ")}. ${T("Ces critères sont affichés « ? » et seront intégrés au prochain calibrage dès que les données seront fournies.")}</div>` : ""}
     <div class="grid g21">
-      ${panel(S.zrColor === "score" ? "Carte du score de risque" : "Carte des catégories de zones", `${T("Situation au")} ${dfmt(Z.date)} — ${T("survolez une zone pour le détail, cliquez pour l’analyser ; étiquettes : zone et score de risque (0–100)")}`, `
+      ${panel(S.zrColor === "score" ? "Carte du score de risque" : "Carte des catégories de zones", `${T("Situation au")} ${dfmt(Z.date)}, ${T("survolez une zone pour le détail, cliquez pour l’analyser ; étiquettes : zone et score de risque (0–100)")}`, `
         <div class="flex" style="margin-bottom:8px"><div class="seg" data-seg="zrColor"><button data-v="categorie" class="${S.zrColor !== "score" ? "on" : ""}">${T("Couleur : catégorie")}</button><button data-v="score" class="${S.zrColor === "score" ? "on" : ""}">${T("Couleur : score")}</button></div>
         <div class="seg" data-seg="zrLab">${[["score", "Étiquettes : score"], ["nom", "Noms seuls"], ["aucune", "Sans étiquette"]].map(([v, t]) => `<button data-v="${v}" class="${S.zrLab === v ? "on" : ""}">${T(t)}</button>`).join("")}</div></div>
         <div id="c-zr-map"></div>`, { tools: mapReportBtn(S.zrColor === "score" ? "03b_score_risque.png" : "03_categories_zones_risque.png") })}
@@ -2053,7 +2049,7 @@
         <tr><td><b>${T("Score")}</b></td><td class="wrap">${T("Score de risque 0–100 : cas 21 j (20), tendance (12), P(Rt > 1) (12), décès communautaires (8), décès groupés (5), proximité d’une zone à incidence élevée (10), frontière (5), mines (5), contacts non vus > 3 j (8), résurgence (10), EDS non réalisés (5). Priorité 1 ≥ 70 ; priorité 2 : 50–69 ; priorité 3 : 30–49 ; veille < 30.")}</td></tr></tbody></table></div>
         <p class="small muted">${T("Références")} : ${esc(Z.references?.mines?.fichier || "—")} (${nf(Z.references?.mines?.sites)} ${T("sites")}) · ${esc(Z.references?.frontalieres?.fichier || "—")} (${nf(Z.references?.frontalieres?.zones)} ${T("zones")})</p>`)}
     </div>
-    ${panel(`${T("Zones classées")} — ${T(S.zrCat)}`, T("✔ critère rempli · — non rempli · ? donnée manquante"), table("zr", shown, [
+    ${panel(`${T("Zones classées")}, ${T(S.zrCat)}`, T("✔ critère rempli ·, non rempli · ? donnée manquante"), table("zr", shown, [
       { k: "zone_sante", t: "Zone de santé" }, { k: "province", t: "Province" },
       { k: "categorie", t: "Catégorie", v: x => `<span class="badge"><i style="background:${ZCOL[x.categorie]}"></i>${esc(T(x.categorie))}</span>`, sortv: x => ZORD.indexOf(x.categorie) },
       { k: "score_risque", t: "Score", num: true, d: 0 }, { k: "rang_province", t: "Rang (province)", num: true },
@@ -2077,7 +2073,7 @@
     if (!zs.length) return panel("Zone sélectionnée", "", `<div class="empty">${T("Aucune zone")}</div>`);
     const z = zs.find(x => x.zone_sante === S.zrSel) || [...zs].sort((a, b) => (b.score_risque || 0) - (a.score_risque || 0))[0];
     const parts = SCORE_PARTS.map(([k, t]) => ({ t, v: z[k] || 0 })).filter(x => x.v > 0);
-    return panel(`${esc(z.zone_sante)} — ${T("score")} ${nf(z.score_risque, 0)}/100`, `${esc(T(z.province || ""))} · ${T("rang")} ${nf(z.rang_province)} ${T("dans la province")} · <span class="badge"><i style="background:${ZCOL[z.categorie]}"></i>${esc(T(z.categorie))}</span>`, `
+    return panel(`${esc(z.zone_sante)}, ${T("score")} ${nf(z.score_risque, 0)}/100`, `${esc(T(z.province || ""))} · ${T("rang")} ${nf(z.rang_province)} ${T("dans la province")} · <span class="badge"><i style="background:${ZCOL[z.categorie]}"></i>${esc(T(z.categorie))}</span>`, `
       <div class="prio-chip" style="background:${PRIO_COL(z.score_risque || 0)};color:${(z.score_risque || 0) >= 50 ? "#fff" : "#3a2a20"}">${esc(T(z.niveau_priorite || ""))}</div>
       <div class="small" style="margin:8px 0"><b>${T("Orientation opérationnelle")} :</b> ${esc(T(z.orientation || ""))}</div>
       <h3 class="small" style="margin:10px 0 6px">${T("Contribution de chaque facteur au score")}</h3>
@@ -2124,13 +2120,13 @@
     const PR = [[70, 101, "Priorité 1 (≥ 70)", 80], [50, 70, "Priorité 2 (50–69)", 60], [30, 50, "Priorité 3 (30–49)", 40], [-1, 30, "Veille (< 30)", 10]];
     const legend = score
       ? PR.map(([a, b, t, v]) => ({ color: PRIO_COL(v), label: T(t), count: zs.filter(z => z.categorie !== "Non touchée" && (z.score_risque || 0) >= a && (z.score_risque || 0) < b).length }))
-      : ZORD.map(c => ({ color: ZCOL[c], label: T(c === "Rouge" ? "Rouge — hotspot" : c === "Orange" ? "Orange — cas < 21 j" : c === "Jaune" ? "Jaune — 22–42 j sans cas" : c === "Verte" ? "Verte — > 42 j sans cas" : "Non touchée"), count: zs.filter(z => z.categorie === c).length }));
+      : ZORD.map(c => ({ color: ZCOL[c], label: T(c === "Rouge" ? "Rouge, hotspot" : c === "Orange" ? "Orange, cas < 21 j" : c === "Jaune" ? "Jaune, 22–42 j sans cas" : c === "Verte" ? "Verte, > 42 j sans cas" : "Non touchée"), count: zs.filter(z => z.categorie === c).length }));
     const top = [...zs].filter(z => z.categorie !== "Non touchée").sort((a, b) => (b.score_risque || 0) - (a.score_risque || 0)).slice(0, 6);
     const per = PER ? `${T("Période du")} ${dfmt(PER.debut)} ${T("au")} ${dfmt(PER.fin)}` : `${T("Situation au")} ${dfmt(Z.date || D.meta.cutoff)}`;
     const prov = S.province === "Toutes" ? T("Toutes provinces") : `${T("Province")} : ${S.province}`;
     const opt = zrMapOpts();
     Ch.reportChoropleth(opt, {
-      title: score ? T("Score de risque de résurgence par zone de santé — zones prioritaires (score ≥ 30)") : T("Catégories de risque des zones de santé"),
+      title: score ? T("Score de risque de résurgence par zone de santé, zones prioritaires (score ≥ 30)") : T("Catégories de risque des zones de santé"),
       subtitle: `${per} · ${prov} · ${score ? T("étiquettes : zones de priorité 1 à 3 (score ≥ 30)") : T("étiquettes : zone · score de risque (0–100)")}`,
       legendTitle: score ? T("Niveau de priorité (score 0–100)") : T("Catégorie de la zone"), legend, countLabel: T("zones"),
       sideNotes: [score ? T("Score = cas 21 j (20) + tendance (12) + P(Rt>1) (12) + décès communautaires (8) + décès groupés (5) + proximité d’une incidence élevée (10) + frontière (5) + mines (5) + contacts non vus > 3 j (8) + résurgence (10) + EDS non réalisés (5).")
@@ -2402,7 +2398,7 @@
     const base = set.base || `../reports/${encodeURIComponent(set.dossier)}/`;
     return `${intro}<div class="maps-grid">${set.cartes.map((c, i) => `
       <section class="panel map-card"><div class="panel-head"><div><div class="eyebrow">${T("Carte")} ${i + 1}</div><h2>${esc(T(c.titre))}</h2></div>
-        <div class="panel-tools"><a class="btn sm" href="${base}${encodeURIComponent(c.fichier)}" download="${esc(c.fichier)}">⤓ PNG</a><a class="btn sm" href="${base}${encodeURIComponent(c.fichier)}" target="_blank" rel="noopener">${T("Ouvrir")}</a><button class="btn sm" type="button" data-copy-cap="${i}">${T("Copier le commentaire")}</button></div></div>
+        <div class="panel-tools"><button class="btn sm" type="button" data-map-png="${i}" data-map-file="${esc(c.fichier)}" title="${T("Carte et commentaire dans une seule image")}">⤓ PNG</button><a class="btn sm" href="${base}${encodeURIComponent(c.fichier)}" target="_blank" rel="noopener">${T("Ouvrir")}</a><button class="btn sm" type="button" data-copy-cap="${i}">${T("Copier le commentaire")}</button></div></div>
         <a href="${base}${encodeURIComponent(c.fichier)}" target="_blank" rel="noopener"><img class="map-img" src="${base}${encodeURIComponent(c.fichier)}" alt="${esc(c.titre)}" loading="lazy"></a>
         <p class="map-cap" id="map-cap-${i}">${capHtml(c.commentaire)}</p></section>`).join("")}</div>`;
   }
@@ -2417,6 +2413,8 @@
   }
   document.addEventListener("click", e => {
     if (e.target.closest("[data-maps-run]")) { mapsRun(); return; }
+    const mp = e.target.closest("[data-map-png]");
+    if (mp) { const card = mp.closest(".map-card"); const img = card && card.querySelector("img.map-img"); if (img) { img.loading = "eager"; Ch.mapCaptionPNG(img, $("#map-cap-" + mp.dataset.mapPng), mp.dataset.mapFile).catch(() => {}); } return; }
     const cp = e.target.closest("[data-copy-cap]");
     if (cp) { const el = $("#map-cap-" + cp.dataset.copyCap); if (el && navigator.clipboard) navigator.clipboard.writeText(el.innerText).then(() => { cp.textContent = "✓ " + T("Copié"); }); }
   });
@@ -2515,8 +2513,8 @@
       const cur = PER ? `${PER.debut}_${PER.fin}` : "";
       el.innerHTML = `<div class="pb-main"><span class="pb-title"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M7 2h2v2h6V2h2v2h3a1 1 0 0 1 1 1v15a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h3zm12 8H5v9h14zM5 8h14V6H5z"/></svg>${T("Période d’analyse")}</span>
         <div class="seg pb-presets">${STATIC_P.map(x => `<button type="button" data-ps="${x.cle}" class="${cur === x.cle ? "on" : ""}">${x.jours} ${T("j")}</button>`).join("")}<button type="button" data-ps="" class="${PER ? "" : "on"}">${T("Tout")}</button></div>
-        <span class="pb-state small">${T("Derniers jours jusqu’au")} ${dfmt(DMAX)} — ${T(pubParcours ? "version publique pseudonymisée" : "version publique agrégée")}</span></div>
-        ${PER ? `<div class="pb-active"><b>${T("Résultats du")} ${dfmt(PER.debut)} ${T("au")} ${dfmt(PER.fin)}</b> — ${T("cas notifiés et contacts suivis pendant la période ; statuts de suivi et zones à risque à la date de fin ; Rt et prévisions estimés sur tout l’historique jusqu’à la date de fin, affichés sur la période.")}</div>` : ""}`;
+        <span class="pb-state small">${T("Derniers jours jusqu’au")} ${dfmt(DMAX)}, ${T(pubParcours ? "version publique pseudonymisée" : "version publique agrégée")}</span></div>
+        ${PER ? `<div class="pb-active"><b>${T("Résultats du")} ${dfmt(PER.debut)} ${T("au")} ${dfmt(PER.fin)}</b>, ${T("cas notifiés et contacts suivis pendant la période ; statuts de suivi et zones à risque à la date de fin ; Rt et prévisions estimés sur tout l’historique jusqu’à la date de fin, affichés sur la période.")}</div>` : ""}`;
       return;
     }
     const d0 = PER ? PER.debut : DMIN, d1 = PER ? PER.fin : DMAX;
@@ -2529,7 +2527,7 @@
         <div class="seg pb-presets">${PRESETS.map(([k, t]) => `<button type="button" data-pp="${k}" class="${presetOn(k) ? "on" : ""}" ${SERVED_P ? "" : "disabled"}>${T(t)}</button>`).join("")}</div>
         <span class="pb-state small" id="pb-state">${SERVED_P ? T("Choisissez les dates : tous les menus se recalculent automatiquement.") : T("Pour recalculer par période, ouvrez l’outil avec 00_INTERFACE.")}</span>
       </div>
-      ${PER ? `<div class="pb-active"><b>${T("Résultats du")} ${dfmt(PER.debut)} ${T("au")} ${dfmt(PER.fin)}</b> — ${T("cas notifiés et contacts suivis pendant la période ; statuts de suivi et zones à risque à la date de fin ; Rt et prévisions estimés sur tout l’historique jusqu’à la date de fin, affichés sur la période.")} <button class="btn sm" type="button" data-pp="all">✕ ${T("Revenir à toute la période")}</button></div>` : ""}`;
+      ${PER ? `<div class="pb-active"><b>${T("Résultats du")} ${dfmt(PER.debut)} ${T("au")} ${dfmt(PER.fin)}</b>, ${T("cas notifiés et contacts suivis pendant la période ; statuts de suivi et zones à risque à la date de fin ; Rt et prévisions estimés sur tout l’historique jusqu’à la date de fin, affichés sur la période.")} <button class="btn sm" type="button" data-pp="all">✕ ${T("Revenir à toute la période")}</button></div>` : ""}`;
   }
   function gotoPeriod(d0, d1) {
     const base = location.pathname + (d0 ? `?p=${d0}_${d1}` : "") + location.hash;

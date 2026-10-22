@@ -1,4 +1,4 @@
-/* Ebola Outbreak Analytics Hub — version en ligne protégée par connexion
+/* Ebola Outbreak Analytics Hub, version en ligne protégée par connexion
    Les données publiées sont chiffrées (AES-256-GCM). Après connexion (mêmes identifiant et mot de passe que l'outil installé),
    la clé du site est déchiffrée dans le navigateur avec le mot de passe et gardée pour cet onglet uniquement (sessionStorage).
    page « connexion » : formulaire ; page « hub » : déchiffrement des données puis chargement de l'application. */
@@ -97,7 +97,7 @@
       const m = /[?&]p=(\d{4}-\d{2}-\d{2}_\d{4}-\d{2}-\d{2})/.exec(location.search), st = window.HUB_STATIC;
       const per = m && st && (st.periodes || []).some(x => x.cle === m[1]) ? "periodes/" + m[1] + ".js" : null;
       window.DASHBOARD_DATA = parseData(await fetchPlain(per || "dashboard-data.js"));
-      loadScripts(["i18n.js", "charts.js", "xlsx.js", "outil.js", "app.js"]);
+      loadScripts(["i18n.js", "i18n_en.js", "charts.js", "xlsx.js", "outil.js", "app.js"]);
     } catch (e) {
       if (e && e.cle) { toLogin("La version en ligne a été mise à jour : reconnectez-vous."); return; }
       const c = document.getElementById("content"); if (c) c.innerHTML = `<div class="empty">${(e && e.message) || "Chargement impossible."}</div>`;

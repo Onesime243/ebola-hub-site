@@ -8,12 +8,12 @@ window.HUB_EN = {
   "Conditions d’utilisation": "Terms of use", "Données opérationnelles": "Operational data", "Province": "Province", "Toutes": "All",
   "Situation au": "Situation as of", "données extraites le": "data extracted on", "Généré le": "Generated on",
   "Pseudonymisé : identifiants et initiales uniquement": "Pseudonymised: IDs and initials only",
-  "Version publique agrégée — aucun parcours individuel publié": "Aggregated public version — no individual journey published",
+  "Version publique agrégée, aucun parcours individuel publié": "Aggregated public version, no individual journey published",
   /* Statuts / classes */
   "Devenu confirmé": "Became confirmed", "Devenu suspect": "Became suspected", "Non vu >3 j": "Not seen >3 d", "Vu 1–3 j": "Seen 1–3 d",
   "Vu ≤24 h": "Seen ≤24 h", "Suivi terminé (21 j)": "Follow-up completed (21 d)", "Suivi clôturé incomplet": "Window closed, incomplete", "Doublon": "Duplicate",
   "Confirmé": "Confirmed", "Probable": "Probable", "Suspect": "Suspected", "Non cas": "Non-case", "En attente / non classé": "Pending / unclassified", "Hors Linelist": "Not in line list",
-  "Critique": "Critical", "Élevée": "High", "Modérée": "Moderate", "Faible": "Low", "Moyenne": "Medium", "Faible — nom discordant": "Low — name mismatch", "Non retrouvé": "Not found",
+  "Critique": "Critical", "Élevée": "High", "Modérée": "Moderate", "Faible": "Low", "Moyenne": "Medium", "Faible, nom discordant": "Low, name mismatch", "Non retrouvé": "Not found",
   "Certain": "Certain", "À vérifier": "To verify", "Non lié": "Not linked", "Aucun candidat": "No candidate",
   "ID exact": "Exact ID", "ID canonique": "Canonical ID", "ID canonique (zone + numéro)": "Canonical ID (zone + number)", "Numéro séquentiel unique": "Unique sequence number", "Nom exact": "Exact name", "Nom approché": "Approximate name",
   "Féminin": "Female", "Masculin": "Male", "Non renseigné": "Not reported", "Inconnu": "Unknown",
@@ -29,10 +29,10 @@ window.HUB_EN = {
   "Contacts non vus >3 j": "Contacts not seen >3 d (lost to follow-up)", "À rechercher en priorité": "Trace as a priority",
   "Courbe épidémique hebdomadaire": "Weekly epidemic curve", "Cas confirmés par semaine (lundi) et décès confirmés": "Confirmed cases per week (Monday) and confirmed deaths",
   "Notification": "Notification", "Début des symptômes": "Symptom onset", "Points d’attention": "Points of attention", "Générés automatiquement à partir des données du jour": "Generated automatically from today's data",
-  "Zones de santé — 14 derniers jours": "Health zones — last 14 days", "Cliquer une ligne pour ouvrir la zone": "Click a row to open the zone", "Zone de santé": "Health zone", "Confirmés 14 j": "Confirmed 14 d",
+  "Zones de santé, 14 derniers jours": "Health zones, last 14 days", "Cliquer une ligne pour ouvrir la zone": "Click a row to open the zone", "Zone de santé": "Health zone", "Confirmés 14 j": "Confirmed 14 d",
   "Décès 14 j": "Deaths 14 d", "% connus contacts": "% known contacts", "Contacts actifs": "Active contacts", "Non vus >3 j": "Not seen >3 d", "Risque": "Risk",
   "Pyramide des âges": "Age pyramid", "Cas confirmés par sexe et groupe d’âge": "Confirmed cases by sex and age group", "Hommes": "Males", "Femmes": "Females",
-  "Délais opérationnels": "Operational delays", "Médiane hebdomadaire en jours — cas confirmés": "Weekly median in days — confirmed cases",
+  "Délais opérationnels": "Operational delays", "Médiane hebdomadaire en jours, cas confirmés": "Weekly median in days, confirmed cases",
   "DDS → notification": "Onset → notification", "DDS → prélèvement": "Onset → sampling", "Prélèvement → résultat": "Sampling → result", "DDS → admission": "Onset → admission",
   "Source officielle des chiffres clés": "Official source of headline figures", "Image SitRep non disponible": "SitRep image not available",
   "Chiffres issus du fichier de validation manuelle : vérifier avant diffusion.": "Figures from the manual validation file: verify before dissemination.", "Cohérence arithmétique OCR validée.": "OCR arithmetic consistency validated.",
@@ -64,7 +64,7 @@ window.HUB_EN = {
   "42 derniers jours": "Last 42 days", "Proportion de contacts vus par jour": "Proportion of contacts seen per day", "Contacts vus / contacts à suivre": "Contacts seen / contacts to follow",
   "Charge de suivi par territoire": "Follow-up workload by territory", "Tri par colonne": "Sort by column", "Zones": "Zones", "Aires": "Areas", "Sorties ≤3 j": "Exits ≤3 d",
   "Devenus suspects": "Became suspected", "Complétude %": "Completeness %", "Contacts à rechercher (non vus >3 j)": "Contacts to trace (not seen >3 d)",
-  "Liste pseudonymisée — la liste nominative est dans outputs/confidentiel": "Pseudonymised list — the named list is in outputs/confidentiel", "ID contact": "Contact ID", "Init.": "Init.", "Zone": "Zone", "Aire": "Area",
+  "Liste pseudonymisée, la liste nominative est dans outputs/confidentiel": "Pseudonymised list, the named list is in outputs/confidentiel", "ID contact": "Contact ID", "Init.": "Init.", "Zone": "Zone", "Aire": "Area",
   "Dernier vu": "Last seen", "jamais": "never", "Jours sans visite": "Days without visit", "Motif": "Reason", "Fin de suivi dans les 3 prochains jours": "Follow-up ending in the next 3 days",
   "Vérifier la dernière visite puis clôturer": "Check the last visit then close", "Fin prévue": "Planned end", "Jours vus": "Days seen", "Statut": "Status", "Contacts à suivre": "Contacts to follow", "% de contacts vus": "% contacts seen",
   /* Cas index */
@@ -83,7 +83,7 @@ window.HUB_EN = {
   "Aucune source identifiée pour ce cas.": "No source identified for this case.", "Graphe de contact tracing": "Contact tracing graph",
   "Cas index au centre ; contacts colorés selon leur statut ; un contact devenu cas ouvre ses propres contacts (niveau suivant)": "Index case at the centre; contacts coloured by status; a contact who became a case opens their own contacts (next level)",
   "Cas (carré)": "Case (square)", "Cas source (amont)": "Source case (upstream)", "Profondeur": "Depth", "Niveau": "Level", "Radial": "Radial", "Arbre": "Tree", "Nœud sélectionné": "Selected node", "Cliquer un nœud du graphe": "Click a graph node",
-  "Statut des contacts directs": "Status of direct contacts", "Contacts du cas index": "Contacts of the index case", "Suivi individuel sur 21 jours — pseudonymisé": "Individual 21-day follow-up — pseudonymised",
+  "Statut des contacts directs": "Status of direct contacts", "Contacts du cas index": "Contacts of the index case", "Suivi individuel sur 21 jours, pseudonymisé": "Individual 21-day follow-up, pseudonymised",
   "Âge": "Age", "Sexe": "Sex", "Relation": "Relationship", "Exposition": "Exposure", "Haut risque": "High risk", "Soins": "Care setting", "Dernière exposition": "Last exposure", "Fin de suivi": "End of follow-up",
   "Jours vus / attendus": "Days seen / expected", "Rapprochement Linelist": "Line list match", "Résultat laboratoire": "Laboratory result", "Admission (CTE)": "Admission (ETC)", "Sortie / issue": "Discharge / outcome",
   "Rapportage": "Reporting", "Investigation": "Investigation", "Prélèvement": "Sampling", "Début du suivi des contacts": "Contact follow-up start", "Fin prévue du suivi des contacts": "Planned end of contact follow-up",
@@ -147,7 +147,7 @@ window.HUB_EN = {
   "Chiffres SitRep non mis à jour": "SitRep figures not updated", "l’image SitRep a changé : lancez 05_METTRE_A_JOUR_SITREP.": "the SitRep image changed: run 05_METTRE_A_JOUR_SITREP.",
   "Cas confirmés (cumul)": "Confirmed cases (cumulative)", "Patients en isolement / hospitalisation": "Patients in isolation / hospitalised", "Guéris (cumul)": "Recovered (cumulative)",
   "Décès parmi les confirmés (cumul)": "Deaths among confirmed (cumulative)", "Taux de létalité (%)": "Case fatality rate (%)", "Taux de suivi des contacts (%)": "Contact follow-up rate (%)",
-  "Codes DHIS2 convertis en libellés": "DHIS2 codes converted to labels", "Observé (jours incomplets, exclus du modèle)": "Observed (incomplete days, excluded from model)", "Cas confirmés par semaine (lundi) et décès confirmés — semaine en cours exclue car incomplète": "Confirmed cases per week (Monday) and confirmed deaths — current incomplete week excluded",
+  "Codes DHIS2 convertis en libellés": "DHIS2 codes converted to labels", "Observé (jours incomplets, exclus du modèle)": "Observed (incomplete days, excluded from model)", "Cas confirmés par semaine (lundi) et décès confirmés, semaine en cours exclue car incomplète": "Confirmed cases per week (Monday) and confirmed deaths, current incomplete week excluded",
   "Nowcasting gamma–Poisson : délai empirique DDS → notification et niveau récent comme a priori": "Gamma–Poisson nowcasting: empirical onset → notification delay and recent level as prior",
   "Les derniers jours restent très incertains ; l’a priori suppose que le niveau récent se maintient.": "The latest days remain highly uncertain; the prior assumes the recent level persists.", "Période": "Period", "Tout": "All", "3 j": "3 d", "7 j": "7 d", "14 j": "14 d", "21 j": "21 d", "derniers jours": "last days", "Toute la période": "Whole period",
   "Cas index actifs sur la période": "Index cases active in the period", "actifs": "active", "sur la période": "in the period",
@@ -162,7 +162,7 @@ window.HUB_EN = {
   "Listes pseudonymisées (identifiant et initiales). Les mêmes listes avec les noms sont générées à chaque actualisation dans outputs/confidentiel/LISTES_AAAAMMJJ/.": "Pseudonymised lists (ID and initials). The same lists with names are generated at each refresh in outputs/confidentiel/LISTES_YYYYMMDD/.",
   "Type de contact": "Contact type", "ID cas index": "Index case ID", "Fin de suivi prévue": "Planned end of follow-up", "Date devenu suspect": "Date became suspected",
   "Dernier motif non vu": "Last reason not seen", "Statut de suivi": "Follow-up status", "Action / observation terrain": "Field action / observation", "Synthèse": "Summary",
-  "Contacts non vus depuis plus de 3 jours (perdus de vue)": "Contacts not seen for more than 3 days (lost to follow-up)", "Contacts — suivi clôturé incomplet": "Contacts — window closed, incomplete follow-up",
+  "Contacts non vus depuis plus de 3 jours (perdus de vue)": "Contacts not seen for more than 3 days (lost to follow-up)", "Contacts, suivi clôturé incomplet": "Contacts, window closed, incomplete follow-up",
   "situation au": "situation as of", "Province non renseignée": "Province not reported", "Total": "Total", "Aucune donnée": "No data", "Zones touchées": "Affected zones", "Vue complète": "Full view",
   /* Délais et groupes d'âge */
   "0–4": "0–4", "5–14": "5–14", "15–24": "15–24", "25–34": "25–34", "35–44": "35–44", "45–54": "45–54", "55–64": "55–64", "65+": "65+"
@@ -186,7 +186,7 @@ window.HUB_METHOD = {
 <span class="formula">Complétude du suivi = jours vus distincts / min(21, date de référence − date d’exposition)</span>
 <p>Statut (ordre de priorité) : devenu confirmé → devenu suspect → doublon → fenêtre close : « suivi terminé » si le contact est vu dans les 3 derniers jours de la fenêtre ou si le dernier jour est déclaré, sinon « clôturé incomplet » → fenêtre ouverte : vu ≤24 h, vu 1–3 j, non vu &gt;3 jours (perdu de vue).</p>
 <h3>4. Alignement cas index ↔ contacts</h3>
-<p>Chaque combinaison (ID du cas source saisi, nom du cas source saisi) est résolue vers un cas de la Linelist selon une hiérarchie : ① ID exact normalisé ; ② ID canonique zone + numéro séquentiel (corrige espaces, tirets, zéros, suffixe manquant) ; ③ numéro séquentiel unique ; ④ nom exact (ordre des mots indifférent) ; ⑤ nom approché (similarité ≥ 0,86) dans la même province. Tout lien par ID est contrôlé par la similarité du nom : un ID pointant vers un autre nom est corrigé si le nom correspond exactement à un autre cas, sinon il est conservé avec la confiance « faible — nom discordant ». Les cas index introuvables restent visibles comme « hors Linelist » et leurs contacts ne sont jamais perdus.</p>
+<p>Chaque combinaison (ID du cas source saisi, nom du cas source saisi) est résolue vers un cas de la Linelist selon une hiérarchie : ① ID exact normalisé ; ② ID canonique zone + numéro séquentiel (corrige espaces, tirets, zéros, suffixe manquant) ; ③ numéro séquentiel unique ; ④ nom exact (ordre des mots indifférent) ; ⑤ nom approché (similarité ≥ 0,86) dans la même province. Tout lien par ID est contrôlé par la similarité du nom : un ID pointant vers un autre nom est corrigé si le nom correspond exactement à un autre cas, sinon il est conservé avec la confiance « faible, nom discordant ». Les cas index introuvables restent visibles comme « hors Linelist » et leurs contacts ne sont jamais perdus.</p>
 <span class="formula">Score lien = 100 × (0,45·ID + 0,40·similarité du nom + 0,10·concordance géographique + 0,05·classification)</span>
 <h3>5. Contact devenu cas</h3>
 <p><b>Appariement avancé en 4 passes</b> (génération de candidats), puis un score unique. ① TF-IDF de n-grammes de caractères : 12 personnes les plus proches de la Linelist (40 pour les contacts déclarés « Confirmé » ou « Suspect » au suivi) ; ② identifiant du contact identique à un identifiant d’alerte de la Linelist ; ③ <b>blocage phonétique</b> : ≥ 2 mots du nom phonétiquement identiques dans la même province (clé adaptée aux noms congolais : PH→F, C/Q→K, Z→S, Y→I, W→U, H muet, lettres doublées réduites, squelette consonantique) ; ④ <b>recherche inverse</b> : chaque cas confirmé ou probable de la Linelist est cherché parmi tous les contacts (10 plus proches). Le propre cas index du contact est exclu.</p>
@@ -209,7 +209,7 @@ window.HUB_METHOD = {
 <li><b>R constant</b> (earlyR) : vraisemblance de Poisson sur 14 j, 28 j ou toute la période ; IC par profil de vraisemblance.<span class="formula">λ<sub>t</sub> = Σ<sub>s≥1</sub> I<sub>t−s</sub> w<sub>s</sub> ;  I<sub>t</sub> ~ Poisson(R · λ<sub>t</sub>)</span></li>
 <li><b>Rt</b> (EpiEstim, Cori 2013) : fenêtres glissantes de 7 jours, a priori Gamma(1, 5) ; posterior Gamma(1 + ΣI, 1/(1/5 + Σλ)) ; incertitude sur l’intervalle sériel intégrée par mélange de tirages bootstrap ; Rt affiché à partir de 12 cas cumulés. Analyse de sensibilité nationale avec le SI de l’OMS 2014.</li>
 <li><b>Projections</b> (projections::project) : processus de branchement de Poisson, 1 000 simulations, R tiré du posterior de la dernière fenêtre <i>consolidée</i>, supposé constant ; départ au premier jour non consolidé, ce qui permet de confronter la projection aux jours déjà partiellement observés. Résumé type R : min, quartiles, médiane, moyenne, max, P(≥ 1 cas).</li>
-<li><b>Reconstruction</b> (inspirée d’outbreaker2, sans génomique) : modèle A (temporel) — candidats = cas de la même aire débutés 1 à 60 j avant, poids w(Δ) ; modèle B (temporel + contacts) — liens documentés poids w(Δ), autres candidats w(Δ)·ε (ε = 0,05) ; une source non observée de poids 1/61 (×ε) ; support = poids normalisé. Arbre consensus = infecteur de support maximal, cycles supprimés (« decycle »). R<sub>i</sub> = cas secondaires de support ≥ 0,5 ; dispersion k par binomiale négative (maximum de vraisemblance, IC par profil).</li>
+<li><b>Reconstruction</b> (inspirée d’outbreaker2, sans génomique) : modèle A (temporel), candidats = cas de la même aire débutés 1 à 60 j avant, poids w(Δ) ; modèle B (temporel + contacts), liens documentés poids w(Δ), autres candidats w(Δ)·ε (ε = 0,05) ; une source non observée de poids 1/61 (×ε) ; support = poids normalisé. Arbre consensus = infecteur de support maximal, cycles supprimés (« decycle »). R<sub>i</sub> = cas secondaires de support ≥ 0,5 ; dispersion k par binomiale négative (maximum de vraisemblance, IC par profil).</li>
 <li><b>Hommes / femmes</b> : courbes épidémiques empilées par sexe ou classe d’âge (0–10, 11–20, 21–30, 31–40, 41+), létalité par sexe et âge (IC de Wilson, test du χ²), taux de conversion des contacts par sexe ; dans les graphes, pictogrammes homme / femme comme dans epicontacts.</li>
 </ul>
 <p class="small muted">Limites : la reconstruction n’utilise ni séquences ni données de contact exhaustives ; R<sub>i</sub> et k ne décrivent que les transmissions identifiées. Rt et projections supposent une détection constante et ne modélisent pas les importations.</p>
@@ -235,7 +235,7 @@ window.HUB_METHOD = {
 </ul>
 <h3
 id="quinquies.-v3.4-linelist-lln-fusion-zones-à-risque-rt-multi-méthodes">8
-quinquies. v3.4 — Linelist lln, fusion, zones à risque, Rt
+quinquies. v3.4 : Linelist lln, fusion, zones à risque, Rt
 multi-méthodes</h3>
 <p><strong>Fusion des deux formats de Linelist.</strong> Le format 1
 (export DHIS2 avec noms) et le format 2 (export
@@ -308,7 +308,7 @@ et part des contacts devenus cas dont les propres contacts ont été
 listés (continuité de la chaîne de suivi).</p>
 
 <p><strong>Mode période (v3.5).</strong> Pour une fenêtre [début, fin]
-choisie au calendrier : (1) données arrêtées à la fin — cas notifiés ≤
+choisie au calendrier : (1) données arrêtées à la fin, cas notifiés ≤
 fin, visites ≤ fin, statut de chaque contact recalculé à la dernière
 visite ≤ fin, liens contact → cas retenus seulement si le cas est
 notifié ≤ fin, chaînes et réconciliation recalculées ; (2) résultats
@@ -348,7 +348,7 @@ les suspects levés reprennent le statut de leur fenêtre de suivi.</p>
 <span class="formula">Follow-up completeness = distinct days seen / min(21, reference date − exposure date)</span>
 <p>Status (priority order): became confirmed → became suspected → duplicate → window closed: “completed” if seen during the last 3 days of the window or last day declared, otherwise “closed incomplete” → window open: seen ≤24 h, seen 1–3 d, not seen &gt;3 days (lost to follow-up).</p>
 <h3>4. Index case ↔ contact alignment</h3>
-<p>Each (entered source-case ID, entered source-case name) combination is resolved to a line-list case through a hierarchy: ① exact normalised ID; ② canonical ID zone + sequence number (fixes spaces, dashes, zeros, missing suffix); ③ unique sequence number; ④ exact name (word order ignored); ⑤ approximate name (similarity ≥ 0.86) in the same province. Every ID link is checked against name similarity: an ID pointing to another name is corrected when the name exactly matches another case, otherwise kept with “low — name mismatch” confidence. Index cases not found remain visible as “not in line list”; their contacts are never lost.</p>
+<p>Each (entered source-case ID, entered source-case name) combination is resolved to a line-list case through a hierarchy: ① exact normalised ID; ② canonical ID zone + sequence number (fixes spaces, dashes, zeros, missing suffix); ③ unique sequence number; ④ exact name (word order ignored); ⑤ approximate name (similarity ≥ 0.86) in the same province. Every ID link is checked against name similarity: an ID pointing to another name is corrected when the name exactly matches another case, otherwise kept with “low, name mismatch” confidence. Index cases not found remain visible as “not in line list”; their contacts are never lost.</p>
 <span class="formula">Link score = 100 × (0.45·ID + 0.40·name similarity + 0.10·geographic agreement + 0.05·classification)</span>
 <h3>5. Contact becoming a case</h3>
 <p><b>Advanced 4-pass matching</b> (candidate generation), then a single score. ① character n-gram TF-IDF: 12 closest line-list persons (40 for contacts reported “Confirmed” or “Suspected” by follow-up); ② contact ID identical to a line-list alert ID; ③ <b>phonetic blocking</b>: ≥ 2 phonetically identical name tokens in the same province (key adapted to Congolese names: PH→F, C/Q→K, Z→S, Y→I, W→U, silent H, doubled letters collapsed, consonant skeleton); ④ <b>reverse search</b>: every confirmed or probable line-list case is searched among all contacts (10 nearest). The contact’s own index case is excluded.</p>
@@ -371,7 +371,7 @@ les suspects levés reprennent le statut de leur fenêtre de suivi.</p>
 <li><b>Constant R</b> (earlyR): Poisson likelihood over 14 d, 28 d or the whole period; profile-likelihood CI.<span class="formula">λ<sub>t</sub> = Σ<sub>s≥1</sub> I<sub>t−s</sub> w<sub>s</sub>;  I<sub>t</sub> ~ Poisson(R · λ<sub>t</sub>)</span></li>
 <li><b>Rt</b> (EpiEstim, Cori 2013): 7-day sliding windows, Gamma(1, 5) prior; posterior Gamma(1 + ΣI, 1/(1/5 + Σλ)); serial-interval uncertainty integrated by mixing bootstrap draws; Rt shown once 12 cumulative cases are reached. National sensitivity analysis with the WHO 2014 SI.</li>
 <li><b>Projections</b> (projections::project): Poisson branching process, 1,000 simulations, R drawn from the posterior of the latest <i>consolidated</i> window and held constant; starts on the first non-consolidated day so the projection can be checked against partly observed days. R-style summary: min, quartiles, median, mean, max, P(≥ 1 case).</li>
-<li><b>Reconstruction</b> (outbreaker2-inspired, no genomics): model A (temporal) — candidates = cases in the same health area with onset 1–60 days earlier, weight w(Δ); model B (temporal + contacts) — documented links weight w(Δ), other candidates w(Δ)·ε (ε = 0.05); an unobserved source of weight 1/61 (×ε); support = normalised weight. Consensus tree = highest-support infector, cycles removed (“decycle”). R<sub>i</sub> = secondary cases with support ≥ 0.5; dispersion k from a negative binomial (maximum likelihood, profile CI).</li>
+<li><b>Reconstruction</b> (outbreaker2-inspired, no genomics): model A (temporal), candidates = cases in the same health area with onset 1–60 days earlier, weight w(Δ); model B (temporal + contacts), documented links weight w(Δ), other candidates w(Δ)·ε (ε = 0.05); an unobserved source of weight 1/61 (×ε); support = normalised weight. Consensus tree = highest-support infector, cycles removed (“decycle”). R<sub>i</sub> = secondary cases with support ≥ 0.5; dispersion k from a negative binomial (maximum likelihood, profile CI).</li>
 <li><b>Men / women</b>: epicurves stacked by sex or age group (0–10, 11–20, 21–30, 31–40, 41+), CFR by sex and age (Wilson CI, χ² test), contact conversion rate by sex; male / female pictograms in the graphs, as in epicontacts.</li>
 </ul>
 <p class="small muted">Limitations: the reconstruction uses neither sequences nor exhaustive contact data; R<sub>i</sub> and k only describe identified transmissions. Rt and projections assume constant ascertainment and do not model importations.</p>
@@ -396,7 +396,7 @@ les suspects levés reprennent le statut de leur fenêtre de suivi.</p>
 <li><b>Network generations</b> (Index cases, Case journey, Chains pages): G1 = index case and its contacts; G<i>n</i> = at least one contact who became a case (certain or probable link) has their own listed contacts, down to level <i>n</i>. The “n generations” filter keeps only networks of depth exactly <i>n</i> and graphs show exactly <i>n</i> levels.</li>
 </ul>
 <h3 id="quinquies.-v3.4-lln-linelist-merge-risk-zones-multi-method-rt">8
-quinquies. v3.4 — lln linelist, merge, risk zones, multi-method Rt</h3>
+quinquies. v3.4, lln linelist, merge, risk zones, multi-method Rt</h3>
 <p><strong>Merging the two linelist formats.</strong> Format 1 (DHIS2
 export with names) and format 2 (<em>lln_mve_notifications</em> export,
 “;” separator, 142 columns, DD/MM/YYYY dates, no names) are normalised
@@ -461,7 +461,7 @@ share of contacts-turned-cases whose own contacts were listed
 (continuity of the follow-up chain).</p>
 
 <p><strong>Period mode (v3.5).</strong> For a window [start, end] chosen
-in the calendar: (1) data cut at the end — cases notified ≤ end, visits
+in the calendar: (1) data cut at the end, cases notified ≤ end, visits
 ≤ end, each contact’s status recomputed at its last visit ≤ end, contact
 → case links kept only if the case was notified ≤ end, chains and
 reconciliation recomputed; (2) descriptive results on cases notified in
@@ -487,7 +487,7 @@ window.HUB_TERMS = {
   fr: `<h3>1. Acceptation</h3><p>En accédant à Ebola Outbreak Analytics Hub ou en l’utilisant, vous acceptez les présentes conditions.</p><h3>2. Absence de garanties</h3><p>Le Hub et son contenu sont fournis « en l’état » et « selon disponibilité », sans garantie d’exactitude, d’exhaustivité, d’actualité ou de disponibilité.</p><h3>3. Finalité</h3><p>Le Hub soutient l’analyse et la revue opérationnelle de la riposte. Il ne constitue pas un avis médical et ne remplace ni les procédures de surveillance validées, ni les SitReps officiels, ni les autorités compétentes.</p><h3>4. Décisions</h3><p>Les résultats doivent être vérifiés et ne doivent pas constituer l’unique base d’une décision sanitaire, clinique, juridique ou sécuritaire.</p><h3>5. Confidentialité</h3><p>Les utilisateurs s’engagent à protéger les données individuelles, à ne pas diffuser les listes nominatives et à respecter la réglementation applicable.</p><h3>6. Travaux préliminaires</h3><p>Les données et analyses sont préliminaires. Avant toute réutilisation liée à une publication, contacter le Prof. Placide Mbala-Kingebeni, le Prof. Dav Ebengo, Pierre Akilimali et Onesime Mbulayi.</p><h3>7. Contact</h3><p>onesime.mbulayi@umie-inrb.cd</p><p class="small muted">© 2026 Onesime Mbulayi et la Team Data UMIE–INRB.</p>`,
   en: `<h3>1. Acceptance</h3><p>By accessing or using Ebola Outbreak Analytics Hub, you agree to these terms.</p><h3>2. No warranties</h3><p>The Hub and its content are provided “as is” and “as available”, without warranty of accuracy, completeness, timeliness or availability.</p><h3>3. Purpose</h3><p>The Hub supports response analysis and operational review. It is not medical advice and does not replace validated surveillance procedures, official SitReps or competent authorities.</p><h3>4. Decisions</h3><p>Outputs must be verified and must not be the sole basis for health, clinical, legal or security decisions.</p><h3>5. Confidentiality</h3><p>Users commit to protecting individual data, not sharing named lists and complying with applicable regulations.</p><h3>6. Preliminary work</h3><p>Data and analyses are preliminary. Before any publication-related reuse, contact Prof. Placide Mbala-Kingebeni, Prof. Dav Ebengo, Pierre Akilimali and Onesime Mbulayi.</p><h3>7. Contact</h3><p>onesime.mbulayi@umie-inrb.cd</p><p class="small muted">© 2026 Onesime Mbulayi and the UMIE–INRB Data Team.</p>`
 };
-/* v3.1 — dynamique de transmission, reconstruction, hommes/femmes */
+/* v3.1, dynamique de transmission, reconstruction, hommes/femmes */
 Object.assign(window.HUB_EN, {
   "Dynamique de transmission": "Transmission dynamics", "Reconstruction de la transmission": "Transmission reconstruction",
   "Sexe non renseigné": "Sex not recorded", "Classe d’âge": "Age group", "Racine": "Root", "Agent de santé": "Health worker", "Oui": "Yes",
@@ -498,7 +498,7 @@ Object.assign(window.HUB_EN, {
   "Base « début des symptômes » : les semaines dont la complétude moyenne est < 80 % sont exclues ; l’incidence est corrigée du retard de notification.": "Onset-date basis: weeks with mean completeness < 80% are excluded; incidence is corrected for reporting delay.",
   "Base « notification » : reflète aussi l’effort de détection et les retards de saisie ; la semaine en cours est exclue.": "Notification basis: also reflects detection effort and data-entry delays; the current week is excluded.",
   "Binomiale négative ajustée": "Fitted negative binomial", "Cas / semaine (début des symptômes, corrigé)": "Cases / week (onset, corrected)", "Cas / semaine (notification)": "Cases / week (notification)",
-  "Cas analysés": "Cases analysed", "Cas ayant le plus de cas secondaires (support ≥ 0,5) — pseudonymisé": "Cases with the most secondary cases (support ≥ 0.5) — pseudonymised",
+  "Cas analysés": "Cases analysed", "Cas ayant le plus de cas secondaires (support ≥ 0,5), pseudonymisé": "Cases with the most secondary cases (support ≥ 0.5), pseudonymised",
   "Cas confirmés et probables ; létalité avec intervalle de Wilson à 95 %": "Confirmed and probable cases; CFR with 95% Wilson interval",
   "Cas confirmés et probables par date de début des symptômes": "Confirmed and probable cases by symptom-onset date", "Cas dans la fenêtre": "Cases in window",
   "Cas observés (corrigés)": "Observed cases (corrected)", "Cas observés (début des symptômes)": "Observed cases (symptom onset)", "Cas projetés sur 14 jours": "Projected cases, next 14 days",
@@ -510,7 +510,7 @@ Object.assign(window.HUB_EN, {
   "Confirmés et probables avec date de début": "Confirmed and probable with onset date", "Connus comme contacts": "Known as contacts", "Consensus : infecteur de support maximal pour chaque cas": "Consensus: highest-support infector for each case",
   "Conséquence pour la riposte : la plupart des cas n’ont pas de source identifiée ; améliorer l’investigation (source MA‑1/2/3), le listage des contacts et le séquençage (INRB) est la priorité pour reconstruire les chaînes.": "Implication for the response: most cases have no identified source; improving investigation (source MA-1/2/3), contact listing and sequencing (INRB) is the priority to reconstruct chains.",
   "Contact suivi devenu cas ou source déclarée": "Followed contact who became a case, or declared source", "Contacts suivis": "Followed contacts", "Corrigés du retard de notification": "Corrected for reporting delay",
-  "Couleur des nœuds": "Node colour", "Courbe épidémique hebdomadaire et ajustement log-linéaire": "Weekly epicurve and log-linear fit", "Courbe épidémique quotidienne — hommes et femmes": "Daily epicurve — men and women",
+  "Couleur des nœuds": "Node colour", "Courbe épidémique hebdomadaire et ajustement log-linéaire": "Weekly epicurve and log-linear fit", "Courbe épidémique quotidienne, hommes et femmes": "Daily epicurve, men and women",
   "Croissance exponentielle significative": "Significant exponential growth", "Depuis le pic": "Since peak", "Dernier Rt consolidé": "Latest consolidated Rt",
   "Dernière exposition déclarée du contact → début des symptômes du cas (contacts devenus cas, lien certain ou probable)": "Contact’s last reported exposure → case symptom onset (contacts who became cases, certain or probable link)",
   "Dispersion k": "Dispersion k", "Distribution du nombre de cas secondaires (R_i)": "Distribution of secondary cases (R_i)", "Distribution observée (proportion)": "Observed distribution (proportion)",
@@ -519,12 +519,12 @@ Object.assign(window.HUB_EN, {
   "Début des symptômes → admission (CTE)": "Symptom onset → admission (ETC)", "Début des symptômes → notification": "Symptom onset → notification", "Début des symptômes → prélèvement": "Symptom onset → sampling",
   "Décroissance significative": "Significant decline", "Effectif limité : interpréter avec prudence ; la durée de suivi de 21 jours reste la norme.": "Small sample: interpret with caution; the 21-day follow-up remains the standard.",
   "Estimation du maximum de vraisemblance": "Maximum-likelihood estimate", "Exclus": "Excluded", "Fenêtre se terminant le": "Window ending",
-  "Fenêtres glissantes de 7 jours, intervalle sériel paramétrique avec incertitude ; en haut l’incidence, en bas Rt (médiane, IC 50 % et 95 %) — ligne pointillée : seuil R = 1": "7-day sliding windows, parametric serial interval with uncertainty; top: incidence, bottom: Rt (median, 50% and 95% CrI) — dashed line: R = 1",
+  "Fenêtres glissantes de 7 jours, intervalle sériel paramétrique avec incertitude ; en haut l’incidence, en bas Rt (médiane, IC 50 % et 95 %), ligne pointillée : seuil R = 1": "7-day sliding windows, parametric serial interval with uncertainty; top: incidence, bottom: Rt (median, 50% and 95% CrI), dashed line: R = 1",
   "Force d’infection λ": "Force of infection λ", "Force d’infection λ (cas attendus si R = 1)": "Force of infection λ (expected cases if R = 1)", "Forme / échelle": "Shape / scale",
-  "Gamma discrétisée ajustée": "Fitted discretised gamma", "Histogramme (saumon) et loi gamma discrétisée ajustée (points violets) — epitrix::fit_disc_gamma": "Histogram (salmon) and fitted discretised gamma (purple points) — epitrix::fit_disc_gamma",
-  "Homme / femme": "Male / female", "Hommes et femmes — profil des cas": "Men and women — case profile",
-  "Hypothèse clé : R constant et intervalle sériel connu — c’est la principale limite soulignée dans les practicals RECON.": "Key assumption: constant R and known serial interval — the main limitation highlighted in the RECON practicals.",
-  "IC 50 %": "50% CrI", "IC 95 % de l’ajustement": "95% CI of the fit", "IC 95 % — phase 2": "95% CI — phase 2", "IC crédible 95 %": "95% credible interval", "Il y a deux semaines": "Two weeks earlier",
+  "Gamma discrétisée ajustée": "Fitted discretised gamma", "Histogramme (saumon) et loi gamma discrétisée ajustée (points violets), epitrix::fit_disc_gamma": "Histogram (salmon) and fitted discretised gamma (purple points), epitrix::fit_disc_gamma",
+  "Homme / femme": "Male / female", "Hommes et femmes, profil des cas": "Men and women, case profile",
+  "Hypothèse clé : R constant et intervalle sériel connu, c’est la principale limite soulignée dans les practicals RECON.": "Key assumption: constant R and known serial interval, the main limitation highlighted in the RECON practicals.",
+  "IC 50 %": "50% CrI", "IC 95 % de l’ajustement": "95% CI of the fit", "IC 95 %, phase 2": "95% CI, phase 2", "IC crédible 95 %": "95% credible interval", "Il y a deux semaines": "Two weeks earlier",
   "Infecteur probable": "Probable infector", "Infecteur probable identifié": "Probable infector identified", "Infection estimée": "Estimated infection", "Intervalle 80 %": "80% interval", "Intervalle 80 % (q10–q90)": "80% interval (q10–q90)",
   "Intervalle sériel utilisé": "Serial interval used", "Issue (décès / vivant)": "Outcome (dead / alive)",
   "La moyenne est très inférieure à Rt car la majorité des transmissions ne sont pas documentées : k décrit l’hétérogénéité des transmissions identifiées, pas la totalité.": "The mean is far below Rt because most transmissions are undocumented: k describes heterogeneity among identified transmissions, not all of them.",
@@ -535,7 +535,7 @@ Object.assign(window.HUB_EN, {
   "Limites (EpiEstim) : suppose une détection constante et des cas tous locaux ; mélange des zones dans l’estimation nationale ; sensibilité au choix de l’intervalle sériel.": "Limitations (EpiEstim): assumes constant ascertainment and all-local cases; national estimate pools zones; sensitive to the serial-interval choice.",
   "Limites : R constant (pas d’effet des interventions futures), incidence par date de début (différente des notifications), pas d’importations ; au-delà de 2–3 semaines, ce sont des scénarios.": "Limitations: constant R (no effect of future interventions), incidence by onset date (differs from notifications), no importations; beyond 2–3 weeks these are scenarios.",
   "Limites : modèle exponentiel simple (pas de saturation), sensible aux changements de détection ; le temps de doublement n’a de sens que si r est significativement différent de 0.": "Limitations: simple exponential model (no saturation), sensitive to changes in detection; doubling time is only meaningful if r differs significantly from 0.",
-  "Létalité par classe d’âge et sexe": "CFR by age group and sex", "Létalité — femmes": "CFR — women", "Létalité — hommes": "CFR — men",
+  "Létalité par classe d’âge et sexe": "CFR by age group and sex", "Létalité, femmes": "CFR, women", "Létalité, hommes": "CFR, men",
   "L’ajout des données de contact déplace les supports vers 1 pour les liens documentés": "Adding contact data shifts support towards 1 for documented links", "MV": "ML",
   "Meilleure séparation en deux phases (incidence::fit_optim_split) le": "Best two-phase split (incidence::fit_optim_split) on", "Modèle A": "Model A",
   "Modèle A (temporel) → modèle B (temporel + contacts)": "Model A (temporal) → model B (temporal + contacts)", "Modèle B": "Model B", "Modèle à 2 phases": "Two-phase model",
@@ -561,7 +561,7 @@ Object.assign(window.HUB_EN, {
   "Réseau des cas reliés (epicontacts)": "Network of linked cases (epicontacts)", "Résumé": "Summary",
   "Sensibilité : avec l’intervalle sériel plus long de l’OMS (2014), Rt s’écarte davantage de 1 (plus haut en croissance, plus bas en décroissance) ; le sens de la tendance est inchangé.": "Sensitivity: with the longer WHO (2014) serial interval, Rt moves further from 1 (higher in growth, lower in decline); the direction of the trend is unchanged.",
   "Sexe / âge": "Sex / age", "Si la transmission reste au niveau du dernier Rt consolidé": "If transmission stays at the latest consolidated Rt", "Support": "Support",
-  "Support des liens — modèle A (temporel seul)": "Link support — model A (temporal only)", "Support des liens — modèle B (temporel + contacts)": "Link support — model B (temporal + contacts)",
+  "Support des liens, modèle A (temporel seul)": "Link support, model A (temporal only)", "Support des liens, modèle B (temporel + contacts)": "Link support, model B (temporal + contacts)",
   "Support du lien": "Link support", "Support minimal": "Minimum support", "Support médian": "Median support", "Sur les": "Over the", "Sur les 14 derniers jours disponibles": "Over the last 14 available days",
   "Sur toute la période, R constant est une hypothèse forte (earlyR est conçu pour le début d’épidémie) : comparer avec Rt.": "Over the whole period, constant R is a strong assumption (earlyR is designed for early outbreaks): compare with Rt.",
   "Symboles homme / femme": "Male / female symbols", "Taille du nœud ∝ √R_i": "Node size ∝ √R_i", "Taille minimale des chaînes": "Minimum chain size", "Taux": "Rate",
@@ -579,10 +579,10 @@ Object.assign(window.HUB_EN, {
   "début de projection": "projection start", "départ": "start", "en Afrique de l’Ouest (OMS, 2014)": "in West Africa (WHO, 2014)",
   "epicontacts « ttree » : x = date, lignes ordonnées par taille de sous-arbre ; arêtes colorées selon le support (gris clair → violet foncé), taille des nœuds = nombre de cas secondaires R_i ; cliquer un cas isole son sous-arbre, double-clic = réinitialiser": "epicontacts “ttree”: x = date, rows ordered by subtree size; edges coloured by support (light grey → dark purple), node size = number of secondary cases R_i; click a case to isolate its subtree, double-click to reset",
   "estimation grossière de R": "crude estimate of R", "exposition déclarée après le début des symptômes": "exposure reported after symptom onset", "femmes": "women", "hausse": "increase", "hommes": "men", "imputé": "imputed",
-  "incidence::fit — régression du logarithme de l’incidence hebdomadaire ; la courbe et sa bande donnent la tendance exponentielle et son IC 95 %": "incidence::fit — regression of log weekly incidence; the curve and band show the exponential trend and its 95% CI",
+  "incidence::fit, régression du logarithme de l’incidence hebdomadaire ; la courbe et sa bande donnent la tendance exponentielle et son IC 95 %": "incidence::fit, regression of log weekly incidence; the curve and band show the exponential trend and its 95% CI",
   "incomplet": "incomplete", "inspirée d’outbreaker2 (practicals RECON), sans données génomiques": "inspired by outbreaker2 (RECON practicals), without genomic data",
   "jours déjà partiellement observés (entre le départ de la projection et aujourd’hui) tombent dans l’intervalle 95 %.": "days already partly observed (between projection start and today) fall within the 95% interval.",
-  "k < 1 : transmission très hétérogène (« super-propagation ») — une minorité de cas (souvent soins à domicile, funérailles, structures de santé) produit la majorité des cas secondaires ; cibler ces contextes.": "k < 1: highly heterogeneous transmission (superspreading) — a minority of cases (often home care, funerals, health facilities) produces most secondary cases; target these settings.",
+  "k < 1 : transmission très hétérogène (« super-propagation »), une minorité de cas (souvent soins à domicile, funérailles, structures de santé) produit la majorité des cas secondaires ; cibler ces contextes.": "k < 1: highly heterogeneous transmission (superspreading), a minority of cases (often home care, funerals, health facilities) produces most secondary cases; target these settings.",
   "k ≥ 1 : transmission relativement homogène.": "k ≥ 1: relatively homogeneous transmission.", "la fin de l’épidémie n’est pas en vue à court terme ; ne pas réduire la riposte.": "the end of the epidemic is not in sight in the short term; do not scale down the response.",
   "la probabilité d’extinction devient non négligeable, mais la surveillance doit être maintenue 42 jours.": "the probability of extinction becomes non-negligible, but surveillance must be maintained for 42 days.",
   "la seule chronologie ne permet pas de savoir « qui a infecté qui » quand beaucoup de cas surviennent au même endroit au même moment (résolution faible, comme dans les practicals RECON).": "timing alone cannot tell “who infected whom” when many cases occur in the same place at the same time (poor resolution, as in the RECON practicals).",
@@ -593,7 +593,7 @@ Object.assign(window.HUB_EN, {
   "molette = zoom · glisser = déplacer": "wheel = zoom · drag = pan", "moyenne locale": "local mean", "non interprétable": "not interpretable", "non renseignés": "not recorded",
   "nouveaux cas (date de début) sur les 14 prochains jours": "new cases (onset date) over the next 14 days", "on attend environ": "about", "par jour": "per day",
   "pour chaque cas, les infecteurs candidats sont les cas de la même aire de santé débutés 1 à 60 jours avant (modèle A, temporel seul), auxquels s’ajoutent les liens documentés par le suivi des contacts et l’investigation, fortement favorisés (modèle B, temporel + contacts, ε = 0,05). Le support d’un lien est la probabilité a posteriori que ce cas soit l’infecteur.": "for each case, candidate infectors are cases in the same health area with onset 1–60 days earlier (model A, temporal only), plus links documented by contact tracing and investigation, strongly favoured (model B, temporal + contacts, ε = 0.05). Link support is the posterior probability that this case is the infector.",
-  "pour l’OMS (2014)": "for WHO (2014)", "projections::project — 1 000 simulations, R tiré du posterior du dernier Rt consolidé et supposé constant": "projections::project — 1,000 simulations, R drawn from the posterior of the latest consolidated Rt and held constant",
+  "pour l’OMS (2014)": "for WHO (2014)", "projections::project, 1 000 simulations, R tiré du posterior du dernier Rt consolidé et supposé constant": "projections::project, 1,000 simulations, R drawn from the posterior of the latest consolidated Rt and held constant",
   "provisoire": "provisional", "rapport": "ratio", "semaine(s) à 0 cas ignorée(s)": "zero-case week(s) ignored", "semaines": "weeks", "soit une variation hebdomadaire de": "i.e. a weekly change of",
   "support médian": "median support", "sur": "over", "temps de division par deux": "halving time", "temps de doublement": "doubling time",
   "transmission en expansion (R > 1 avec ≥ 97,5 % de probabilité)": "expanding transmission (R > 1 with ≥ 97.5% probability)", "transmission en recul (R < 1 avec ≥ 97,5 % de probabilité)": "declining transmission (R < 1 with ≥ 97.5% probability)",
@@ -604,7 +604,7 @@ Object.assign(window.HUB_EN, {
   "Ensemble des données (national)": "All data (national)", "tendance non significative (plateau)": "non-significant trend (plateau)", "croissance significative": "significant growth", "décroissance significative": "significant decline",
   "depuis le pic": "since peak", "toute la période": "whole period", "Taux de croissance": "Growth rate", "Âge": "Age", "Infection estimée (début − incubation médiane)": "Estimated infection (onset − median incubation)"
 });
-/* v3.2 — territoires, réconciliation, enfants, résurgence, indicateurs hebdomadaires */
+/* v3.2, territoires, réconciliation, enfants, résurgence, indicateurs hebdomadaires */
 Object.assign(window.HUB_EN, {
   "% contacts vus ≤ 24 h (aujourd’hui)": "% contacts seen ≤ 24 h (today)", "% nouveaux confirmés connus comme contacts": "% new confirmed known as contacts", "% sans lien": "% unlinked",
   "1. Contact tracing → cas index": "1. Contact tracing → index cases", "14 derniers jours": "last 14 days", "14 jours": "14 days", "2. Contacts devenus cas → Linelist": "2. Contacts who became cases → line list",
@@ -632,7 +632,7 @@ Object.assign(window.HUB_EN, {
   "Depuis le début": "Since the start", "Dernier cas confirmé": "Last confirmed case", "Dynamique et risque": "Dynamics and risk", "Déclarent un contact avec un malade, non retrouvés": "Report contact with a sick person, not found",
   "Déclarés « Confirmé » au suivi": "Reported “Confirmed” at follow-up", "Déclarés « Suspect » au suivi": "Reported “Suspected” at follow-up", "Décès cumulés": "Cumulative deaths",
   "Délai DDS → admission (médiane, j)": "Delay onset → admission (median, d)", "Délai DDS → notification (médiane, j)": "Delay onset → notification (median, d)", "Délais (médiane, jours) et contacts listés par cas": "Delays (median, days) and contacts listed per case",
-  "Effectif insuffisant": "Insufficient sample", "En baisse — sous surveillance": "Declining — under surveillance", "Enfants (0–18 ans)": "Children (0–18 years)",
+  "Effectif insuffisant": "Insufficient sample", "En baisse, sous surveillance": "Declining, under surveillance", "Enfants (0–18 ans)": "Children (0–18 years)",
   "EpiEstim, fenêtres de 7 jours ; bande = IC crédible 95 % ; ligne pointillée = R = 1 ; zone grisée = provisoire": "EpiEstim, 7-day windows; band = 95% CrI; dashed line = R = 1; shaded = provisional",
   "Filles": "Girls", "Filles / femmes": "Girls / women", "Garçons": "Boys", "Garçons / hommes": "Boys / men", "Indicateur calculé sur": "Indicator computed over", "Indicateur de la carte": "Map indicator",
   "Indicateur instantané (situation du jour), indépendant de la période": "Snapshot indicator (today), independent of the period", "Indicateurs hebdomadaires de la riposte": "Weekly response indicators",
@@ -666,7 +666,7 @@ Object.assign(window.HUB_EN, {
   "de la moyenne": "of the mean", "des cas": "of cases", "des cas étaient connus comme contacts et": "of cases were known as contacts and", "des nouveaux cas sans lien connu : transmission non détectée probable.": "of new cases without a known link: likely undetected transmission.",
   "différence non significative.": "non-significant difference.", "dont confirmés": "of which confirmed", "effectif faible": "small sample", "effectif insuffisant": "insufficient sample",
   "enfants dont la source est documentée,": "children with a documented source,", "gamma": "gamma", "j sans cas avant la reprise": "d without cases before resumption",
-  "jours sans cas — rechercher l’origine (déplacement, chaîne non suivie).": "days without cases — investigate the origin (travel, untracked chain).", "jusqu’au": "up to",
+  "jours sans cas, rechercher l’origine (déplacement, chaîne non suivie).": "days without cases, investigate the origin (travel, untracked chain).", "jusqu’au": "up to",
   "le": "on", "les autres sont listés ci-dessous et dans le fichier de validation (onglet « Suivi Confirmé-Suspect non retrouvés ») pour vérification sur le terrain.": "the others are listed below and in the validation file for field verification.",
   "létalité": "CFR", "maintenant": "now", "moins de 10 cas": "fewer than 10 cases", "médiane": "median", "nouveaux cas après": "new cases after",
   "ont eux-mêmes des contacts listés : la couverture du listage des contacts est l’écart principal à combler.": "have their own listed contacts: contact-listing coverage is the main gap to close.",
@@ -680,13 +680,13 @@ Object.assign(window.HUB_EN, {
   "Non vu >3 j": "Not seen >3 d", "Vu 1–3 j": "Seen 1–3 d", "Non vus >3 j": "Not seen >3 d", "Synthèse": "Summary", "Indicateur": "Indicator", "Contacts non vus >3 j": "Contacts not seen >3 d (lost to follow-up)",
   "Toutes les zones de santé": "All health zones", "Total": "Total", "Score": "Score", "Contacts « Confirmé » au suivi retrouvés dans la Linelist": "Contacts “Confirmed” at follow-up found in the line list"
 });
-/* v3.3 — super-propagation, lieux, générations des réseaux */
+/* v3.3, super-propagation, lieux, générations des réseaux */
 Object.assign(window.HUB_EN, {
   "1 génération": "1 generation", "2 générations": "2 generations", "3 générations": "3 generations", "4 générations": "4 generations",
   "Attention : sur « tous les cas », la grande majorité des cas n’a aucun lien documenté ; les zéros sont gonflés par le sous-enregistrement des liens, ce qui exagère l’hétérogénéité. Le jeu « cas index suivis » (dénominateur complet, suivi clos) est la référence.": "Caution: with “all cases”, most cases have no documented link; zeros are inflated by under-recording of links, which exaggerates heterogeneity. The “followed index cases” set (complete denominator, closed follow-up) is the reference.",
   "Aucun cas index ne correspond aux filtres.": "No index case matches the filters.", "Aucun lien": "No link", "Aucune grappe ne correspond aux filtres.": "No cluster matches the filters.", "Avec k =": "With k =", "Avec le Rt actuel": "With the current Rt",
   "Binomiale négative": "Negative binomial", "Cas avec contacts listés": "Cases with listed contacts", "Cas des chaînes documentées": "Cases in documented chains", "Cas index (filtrés)": "Index cases (filtered)", "Cas index du traçage": "Contact-tracing index case",
-  "Cas index filtrés": "Filtered index cases", "Cas index par nombre de générations": "Index cases by number of generations", "Cas index suivis": "Followed index cases", "Cas index — période et génération choisies": "Index cases — selected period and generation",
+  "Cas index filtrés": "Filtered index cases", "Cas index par nombre de générations": "Index cases by number of generations", "Cas index suivis": "Followed index cases", "Cas index, période et génération choisies": "Index cases, selected period and generation",
   "Cas mis en quarantaine / suivi": "Quarantined / followed case", "Cas non détecté": "Undetected case", "Cas responsables de 80 % de la transmission": "Cases responsible for 80% of transmission", "Cas secondaires par cas (R)": "Secondary cases per case (R)",
   "Chaque grappe = un cas index (rond rose = source avec source connue, blanc = source non identifiée) relié au lieu d’exposition (M = ménage/foyer, H = structure de santé, T = travail, F = funérailles), puis à ses contacts ; couleur = type de transmission ; anneau rouge = contact devenu cas ; carré plein = suivi de 21 jours terminé (quarantaine menée à terme), carré pointillé = suivi en cours, sans carré = perdu de vue ou suivi incomplet": "Each cluster = an index case (pink = source with a known source, white = unidentified source) linked to the exposure setting (M = household, H = health facility, T = work, F = funeral), then to its contacts; colour = transmission type; red ring = contact who became a case; solid square = 21-day follow-up completed (quarantine completed), dashed square = follow-up ongoing, no square = lost to follow-up or incomplete",
   "Concentration de la transmission": "Concentration of transmission", "Conséquence opérationnelle : quand k < 1, chercher en priorité la SOURCE et l’ÉVÉNEMENT (funérailles, soins à domicile, structure de santé) de chaque nouveau cas, puis lister tous les participants : c’est là que se trouvent les grappes.": "Operational consequence: when k < 1, first look for the SOURCE and the EVENT (funeral, home care, health facility) of each new case, then list all participants: that is where clusters are.",
@@ -695,14 +695,14 @@ Object.assign(window.HUB_EN, {
   "Filtres actifs": "Active filters", "G1 = cas index et ses contacts ; G2 = au moins un contact devenu cas a lui-même des contacts listés ; G3, G4 = chaînes de contacts plus longues.": "G1 = index case and its contacts; G2 = at least one contact who became a case has their own listed contacts; G3, G4 = longer contact chains.",
   "Gain du traçage rétrograde": "Backward tracing gain", "Graphe des lieux potentiels de transmission": "Potential transmission settings graph", "Graphes des plus grands réseaux": "Largest network graphs", "Graphes des réseaux à": "Network graphs with",
   "Grappes avec au moins un contact devenu cas": "Clusters with at least one contact who became a case", "Générations affichées": "Generations shown", "Générations de la chaîne": "Chain generations", "Générations du réseau": "Network generations",
-  "Histogramme observé (saumon), binomiale négative ajustée (violet) et Poisson de même moyenne (gris) — epicontacts::get_degree + fitdistrplus::fitdist": "Observed histogram (salmon), fitted negative binomial (purple) and Poisson with the same mean (grey) — epicontacts::get_degree + fitdistrplus::fitdist",
+  "Histogramme observé (saumon), binomiale négative ajustée (violet) et Poisson de même moyenne (gris), epicontacts::get_degree + fitdistrplus::fitdist": "Observed histogram (salmon), fitted negative binomial (purple) and Poisson with the same mean (grey), epicontacts::get_degree + fitdistrplus::fitdist",
   "Interprétation (expertise épidémiologique)": "Interpretation (epidemiological expertise)", "Interprétation (lecture d’épidémiologiste)": "Interpretation (epidemiologist’s reading)", "Jeu de données": "Dataset",
   "Jeu de référence : cas index dont tous les contacts ont terminé leur suivi ; le nombre de contacts devenus cas mesure directement la descendance observée par le traçage.": "Reference set: index cases whose contacts have all completed follow-up; the number of contacts who became cases directly measures the offspring observed by tracing.",
   "La binomiale négative est le meilleur modèle": "The negative binomial is the best model", "Les 12 premiers cas index filtrés (contacts devenus cas d’abord, puis taille du réseau) ; chaque graphe montre exactement les générations choisies ; cliquer pour ouvrir le parcours": "First 12 filtered index cases (contacts who became cases first, then network size); each graph shows exactly the selected generations; click to open the journey",
   "Lieu": "Setting", "Lieu de travail": "Workplace", "Limites : les liens sont incomplets (sous-détection des sources) et la descendance d’un cas peut être répartie entre plusieurs listes ; k et R observés décrivent la transmission documentée, pas la transmission totale.": "Limitations: links are incomplete (under-detection of sources) and a case’s offspring may be split across several lists; observed k and R describe documented transmission, not total transmission.",
   "Modèle (binomiale négative)": "Model (negative binomial)", "Ménage / foyer": "Household", "Nombre de contacts par cas index": "Number of contacts per index case", "Non précisé": "Not specified", "Par type de contact et par relation": "By contact type and relationship",
   "Part cumulée de la transmission (y) due à la part x des cas les plus infectieux ; diagonale = transmission homogène ; courbes de référence (Ebola, SARS)": "Cumulative share of transmission (y) due to the share x of most infectious cases; diagonal = homogeneous transmission; reference curves (Ebola, SARS)",
-  "Plus k est petit, plus une introduction a de chances de s’éteindre seule — mais quand elle ne s’éteint pas, elle démarre souvent par une flambée explosive (super-propagation). La surveillance doit donc détecter très tôt les événements à risque.": "The smaller k, the more likely an introduction dies out on its own — but when it does not, it often starts with an explosive flare-up (superspreading). Surveillance must therefore detect risk events very early.",
+  "Plus k est petit, plus une introduction a de chances de s’éteindre seule, mais quand elle ne s’éteint pas, elle démarre souvent par une flambée explosive (super-propagation). La surveillance doit donc détecter très tôt les événements à risque.": "The smaller k, the more likely an introduction dies out on its own, but when it does not, it often starts with an explosive flare-up (superspreading). Surveillance must therefore detect risk events very early.",
   "Poids AIC": "AIC weight", "Poisson (même moyenne)": "Poisson (same mean)", "Probabilité d’appartenir à une grappe": "Probability of belonging to a cluster", "Probabilité qu’une introduction déclenche une épidémie": "Probability that an introduction causes an epidemic",
   "Processus de branchement à descendance binomiale négative : 1 − q, avec q = (1 + R(1 − q)/k)^−k": "Branching process with negative binomial offspring: 1 − q, with q = (1 + R(1 − q)/k)^−k", "Profondeur du réseau de contact tracing (tous les cas index de la province) ; cliquer pour filtrer": "Contact-tracing network depth (all index cases of the province); click to filter",
   "Recommandations : (1) pour chaque nouveau cas, investigation rétrograde sur 21 jours avant le début des symptômes (funérailles, soins à un malade, visites en structure de santé, tradipraticiens) ; (2) listage exhaustif de tous les participants aux événements identifiés ; (3) priorité de suivi aux contacts des événements de super-propagation ; (4) suivi quotidien de l’indicateur « % de nouveaux cas connus comme contacts » (objectif > 80 %).": "Recommendations: (1) for each new case, backward investigation over the 21 days before onset (funerals, caring for a sick person, health-facility visits, traditional healers); (2) exhaustive listing of all participants in identified events; (3) priority follow-up of contacts of superspreading events; (4) daily monitoring of “% of new cases known as contacts” (target > 80%).",
@@ -710,7 +710,7 @@ Object.assign(window.HUB_EN, {
   "Suivi 21 j terminé": "21-day follow-up completed", "Suivi en cours": "Follow-up ongoing", "Super-propagation": "Superspreading", "Super-propagation et lieux": "Superspreading and settings", "Sur les 28 derniers jours, seuls": "Over the last 28 days, only",
   "Sur les seuls cas des chaînes documentées, les cas sans descendance sont sous-représentés : k est surestimé (hétérogénéité sous-estimée). À lire comme une borne.": "Among cases in documented chains only, cases without offspring are under-represented: k is overestimated (heterogeneity underestimated). Read it as a bound.",
   "Taille minimale de la grappe": "Minimum cluster size", "Taux d’attaque secondaire (IC 95 %)": "Secondary attack rate (95% CI)", "Taux d’attaque secondaire par lieu d’exposition": "Secondary attack rate by exposure setting", "Tous les cas (liens documentés)": "All cases (documented links)", "Tous les lieux": "All settings",
-  "Transmission homogène": "Homogeneous transmission", "Travail": "Work", "Traçage prospectif (vers les contacts du cas) et rétrograde (vers la source et ses autres contacts) — Endo et al. 2020 ; Raymenants et al. 2022": "Forward tracing (to the case’s contacts) and backward tracing (to the source and its other contacts) — Endo et al. 2020; Raymenants et al. 2022",
+  "Transmission homogène": "Homogeneous transmission", "Travail": "Work", "Traçage prospectif (vers les contacts du cas) et rétrograde (vers la source et ses autres contacts) : Endo et al. 2020 ; Raymenants et al. 2022": "Forward tracing (to the case’s contacts) and backward tracing (to the source and its other contacts) : Endo et al. 2020; Raymenants et al. 2022",
   "Traçage prospectif et rétrograde": "Forward and backward tracing", "Traçage prospectif réussi": "Successful forward tracing", "Traçage prospectif seul": "Forward tracing only", "Traçage rétrograde réussi": "Successful backward tracing", "Traçage réussi": "Successful contact tracing", "Traçage échoué": "Failed contact tracing",
   "Un nouveau cas a": "A new case has", "Voisinage / social": "Neighbourhood / social", "aucun": "none", "autres cas secondaires (R(1 + 1/k)), contre": "other secondary cases (R(1 + 1/k)), versus", "avec source retrouvée": "with source found", "cas ayant infecté plus de": "cases who infected more than",
   "cas index sur": "index cases out of", "cas les plus infectieux": "most infectious cases", "cas secondaires attendus pour un cas pris au hasard : retrouver la source rapporte environ": "secondary cases expected for a random case: finding the source yields about",
@@ -723,12 +723,12 @@ Object.assign(window.HUB_EN, {
   "le nombre de cas secondaires par cas (distribution de descendance) est ajusté par une loi binomiale négative de moyenne R et de dispersion k (fitdistrplus / superspreading, Epiverse-TRACE). Plus k est petit, plus la transmission est concentrée sur quelques cas : c’est ce qui rend le traçage rétrograde (vers la source) particulièrement rentable.": "the number of secondary cases per case (offspring distribution) is fitted with a negative binomial of mean R and dispersion k (fitdistrplus / superspreading, Epiverse-TRACE). The smaller k, the more transmission is concentrated in a few cases: this is what makes backward tracing (to the source) particularly effective.",
   "les": "the", "les 20 % les plus infectieux": "the most infectious 20%", "local": "local", "nœuds": "nodes", "observé": "observed", "ont une source identifiée (traçage rétrograde) : la grande majorité des chaînes échappe au traçage.": "have an identified source (backward tracing): most chains escape tracing.",
   "personnes (99e percentile de Poisson)": "people (99th Poisson percentile)", "plus de cas que le seul traçage prospectif.": "more cases than forward tracing alone.", "probabilité d’épidémie": "probability of epidemic", "sans cas secondaire": "without secondary case", "seuil SSE": "SSE threshold", "source non identifiée": "unidentified source", "suivi en cours": "follow-up ongoing",
-  "superspreading::proportion_cluster_size — probabilité qu’un cas détecté appartienne à une grappe (cas secondaires d’une même source) d’au moins c cas": "superspreading::proportion_cluster_size — probability that a detected case belongs to a cluster (secondary cases of the same source) of at least c cases",
+  "superspreading::proportion_cluster_size, probabilité qu’un cas détecté appartienne à une grappe (cas secondaires d’une même source) d’au moins c cas": "superspreading::proportion_cluster_size, probability that a detected case belongs to a cluster (secondary cases of the same source) of at least c cases",
   "surdispersion": "overdispersion", "transmission hétérogène : une minorité de cas génère la majorité des cas secondaires": "heterogeneous transmission: a minority of cases generates most secondary cases", "transmission relativement homogène": "relatively homogeneous transmission",
   "une nouvelle introduction s’éteint presque toujours.": "a new introduction almost always dies out.", "Événements de super-propagation": "Superspreading events", "Hôpital": "Hospital", "Lieu du travail": "Workplace", "Foyer": "Household", "Paramètres": "Parameters", "Modèle": "Model"
 });
 
-/* v3.4 — Rt multi-méthodes, zones à risque, lln, fusion, chargement */
+/* v3.4 : Rt multi-méthodes, zones à risque, lln, fusion, chargement */
 Object.assign(window.HUB_EN, {
   "croissance": "growth", "contrôle (décroissance)": "control (decline)", "signal incertain": "uncertain signal", "Méthodes": "Methods",
   "Consensus (médiane des méthodes)": "Consensus (median of methods)", "Étendue": "Range", "Méthodes en croissance": "Methods signalling growth",
@@ -779,7 +779,7 @@ Object.assign(window.HUB_EN, {
   "Dictionnaire des variables": "Variable dictionary", "Copier les fichiers et lancer l’analyse": "Copy files and run the analysis", "Relancer l’analyse sans nouveau fichier": "Re-run without new files",
   "Charger les données": "Load data", "Fichiers actuellement utilisés": "Files currently used", "Linelist format 1": "Linelist format 1", "Linelist lln": "lln linelist", "Sites miniers": "Mining sites",
   "Zones frontalières": "Border zones", "fichier(s) en cours d’envoi…": "file(s) uploading…", "Lancement…": "Starting…", "Erreur": "Error", "Analyse en cours…": "Analysis running…",
-  "Terminé : rechargement du tableau de bord…": "Done: reloading the dashboard…", "Échec — voir le journal": "Failed — see the log", "Serveur local injoignable : lancez 00_INTERFACE.": "Local server unreachable: start 00_INTERFACE.",
+  "Terminé : rechargement du tableau de bord…": "Done: reloading the dashboard…", "Échec, voir le journal": "Failed, see the log", "Serveur local injoignable : lancez 00_INTERFACE.": "Local server unreachable: start 00_INTERFACE.",
   "Contacts devenus cas par génération": "Contacts who became cases by generation", "% devenus cas": "% became cases", "Afficher les données du graphique": "Show chart data", "Tableau": "Table",
   "Signal": "Signal", "Temps réel": "Real time", "IC bas": "CI low", "IC haut": "CI high", "Score log": "Log score", "Erreur absolue moyenne": "Mean absolute error", "Jours": "Days",
   "Forces": "Strengths", "Limites": "Limitations", "Jours depuis le dernier cas": "Days since last case", "21 j précédents": "Previous 21 d", "Hausse > 25 %": "Increase > 25%",
@@ -799,7 +799,7 @@ Object.assign(window.HUB_EN, {
   "Temps réel seulement": "Real time only", "Lissage et rétrospectives": "Smoothing and retrospective", "Tout": "All", "Lecture": "Reading", "Paramètres": "Parameters"
 });
 
-/* v3.5 — période, suspects, chargement graphique */
+/* v3.5, période, suspects, chargement graphique */
 Object.assign(window.HUB_EN, {
   "Période d’analyse": "Analysis period", "Du": "From", "au": "to", "Tout": "All",
   "Choisissez les dates : tous les menus se recalculent automatiquement.": "Pick the dates: every menu is recalculated automatically.",
@@ -815,7 +815,7 @@ Object.assign(window.HUB_EN, {
   "Suspicion levée (« Non cas »)": "Suspicion cleared (“Non-case”)", "Issue non documentée": "Outcome not documented", "contacts listés": "listed contacts", "suspects": "suspects",
   "de": "of", "soit": "i.e.", "des contacts devenus cas étaient d’abord signalés suspects": "of contacts who became cases were first reported as suspects",
   "À investiguer : résultat du test ou classification à saisir": "To investigate: test result or classification to enter",
-  "Suspects issue en attente": "Suspects, outcome pending", "Contacts suspects — issue à documenter": "Suspect contacts — outcome to document",
+  "Suspects issue en attente": "Suspects, outcome pending", "Contacts suspects, issue à documenter": "Suspect contacts, outcome to document",
   "Déposez les fichiers ici": "Drop files here", "ou cliquez pour parcourir l’ordinateur": "or click to browse your computer", "Choisir le type de fichier…": "Choose the file type…",
   "Aucun fichier choisi pour l’instant.": "No file selected yet.", "Retirer": "Remove", "⤒ Charger les données": "⤒ Load data",
   "Le chargement graphique nécessite l’interface locale.": "Graphical loading requires the local interface.", "Double-cliquez sur": "Double-click"
@@ -826,10 +826,10 @@ Object.assign(window.HUB_EN, { "Cartes pour rapport": "Report maps", "Carte": "M
   "Fichiers PNG haute définition (A4 paysage) dans le dossier reports du projet.": "High-resolution PNG files (A4 landscape) in the project's reports folder." });
 Object.assign(window.HUB_EN, { "Derniers jours jusqu’au": "Last days up to", "version publique agrégée": "aggregated public version", "version publique pseudonymisée": "pseudonymised public version",
   "Sur le site public, les cartes sont publiées pour la situation complète : revenez à « Tout » dans la période d’analyse.": "On the public site, maps are published for the full situation: switch back to “All” in the analysis period." });
-/* v3.6 — SitRep PDF, Rt par zone, opérations, score de risque */
+/* v3.6 : SitRep PDF, Rt par zone, opérations, score de risque */
 Object.assign(window.HUB_EN, {
   "Cumul des cas": "Cumulative cases", "Cumul des décès confirmés": "Cumulative confirmed deaths", "Patients en isolement / CTE": "Patients in isolation / ETC",
-  "Cumul des guéris": "Cumulative recovered", "Taux de suivi des contacts": "Contact follow-up rate", "en 24 h": "in 24 h", "Chiffres officiels nationaux — rapport du": "Official national figures — report of",
+  "Cumul des guéris": "Cumulative recovered", "Taux de suivi des contacts": "Contact follow-up rate", "en 24 h": "in 24 h", "Chiffres officiels nationaux, rapport du": "Official national figures, report of",
   "publié le": "published on", "Décès confirmés / cas confirmés": "Confirmed deaths / confirmed cases", "Fin de journée, toutes provinces": "End of day, all provinces",
   "Sorties guéries cumulées": "Cumulative recovered discharges", "SitRep : situation par province": "SitRep: situation by province", "Évolution selon les SitRep déposés": "Trend across uploaded SitReps",
   "Concordance SitRep / Linelist par zone de santé": "SitRep / Linelist agreement by health zone", "Cumuls officiels": "Official cumulative figures",
@@ -847,11 +847,110 @@ Object.assign(window.HUB_EN, {
 });
 Object.assign(window.HUB_EN, { "Toutes provinces": "All provinces", "Zones les plus prioritaires": "Highest-priority zones", "Niveau de priorité (score 0–100)": "Priority level (score 0–100)",
   "Catégorie de la zone": "Zone category", "Score de risque de résurgence par zone de santé": "Resurgence risk score by health zone", "Catégories de risque des zones de santé": "Risk categories of health zones",
-  "étiquettes : zone · score de risque (0–100)": "labels: zone · risk score (0–100)", "Rouge — hotspot": "Red — hotspot", "Orange — cas < 21 j": "Orange — cases < 21 d",
-  "Jaune — 22–42 j sans cas": "Yellow — 22–42 d without cases", "Verte — > 42 j sans cas": "Green — > 42 d without cases", "au": "to",
+  "étiquettes : zone · score de risque (0–100)": "labels: zone · risk score (0–100)", "Rouge, hotspot": "Red, hotspot", "Orange, cas < 21 j": "Orange, cases < 21 d",
+  "Jaune, 22–42 j sans cas": "Yellow, 22–42 d without cases", "Verte, > 42 j sans cas": "Green, > 42 d without cases", "au": "to",
   "Carte de rapport pour la période et la province affichées : légende des couleurs avec effectifs, scores, nord, source": "Report map for the displayed period and province: colour legend with counts, scores, north arrow, source",
   "Score = cas 21 j (20) + tendance (12) + P(Rt>1) (12) + décès communautaires (8) + décès groupés (5) + proximité d’une incidence élevée (10) + frontière (5) + mines (5) + contacts non vus > 3 j (8) + résurgence (10) + EDS non réalisés (5).": "Score = cases 21 d (20) + trend (12) + P(Rt>1) (12) + community deaths (8) + clustered deaths (5) + proximity to high incidence (10) + border (5) + mines (5) + contacts not seen > 3 d (8) + resurgence (10) + unsafe burials (5).",
   "Rouge : cas dans les 21 derniers jours et au moins un critère d’aggravation, ou deux critères de contexte. Orange : cas < 21 j sans critère rouge.": "Red: cases in the last 21 days and at least one aggravating criterion, or two context criteria. Orange: cases < 21 d without a red criterion." });
-Object.assign(window.HUB_EN, { "Score de risque de résurgence par zone de santé — zones prioritaires (score ≥ 30)": "Resurgence risk score by health zone — priority zones (score ≥ 30)", "étiquettes : zones de priorité 1 à 3 (score ≥ 30)": "labels: priority 1–3 zones (score ≥ 30)" });
+Object.assign(window.HUB_EN, { "Score de risque de résurgence par zone de santé, zones prioritaires (score ≥ 30)": "Resurgence risk score by health zone, priority zones (score ≥ 30)", "étiquettes : zones de priorité 1 à 3 (score ≥ 30)": "labels: priority 1–3 zones (score ≥ 30)" });
 Object.assign(window.HUB_EN, { "Rapport national et présentation": "National report and presentation", "Produits automatiquement à chaque exécution, pour la situation complète": "Produced automatically at each run, for the full situation",
   "Rapport épidémiologique national (PDF)": "National epidemiological report (PDF)", "Présentation de la riposte (PowerPoint)": "Response presentation (PowerPoint)", "Question opérationnelle de la présentation": "Operational question of the presentation" });
+
+/* ---------------------------------------------------------------------------------------------------------------
+   Traduction de tout le texte affiché (version anglaise). Les textes produits par l'analyse (notes, commentaires,
+   listes calculées) ne passent pas tous par T() ; en anglais, chaque texte affiché est traduit :
+   phrase exacte du dictionnaire, sinon modèle où les nombres deviennent {0}, {1}… et les parenthèses (§0), (§1)…,
+   sinon découpage en segments ( · | ; . : , ) dont chacun doit être traduit ou neutre (noms propres, nombres).
+   --------------------------------------------------------------------------------------------------------------- */
+window.HUB_EN_TPL = window.HUB_EN_TPL || {};
+window.HUB_MISS = window.HUB_MISS || new Set();
+(function () {
+  const NUM = /(?<![\p{L}\d§])[-+−]?\d(?:[\d   ]*\d)?(?:[.,]\d+)?(?:\s?%)?(?![\p{L}\d])/gu;
+  const FRW = /[àâçéèêëîïôûùüœ]|\b(le|la|les|des|du|de|et|un|une|au|aux|pour|par|sur|avec|dans|est|sont|ont|pas|ne|qui|que|dont|selon|depuis|entre|leur|leurs|cette|ces|son|sa|ses|plus|moins|jours?|semaines?|cas|aucun|aucune|zones|vus|suivis?|données|nombre|nouveaux|nouvelles?|derniers?|dernière|taux|carte|tableau|période|santé|hausse|baisse|mois|ou|sans|en)\b/i;
+  const norm = s => s.replace(/[  ]/g, " ").replace(/’/g, "'").replace(/\s+/g, " ").trim();
+  let IDX = null, TPL = null, VALS = null, n0 = -1, t0 = -1;
+  function idx() {
+    const E = window.HUB_EN || {}, P = window.HUB_EN_TPL || {};
+    const ne = Object.keys(E).length, np = Object.keys(P).length;
+    if (IDX && ne === n0 && np === t0) return;
+    IDX = new Map(); VALS = new Set();
+    for (const k in E) { IDX.set(norm(k), E[k]); VALS.add(norm(String(E[k]))); }
+    TPL = new Map(); for (const k in P) { TPL.set(norm(k), P[k]); }
+    n0 = ne; t0 = np; cache.clear();
+  }
+  const neutral = s => { const t = norm(s); return !t || !/\p{L}/u.test(t) || VALS.has(t) || !FRW.test(t); };
+  function splitOut(t, sep) {   // découpe hors des parenthèses
+    const out = []; let d = 0, s = 0;
+    for (let i = 0; i < t.length; i++) {
+      const c = t[i];
+      if (c === "(" || c === "[") d++; else if ((c === ")" || c === "]") && d > 0) d--;
+      else if (!d && t.startsWith(sep, i)) { out.push(t.slice(s, i)); s = i + sep.length; i += sep.length - 1; }
+    }
+    out.push(t.slice(s));
+    return out;
+  }
+  const cache = new Map();
+  const SEPS = [" · ", " | ", " ; ", "; ", ". ", " : ", ": ", ", ", " / "];
+  function tr(s, depth) {
+    depth = depth || 0;
+    const t = norm(s);
+    if (!t || !/\p{L}/u.test(t)) return s;
+    if (cache.has(t)) return cache.get(t);
+    let r = IDX.get(t) ?? TPL.get(t);
+    if (r === undefined) {
+      const groups = [];
+      const k1 = t.replace(/\(([^()]*)\)/g, (m, g) => { groups.push(g); return `(§${groups.length - 1})`; });
+      const nums = [];
+      const key = k1.replace(NUM, m => { nums.push(m.trim()); return `{${nums.length - 1}}`; });
+      if (key !== t) {
+        const tp = TPL.get(key) ?? IDX.get(key);
+        if (tp !== undefined) {
+          r = String(tp).replace(/\{(\d+)\}/g, (_, i) => nums[+i] ?? "").replace(/§(\d+)/g, (_, i) => { const g = groups[+i] ?? ""; return neutral(g) ? g : tr(g, depth + 1); });
+        }
+      }
+    }
+    if (r === undefined) {
+      for (const [rx, rep] of (window.HUB_EN_RX || [])) { if (rx.test(t)) { r = t.replace(rx, (...m) => rep.replace(/\$(\d)/g, (_, i) => { const v = m[+i] || ""; return neutral(v) ? v : tr(v, depth + 1); })); break; } }
+    }
+    if (r === undefined && depth < 6) {
+      for (const sep of SEPS) {
+        if (!t.includes(sep)) continue;
+        const parts = splitOut(t, sep);
+        if (parts.length < 2) continue;
+        const out = parts.map(p => tr(p, depth + 1));
+        if (out.every((o, i) => o !== parts[i] || neutral(parts[i])) && out.some((o, i) => o !== parts[i])) { r = out.join(sep); break; }
+      }
+      if (r === undefined) {
+        const m = /^(.*?)\s*\(([^()]*)\)(\s*[.:;,]?)$/.exec(t);
+        if (m && m[1]) {
+          const a = tr(m[1], depth + 1), b = neutral(m[2]) ? m[2] : tr(m[2], depth + 1);
+          if ((a !== m[1] || neutral(m[1])) && (b !== m[2] || neutral(m[2])) && (a !== m[1] || b !== m[2])) r = `${a} (${b})${m[3]}`;
+        }
+      }
+    }
+    if (r === undefined) { if (!depth && !neutral(t)) window.HUB_MISS.add(t); r = s; }
+    else { const lead = s.match(/^\s*/)[0], trail = s.match(/\s*$/)[0]; r = lead + r + trail; }
+    if (cache.size > 20000) cache.clear();
+    cache.set(t, r);
+    return r;
+  }
+  function walk(root) {
+    if (window.HubLang !== "en" || !root) return;
+    idx();
+    const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, { acceptNode: n => (n.parentElement && /^(SCRIPT|STYLE|TEXTAREA)$/.test(n.parentElement.tagName)) || n.parentElement?.closest("[data-no-i18n]") ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT });
+    const nodes = []; while (w.nextNode()) nodes.push(w.currentNode);
+    for (const n of nodes) { const v = n.nodeValue; if (v && /\p{L}/u.test(v)) { const x = tr(v); if (x !== v) n.nodeValue = x; } }
+    const els = root.querySelectorAll ? root.querySelectorAll("[title],[placeholder],[aria-label]") : [];
+    for (const el of els) for (const a of ["title", "placeholder", "aria-label"]) { const v = el.getAttribute(a); if (v) { const x = tr(v); if (x !== v) el.setAttribute(a, x); } }
+  }
+  window.HubTr = s => { idx(); return tr(s); };
+  window.HubTranslateDOM = walk;
+  let pending = false;
+  const obs = new MutationObserver(() => {
+    if (window.HubLang !== "en" || pending) return;
+    pending = true;
+    requestAnimationFrame(() => { pending = false; obs.disconnect(); walk(document.body); obs.observe(document.body, { childList: true, subtree: true, characterData: true }); });
+  });
+  const start = () => { obs.observe(document.body, { childList: true, subtree: true, characterData: true }); walk(document.body); };
+  if (document.body) start(); else document.addEventListener("DOMContentLoaded", start);
+})();
