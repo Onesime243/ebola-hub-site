@@ -1,10 +1,15 @@
-/* Ebola Outbreak — outil de la zone de santé : tableau de bord
+/* Ebola Outbreak, outil de la zone de santé : tableau de bord
    Identité de l'outil national (menu bleu marine, mêmes couleurs, mode clair / sombre).
    Filtres globaux : période d'analyse (du … au …, préréglages 7 j à Tout) et aire de santé. */
 (function () {
   "use strict";
   const D = window.ZS_DATA;
   const Ch = window.HubCharts;
+  document.addEventListener("click", e => {   // carte de rapport + commentaire dans un seul PNG
+    const mp = e.target.closest("[data-map-png]"); if (!mp) return;
+    const card = mp.closest(".map-card"), img = card && card.querySelector("img.map-img");
+    if (img) { img.loading = "eager"; Ch.mapCaptionPNG(img, card.querySelector(".map-cap"), mp.dataset.mapFile).catch(() => {}); }
+  });
   const { nf, esc } = G;
   const col = Ch.col;
   const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
@@ -12,7 +17,7 @@
   const archivesHTML = arr => arr && arr.length ? `<details class="archives" style="margin-top:12px"><summary><b>Copies datées</b> <span class="muted small">— une copie de chaque fichier chargé est gardée dans le dossier archives/&lt;date du jour&gt;</span></summary><div class="table-wrap files-tbl"><table><thead><tr><th>Date de chargement</th><th>Fichiers</th></tr></thead><tbody>${arr.map(a => `<tr><td style="white-space:nowrap">${esc(a.date.split("-").reverse().join("/"))}</td><td>${a.fichiers.map(esc).join("<br>")}</td></tr>`).join("")}</tbody></table></div></details>` : "";
   const filesHTML = r => (r.fichiers && r.fichiers.length ? `<div class="table-wrap files-tbl"><table><thead><tr><th>Fichiers présents dans le dossier de la zone</th><th class="num">Taille</th><th>Déposé le</th></tr></thead><tbody>${r.fichiers.map(f => `<tr><td>${esc(f.nom)}</td><td class="num">${nf(f.taille / 1e6, 1)} Mo</td><td>${esc(f.modifie)}</td></tr>`).join("")}</tbody></table></div>` : `<p class="note">Aucun fichier déposé pour l'instant.</p>`) + archivesHTML(r.archives);
   if (!D) { sansAnalyse(); return; }
-  window.ZS_FOOT = `ZS ${D.meta.zone_de_sante} · Ebola Outbreak — outil provincial`;
+  window.ZS_FOOT = `ZS ${D.meta.zone_de_sante} · Ebola Outbreak, outil provincial`;
   const OUT = "../sortie/zs/" + encodeURIComponent(D.meta.zone_de_sante) + "/";   // rapports, classeurs et cartes de la zone
   const NIV_PROV = D.meta.niveau === "province";   // analyse provinciale détaillée : les unités sont les zones de santé
   /* vocabulaire : en vue provinciale, « aire de santé » devient « zone de santé » (textes, tableaux, graphiques) */
@@ -317,7 +322,7 @@
   function alertsHTML() {
     const t = ti(), td = day(S.date), it = [];
     const pdvBy = AIRES.map(a => [a.nom, sv("pdv", t, a.cle)]).filter(x => x[1] > 0).sort((a, b) => b[1] - a[1]);
-    if (sv("pdv", t)) it.push(["crit", `<b>${nf(sv("pdv", t))} contacts perdus de vue (non vus depuis 3 jours ou plus)</b>${S.aire ? "" : " — " + pdvBy.slice(0, 3).map(x => `${esc(x[0])} (${nf(x[1])})`).join(", ")}.`]);
+    if (sv("pdv", t)) it.push(["crit", `<b>${nf(sv("pdv", t))} contacts perdus de vue (non vus depuis 3 jours ou plus)</b>${S.aire ? "" : ", " + pdvBy.slice(0, 3).map(x => `${esc(x[0])} (${nf(x[1])})`).join(", ")}.`]);
     const taux = ratio(sv("vus", t), sv("a_suivre", t));
     if (taux !== null && taux < C.taux_suivi_pct) it.push([taux < 75 ? "crit" : "warn", `<b>Taux de suivi ${pc(taux)}</b> sous la cible de ${C.taux_suivi_pct} %.`]);
     if (sv("jmv", t)) it.push(["warn", `<b>${nf(sv("jmv", t))} contacts jamais vus</b> depuis leur enregistrement.`]);
@@ -408,7 +413,7 @@
     if (m[2] === "cat") {
       color = v => CATMAP[v] || TL_NA;
       const cnt = c => AIRES.filter(a => B[a.cle].cat === c).length;
-      leg = Object.keys(CATMAP).map(c => ({ label: `${c} — ${CATDEF[c]} (${cnt(c)})`, color: CATMAP[c] }));
+      leg = Object.keys(CATMAP).map(c => ({ label: `${c}, ${CATDEF[c]} (${cnt(c)})`, color: CATMAP[c] }));
     } else if (m[2] === "down") {
       const tg = C.taux_suivi_pct, br = [50, 65, 80, tg];
       cls = [{ lo: -Infinity, hi: br[0], color: TL[4], label: `< ${br[0]} %` }, { lo: br[0], hi: br[1], color: TL[3], label: `${br[0]}–${br[1]} %` }, { lo: br[1], hi: br[2], color: TL[2], label: `${br[1]}–${br[2]} %` }, { lo: br[2], hi: br[3], color: TL[1], label: `${br[2]}–${br[3]} %` }, { lo: br[3], hi: Infinity, color: TL[0], label: `≥ ${br[3]} % (cible)` }];
@@ -419,7 +424,7 @@
       color = v => { if (v === null || v === undefined) return TL_NA; return (cls.find(c => v >= c.lo && v <= c.hi) || cls[cls.length - 1]).color; };
       leg = [...cls.map(c => ({ label: c.label, color: c.color })), { label: "aucune donnée", color: TL_NA }];
     }
-    leg.title = m[1] + (S.mapInd === "categorie" ? " — chiffre dans le cercle : cas confirmés des 7 derniers jours" : "");
+    leg.title = m[1] + (S.mapInd === "categorie" ? ", chiffre dans le cercle : cas confirmés des 7 derniers jours" : "");
     return { B, val, color, leg, m };
   }
   function drawMap(el_) {
@@ -466,7 +471,7 @@
         ${box("Statut des contacts du jour", "Cliquez un statut pour afficher la liste correspondante", `<div id="c-stat"></div>`, pngBtn("statut_contacts"))}
         ${box("Issue des contacts sortis du suivi", "Contacts dont les 21 jours se sont terminés pendant la période", `<div id="c-iss"></div>`, pngBtn("issue_suivi"))}
       </div>
-      ${box(`Contacts à retrouver — ${S.ctStat === "a_retrouver" ? "PDV, jamais vus, absents, déplacés, refus" : S.ctStat}`, "Liste pseudonymisée. Les listes nominatives (noms, téléphone, quartier, ReCo) sont dans le classeur confidentiel (menu Carte et rapports).",
+      ${box(`Contacts à retrouver, ${S.ctStat === "a_retrouver" ? "PDV, jamais vus, absents, déplacés, refus" : S.ctStat}`, "Liste pseudonymisée. Les listes nominatives (noms, téléphone, quartier, ReCo) sont dans le classeur confidentiel (menu Carte et rapports).",
         `<div class="filters"><label>Afficher <select data-state="ctStat">${[["a_retrouver", "Tous les contacts à retrouver"], ...order.filter(k => byStat[k]).map(k => [k, k])].map(([k, l]) => `<option value="${k}" ${S.ctStat === k ? "selected" : ""}>${l} ${byStat[k] ? `(${byStat[k]})` : ""}</option>`).join("")}</select></label></div>
         ${jLegend()}${tableHTML("t-retrouver", cols, lst, { name: `contacts_${S.ctStat}_${S.date}`, limit: 300 })}`, csvBtn("t-retrouver"))}
       <div class="grid2">
@@ -582,6 +587,7 @@
   /* ================================================================== CARTE ET RAPPORTS */
   const PUBLIC = !!(D.meta && D.meta.public);   // version partagée en ligne (lecture seule, sans listes nominatives)
   const SERVED = location.protocol.startsWith("http") && !PUBLIC;
+  const capHtml = t => Ch.esc(t || "").replace(/&lt;(\/?)b&gt;/g, "<$1b>");
   function pageCarte() {
     after(() => drawMap($("#c-map2")));
     const dl = D.exports || {};
@@ -590,9 +596,9 @@
         `<div class="filters"><label>Indicateur <select data-state="mapInd">${MAPIND.map(([k, l]) => `<option value="${k}" ${S.mapInd === k ? "selected" : ""}>${l}</option>`).join("")}</select></label></div><div id="c-map2"></div>`, `<button class="btn sm primary" data-maprep>Carte (PNG rapport)</button>`)}
       ${(() => { const cm = D.exports.cartes || {}; const lab = { categorie: "Catégorisation des aires de santé (date du dernier cas)", cas21: "Cas des 21 derniers jours", cas7: "Cas des 7 derniers jours", inc: "Incidence cumulée /10 000 hab.", taux: "Taux de suivi des contacts du jour", pdv: "Contacts perdus de vue", as: "Contacts à suivre" };
         const ks = Object.keys(cm); if (!ks.length) return "";
-        return box("Cartes pour rapport", `Cartes A4 produites par l'analyse du ${dfr(D.meta.date_rapport)} : titre, légende avec le nombre d'aires, flèche du nord, échelle, source et date — prêtes pour Word ou PowerPoint`,
-          `<div class="maps-grid">${ks.map(k => `<div class="map-card"><a href="${OUT}cartes/${encodeURIComponent(cm[k])}" target="_blank" rel="noopener"><img class="map-img" loading="lazy" src="${OUT}cartes/${encodeURIComponent(cm[k])}" alt="${esc(lab[k] || k)}"></a><div class="flex between" style="margin-top:8px"><b class="small">${esc(lab[k] || k)}</b><a class="btn sm" href="${OUT}cartes/${encodeURIComponent(cm[k])}" download>⤓ PNG</a></div></div>`).join("")}</div>`); })()}
-      ${box("Rapports produits", `Produits à chaque analyse pour la date du ${dfr(D.meta.date_rapport)}${S.date !== D.meta.date_rapport ? " — la date affichée est différente : utilisez « Produire pour cette date »" : ""}`,
+        return box("Cartes pour rapport", `Cartes A4 produites par l'analyse du ${dfr(D.meta.date_rapport)} : titre, légende avec le nombre d'aires, flèche du nord, échelle, source et date, prêtes pour Word ou PowerPoint`,
+          `<div class="maps-grid">${ks.map(k => `<div class="map-card"><a href="${OUT}cartes/${encodeURIComponent(cm[k])}" target="_blank" rel="noopener"><img class="map-img" loading="lazy" src="${OUT}cartes/${encodeURIComponent(cm[k])}" alt="${esc(lab[k] || k)}"></a><div class="flex between" style="margin-top:8px"><b class="small">${esc(lab[k] || k)}</b><button class="btn sm" type="button" data-map-png="${k}" data-map-file="${esc(cm[k])}" title="Carte et commentaire dans une seule image">⤓ PNG</button></div>${(D.exports.commentaires || {})[k] ? `<p class="map-cap" id="map-cap-${k}">${capHtml(D.exports.commentaires[k])}</p>` : ""}</div>`).join("")}</div>`); })()}
+      ${box("Rapports produits", `Produits à chaque analyse pour la date du ${dfr(D.meta.date_rapport)}${S.date !== D.meta.date_rapport ? ", la date affichée est différente : utilisez « Produire pour cette date »" : ""}`,
         `<div class="filters">${link(dl.rapport_pdf, "Rapport de la zone de santé (PDF)")}${link(dl.classeur, "Classeur des tableaux (Excel)")}
           ${SERVED ? `<button class="btn" data-run-date>Produire pour le ${dfr(S.date)}</button>` : ""}</div>
          ${PUBLIC ? `<p class="note">Version en ligne : les listes nominatives restent uniquement dans l'outil local de la coordination provinciale.</p>` : SERVED && !canUp() ? `<p class="note">Listes nominatives : réservées au compte provincial et au compte de la zone de santé de ${esc(D.meta.zone_de_sante)}.</p>` : `<h3 class="small" style="margin:14px 0 6px">Listes nominatives (confidentiel)</h3>
@@ -637,7 +643,7 @@
   let TV = {};
   const PAGES = [
     ["jour", "Vue générale", "Situation"], ["aires", "Aires de santé", "Situation"], ["cas", "Cas confirmés et probables", "Situation"], ["carte", "Carte et rapports", "Situation"],
-    ["contacts", "Suivi des contacts", "Contact tracing"], ["equipes", "Équipes de suivi", "Contact tracing"], ["index", "Cas index", "Contact tracing"], ["journey", "Parcours du cas", "Contact tracing"],
+    ["equipes", "Équipes de suivi", "Contact tracing"], ["index", "Cas index", "Contact tracing"], ["journey", "Parcours du cas", "Contact tracing"],
     ["chains", "Chaînes de transmission", "Contact tracing"], ["recon", "Reconstruction de la transmission", "Contact tracing"],
     ["dynamics", "Dynamique de transmission", "Analyses"], ["children", "Enfants (0–18 ans)", "Analyses"],
     ["alertes", "Surveillance des alertes", "Riposte"], ["deces", "Décès et EDS", "Riposte"], ["clinique", "Symptômes et clinique", "Riposte"], ["labo", "Laboratoire", "Riposte"],
@@ -656,7 +662,7 @@
   function shell() {
     if (PUBLIC || (SERVED && !canUp())) { const b = document.querySelector('.controls [data-go="fichiers"]'); if (b) b.remove(); }
     if (!NAVP().find(x => x[0] === S.page)) S.page = "jour";
-    document.title = NIV_PROV ? `Ebola — ${D.meta.zone_de_sante} (analyses détaillées)` : `Ebola — ZS ${D.meta.zone_de_sante}`;
+    document.title = NIV_PROV ? `Ebola, ${D.meta.zone_de_sante} (analyses détaillées)` : `Ebola : ZS ${D.meta.zone_de_sante}`;
     $("#brand-sub").textContent = NIV_PROV ? `${D.meta.zone_de_sante} · analyses détaillées` : `Zone de santé de ${D.meta.zone_de_sante}`;
     let g0 = "";
     const zl = PROV ? PROV.zones.filter(z => (PROV.meta.zones_detail || []).includes(z.nom)) : [];
@@ -674,8 +680,8 @@
     const z = bulletin(null, day(S.date));
     $("#side-status").innerHTML = `<b><span class="pulse"></span>ZS ${esc(D.meta.zone_de_sante)}</b><span>Données jusqu'au ${dfr(D.meta.donnees_jusqu_au)}</span>
       ${SU ? `<div class="row"><span>Contacts à suivre</span><b>${nf(z.as)}</b></div><div class="row"><span>Taux de suivi</span><b>${pc(z.taux, 0)}</b></div>` : ""}<div class="row"><span>Cas 7 j</span><b>${nf(z.cs.n7)}</b></div><div class="row"><span>Cas 21 j</span><b>${nf(z.cs.n21)}</b></div>`;
-    $("#foot-l").textContent = `Ebola Outbreak — outil provincial · zone de santé de ${D.meta.zone_de_sante} · analyse du ${D.meta.genere_le} · v${D.meta.version || ""}`;
-    if (!NIV_PROV) document.title = `Ebola — ZS ${D.meta.zone_de_sante}`;
+    $("#foot-l").textContent = `Ebola Outbreak, outil provincial · zone de santé de ${D.meta.zone_de_sante} · analyse du ${D.meta.genere_le} · v${D.meta.version || ""}`;
+    if (!NIV_PROV) document.title = `Ebola : ZS ${D.meta.zone_de_sante}`;
     const PR = [["7", "7 j"], ["14", "14 j"], ["21", "21 j"], ["28", "28 j"], ["42", "42 j"], ["90", "90 j"], ["tout", "Tout"]];
     $("#periodbar").innerHTML = `<div class="pb-main"><span class="pb-title"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M7 2h2v2h6V2h2v2h3v18H4V4h3zm-1 8v10h12V10z"/></svg>Période d'analyse</span>
       <label class="pb-date">Du <input type="date" id="pb-from" value="${S.from}" min="${firstDate}" max="${S.date}"></label>
@@ -734,7 +740,7 @@
     const more = t.closest("[data-more]"); if (more) { const st = S.tables[more.dataset.more]; if (st) { st.limit += 100; render(); } return; }
     const seg = t.closest(".seg[data-seg] button"); if (seg) { S[seg.parentElement.dataset.seg] = seg.dataset.v; render(); return; }
     const png = t.closest("[data-png]"); if (png) { const p = png.closest(".panel"); const name = `${png.dataset.png}_${S.aire ? AN[S.aire] : D.meta.zone_de_sante}_${S.date}`;
-      if (!TV[S.page] && p.querySelector(".chart svg")) G.panelPNG(p, name, `ZS ${D.meta.zone_de_sante} · ${scope()} · ${perTxt()} · Ebola Outbreak — outil de la zone de santé`);
+      if (!TV[S.page] && p.querySelector(".chart svg")) G.panelPNG(p, name, `ZS ${D.meta.zone_de_sante} · ${scope()} · ${perTxt()} · Ebola Outbreak, outil de la zone de santé`);
       else Ch.downloadPanelPNG(p, name); return; }
     const cv = t.closest("[data-csv]"); if (cv) { const id = cv.dataset.csv; if (TABLESN[id]) { csvN(id); return; } const T_ = TABLES[id]; if (T_) G.csv(T_.name, Array.isArray(T_.cols) && typeof T_.cols[0] === "object" ? T_.cols.map(c => c.t) : T_.cols, Array.isArray(T_.cols) && typeof T_.cols[0] === "object" ? T_.rows.map(r => T_.cols.map(c => { const v = r[c.k]; return Array.isArray(v) ? v.join(" ") : v; })) : T_.rows); return; }
     if (t.closest("[data-maprep]")) { mapReport(); return; }
@@ -768,9 +774,9 @@
     const host = document.createElement("div"); host.style.cssText = "position:absolute;left:-9999px;top:0;width:1100px"; document.body.appendChild(host);
     const b = document.createElement("section"); b.className = "panel"; host.appendChild(b);
     const ind = MAPIND.find(m => m[0] === S.mapInd)[1];
-    b.innerHTML = `<div class="panel-head"><div><h2>ZS ${esc(D.meta.zone_de_sante)} — ${esc(ind)}</h2><p>Situation au ${dfr(S.date)}${S.mapInd === "casper" ? " · " + perTxt() : ""} · ${D.geo ? "contours des aires de santé" : "carte schématique (positions non géographiques)"}</p></div></div><div class="cm"></div>`;
+    b.innerHTML = `<div class="panel-head"><div><h2>ZS ${esc(D.meta.zone_de_sante)}, ${esc(ind)}</h2><p>Situation au ${dfr(S.date)}${S.mapInd === "casper" ? " · " + perTxt() : ""} · ${D.geo ? "contours des aires de santé" : "carte schématique (positions non géographiques)"}</p></div></div><div class="cm"></div>`;
     drawMap(b.querySelector(".cm"));
-    G.panelPNG(b, `carte_${S.mapInd}_${D.meta.zone_de_sante}_${S.date}`, `Sources : base de suivi des contacts, liste des cas, SBC, recherche active · Ebola Outbreak — outil de la zone de santé · ${dfr(S.date)}`);
+    G.panelPNG(b, `carte_${S.mapInd}_${D.meta.zone_de_sante}_${S.date}`, `Sources : base de suivi des contacts, liste des cas, SBC, recherche active · Ebola Outbreak, outil de la zone de santé · ${dfr(S.date)}`);
     setTimeout(() => host.remove(), 3000);
   }
   /* ---- dépôt de fichiers et analyse (serveur local) */
@@ -833,7 +839,7 @@
       if (s.role !== "province" && s.code !== zq) { location.replace("zs.html?zone=" + encodeURIComponent(s.code)); return; }
       const zone = s.role === "province" ? (s.codes || {})[zq] : s.zone;
       if (!zone) { show(`<div class="empty">Zone de santé inconnue. <a href="index.html">Retour à la province</a></div>`); return; }
-      show(`${s.role === "province" ? `<p><a href="index.html">← Accueil de la province</a></p>` : ""}<section class="panel"><div class="panel-head"><div><h2>Zone de santé de ${esc(zone)} — première analyse</h2><p>Aucune analyse n'a encore été produite pour cette zone. Déposez ses fichiers puis lancez l'analyse.</p></div></div>
+      show(`${s.role === "province" ? `<p><a href="index.html">← Accueil de la province</a></p>` : ""}<section class="panel"><div class="panel-head"><div><h2>Zone de santé de ${esc(zone)}, première analyse</h2><p>Aucune analyse n'a encore été produite pour cette zone. Déposez ses fichiers puis lancez l'analyse.</p></div></div>
         <label class="drop" id="drop0"><input type="file" id="up0" multiple hidden accept=".xlsx,.xlsb,.xls,.xlsm,.csv,.zip,.geojson,.json"><b>Déposez les fichiers ici</b><span class="muted small">ou cliquez pour les choisir · l'outil reconnaît chaque fichier par son contenu</span></label>
         <div id="up-files" style="margin-top:12px"></div><p style="margin-top:12px"><button class="btn primary" id="run0">Lancer l'analyse</button></p><div class="log" id="log" hidden></div></section>`, "ZS " + zone);
       const list = async () => { try { $("#up-files").innerHTML = filesHTML(await (await fetch("/api/fichiers?zone=" + encodeURIComponent(zone), { credentials: "same-origin" })).json()); } catch (e) {} };

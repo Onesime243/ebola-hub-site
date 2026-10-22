@@ -1,4 +1,4 @@
-/* Ebola Outbreak — version en ligne protégée par connexion
+/* Ebola Outbreak, version en ligne protégée par connexion
    Les données publiées sont chiffrées (AES-256-GCM). Après connexion (mêmes identifiant et mot de passe que l'outil local),
    les clés du compte sont déchiffrées dans le navigateur et gardées pour cet onglet uniquement (sessionStorage) :
    un compte de zone ne reçoit que la clé de sa zone ; le compte provincial reçoit toutes les clés.

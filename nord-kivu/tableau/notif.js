@@ -1,4 +1,4 @@
-/* Ebola Outbreak — tableau de bord d'une zone de santé : alertes et cas suspects
+/* Ebola Outbreak, tableau de bord d'une zone de santé : alertes et cas suspects
    Sources : liste linéaire des suspects et confirmés de la zone, export DHIS2 des alertes (une ligne par notification),
    base des alertes de la zone (agrégats journaliers par aire de santé). */
 window.ZS_NOTIF = function (H) {
@@ -47,7 +47,7 @@ window.ZS_NOTIF = function (H) {
         dp: med(p.map(r => dd(r.notif, r.prel)).filter(v => v !== null && v >= 0 && v <= 30)), al: sum(y, "total_v") + sum(y, "total_d"), inv: ratio(sum(y, "inv_v") + sum(y, "inv_d"), sum(y, "total_v") + sum(y, "total_d")), alv: sum(y, "val_v") + sum(y, "val_d") }; });
     const attRows = att.map(r => ({ id: r.id || "—", ini: r.ini || "", aire: AN[r.aire] || r.aire || "—", notif: r.notif, prel: r.prel, j: dd(r.prel || r.notif, S.date) })).sort((a, b) => (b.j ?? 0) - (a.j ?? 0));
     const src = N.length ? [...new Set(N.map(r => r.source).filter(Boolean))].join(", ") : "";
-    return `<div class="notice"><b>Alertes et cas suspects</b> — ${N.length ? `liste individuelle des notifications de la zone (${esc(src)})` : ""}${N.length && AJ.length ? " et " : ""}${AJ.length ? "base des alertes (agrégats journaliers par aire de santé)" : ""}. ${perTxt()}${S.aire ? " · " + esc(AN[S.aire] || S.aire) : ""}.</div>
+    return `<div class="notice"><b>Alertes et cas suspects</b>, ${N.length ? `liste individuelle des notifications de la zone (${esc(src)})` : ""}${N.length && AJ.length ? " et " : ""}${AJ.length ? "base des alertes (agrégats journaliers par aire de santé)" : ""}. ${perTxt()}${S.aire ? " · " + esc(AN[S.aire] || S.aire) : ""}.</div>
       <div class="grid g5">
         ${kpi(useAJ ? "Alertes notifiées (base des alertes)" : "Alertes et suspects notifiés", nf(useAJ ? aj.tot : L.length), useAJ ? `${nf(aj.dec)} décès · ${pc(ratio(aj.inv, aj.tot), 0)} investiguées` : `${nf(dec)} décès${val + inval ? ` · ${nf(val)} validées / ${nf(inval)} invalidées` : ""}`, { color: "--s1" })}
         ${kpi("Prélevés", nf(useAJ && !N.length ? aj.prel : pre.length), N.length ? `${pc(ratio(pre.length, L.length), 0)} des notifications · délai médian ${dprel !== null ? nf(dprel, 0) + " j" : "—"} après la notification` : `${nf(aj.swab)} écouvillons post-mortem`, { color: "--s3" })}

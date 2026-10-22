@@ -1,13 +1,13 @@
-/* Ebola Outbreak — page « Présentation » : graphiques et diapositives prêts pour les réunions (province et zones de santé)
+/* Ebola Outbreak, page « Présentation » : graphiques et diapositives prêts pour les réunions (province et zones de santé)
    Les fichiers sont produits à chaque analyse par scripts/presentation.py (sortie/…/presentation/). Noms fixes : une image
    absente (données non disponibles) est simplement masquée. */
 (function () {
   "use strict";
   const PRES = [
-    ["1. Surveillance — situation cumulée", [["01_indicateurs_cumul", "Indicateurs cumulés"], ["02_courbe_hebdomadaire", "Évolution hebdomadaire : vivants, décès et létalité"]]],
-    ["1. Surveillance — situation du jour", [["03_indicateurs_jour", "Indicateurs du jour"], ["04_cas_du_jour", "Répartition des nouveaux cas"]]],
-    ["1. Surveillance — jours sans nouveau cas", [["05_jours_sans_cas", "Jours sans nouveau cas confirmé"]]],
-    ["1. Surveillance — carte", [["06_carte", "Carte de catégorisation"]]],
+    ["1. Surveillance, situation cumulée", [["01_indicateurs_cumul", "Indicateurs cumulés"], ["02_courbe_hebdomadaire", "Évolution hebdomadaire : vivants, décès et létalité"]]],
+    ["1. Surveillance, situation du jour", [["03_indicateurs_jour", "Indicateurs du jour"], ["04_cas_du_jour", "Répartition des nouveaux cas"]]],
+    ["1. Surveillance, jours sans nouveau cas", [["05_jours_sans_cas", "Jours sans nouveau cas confirmé"]]],
+    ["1. Surveillance, carte", [["06_carte", "Carte de catégorisation"]]],
     ["2. Alertes", [["07_indicateurs_alertes", "Indicateurs des alertes"], ["07b_alertes_comparatif_3j", "Tableau comparatif sur 3 jours"], ["08_alertes_sources", "Sources des alertes du jour (nombre et %)"],
       ["08b_alertes_sources_3j", "Sources des alertes sur 3 jours"], ["09_alertes_unites", "Alertes et validées"], ["09b_alertes_sources_zs", "Sources des alertes du jour par zone de santé"]]],
     ["3. Suivi des contacts", [["10_indicateurs_contacts", "Indicateurs du suivi"], ["11_contacts_non_vus", "Raisons de non-suivi"], ["12_contacts_tendance", "Taux de suivi sur 21 jours"],
@@ -21,7 +21,7 @@
   function html(base, pptx, titre, dateTxt) {
     const v = Date.now();
     return `<section class="panel pres-head"><div class="pres-dl">
-        <div><h2>Présentation PowerPoint — ${esc(titre)}</h2>
+        <div><h2>Présentation PowerPoint, ${esc(titre)}</h2>
           <p>Diapositives au format des présentations de la DPS, ${esc(dateTxt)} : indicateurs, courbes et tableaux, avec des graphiques <b>modifiables</b> dans PowerPoint (clic droit sur un graphique › Modifier les données). Seuls les piliers dont l'outil reçoit les données sont produits.</p></div>
         <a class="btn primary pres-btn" href="${base}${encodeURIComponent(pptx)}" download="${esc(pptx)}">⤓ Télécharger le PowerPoint</a></div>
         <p class="note">Chaque graphique ci-dessous se télécharge aussi en image (PNG haute définition) pour être collé dans une diapositive existante. Tout est mis à jour à chaque analyse.</p></section>

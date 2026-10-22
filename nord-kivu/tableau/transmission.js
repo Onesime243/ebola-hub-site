@@ -1,4 +1,4 @@
-/* Ebola Outbreak — outil de la zone de santé : analyses de transmission
+/* Ebola Outbreak, outil de la zone de santé : analyses de transmission
    Cas index, parcours du cas, chaînes de transmission, reconstruction, dynamique de transmission, enfants (0–18 ans).
    Mêmes vues et mêmes modèles que l'outil national (practicals RECON), appliqués aux aires de santé de la zone. */
 window.ZS_TRANSMISSION = function (H) {
@@ -11,7 +11,7 @@ window.ZS_TRANSMISSION = function (H) {
     dynG: "National", growBase: "dds", growWin: "12s", dyBase: "o", rtDays: "120", rlWin: "28j", projH: "30", distK: "dds_notification",
     recZone: "", recSup: "0.3", recColor: "issue", recX: "onset", recDoc: false, epiMin: "3" }).forEach(([k, v]) => { if (S[k] === undefined) S[k] = v; });
   const noTR = () => { const w = (D.meta.avertissements || []).find(x => /transmission/i.test(x));
-    return `<div class="empty">Analyses de transmission indisponibles : ${w ? esc(w) + " — " : "la base de suivi des contacts et la liste des cas sont nécessaires. "}Relancez l'analyse depuis « Charger les données ».</div>`; };
+    return `<div class="empty">Analyses de transmission indisponibles : ${w ? esc(w) + ", " : "la base de suivi des contacts et la liste des cas sont nécessaires. "}Relancez l'analyse depuis « Charger les données ».</div>`; };
   const tRef = () => day(S.date);
   const tFrom = () => day(S.from);
 
@@ -33,7 +33,7 @@ window.ZS_TRANSMISSION = function (H) {
   const CLS = { "Confirmé": "--st-conf", "Probable": "--s5" };
   const clsColor = c => CLS[c] || "--st-inc";
   const LINKC = { "Certain": "b-crit", "Probable": "b-high", "À vérifier": "b-mod" };
-  /* statut d'un contact à une date (t en jours) — mêmes règles que le rapport de suivi */
+  /* statut d'un contact à une date (t en jours), mêmes règles que le rapport de suivi */
   function cst(x, t) {
     if (strongLk(x)) { const tc = caseBy.get(x.lk); if (!tc || !tc.date || day(tc.date) <= t) return "Devenu confirmé"; }
     const s = status(x, t);
@@ -104,7 +104,7 @@ window.ZS_TRANSMISSION = function (H) {
         <div><div class="small muted" style="margin-bottom:3px">Générations du réseau</div>${segBtns("gen", GENS)}</div>
         <label class="flex small" style="margin-top:14px"><input type="checkbox" data-check="idxActive" ${S.idxActive ? "checked" : ""}> Suivi en cours uniquement</label>
       </div>
-      <div class="small muted" style="margin-top:8px">Filtres actifs : <b>${filtTxt || "aucun"}</b> — ${nf(rows.length)} cas index sur ${nf(all.length)} · la période et l'aire de santé se choisissent en haut de l'écran</div>
+      <div class="small muted" style="margin-top:8px">Filtres actifs : <b>${filtTxt || "aucun"}</b>, ${nf(rows.length)} cas index sur ${nf(all.length)} · la période et l'aire de santé se choisissent en haut de l'écran</div>
     </section>
     <div class="grid g5">
       ${kpi("Cas index (filtrés)", nf(rows.length), `Médiane ${nf(med)} contacts par cas index`)}
@@ -173,7 +173,7 @@ window.ZS_TRANSMISSION = function (H) {
     <div class="flex between" style="margin-bottom:12px">
       <div class="search-box"><input type="search" id="case-search" placeholder="Rechercher un cas : identifiant, initiales, aire de santé…" autocomplete="off"><div id="case-results" class="search-results hide"></div></div>
       <div class="flex small"><span class="muted">Générations</span>${segBtns("gen", GENS)}
-        <select data-state="cas" title="Cas index de la période et de l'aire choisies" style="max-width:300px"><option value="">Cas index — période et aire choisies (${nf(list.length)})</option>${list.slice(0, 500).map(x => `<option value="${esc(x.index_key)}" ${x.index_key === k ? "selected" : ""}>${esc(x.id_cas)} · ${esc(x.aire || "")} · G${x.gen} · ${nf(x.reseau)} contacts</option>`).join("")}</select></div>
+        <select data-state="cas" title="Cas index de la période et de l'aire choisies" style="max-width:300px"><option value="">Cas index, période et aire choisies (${nf(list.length)})</option>${list.slice(0, 500).map(x => `<option value="${esc(x.index_key)}" ${x.index_key === k ? "selected" : ""}>${esc(x.id_cas)} · ${esc(x.aire || "")} · G${x.gen} · ${nf(x.reseau)} contacts</option>`).join("")}</select></div>
       <div class="flex small muted">Navigation :
         <button class="btn sm" data-nav="${esc((list[i - 1] || {}).index_key || "")}" ${i > 0 ? "" : "disabled"}>← Cas précédent</button><button class="btn sm" data-nav="${esc((list[i + 1] || {}).index_key || "")}" ${i >= 0 && i < list.length - 1 ? "" : "disabled"}>Cas suivant →</button></div>
     </div>
@@ -209,7 +209,7 @@ window.ZS_TRANSMISSION = function (H) {
       ${panel("Nœud sélectionné", "Cliquer un nœud du graphe", `<div id="node-detail">${nodeDetail()}</div><h3 class="small" style="margin:16px 0 6px">Statut des contacts directs (${dfr(S.date)})</h3>${stackbar(counts)}${legend(STATUS.filter(x => counts[x.k]).map(x => ({ t: x.k, c: x.c, n: counts[x.k] })))}`)}
     </div>
     ${ct.length ? panel("Grille de suivi des contacts (J1 à J21)", "Une ligne par contact, comme la fiche de suivi ; le jour du rapport est encadré ; les cases hachurées précèdent l'enregistrement du contact (pas une absence).", `${H.jLegend()}<div class="tbl-wrap" style="max-height:560px">${gridHTML(ct)}</div>`) : ""}
-    ${panel("Contacts du cas index", `Suivi individuel sur 21 jours — pseudonymisé · ${perTxt()}`, table("jr-ct", ct.map(x => { const ds = daysSeen(x, t); return { ...x, st: cst(x, t), jv: ds.v, ja: ds.a, vl: lastSeen(x), fin: x._dlc !== null ? H.iso(x._dlc + 21) : null, aire_n: AN[x.aire] || x.aire }; }), [
+    ${panel("Contacts du cas index", `Suivi individuel sur 21 jours, pseudonymisé · ${perTxt()}`, table("jr-ct", ct.map(x => { const ds = daysSeen(x, t); return { ...x, st: cst(x, t), jv: ds.v, ja: ds.a, vl: lastSeen(x), fin: x._dlc !== null ? H.iso(x._dlc + 21) : null, aire_n: AN[x.aire] || x.aire }; }), [
       { k: "id", t: "ID contact", v: x => `<b>${esc(x.id)}</b> <span class="muted">${esc(x.ini)}</span>`, csv: x => x.id }, { k: "age", t: "Âge", num: true }, { k: "sexe", t: "Sexe" },
       { k: "lien", t: "Relation" }, { k: "type", t: "Exposition", v: x => esc(x.type || "—") + (x.hr ? " " + badge("Haut risque", "b-high") : ""), csv: x => x.type },
       { k: "aire_n", t: "Aire" }, { k: "dlc", t: "Dernière exposition", v: x => dshort(x.dlc) }, { k: "fin", t: "Fin de suivi", v: x => dshort(x.fin) },
@@ -278,7 +278,7 @@ window.ZS_TRANSMISSION = function (H) {
         ["Jours vus / attendus", `${ds.v} / ${ds.a}`], ["Dernière visite (vu)", lastSeen(x) ? dfmt(lastSeen(x)) : "jamais"], ["Superviseur / ReCo", `${x.sup || "—"} / ${x.reco || "—"}`], ["Vaccination", x.vacc || "—"]];
       return `<div class="detail-card"><div>${statusBadge(st)}</div>${rows.map(([a, b]) => `<div class="detail-row"><span>${a}</span><b>${esc(b)}</b></div>`).join("")}
         <div style="margin-top:6px">${H.miniGrid(x.codes, Math.min(21, Math.max(0, t - x._dlc)))}</div>
-        ${x.lk ? `<div class="notice ${x.lkc === "À vérifier" ? "warn" : ""}"><b>Devenu cas : ${esc(x.lkc)}</b> — <a href="#" data-gocas="${esc(x.lk)}">${esc(x.lk)}</a> (rapprochement du nom du contact avec la liste des cas)</div>` : ""}</div>`;
+        ${x.lk ? `<div class="notice ${x.lkc === "À vérifier" ? "warn" : ""}"><b>Devenu cas : ${esc(x.lkc)}</b>, <a href="#" data-gocas="${esc(x.lk)}">${esc(x.lk)}</a> (rapprochement du nom du contact avec la liste des cas)</div>` : ""}</div>`;
     }
     const c = caseBy.get(String(k).replace(/^C:/, ""));
     if (c) return `<div class="detail-card"><div class="detail-row"><span>Cas</span><b><a href="#" data-gocas="${esc(c.k)}">${esc(c.id)}</a></b></div><div class="detail-row"><span>Classification</span><b>${esc(c.cls)}</b></div><div class="detail-row"><span>Aire</span><b>${esc(c.zs || "—")}</b></div><div class="detail-row"><span>Contacts listés</span><b>${nf(c.nc)}</b></div></div>`;
@@ -375,7 +375,7 @@ window.ZS_TRANSMISSION = function (H) {
   const DY = (TR && TR.dynamique) || {}, RC = (TR && TR.reconstruction) || {};
   const AGEC = ["#3288BD", "#9ED1A3", "#FDAE61", "#E8684F", "#B0213A", "--sex-i"];
   const fmtR = v => v === null || v === undefined ? "—" : nf(v, 2);
-  const ci = (a, b, d = 2) => (a === null || a === undefined) ? "" : `[${nf(a, d)} – ${nf(b, d)}]`;
+  const ci = (a, b, d = 2) => (a === null || a === undefined) ? "" : `[${nf(a, d)}, ${nf(b, d)}]`;
   const pctS = v => (v >= 0 ? "+" : "") + nf(v, 1) + " %";
   const firstIdx = (rows, f) => { const i = rows.findIndex(f); return i < 0 ? null : i; };
   function dyGroups() { return DY.groupes || []; }
@@ -404,8 +404,8 @@ window.ZS_TRANSMISSION = function (H) {
   function growthText(f) {
     if (!f || f.r === undefined) return [];
     const up = f.sens === "croissance", down = f.sens === "decroissance";
-    const dbl = f.sens === "incertain" ? "" : f.temps_doublement ? `temps de doublement ${nf(f.temps_doublement, 1)} j${f.temps_doublement_ic95 ? ` (IC 95 % ${nf(f.temps_doublement_ic95[0], 1)} – ${f.temps_doublement_ic95[1] ? nf(f.temps_doublement_ic95[1], 1) : "∞"} j)` : ""}` : "";
-    const half = f.sens === "incertain" ? "" : f.temps_demi ? `temps de division par deux ${nf(f.temps_demi, 1)} j${f.temps_demi_ic95 ? ` (IC 95 % ${nf(f.temps_demi_ic95[0], 1)} – ${f.temps_demi_ic95[1] ? nf(f.temps_demi_ic95[1], 1) : "∞"} j)` : ""}` : "";
+    const dbl = f.sens === "incertain" ? "" : f.temps_doublement ? `temps de doublement ${nf(f.temps_doublement, 1)} j${f.temps_doublement_ic95 ? ` (IC 95 % ${nf(f.temps_doublement_ic95[0], 1)}, ${f.temps_doublement_ic95[1] ? nf(f.temps_doublement_ic95[1], 1) : "∞"} j)` : ""}` : "";
+    const half = f.sens === "incertain" ? "" : f.temps_demi ? `temps de division par deux ${nf(f.temps_demi, 1)} j${f.temps_demi_ic95 ? ` (IC 95 % ${nf(f.temps_demi_ic95[0], 1)}, ${f.temps_demi_ic95[1] ? nf(f.temps_demi_ic95[1], 1) : "∞"} j)` : ""}` : "";
     return [
       `Taux de croissance journalier r = <b>${nf(f.r, 4)}</b> ${ci(f.r_ic95[0], f.r_ic95[1], 4)}, soit une variation hebdomadaire de <b>${pctS(f.variation_hebdo_pct)}</b> ${ci(f.variation_hebdo_ic95[0], f.variation_hebdo_ic95[1], 1)} ; ${dbl || half || "aucune tendance nette"}.`,
       up ? `<b>Croissance exponentielle significative</b> : l'intervalle de confiance de r est entièrement positif.` : down ? `<b>Décroissance significative</b> : l'intervalle de confiance de r est entièrement négatif.` : `<b>Tendance non significative</b> : l'intervalle de confiance de r contient 0 (plateau ou données insuffisantes) ; le temps de doublement n'est pas interprétable.`,
@@ -428,19 +428,19 @@ window.ZS_TRANSMISSION = function (H) {
       <div class="small muted">Cas confirmés et probables par date de début des signes · ${nf(imp.dds_imputee)} dates imputées (${pc(imp.pct_imputee, 0)}) · dernier jour consolidé : ${dshort(cons.date)} · modèles estimés sur tout l'historique, affichage ${perTxt()}</div>
     </div>
     <div class="grid g5">
-      ${kpi("Rt consolidé", cons.mediane !== undefined ? fmtR(cons.mediane) : "—", cons.mediane !== undefined ? `IC 95 % ${fmtR(cons.q025)} – ${fmtR(cons.q975)} · ${dshort(cons.date)} · P(R>1) = ${pc(100 * cons.p_sup_1, 0)}` : "Effectif insuffisant", { cls: cons.q025 > 1 ? "alert" : cons.q975 < 1 ? "good" : "", color: "--rc-rt" })}
-      ${kpi("Rt provisoire (derniers jours)", last.mediane !== undefined ? fmtR(last.mediane) : "—", last.mediane !== undefined ? `IC 95 % ${fmtR(last.q025)} – ${fmtR(last.q975)} · ${dshort(last.date)} · à confirmer` : "", { color: "--muted" })}
+      ${kpi("Rt consolidé", cons.mediane !== undefined ? fmtR(cons.mediane) : "—", cons.mediane !== undefined ? `IC 95 % ${fmtR(cons.q025)}, ${fmtR(cons.q975)} · ${dshort(cons.date)} · P(R>1) = ${pc(100 * cons.p_sup_1, 0)}` : "Effectif insuffisant", { cls: cons.q025 > 1 ? "alert" : cons.q975 < 1 ? "good" : "", color: "--rc-rt" })}
+      ${kpi("Rt provisoire (derniers jours)", last.mediane !== undefined ? fmtR(last.mediane) : "—", last.mediane !== undefined ? `IC 95 % ${fmtR(last.q025)}, ${fmtR(last.q975)} · ${dshort(last.date)} · à confirmer` : "", { color: "--muted" })}
       ${kpi("Variation hebdomadaire", fit && fit.r !== undefined ? pctS(fit.variation_hebdo_pct) : fit && fit.apres ? pctS(fit.apres.variation_hebdo_pct) : "—", fit && fit.r !== undefined ? (fit.sens === "croissance" ? `Doublement ${nf(fit.temps_doublement, 0)} j · ` : fit.sens === "decroissance" ? `Division par deux ${nf(fit.temps_demi, 0)} j · ` : "") + (fit.sens === "croissance" ? "croissance significative" : fit.sens === "decroissance" ? "décroissance significative" : "tendance non significative (plateau)") : "Modèle à 2 phases", { color: "--s2" })}
-      ${kpi("R (vraisemblance, 28 j)", l28.R_ml !== undefined ? fmtR(l28.R_ml) : "—", l28.R_ml !== undefined ? `IC 95 % ${fmtR(l28.ic95[0])} – ${fmtR(l28.ic95[1])} · ${nf(l28.cas, 0)} cas` : "", { color: "--rc-r1" })}
-      ${kpi("Cas projetés sur 14 jours", p14.mediane !== undefined ? nf(p14.mediane) : "—", p14.mediane !== undefined ? `Intervalle 80 % ${nf(p14.q10)} – ${nf(p14.q90)} · P(0 cas) ${pc(100 * p14.p_aucun_cas, 0)}` : "", { color: "--s7" })}
+      ${kpi("R (vraisemblance, 28 j)", l28.R_ml !== undefined ? fmtR(l28.R_ml) : "—", l28.R_ml !== undefined ? `IC 95 % ${fmtR(l28.ic95[0])}, ${fmtR(l28.ic95[1])} · ${nf(l28.cas, 0)} cas` : "", { color: "--rc-r1" })}
+      ${kpi("Cas projetés sur 14 jours", p14.mediane !== undefined ? nf(p14.mediane) : "—", p14.mediane !== undefined ? `Intervalle 80 % ${nf(p14.q10)}, ${nf(p14.q90)} · P(0 cas) ${pc(100 * p14.p_aucun_cas, 0)}` : "", { color: "--s7" })}
     </div>
-    ${rt.dernier_consolide ? `<div class="notice ${cons.q025 > 1 ? "crit" : ""}"><b>Synthèse — ${esc(grp.nom)}</b> : ${rtTrend}. Intervalle sériel utilisé : ${nf(siu.moyenne, 1)} ± ${nf(siu.ecart_type, 1)} j (${esc(siu.source || "")}). Les derniers jours restent incomplets malgré la correction du retard de notification : privilégier le Rt consolidé pour la décision.</div>` : ""}
+    ${rt.dernier_consolide ? `<div class="notice ${cons.q025 > 1 ? "crit" : ""}"><b>Synthèse, ${esc(grp.nom)}</b> : ${rtTrend}. Intervalle sériel utilisé : ${nf(siu.moyenne, 1)} ± ${nf(siu.ecart_type, 1)} j (${esc(siu.source || "")}). Les derniers jours restent incomplets malgré la correction du retard de notification : privilégier le Rt consolidé pour la décision.</div>` : ""}
     ${panel("Courbe épidémique hebdomadaire et ajustement log-linéaire", "Régression du logarithme de l'incidence hebdomadaire ; la courbe et sa bande donnent la tendance exponentielle et son IC 95 %",
       `<div id="c-grow"></div><div class="statgrid" id="grow-stats"></div><div id="grow-interp"></div>`,
       { png: "croissance_loglineaire", tools: `${segBtns("growBase", [["dds", "Début des signes (corrigé)"], ["notification", "Notification"]])}${segBtns("growWin", winOpts)}` })}
     ${panel("Courbe épidémique quotidienne par classe d'âge", "Un carré = un cas lorsque les effectifs sont faibles ; zone grisée = jours encore incomplets",
       `<div id="c-dsex"></div><div id="dsex-interp"></div>`, { png: "courbe_quotidienne_age", tools: segBtns("dyBase", [["o", "Début des signes"], ["n", "Notification"]]) })}
-    ${panel("Nombre de reproduction effectif Rt (EpiEstim)", "Fenêtres glissantes de 7 jours, intervalle sériel paramétrique avec incertitude ; en haut l'incidence, en bas Rt (médiane, IC 50 % et 95 %) — ligne pointillée : seuil R = 1",
+    ${panel("Nombre de reproduction effectif Rt (EpiEstim)", "Fenêtres glissantes de 7 jours, intervalle sériel paramétrique avec incertitude ; en haut l'incidence, en bas Rt (médiane, IC 50 % et 95 %), ligne pointillée : seuil R = 1",
       `<div class="chart-stack"><div id="c-rt-inc"></div><div id="c-rt"></div></div><div id="rt-interp"></div>`, { png: "rt_epiestim", tools: segBtns("rtDays", [["60", "60 j"], ["120", "120 j"], ["200", "Tout"]]) })}
     <div class="grid g2">
       ${panel("Vraisemblance de R (earlyR)", "R supposé constant sur la fenêtre ; ligne verticale : seuil R = 1", `<div id="c-rlik"></div><div id="rlik-interp"></div>`, { png: "vraisemblance_R", tools: segBtns("rlWin", [["14j", "14 j"], ["28j", "28 j"], ["tout", "Tout"]]) })}
@@ -476,7 +476,7 @@ window.ZS_TRANSMISSION = function (H) {
     const r = d.resume, f = d.ajustement || {};
     return `<table class="rsum"><thead><tr><th>Résumé</th><th>Min.</th><th>1er quartile</th><th>Médiane</th><th>Moyenne</th><th>3e quartile</th><th>Max.</th><th>n</th></tr></thead>
       <tbody><tr><td>Observé</td><td>${nf(r.min)}</td><td>${nf(r.q1, 1)}</td><td>${nf(r.mediane, 1)}</td><td>${nf(r.moyenne, 2)}</td><td>${nf(r.q3, 1)}</td><td>${nf(r.max)}</td><td>${nf(d.n)}</td></tr></tbody></table>
-      ${f.moyenne ? `<div class="statgrid">${stat("Moyenne μ (gamma)", `${nf(f.moyenne, 2)} j`, `IC 95 % ${nf(f.moyenne_ic95[0], 2)} – ${nf(f.moyenne_ic95[1], 2)}`)}${stat("Écart-type σ", `${nf(f.ecart_type, 2)} j`, `CV = ${nf(f.cv, 3)}`)}${stat("Forme / échelle", `${nf(f.shape, 3)} / ${nf(f.scale, 3)}`, `log-vraisemblance ${nf(f.loglik, 1)}`)}${stat("Médiane / 95e percentile", `${nf(f.mediane, 1)} / ${nf(f.p95, 1)} j`, "")}</div>` : ""}
+      ${f.moyenne ? `<div class="statgrid">${stat("Moyenne μ (gamma)", `${nf(f.moyenne, 2)} j`, `IC 95 % ${nf(f.moyenne_ic95[0], 2)}, ${nf(f.moyenne_ic95[1], 2)}`)}${stat("Écart-type σ", `${nf(f.ecart_type, 2)} j`, `CV = ${nf(f.cv, 3)}`)}${stat("Forme / échelle", `${nf(f.shape, 3)} / ${nf(f.scale, 3)}`, `log-vraisemblance ${nf(f.loglik, 1)}`)}${stat("Médiane / 95e percentile", `${nf(f.mediane, 1)} / ${nf(f.p95, 1)} j`, "")}</div>` : ""}
       ${(d.exclus_negatifs || d.exclus_sup_60 || d.exclus_inf_1) ? `<div class="small muted" style="margin-top:6px">Exclus : ${nf(d.exclus_negatifs || 0)} valeurs négatives · ${nf(d.exclus_sup_60 || 0)} > 60 j${d.exclus_inf_1 ? ` · ${nf(d.exclus_inf_1)} < 1 j (exposition déclarée après le début des signes)` : ""}</div>` : ""}
       ${ref ? `<div class="interp"><b>Comparaison</b> : ${ref}</div>` : ""}`;
   }
@@ -492,7 +492,7 @@ window.ZS_TRANSMISSION = function (H) {
       const split = win === "split" && fit && fit.avant;
       if (split) { put(fit.avant, 1); put(fit.apres, 2); } else if (fit) put(fit, 1);
       Ch.xy($("#c-grow"), { data: wk, x: "week", height: 290, xLabel: (v, r, tip) => tip ? `Semaine du ${dfmt(v)}` : dshort(v), tipSkipNull: true,
-        bands: [{ lo: "lo1", hi: "hi1", color: "--s2", label: "IC 95 % de l'ajustement", opacity: .18 }, ...(split ? [{ lo: "lo2", hi: "hi2", color: "--s7", label: "IC 95 % — phase 2", opacity: .18 }] : [])],
+        bands: [{ lo: "lo1", hi: "hi1", color: "--s2", label: "IC 95 % de l'ajustement", opacity: .18 }, ...(split ? [{ lo: "lo2", hi: "hi2", color: "--s7", label: "IC 95 %, phase 2", opacity: .18 }] : [])],
         vlines: split ? [{ x: fit.separation, color: "--ink-2", label: "Changement de phase" }] : [],
         series: [{ key: "n", label: S.growBase === "dds" ? "Cas / semaine (début des signes, corrigé)" : "Cas / semaine (notification)", color: "--rc-bar" },
           { key: "fit1", label: split ? "Phase 1" : "Ajustement log-linéaire", color: "--s2", type: "line", markers: false, width: 2.5 },
@@ -504,7 +504,7 @@ window.ZS_TRANSMISSION = function (H) {
         stat(`${lab ? lab + " · " : ""}${f.r >= 0 ? "Temps de doublement" : "Temps de division par deux"}`, f.sens === "incertain" ? "non interprétable" : f.r >= 0 ? (f.temps_doublement ? nf(f.temps_doublement, 1) + " j" : "—") : (f.temps_demi ? nf(f.temps_demi, 1) + " j" : "—"), ""),
         stat(`${lab ? lab + " · " : ""}R implicite`, fmtR(f.R_implicite), f.R_implicite_ic95 && f.R_implicite_ic95[0] ? ci(f.R_implicite_ic95[0], f.R_implicite_ic95[1]) : ""),
         stat(`${lab ? lab + " · " : ""}R²`, nf(f.r2, 3), `${nf(f.semaines)} semaines`)].join("")).join("");
-      const items = split ? [`Meilleure séparation en deux phases le <b>${dfmt(fit.separation)}</b>.`, ...growthText(fit.avant).slice(0, 2).map(x => `Phase 1 — ${x}`), ...growthText(fit.apres).slice(0, 3).map(x => `Phase 2 — ${x}`)] : growthText(fit);
+      const items = split ? [`Meilleure séparation en deux phases le <b>${dfmt(fit.separation)}</b>.`, ...growthText(fit.avant).slice(0, 2).map(x => `Phase 1, ${x}`), ...growthText(fit.apres).slice(0, 3).map(x => `Phase 2, ${x}`)] : growthText(fit);
       $("#grow-interp").innerHTML = interp("Interprétation", [...items, S.growBase === "dds" ? "Base « début des signes » : les semaines dont la complétude moyenne est < 80 % sont exclues ; l'incidence est corrigée du retard de notification." : "Base « notification » : reflète aussi l'effort de détection et les retards de saisie ; la semaine en cours est exclue."],
         "Limites : modèle exponentiel simple (pas de saturation), sensible aux changements de détection ; le temps de doublement n'a de sens que si r est significativement différent de 0.");
     }
@@ -588,11 +588,11 @@ window.ZS_TRANSMISSION = function (H) {
       const pick = P.filter(r => r.date > end && r.date <= stop).filter((r, i, a) => i % 7 === 6 || i === 0 || i === a.length - 1);
       const tt = pj.totaux || {};
       $("#proj-table").innerHTML = `<table class="rsum"><thead><tr><th>Date</th><th>Min.</th><th>1er quartile</th><th>Médiane</th><th>Moyenne</th><th>3e quartile</th><th>Max.</th><th>P(≥ 1 cas)</th></tr></thead><tbody>${pick.map(r => `<tr><td>${dfmt(r.date)}</td><td>${nf(r.min)}</td><td>${nf(r.q25)}</td><td>${nf(r.mediane)}</td><td>${nf(r.moyenne, 2)}</td><td>${nf(r.q75)}</td><td>${nf(r.max)}</td><td>${pc(100 * r.p_au_moins_1, 1)}</td></tr>`).join("")}</tbody></table>
-        <div class="statgrid">${["7j", "14j", "30j"].filter(k => tt[k]).map(k => stat(`Total sur ${k.replace("j", " jours")}`, nf(tt[k].mediane), `80 % : ${nf(tt[k].q10)} – ${nf(tt[k].q90)} · 95 % : ${nf(tt[k].q025)} – ${nf(tt[k].q975)}`)).join("")}${stat("R utilisé", `${fmtR(pj.R_utilise?.mediane)}`, ci(pj.R_utilise?.q025, pj.R_utilise?.q975))}</div>`;
+        <div class="statgrid">${["7j", "14j", "30j"].filter(k => tt[k]).map(k => stat(`Total sur ${k.replace("j", " jours")}`, nf(tt[k].mediane), `80 % : ${nf(tt[k].q10)}, ${nf(tt[k].q90)} · 95 % : ${nf(tt[k].q025)}, ${nf(tt[k].q975)}`)).join("")}${stat("R utilisé", `${fmtR(pj.R_utilise?.mediane)}`, ci(pj.R_utilise?.q025, pj.R_utilise?.q975))}</div>`;
       const t14 = tt["14j"] || {};
       $("#proj-interp").innerHTML = interp("Interprétation", [
-        `Si la transmission reste au niveau du dernier Rt consolidé (${fmtR(pj.R_utilise?.mediane)}), on attend environ <b>${nf(t14.mediane)}</b> nouveaux cas (date de début) sur les 14 prochains jours (80 % : ${nf(t14.q10)} – ${nf(t14.q90)}).`,
-        t14.p_aucun_cas !== undefined ? `Probabilité qu'aucun cas n'apparaisse sur 14 jours : <b>${pc(100 * t14.p_aucun_cas, 1)}</b> — ${t14.p_aucun_cas < .05 ? "la fin de l'épidémie n'est pas en vue à court terme ; ne pas réduire la riposte." : "la probabilité d'extinction devient non négligeable, mais la surveillance doit être maintenue 42 jours."}` : ""],
+        `Si la transmission reste au niveau du dernier Rt consolidé (${fmtR(pj.R_utilise?.mediane)}), on attend environ <b>${nf(t14.mediane)}</b> nouveaux cas (date de début) sur les 14 prochains jours (80 % : ${nf(t14.q10)}, ${nf(t14.q90)}).`,
+        t14.p_aucun_cas !== undefined ? `Probabilité qu'aucun cas n'apparaisse sur 14 jours : <b>${pc(100 * t14.p_aucun_cas, 1)}</b>, ${t14.p_aucun_cas < .05 ? "la fin de l'épidémie n'est pas en vue à court terme ; ne pas réduire la riposte." : "la probabilité d'extinction devient non négligeable, mais la surveillance doit être maintenue 42 jours."}` : ""],
         "Limites : R constant (pas d'effet des interventions futures), pas d'importations ; au-delà de 2–3 semaines, ce sont des scénarios.");
     }
     /* --- distributions --- */
@@ -610,8 +610,8 @@ window.ZS_TRANSMISSION = function (H) {
       const sel = [...caseBy.values()].filter(c => !c.hors && (gid === "National" || c.zs === gid.slice(2)) && c.age !== null && c.age !== undefined);
       const wil = (k, n) => { if (!n) return [null, null]; const z = 1.96, p = k / n, d = 1 + z * z / n, c = p + z * z / (2 * n), m = z * Math.sqrt(p * (1 - p) / n + z * z / (4 * n * n)); return [100 * (c - m) / d, 100 * (c + m) / d]; };
       const data = cls.map(([l, a, b]) => { const g = sel.filter(c => Math.floor(c.age) >= a && Math.floor(c.age) <= b), k = g.filter(c => c.dc).length; const w = wil(k, g.length); return { classe: l, cas: g.length, deces: k, let: g.length ? 100 * k / g.length : null, lo: w[0], hi: w[1] }; });
-      Ch.xy($("#c-cfr-age"), { data, x: "classe", height: 230, percent: true, digits: 1, xLabel: (v, r, tip) => tip ? `${v} ans — ${nf(r.cas)} cas, ${nf(r.deces)} décès` : v, series: [{ key: "let", label: "Létalité", color: "--rc-rt" }] });
-      $("#cfr-tbl").innerHTML = `<table class="rsum"><thead><tr><th>Âge (ans)</th><th>Cas</th><th>Décès</th><th>Létalité</th><th>IC 95 % (Wilson)</th></tr></thead><tbody>${data.map(r => `<tr><td>${r.classe}</td><td>${nf(r.cas)}</td><td>${nf(r.deces)}</td><td>${pc(r.let, 1)}</td><td>${r.lo !== null ? `${nf(r.lo, 1)} – ${nf(r.hi, 1)} %` : "—"}</td></tr>`).join("")}</tbody></table>`;
+      Ch.xy($("#c-cfr-age"), { data, x: "classe", height: 230, percent: true, digits: 1, xLabel: (v, r, tip) => tip ? `${v} ans, ${nf(r.cas)} cas, ${nf(r.deces)} décès` : v, series: [{ key: "let", label: "Létalité", color: "--rc-rt" }] });
+      $("#cfr-tbl").innerHTML = `<table class="rsum"><thead><tr><th>Âge (ans)</th><th>Cas</th><th>Décès</th><th>Létalité</th><th>IC 95 % (Wilson)</th></tr></thead><tbody>${data.map(r => `<tr><td>${r.classe}</td><td>${nf(r.cas)}</td><td>${nf(r.deces)}</td><td>${pc(r.let, 1)}</td><td>${r.lo !== null ? `${nf(r.lo, 1)}, ${nf(r.hi, 1)} %` : "—"}</td></tr>`).join("")}</tbody></table>`;
     }
   }
 
@@ -626,20 +626,20 @@ window.ZS_TRANSMISSION = function (H) {
     const n05 = (RC.liens || []).filter(l => l[2] >= .5).length;
     const top = [...caseBy.values()].filter(c => c.ri > 0 && aireOk(c)).sort((a, b) => b.ri - a.ri).slice(0, 60);
     return `
-    <div class="notice"><b>Reconstruction probabiliste de la transmission</b> — inspirée d'outbreaker2 (practicals RECON), sans données génomiques : pour chaque cas, les infecteurs candidats sont les cas de la même aire de santé débutés 1 à 60 jours avant (modèle A, temporel seul), auxquels s'ajoutent les liens documentés par le suivi des contacts, fortement favorisés (modèle B, temporel + contacts, ε = 0,05). Le support d'un lien est la probabilité a posteriori que ce cas soit l'infecteur.</div>
+    <div class="notice"><b>Reconstruction probabiliste de la transmission</b>, inspirée d'outbreaker2 (practicals RECON), sans données génomiques : pour chaque cas, les infecteurs candidats sont les cas de la même aire de santé débutés 1 à 60 jours avant (modèle A, temporel seul), auxquels s'ajoutent les liens documentés par le suivi des contacts, fortement favorisés (modèle B, temporel + contacts, ε = 0,05). Le support d'un lien est la probabilité a posteriori que ce cas soit l'infecteur.</div>
     <div class="grid g5">
       ${kpi("Cas analysés", nf(s.cas), "Confirmés et probables avec date de début")}
       ${kpi("Infecteur probable identifié", pc(100 * n05 / Math.max(s.cas, 1), 1), `${nf(n05)} cas avec un lien de support ≥ 0,5 (modèle B)`, { color: "--rc-purple" })}
       ${kpi("Support médian", `${nf(A.support_median, 2)} → ${nf(B.support_median, 2)}`, "Modèle A (temporel) → modèle B (temporel + contacts)")}
       ${kpi("Liens documentés retenus", nf(B.liens_documentes), "Contact suivi retrouvé dans la liste des cas", { color: "--st-conf" })}
-      ${kpi("Dispersion k", nb.k !== undefined ? nf(nb.k, 2) : "—", nb.k !== undefined ? `IC 95 % ${nf(nb.k_ic95?.[0], 2)} – ${nf(nb.k_ic95?.[1], 2)} · ${pc(100 * nb.part_cas_80pct, 1)} des cas → 80 % des transmissions identifiées` : "", { color: "--s2" })}
+      ${kpi("Dispersion k", nb.k !== undefined ? nf(nb.k, 2) : "—", nb.k !== undefined ? `IC 95 % ${nf(nb.k_ic95?.[0], 2)}, ${nf(nb.k_ic95?.[1], 2)} · ${pc(100 * nb.part_cas_80pct, 1)} des cas → 80 % des transmissions identifiées` : "", { color: "--s2" })}
     </div>
     <div class="grid g2">
-      ${panel("Support des liens — modèle A (temporel seul)", "Consensus : infecteur de support maximal pour chaque cas", `<div id="c-supA"></div>`, { png: "support_modele_A" })}
-      ${panel("Support des liens — modèle B (temporel + contacts)", "L'ajout des données de contact déplace les supports vers 1 pour les liens documentés", `<div id="c-supB"></div>`, { png: "support_modele_B" })}
+      ${panel("Support des liens, modèle A (temporel seul)", "Consensus : infecteur de support maximal pour chaque cas", `<div id="c-supA"></div>`, { png: "support_modele_A" })}
+      ${panel("Support des liens, modèle B (temporel + contacts)", "L'ajout des données de contact déplace les supports vers 1 pour les liens documentés", `<div id="c-supB"></div>`, { png: "support_modele_B" })}
     </div>
     ${interp("Interprétation", [
-      `Modèle A : support médian <b>${nf(A.support_median, 2)}</b>, ${pc(A.pct_sup_05, 1)} des liens ≥ 0,5 — la seule chronologie ne permet pas de savoir « qui a infecté qui » quand beaucoup de cas surviennent au même endroit au même moment.`,
+      `Modèle A : support médian <b>${nf(A.support_median, 2)}</b>, ${pc(A.pct_sup_05, 1)} des liens ≥ 0,5, la seule chronologie ne permet pas de savoir « qui a infecté qui » quand beaucoup de cas surviennent au même endroit au même moment.`,
       `Modèle B : support médian <b>${nf(B.support_median, 2)}</b>, ${pc(B.pct_sup_05, 1)} des liens ≥ 0,5 ; ${nf(B.liens_documentes)} liens documentés retenus. Les données de contact rendent les liens beaucoup plus certains, mais elles ne couvrent qu'une partie des cas.`,
       "Conséquence pour la riposte : la plupart des cas n'ont pas de source identifiée ; améliorer l'investigation, le listage des contacts et l'enregistrement du nom complet des contacts (pour les retrouver dans la liste des cas)."],
       "Les liens viennent d'un rapprochement des noms (contact → cas) ; une erreur d'orthographe peut créer ou masquer un lien : c'est pourquoi le modèle garde une probabilité ε de transmission hors contacts.")}
@@ -652,8 +652,8 @@ window.ZS_TRANSMISSION = function (H) {
         <label class="small flex" style="gap:4px"><input type="checkbox" data-check="recDoc" ${S.recDoc ? "checked" : ""}>Liens documentés uniquement</label>
       </div><div id="c-ttree"></div><div id="ttree-legend"></div>`, { png: "arbre_transmission_" + S.recZone })}
     <div class="grid g21">
-      ${panel("Distribution du nombre de cas secondaires (R_i)", "Liens consensus de support ≥ 0,5 ; cas débutés il y a plus de 30 jours ; points : binomiale négative ajustée", `<div id="c-off"></div>${nb.k !== undefined ? interp("Interprétation", [`Moyenne ${nf(nb.R_moyen, 3)} cas secondaires identifiés par cas ; dispersion <b>k = ${nf(nb.k, 2)}</b> ${ci(nb.k_ic95?.[0], nb.k_ic95?.[1])} ; ${pc(100 * nb.part_zero, 1)} des cas sans cas secondaire identifié.`, nb.k < 1 ? "k < 1 : transmission très hétérogène (« super-propagation ») — une minorité de cas (soins à domicile, funérailles, structures de santé) produit la majorité des cas secondaires ; cibler ces contextes." : "k ≥ 1 : transmission relativement homogène.", "La moyenne est très inférieure à Rt car la majorité des transmissions ne sont pas documentées : k décrit l'hétérogénéité des transmissions identifiées, pas la totalité."]) : ""}`, { png: "cas_secondaires" })}
-      ${panel("Principaux propagateurs identifiés", `Cas ayant le plus de cas secondaires (support ≥ 0,5) — pseudonymisé${S.aire ? " · " + esc(AN[S.aire]) : ""}`, table("rec-top", top, [{ k: "id", t: "Cas", v: x => `<a href="#" data-gocas="${esc(x.k)}">${esc(x.id)}</a> <span class="muted">${esc(x.ini || "")}</span>`, csv: x => x.id }, { k: "age", t: "Âge", num: true }, { k: "zs", t: "Aire" }, { k: "on", t: "Début", v: x => dshort(x.on) }, { k: "ri", t: "Cas secondaires", num: true }, { k: "dc", t: "Décédé", v: x => x.dc ? badge("Oui", "b-crit") : "", csv: x => x.dc ? "Oui" : "" }], { sort: "ri", maxh: 420, search: false }), { csv: "rec-top" })}
+      ${panel("Distribution du nombre de cas secondaires (R_i)", "Liens consensus de support ≥ 0,5 ; cas débutés il y a plus de 30 jours ; points : binomiale négative ajustée", `<div id="c-off"></div>${nb.k !== undefined ? interp("Interprétation", [`Moyenne ${nf(nb.R_moyen, 3)} cas secondaires identifiés par cas ; dispersion <b>k = ${nf(nb.k, 2)}</b> ${ci(nb.k_ic95?.[0], nb.k_ic95?.[1])} ; ${pc(100 * nb.part_zero, 1)} des cas sans cas secondaire identifié.`, nb.k < 1 ? "k < 1 : transmission très hétérogène (« super-propagation »), une minorité de cas (soins à domicile, funérailles, structures de santé) produit la majorité des cas secondaires ; cibler ces contextes." : "k ≥ 1 : transmission relativement homogène.", "La moyenne est très inférieure à Rt car la majorité des transmissions ne sont pas documentées : k décrit l'hétérogénéité des transmissions identifiées, pas la totalité."]) : ""}`, { png: "cas_secondaires" })}
+      ${panel("Principaux propagateurs identifiés", `Cas ayant le plus de cas secondaires (support ≥ 0,5), pseudonymisé${S.aire ? " · " + esc(AN[S.aire]) : ""}`, table("rec-top", top, [{ k: "id", t: "Cas", v: x => `<a href="#" data-gocas="${esc(x.k)}">${esc(x.id)}</a> <span class="muted">${esc(x.ini || "")}</span>`, csv: x => x.id }, { k: "age", t: "Âge", num: true }, { k: "zs", t: "Aire" }, { k: "on", t: "Début", v: x => dshort(x.on) }, { k: "ri", t: "Cas secondaires", num: true }, { k: "dc", t: "Décédé", v: x => x.dc ? badge("Oui", "b-crit") : "", csv: x => x.dc ? "Oui" : "" }], { sort: "ri", maxh: 420, search: false }), { csv: "rec-top" })}
     </div>
     ${panel("Réseau des cas reliés (epicontacts)", "Tous les liens documentés entre cas (contact suivi devenu cas) ; couleur = classification, anneau = décédé ; chaque grappe est une chaîne",
       `<div class="flex" style="margin-bottom:8px"><span class="small muted">Taille minimale des chaînes</span>${segBtns("epiMin", [["2", "≥ 2 cas"], ["3", "≥ 3 cas"], ["5", "≥ 5 cas"]])}</div><div id="c-epinet"></div>${legend([{ t: "Confirmé", c: "--st-conf" }, { t: "Probable", c: "--s5" }, { t: "Lien contact suivi → cas", c: "--st-conf" }])}`, { png: "reseau_cas" })}`;
@@ -671,7 +671,7 @@ window.ZS_TRANSMISSION = function (H) {
     if ($("#c-off") && off.histogramme) {
       const n = off.n_cas || 1;
       const data = off.histogramme.map((v, i) => ({ k: i, p: v / n, nb: nb ? nb.pmf[i] : null }));
-      Ch.xy($("#c-off"), { data, x: "k", height: 230, digits: 4, barWidth: .9, barStroke: "--surface", yFmt: v => nf(v, 2), xLabel: (v, r, tip) => tip ? `${v} cas secondaires — ${nf(off.histogramme[v])} cas` : v,
+      Ch.xy($("#c-off"), { data, x: "k", height: 230, digits: 4, barWidth: .9, barStroke: "--surface", yFmt: v => nf(v, 2), xLabel: (v, r, tip) => tip ? `${v} cas secondaires, ${nf(off.histogramme[v])} cas` : v,
         series: [{ key: "p", label: "Proportion observée", color: "--rc-salmon" }, ...(nb ? [{ key: "nb", label: "Binomiale négative ajustée", color: "--rc-purple", type: "line", dash: "5 4", markers: true, r: 2.6 }] : [])] });
     }
     if ($("#c-ttree")) {
@@ -731,11 +731,11 @@ window.ZS_TRANSMISSION = function (H) {
     const fromAdults = M.length ? [0, 1, 2].reduce((s, j) => s + M[3][j], 0) : 0;
     const ctRows = Gs.map(g => ({ ...g.contacts, groupe: g.groupe, cle: g.cle }));
     return `
-    <div class="notice"><b>Analyses pédiatriques</b> — classes d'âge ${esc(E.bornes || "")}. ${E.age_douteux ? `<b>${nf(E.age_douteux)}</b> cas enregistrés « 0 an » (âge très probablement non saisi) sont exclus des classes d'âge ; ${nf(E.age_inconnu)} cas au total sans âge exploitable.` : ""} Cas confirmés et probables de la zone de santé ; Rt calculé sur l'incidence de chaque classe avec l'intervalle sériel global. La base des cas ne contient pas le sexe : pas de ventilation garçons / filles.</div>
+    <div class="notice"><b>Analyses pédiatriques</b>, classes d'âge ${esc(E.bornes || "")}. ${E.age_douteux ? `<b>${nf(E.age_douteux)}</b> cas enregistrés « 0 an » (âge très probablement non saisi) sont exclus des classes d'âge ; ${nf(E.age_inconnu)} cas au total sans âge exploitable.` : ""} Cas confirmés et probables de la zone de santé ; Rt calculé sur l'incidence de chaque classe avec l'intervalle sériel global. La base des cas ne contient pas le sexe : pas de ventilation garçons / filles.</div>
     <div class="grid g4">${Gs.map(card).join("")}</div>
     ${interp("Synthèse", [
       `Les enfants de moins de 18 ans représentent <b>${pc(100 * nk / Math.max(tot, 1), 1)}</b> des cas (${nf(nk)}).`,
-      kids[0] ? `Létalité chez les 0–5 ans : <b>${pc(kids[0].letalite_pct, 1)}</b> ${ci(kids[0].letalite_ic95[0], kids[0].letalite_ic95[1], 1)} contre ${pc(ad.letalite_pct, 1)} chez les adultes — ${kids[0].letalite_ic95[0] > (ad.letalite_ic95 || [0, 0])[1] ? "surmortalité significative des jeunes enfants : prise en charge pédiatrique précoce et nutrition prioritaires." : "différence non significative."}` : "",
+      kids[0] ? `Létalité chez les 0–5 ans : <b>${pc(kids[0].letalite_pct, 1)}</b> ${ci(kids[0].letalite_ic95[0], kids[0].letalite_ic95[1], 1)} contre ${pc(ad.letalite_pct, 1)} chez les adultes, ${kids[0].letalite_ic95[0] > (ad.letalite_ic95 || [0, 0])[1] ? "surmortalité significative des jeunes enfants : prise en charge pédiatrique précoce et nutrition prioritaires." : "différence non significative."}` : "",
       kidsAsTarget ? `Parmi les ${nf(kidsAsTarget)} enfants dont la source est documentée, ${nf(fromAdults)} (${pc(100 * fromAdults / Math.max(kidsAsTarget, 1), 0)}) ont été infectés par un adulte.` : "",
       "Rt et intervalle sériel par classe d'âge reposent sur des effectifs faibles dans une zone de santé : lire les intervalles de crédibilité avant de conclure."])}
     <div class="grid g21">

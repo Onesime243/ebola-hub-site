@@ -1,9 +1,15 @@
-/* Ebola Outbreak — outil provincial : page d'accueil et vues provinciales
-   Données : window.NK_PROVINCE (donnees/province.js) — cas confirmés de la liste labo, suivi des contacts et alertes de la base
+/* Ebola Outbreak, outil provincial : page d'accueil et vues provinciales
+   Données : window.NK_PROVINCE (donnees/province.js), cas confirmés de la liste labo, suivi des contacts et alertes de la base
    chiffrée provinciale, indicateurs des analyses détaillées des zones. Filtres : période (du … au …) et zone de santé. */
 (function () {
   "use strict";
   const Ch = window.HubCharts;
+  const capHtml = t => Ch.esc(t || "").replace(/&lt;(\/?)b&gt;/g, "<$1b>");
+  document.addEventListener("click", e => {   // carte de rapport + commentaire dans un seul PNG
+    const mp = e.target.closest("[data-map-png]"); if (!mp) return;
+    const card = mp.closest(".map-card"), img = card && card.querySelector("img.map-img");
+    if (img) { img.loading = "eager"; Ch.mapCaptionPNG(img, card.querySelector(".map-cap"), mp.dataset.mapFile).catch(() => {}); }
+  });
   const { nf, esc } = G;
   const col = Ch.col;
   const $ = s => document.querySelector(s);
@@ -14,7 +20,7 @@
   const PUBLIC = !!P.meta.public;
   const PROV = P.meta.province;
   const C = P.cibles || {};
-  window.ZS_FOOT = `Province du ${PROV} · Ebola Outbreak — outil provincial`;
+  window.ZS_FOOT = `Province du ${PROV} · Ebola Outbreak, outil provincial`;
 
   /* ------------------------------------------------------------------ utilitaires */
   const MOIS = ["janv.", "févr.", "mars", "avr.", "mai", "juin", "juil.", "août", "sept.", "oct.", "nov.", "déc."];
@@ -248,7 +254,7 @@
     const m = MAPIND.find(x => x[0] === ind) || MAPIND[0];
     const val = k => { const r = rows[k]; if (!r) return null; switch (ind) { case "categorie": return r.cat; case "casper": return per[k] || 0; case "cas7": return r.cs.n7; case "cas21": return r.cs.n21; case "inc": return r.inc; case "taux": return r.s ? r.s.taux : null; case "as": return r.s ? r.s.a_suivre : null; case "jmv": return r.s ? r.s.jmv : null; case "alinv": return r.al && r.al.total ? r.al.inv_pct : null; } };
     let color, leg;
-    if (m[2] === "cat") { color = v => CATMAP[v] || TL_NA; leg = CO.map(c => ({ label: `${c} — ${CATDEF[c]} (${ZONES.filter(z => rows[z.code].cat === c).length})`, color: CATMAP[c] })); }
+    if (m[2] === "cat") { color = v => CATMAP[v] || TL_NA; leg = CO.map(c => ({ label: `${c}, ${CATDEF[c]} (${ZONES.filter(z => rows[z.code].cat === c).length})`, color: CATMAP[c] })); }
     else if (m[2].startsWith("down")) {
       const tg = m[2] === "down90" ? 90 : C.taux_suivi_pct, br = [50, 65, 80, tg];
       const cls = [{ lo: -Infinity, hi: br[0], color: TL[4], label: `< ${br[0]} %` }, { lo: br[0], hi: br[1], color: TL[3], label: `${br[0]}–${br[1]} %` }, { lo: br[1], hi: br[2], color: TL[2], label: `${br[1]}–${br[2]} %` }, { lo: br[2], hi: br[3], color: TL[1], label: `${br[2]}–${br[3]} %` }, { lo: br[3], hi: Infinity, color: TL[0], label: `≥ ${br[3]} % (cible)` }];
@@ -259,7 +265,7 @@
       color = v => v === null || v === undefined ? TL_NA : (cls.find(c => v >= c.lo && v <= c.hi) || cls[cls.length - 1]).color;
       leg = [...cls.map(c => ({ label: c.label, color: c.color })), { label: "aucune donnée", color: TL_NA }];
     }
-    leg.title = m[1] + (ind === "categorie" ? " — chiffre dans le cercle : cas confirmés des 7 derniers jours" : "");
+    leg.title = m[1] + (ind === "categorie" ? ", chiffre dans le cercle : cas confirmés des 7 derniers jours" : "");
     return { rows, val, color, leg, m };
   }
   function drawMap(el_, ind, t) {
@@ -306,7 +312,7 @@
       G.hbars($("#c-let"), { items: AG.map(([l, a, b]) => { const g = L.filter(c => c.age >= a && c.age <= b); return { label: `${l} ans (${g.length} cas)`, value: g.length ? 100 * g.filter(c => c.deces).length / g.length : 0, color: col("--rc-rt") }; }), pct: 1, max: 100 });
     });
     const zr = ZONES.map(z => { const l = L.filter(c => c.zone === z.code), p = prev.filter(c => c.zone === z.code), c = casZone(z.code, t); return { nom: z.nom, code: z.code, cat: c.cat, n: l.length, prev: p.length, deces: l.filter(x => x.deces).length, let: ratio(l.filter(x => x.deces).length, l.length), inc: z.population ? 1e5 * l.length / z.population : null, cum: c.n, jours: c.jours }; }).filter(r => r.n || r.prev);
-    return `<p class="lead">${scope()} — <b>${nf(L.length)} cas confirmés</b> ${perTxt()} (${nf(prev.length)} sur la période précédente de même durée), dont <b>${nf(dec)} décès</b> (${pc(ratio(dec, L.length), 1)}). ${S.zone ? `Dernier cas il y a ${nf(cs.jours)} jours.` : `${nf(zr.filter(r => r.n).length)} zones ont notifié des cas sur la période.`}</p>
+    return `<p class="lead">${scope()}, <b>${nf(L.length)} cas confirmés</b> ${perTxt()} (${nf(prev.length)} sur la période précédente de même durée), dont <b>${nf(dec)} décès</b> (${pc(ratio(dec, L.length), 1)}). ${S.zone ? `Dernier cas il y a ${nf(cs.jours)} jours.` : `${nf(zr.filter(r => r.n).length)} zones ont notifié des cas sur la période.`}</p>
       <div class="grid g5">
         ${kpi("Cas confirmés sur la période", nf(L.length), `${L.length >= prev.length ? "+" : ""}${nf(L.length - prev.length)} vs période précédente`, { color: "--s2", cls: L.length > prev.length ? "alert" : "" })}
         ${kpi("Décès", nf(dec), `létalité ${pc(ratio(dec, L.length), 1)} sur la période`, { color: "--rc-rt" })}
@@ -364,13 +370,13 @@
           ${P.exports && P.exports.classeur ? `<a href="${outp(P.exports.classeur)}" download>${svgI("zones")}<div><b>Classeur des tableaux</b><span>Excel : synthèse par zone, cas par semaine, suivi, alertes</span></div></a>` : ""}
         </div><p class="note">Le rapport de chaque zone de santé se télécharge depuis son tableau de bord (« Carte et rapports »).</p>`)}
       </div>
-      ${ks.length ? panel("Cartes pour rapport", "Format A4 paysage : titre, légende avec le nombre de zones par classe, flèche du nord, échelle, source", `<div class="maps-grid">${ks.map(k => `<div class="map-card"><a href="${outp("cartes/" + encodeURIComponent(cm[k]))}" target="_blank" rel="noopener"><img class="map-img" loading="lazy" src="${outp("cartes/" + encodeURIComponent(cm[k]))}" alt="${esc(lab[k] || k)}"></a><div class="flex between" style="margin-top:8px"><b class="small">${esc(lab[k] || k)}</b><a class="btn sm" href="${outp("cartes/" + encodeURIComponent(cm[k]))}" download>⤓ PNG</a></div></div>`).join("")}</div>`) : ""}`;
+      ${ks.length ? panel("Cartes pour rapport", "Format A4 paysage : titre, légende avec le nombre de zones par classe, flèche du nord, échelle, source", `<div class="maps-grid">${ks.map(k => `<div class="map-card"><a href="${outp("cartes/" + encodeURIComponent(cm[k]))}" target="_blank" rel="noopener"><img class="map-img" loading="lazy" src="${outp("cartes/" + encodeURIComponent(cm[k]))}" alt="${esc(lab[k] || k)}"></a><div class="flex between" style="margin-top:8px"><b class="small">${esc(lab[k] || k)}</b><button class="btn sm" type="button" data-map-png="${k}" data-map-file="${esc(cm[k])}" title="Carte et commentaire dans une seule image">⤓ PNG</button></div>${((P.exports || {}).commentaires || {})[k] ? `<p class="map-cap">${capHtml(P.exports.commentaires[k])}</p>` : ""}</div>`).join("")}</div>`) : ""}`;
   }
 
   /* ================================================================== SUIVI DES CONTACTS */
   function pageContacts() {
     const t = day(S.date);
-    if (!SV.length) return notice("<b>Suivi des contacts</b> — la base chiffrée provinciale (feuille « SaisieSuiviContact ») n'a pas été chargée.", "warn");
+    if (!SV.length) return notice("<b>Suivi des contacts</b>, la base chiffrée provinciale (feuille « SaisieSuiviContact ») n'a pas été chargée.", "warn");
     const codes = S.zone ? [S.zone] : Object.keys(SVZ);
     const sp = suiviProv(t, codes);
     const days = []; for (let d = day(S.from); d <= t; d++) days.push(d);
@@ -389,7 +395,7 @@
       }
     });
     const late = zr.filter(r => r.retard > 1 && r.cas21);
-    return `<p class="lead">${scope()} — le ${dfr(S.date)}, <b>${nf(sp.vus)} contacts vus sur ${nf(sp.a_suivre)} à suivre</b> (${pc(sp.taux, 1)}) dans ${nf(sp.zones)} zone(s) ayant rapporté ; ${nf(sp.jmv)} jamais vus et ${nf(sp.pdv)} perdus de vue.</p>
+    return `<p class="lead">${scope()}, le ${dfr(S.date)}, <b>${nf(sp.vus)} contacts vus sur ${nf(sp.a_suivre)} à suivre</b> (${pc(sp.taux, 1)}) dans ${nf(sp.zones)} zone(s) ayant rapporté ; ${nf(sp.jmv)} jamais vus et ${nf(sp.pdv)} perdus de vue.</p>
       <div class="grid g5">
         ${kpi("Contacts à suivre", nf(sp.a_suivre), `${nf(sp.zones)} zones rapportées`, { color: "--s1" })}
         ${kpi("Taux de suivi", pc(sp.taux, 1), `cible ${nf(C.taux_suivi_pct)} %`, { color: "--st-v24", cls: sp.taux !== null && sp.taux < C.taux_suivi_pct ? "alert" : "good", meter: sp.taux, meterColor: sp.taux < C.taux_suivi_pct ? "--critical" : "--good" })}
@@ -412,7 +418,7 @@
   /* ================================================================== ALERTES */
   function pageAlertes() {
     const t = day(S.date);
-    if (!AL.length) return notice("<b>Alertes</b> — la base chiffrée provinciale (feuille « DATA ENTRY ») n'a pas été chargée.", "warn");
+    if (!AL.length) return notice("<b>Alertes</b>, la base chiffrée provinciale (feuille « DATA ENTRY ») n'a pas été chargée.", "warn");
     const t1 = Math.min(t, lastAl), t0 = day(S.from);
     const a = alertesPer(S.zone, t0, t1);
     const stale = t - lastAl;
@@ -425,7 +431,7 @@
     });
     const zr = ZONES.map(z => { const x = alertesPer(z.code, t0, t1); if (!x.total) return null; return { code: z.code, nom: z.nom, cat: casZone(z.code, t).cat, ...x, cas: CAS.filter(c => c.zone === z.code && c._d >= t0 && c._d <= t1).length }; }).filter(Boolean);
     return `${stale > 3 ? notice(`<b>Base des alertes à jour au ${dfr(iso(lastAl))}</b> : les indicateurs portent sur la période ${perTxt().replace(dfr(S.date), dfr(iso(t1)))} ; les jours suivants n'ont pas encore été saisis.`, "warn") : ""}
-      <p class="lead">${scope()} — <b>${nf(a.total)} alertes</b> ${perTxt()} (dont ${nf(a.deces)} décès), <b>${pc(a.inv_pct, 0)} investiguées</b>, ${nf(a.val)} validées comme suspects et ${nf(a.prelev)} prélevées.</p>
+      <p class="lead">${scope()}, <b>${nf(a.total)} alertes</b> ${perTxt()} (dont ${nf(a.deces)} décès), <b>${pc(a.inv_pct, 0)} investiguées</b>, ${nf(a.val)} validées comme suspects et ${nf(a.prelev)} prélevées.</p>
       <div class="grid g5">
         ${kpi("Alertes notifiées", nf(a.total), `${nf(a.deces)} décès communautaires`, { color: "--s1" })}
         ${kpi("Alertes investiguées", pc(a.inv_pct, 0), `${nf(a.inv)} investiguées · objectif 100 %`, { color: "--brand-2", cls: a.inv_pct !== null && a.inv_pct < 95 ? "alert" : "good", meter: a.inv_pct })}
@@ -584,7 +590,7 @@
         ${zs.map(([k, n]) => `<option value="${k}" ${k === cur ? "selected" : ""}>${esc(n.nom)}</option>`).join("")}</select></label>
         ${f.xlsx ? `<a class="btn" href="${href(f.xlsx)}" download="${esc(f.xlsx)}">⤓ Excel</a>` : ""}${f.docx ? `<a class="btn primary" href="${href(f.docx)}" download="${esc(f.docx)}">⤓ Word (canevas)</a>` : ""}
         <span class="note">${cur === "province" ? "Les fichiers de la province contiennent aussi une page par zone de santé." : ""} Calculés le ${esc(I.genere_le)} · situation au ${dfr(I.date)}.</span></div>
-      ${panel(`Collecte des indicateurs du pilier surveillance — ${esc(N.nom)}`, "Vert : seuil atteint · rouge : seuil non atteint · n.d. : donnée non disponible dans les fichiers reçus. Les définitions de calcul figurent dans la colonne Observations.", tbl)}
+      ${panel(`Collecte des indicateurs du pilier surveillance, ${esc(N.nom)}`, "Vert : seuil atteint · rouge : seuil non atteint · n.d. : donnée non disponible dans les fichiers reçus. Les définitions de calcul figurent dans la colonne Observations.", tbl)}
       ${reglages}`;
   }
 
@@ -601,20 +607,20 @@
 
   /* ------------------------------------------------------------------ navigation */
   const PAGES = [["accueil", "Accueil", "Province"], ["situation", "Situation épidémiologique", "Province"], ["zones", "Zones de santé", "Province"], ["carte", "Carte et rapports", "Province"],
-    ["contacts", "Suivi des contacts", "Riposte"], ["alertes", "Surveillance des alertes", "Riposte"], ["presentation", "Présentation (diapositives)", "Réunions"], ["indicateurs", "Indicateurs du pilier surveillance", "Réunions"], ["donnees", PUBLIC ? "État des données" : "Données des zones", "Données"],
+    ["alertes", "Surveillance des alertes", "Riposte"], ["presentation", "Présentation (diapositives)", "Réunions"], ["indicateurs", "Indicateurs du pilier surveillance", "Réunions"], ["donnees", PUBLIC ? "État des données" : "Données des zones", "Données"],
     ["comptes", "Comptes", "Administration", () => isProv() && !PUBLIC], ["publication", "Publication en ligne", "Administration", () => isProv() && !PUBLIC]];
   const DETAIL_PAGES = [["index", "Cas index", "M4 6h16v2H4zm0 5h16v2H4zm0 5h10v2H4z"], ["journey", "Parcours des cas", "M12 2a4 4 0 1 1 0 8 4 4 0 0 1 0-8zm-7 18c0-3.9 3.1-7 7-7s7 3.1 7 7H5zM19 3l3 3-3 3"],
     ["chains", "Chaînes de transmission", "M7 7a3 3 0 1 1-2 5.2L10 15a3 3 0 1 1-.8 1.8L4.3 14A3 3 0 0 1 7 7zm10-4a3 3 0 1 1 0 6 3 3 0 0 1 0-6z"], ["recon", "Reconstruction de la transmission", "M4 5h4v4H4zm12 0h4v4h-4zM10 15h4v4h-4zM6 9v2h4v4h2v-4h4V9h-2v2H8V9z"],
     ["dynamics", "Dynamique et Rt", "M3 19h18v2H3zM4 15l4-6 4 3 5-8 3 2-6.6 10.3-4-3L6.2 16.4z"], ["children", "Enfants (0–18 ans)", "M12 2a3 3 0 1 1 0 6 3 3 0 0 1 0-6zm-4 8h8l-1 6h-1v6h-4v-6H9z"],
     ["deces", "Décès et EDS communautaires", "M10 2h4v6h6v4h-6v10h-4V12H4V8h6z"], ["labo", "Laboratoire et positivité", "M9 2h6v2h-1v5l5 9a2 2 0 0 1-2 3H7a2 2 0 0 1-2-3l5-9V4H9z"],
-    ["contacts", "Suivi des contacts (bases des zones)", "M16 11c1.7 0 3-1.3 3-3s-1.3-3-3-3-3 1.3-3 3 1.3 3 3 3zm-8 0c1.7 0 3-1.3 3-3S9.7 5 8 5 5 6.3 5 8s1.3 3 3 3z"], ["pec", "Prise en charge et expositions", "M19 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm-2 10h-4v4h-2v-4H7v-2h4V7h2v4h4z"]];
+["pec", "Prise en charge et expositions", "M19 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm-2 10h-4v4h-2v-4H7v-2h4V7h2v4h4z"]];
   const VIEWS = { accueil: pageAccueil, situation: pageSituation, zones: pageZones, carte: pageCarte, contacts: pageContacts, alertes: pageAlertes, donnees: pageDonnees, comptes: pageComptes, publication: pagePublication, presentation: pagePresentation, indicateurs: pageIndicateurs };
   const PERIOD_PAGES = new Set(["situation", "contacts", "alertes", "carte"]);
   const SUBT = { accueil: () => `Situation au ${dfr(S.date)}`, zones: () => `Bulletin au ${dfr(S.date)}`, donnees: () => `Analyse provinciale du ${esc(P.meta.genere_le)}`, indicateurs: () => `Canevas mensuel PID-MIO · situation au ${dfr(P.meta.date_rapport)}`, presentation: () => `Graphiques et diapositives prêts pour les réunions · situation au ${dfr(P.meta.date_rapport)}`, comptes: () => "Accès des zones de santé et de la province", publication: () => "Lien de partage en lecture seule" };
   function shell() {
     const pages = PAGES.filter(p => !p[3] || p[3]());
     if (!pages.find(p => p[0] === S.page)) S.page = "accueil";
-    document.title = `Ebola — Province du ${PROV}`;
+    document.title = `Ebola : Province du ${PROV}`;
     $("#brand-sub").textContent = `Outil provincial · ${PROV}`;
     let g0 = "";
     const zl = ZONES.filter(z => DETAIL.has(z.code));
@@ -630,7 +636,7 @@
     const t = day(S.date), pr = casZone(null, t), sp = suiviProv(t);
     $("#side-status").innerHTML = `<b><span class="pulse"></span>Province du ${esc(PROV)}</b><span>Situation au ${dfr(P.meta.date_rapport)}</span>
       <div class="row"><span>Cas 7 j</span><b>${nf(pr.n7)}</b></div><div class="row"><span>Zones actives</span><b>${nf(ZONES.filter(z => ["Rouge", "Orange"].includes(casZone(z.code, t).cat)).length)}</b></div><div class="row"><span>Taux de suivi</span><b>${pc(sp.taux, 0)}</b></div>`;
-    $("#foot-l").textContent = `Ebola Outbreak — outil provincial du ${PROV} · analyse du ${P.meta.genere_le} · v${P.meta.version || ""}`;
+    $("#foot-l").textContent = `Ebola Outbreak, outil provincial du ${PROV} · analyse du ${P.meta.genere_le} · v${P.meta.version || ""}`;
     $("#user").innerHTML = USER ? `<button class="userchip" id="userchip" aria-haspopup="true"><span class="av">${esc((USER.nom || USER.identifiant).slice(0, 1).toUpperCase())}</span><span>${esc(USER.nom)}<small>${USER.role === "province" ? "Coordination provinciale" : "Zone de santé de " + esc(USER.zone)}</small></span></button>
       ${S.menu ? `<div class="menu-pop"><div class="who">Connecté : <b>${esc(USER.identifiant)}</b></div>${PUBLIC ? `<div class="who">Version en ligne, lecture seule. Le mot de passe se change dans l'outil local.</div>` : `<button data-mdp>Changer mon mot de passe</button>`}<button data-logout>Se déconnecter</button></div>` : ""}` : PUBLIC ? `<span class="badge b-info">Version en ligne · lecture seule</span>` : "";
     const PR = [["7", "7 j"], ["14", "14 j"], ["21", "21 j"], ["28", "28 j"], ["42", "42 j"], ["90", "90 j"], ["tout", "Tout"]];
@@ -684,7 +690,7 @@
     const zr = t.closest("[data-zrow]"); if (zr && !t.closest("a")) { const k = zr.dataset.zrow; if (S.page === "accueil" || S.page === "zones" || S.page === "donnees") { if (DETAIL.has(k)) location.href = openZS(k); } else { S.zone = S.zone === k ? null : k; render(); } return; }
     const srt = t.closest("th[data-sort]"); if (srt) { const [id, k] = srt.dataset.sort.split("|"); const st = S.tables[id]; if (st) { st.dir = st.sort === k ? -st.dir : -1; st.sort = k; render(); } return; }
     const more = t.closest("[data-more]"); if (more) { const st = S.tables[more.dataset.more]; if (st) { st.limit += 100; render(); } return; }
-    const png = t.closest("[data-png]"); if (png) { const p = png.closest(".panel"); const name = `${png.dataset.png}_${S.zone ? ZN[S.zone] : PROV}_${S.date}`; if (p.querySelector(".chart svg")) G.panelPNG(p, name, `${scope()} · ${PERIOD_PAGES.has(S.page) ? perTxt() : "au " + dfr(S.date)} · Ebola Outbreak — outil provincial`); else Ch.downloadPanelPNG(p, name); return; }
+    const png = t.closest("[data-png]"); if (png) { const p = png.closest(".panel"); const name = `${png.dataset.png}_${S.zone ? ZN[S.zone] : PROV}_${S.date}`; if (p.querySelector(".chart svg")) G.panelPNG(p, name, `${scope()} · ${PERIOD_PAGES.has(S.page) ? perTxt() : "au " + dfr(S.date)} · Ebola Outbreak, outil provincial`); else Ch.downloadPanelPNG(p, name); return; }
     const cv = t.closest("[data-csv]"); if (cv) { csvT(cv.dataset.csv); return; }
     const rn = t.closest("[data-run]"); if (rn) { runJob(rn.dataset.run); return; }
     const rt = t.closest("[data-retirer]"); if (rt) { if (!confirm(`Retirer « ${rt.dataset.retirer} » des analyses ? Le fichier est déplacé dans le sous-dossier _retires (il n'est pas supprimé).`)) return;
