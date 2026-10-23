@@ -85,7 +85,7 @@
     lab: "Tous", nowH: 30, fLevel: "National", fTerr: "National", fTarget: "confirmes", fH: 30, tables: {},
     ovStack: "aucun", netIcons: true, gen: "0", idxPeriod: "0", ssSet: "", ssPlace: "Tous", ssMin: "2", ssCases: true, dynG: "National", growBase: "dds", growWin: "12s", dyStack: "sexe", dyBase: "o", dyDays: "60", rtDays: "120",
     siCmp: false, rlWin: "28j", projH: "30", distK: "dds_notification", recZone: "", recSup: "0.3", recColor: "issue", recX: "onset", recIcons: true, recDoc: false, epiMin: "3", resZone: "", perfG: "National",
-    rtmG: "National", rtmSet: "all", rtmDays: "120", zrCat: "Toutes", rtmMode: "zones", rtzProv: "Toutes", rtzG: "National", rtzTau: "7", rtzDays: "60", opTab: "eds", opProv: "Toutes", opWin: "cumul", zrColor: "categorie", zrLab: "score", zrSel: "", pplProv: "Toutes", sitNiv: "national"
+    rtmG: "National", rtmSet: "all", rtmDays: "120", zrCat: "Toutes", rtmMode: "zones", iclG: "National", rtzProv: "Toutes", rtzG: "National", rtzTau: "7", rtzDays: "60", opTab: "eds", opProv: "Toutes", opWin: "cumul", zrColor: "categorie", zrLab: "score", zrSel: "", pplProv: "Toutes", sitNiv: "national"
   };
   const TABS = [
     { id: "overview", t: "Vue générale", g: "Situation", i: "M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z" },
@@ -1694,7 +1694,7 @@
   /* ======================================================================
      v3.4 : Rt multi-méthodes, zones à risque, analyses lln, Linelist fusionnée, chargement des fichiers
      ====================================================================== */
-  const RTM_COL = { RP: "--s1", RPa: "--s5", WT: "--s3", EG: "--s4", DSS: "--s2", BPS: "--s6", FBI: "--s7", FBIs: "--s8", SB: "--ink-2" };
+  const RTM_COL = { RP: "--s1", RPa: "--s5", WT: "--s3", EG: "--s4", DSS: "--s2", BPS: "--s6", FBI: "--s7", FBIs: "--s8", SB: "--ink-2", ICL: "--critical" };
   const RTM_INFO = {
     RP: ["Renouvellement (Cori 2013, EpiEstim)", "Fenêtre glissante de 7 jours, a priori Gamma(1, 5)", "Référence opérationnelle ; bien calibré en transmission modérée", "Retard d’environ une demi-fenêtre ; sensible au choix de la fenêtre et de l’intervalle sériel"],
     RPa: ["EpiEstim, fenêtre optimale (Parag & Donnelly 2020)", "Fenêtre choisie parmi 3 à 21 jours par l’erreur de prédiction cumulée (APE)", "Fenêtre objective, adaptée aux données", "Même hypothèses qu’EpiEstim"],
@@ -1704,6 +1704,7 @@
     BPS: ["P-splines bayésiennes (Gressani 2022, EpiLPS)", "Binomiale négative + P-spline, approximation de Laplace (LPSMAP), Rt = μt / Σ μ(t−s) ws", "Gère la surdispersion ; courbe lisse", "Le moins robuste pour R0 dans l’article (queues longues, sous-couverture)"],
     FBI: ["Filtrage bayésien (Parag 2021, EpiFilter)", "Rt suit une marche aléatoire ; filtre récursif sur grille (η = 0,1)", "Robuste quand les cas sont peu nombreux ; temps réel", "Surestimation et transitions lissées selon η (article)"],
     FBIs: ["EpiFilter, lisseur avant–arrière", "Même modèle, utilise aussi les données futures", "Meilleure précision rétrospective", "Non opérationnel en temps réel (révisé quand arrivent de nouvelles données)"],
+    ICL: ["Rt des infections corrigé de la détection (ICL–INRB 2026)", "Alertes validées vivantes et décédées ; non testées pondérées par la positivité de leur type ; détection = p + (1 − p) × létalité hors CTE (42,8 %) ; infections = positives attendues / détection ; Rt = infections / infectiosité, droite de Theil–Sen sur 13 jours", "Corrige les écarts de détection entre zones et dans le temps ; dates de début imputées au hasard ; IC = imputations × bootstrap", "Repose sur une létalité hors CTE supposée et sur la notification de tous les décès ; fenêtre centrée : retard de 6 jours ; sensible aux non-cas non saisis"],
     SB: ["Bayésien séquentiel (Bettencourt & Ribeiro 2008)", "I(t+1) ~ Poisson(I(t) exp(γ (Rt − 1))), γ = 1 / moyenne du SI", "Mise à jour jour par jour", "Peu informatif quand γ est petit (Ebola) : intervalles larges"],
   };
   const rtmData = () => D.rt_methodes || { groupes: [], resultats: {}, methodes: [] };
@@ -1742,7 +1743,7 @@
     <div class="notice small">${T("Paramètres")} : ${T("intervalle sériel")} ${nf(r.parametres?.SI_moyenne, 1)} ± ${nf(r.parametres?.SI_ecart_type, 1)} j ; ${T("fenêtre APE retenue")} ${nf(r.parametres?.fenetre_APE)} j ; DSS λ = ${nf(r.parametres?.DSS?.lambda, 1)}, ${T("ddl")} ${nf(r.parametres?.DSS?.edf, 1)} ; EpiLPS λ = ${nf(r.parametres?.BPS?.lambda, 1)}, φ = ${nf(r.parametres?.BPS?.dispersion_nb, 0)} ; EpiFilter η = ${nf(r.parametres?.EpiFilter_eta, 2)}.</div>`;
   }
   const METH = k => (rtmData().methodes.find(m => m.code === k) || {}).libelle || k;
-  const rtmKeep = k => S.rtmSet === "all" || (S.rtmSet === "rt" ? ["RP", "RPa", "EG", "FBI", "SB"].includes(k) : ["WT", "DSS", "BPS", "FBIs"].includes(k));
+  const rtmKeep = k => S.rtmSet === "all" || (S.rtmSet === "rt" ? ["RP", "RPa", "EG", "FBI", "SB"].includes(k) : ["WT", "DSS", "BPS", "FBIs", "ICL"].includes(k));
   function rtmRows() {
     const r = rtmData().resultats[S.rtmG]; if (!r) return { rows: [], prov: null };
     const n = r.n, start = r.debut;
@@ -1768,11 +1769,65 @@
   /* ---------------- Rt par province et zone de santé (EpiEstim, fenêtres 7 / 14 / 21 j) ---------------- */
   const TAU_COL = { "7": "--s1", "14": "--s3", "21": "--s7" };
   function rtmView() {
-    const modes = [["zones", "Par province et zone de santé"], ["methodes", "Comparaison des 9 méthodes"]];
+    const modes = [["zones", "Par province et zone de santé"], ["methodes", "Comparaison des 10 méthodes"], ["detection", "Détection et Rt des infections (ICL)"]];
     const seg = `<div class="seg big-seg" data-seg="rtmMode" style="margin-bottom:12px">${modes.map(([v, t]) => `<button data-v="${v}" class="${S.rtmMode === v ? "on" : ""}">${T(t)}</button>`).join("")}</div>`;
-    return seg + (S.rtmMode === "methodes" ? rtmMethodsView() : rtzView());
+    return seg + (S.rtmMode === "methodes" ? rtmMethodsView() : S.rtmMode === "detection" ? iclView() : rtzView());
   }
-  function rtmCharts() { if (S.rtmMode === "methodes") rtmMethodsCharts(); else rtzCharts(); }
+  function rtmCharts() { if (S.rtmMode === "methodes") rtmMethodsCharts(); else if (S.rtmMode === "detection") iclCharts(); else rtzCharts(); }
+  /* ---------------- Détection et Rt des infections (approche ICL–INRB) ---------------- */
+  const ICLD = () => D.rt_icl || { groupes: [], series: {} };
+  const TEND = { hausse: "▲ hausse", baisse: "▼ baisse", stable: "● stable" };
+  function iclView() {
+    const R = ICLD(), gs = R.groupes || [];
+    if (!gs.length) return `<div class="empty">${T("Méthode ICL indisponible : relancez l’analyse complète.")}</div>`;
+    if (!gs.some(g => g.id === S.iclG)) S.iclG = "National";
+    const g = gs.find(x => x.id === S.iclG) || gs[0], r = g.rt, a = g.detection, P = R.parametres || {};
+    const rtTxt = x => x ? `${nf(x.mediane, 2)} (${nf(x.ic95[0], 2)}–${nf(x.ic95[1], 2)})` : T("données insuffisantes");
+    const detTxt = x => x ? `${pc(100 * x.moyenne, 0)} (${nf(100 * x.ic95[0], 0)}–${nf(100 * x.ic95[1], 0)})` : "—";
+    const low = x => x.pct_testees_14j !== null && x.pct_testees_14j < 50;
+    const rows = gs.filter(x => x.id !== "National").map(x => ({ ...x, rtm: x.rt?.mediane, det: x.detection?.moyenne }));
+    const fillR = x => !x.rt ? "" : x.rt.ic95[0] > 1 ? "b-crit" : x.rt.ic95[1] < 1 ? "b-good" : "b-mod";
+    const map = (D.cartes?.cartes || []).find(c => /detection/.test(c.fichier));
+    const base = D.cartes ? (D.cartes.base || `../reports/${encodeURIComponent(D.cartes.dossier)}/`) : "";
+    return `
+    <div class="flex" style="margin-bottom:12px">
+      <label class="field">${T("Territoire")}<select data-state="iclG">${gs.map(x => `<option value="${esc(x.id)}" ${S.iclG === x.id ? "selected" : ""}>${esc(T(x.niveau))}, ${esc(x.nom)}</option>`).join("")}</select></label>
+    </div>
+    <div class="grid g4">
+      ${kpi("Rt des infections", r ? nf(r.mediane, 2) : "—", r ? `${T("IC 95 %")} ${nf(r.ic95[0], 2)}–${nf(r.ic95[1], 2)} · P(Rt>1) ${pc(100 * r.p_sup_1, 0)} · ${T("centre")} ${dshort(r.date)}${r.tendance_14j ? " · " + T(TEND[r.tendance_14j]) : ""}` : T("moins de 20 cas confirmés sur 28 jours"), { color: r && r.ic95[0] > 1 ? "--critical" : r && r.ic95[1] < 1 ? "--good" : "--warn" })}
+      ${kpi("Part des infections détectées", a ? pc(100 * a.moyenne, 0) : "—", a ? `${T("IC 95 %")} ${nf(100 * a.ic95[0], 0)}–${nf(100 * a.ic95[1], 0)} % · ${dshort(a.debut)}–${dshort(a.fin)}${a.tendance ? " · " + T(TEND[a.tendance]) : ""}` : "", { color: "--s1" })}
+      ${kpi("Alertes déjà décédées (14 j)", pc(g.pct_decedees_14j, 0), `${nf(g.alertes_valides_14j)} ${T("alertes validées")}`, { color: "--ink-2" })}
+      ${kpi("Alertes validées testées (14 j)", pc(g.pct_testees_14j, 0), `${T("positivité")} ${pc(g.positivite_14j, 0)}`, { color: low(g) ? "--critical" : "--s3", cls: low(g) ? "alert" : "" })}
+    </div>
+    <div class="notice"><b>${T("Méthode (ICL–INRB)")} :</b> ${T("les alertes validées non testées reçoivent la probabilité d’être positives des alertes testées du même type (vivante / décédée). Une infection est détectée vivante avec la probabilité p, sinon elle meurt avec la létalité hors CTE")} (${pc(100 * (P.letalite_hors_cte || .428), 1)}) ${T("et devient une alerte décès ; p découle de la part d’alertes vivantes parmi les positives. Infections = alertes positives attendues / probabilité de générer une alerte. Rt = infections / infectiosité des infections antérieures, droite de Theil–Sen sur 13 jours, valeur au centre. Dates de début manquantes tirées au hasard dans le délai observé")} (${nf(P.imputations)} ${T("jeux imputés")} × ${nf(P.bootstraps)} ${T("bootstraps")}). ${T("Rt affiché seulement avec au moins 20 cas confirmés sur 28 jours.")}${low(g) ? `<br><b>${T("Attention")} :</b> ${T("moins de la moitié des alertes validées ont un résultat saisi ; si les non-cas ne sont pas saisis, la détection est sous-estimée et le Rt des infections peut être biaisé.")}` : ""}</div>
+    <div class="grid g2">
+      ${panel(`${T("Rt des infections")}, ${esc(g.nom)}`, T("Médiane et IC 95 % ; ligne pointillée : R = 1 ; zone grisée : jours non consolidés"), `<div id="c-icl-rt"></div>`, { png: "rt_infections_icl" })}
+      ${panel(`${T("Part des infections détectées")}, ${esc(g.nom)}`, T("Cas confirmés / infections estimées, sommes glissantes sur 14 jours ; IC 95 %"), `<div id="c-icl-det"></div>`, { png: "detection_icl" })}
+    </div>
+    ${panel("Détection et Rt des infections par province et zone de santé", T("Zones avec au moins 20 cas confirmés sur 28 jours ou 100 cas au total ; tendance : comparaison avec 14 jours plus tôt (probabilité ≥ 80 %) ; ⚠ : moins de la moitié des alertes testées, détection probablement sous-estimée"), table("icl-geo", rows, [
+      { k: "nom", t: "Territoire", v: x => `${esc(x.nom)}${low(x) ? ` <span title="${T("moins de la moitié des alertes testées")}">⚠</span>` : ""}` }, { k: "niveau", t: "Niveau", v: x => T(x.niveau) }, { k: "province", t: "Province", v: x => esc(x.province || "") },
+      { k: "confirmes_28j", t: "Confirmés 28 j", num: true },
+      { k: "rtm", t: "Rt des infections (IC 95 %)", v: x => x.rt ? badge(rtTxt(x.rt), fillR(x)) : `<span class="muted">${T("insuffisant")}</span>`, sortv: x => x.rtm },
+      { k: "p1", t: "P(Rt > 1)", num: true, v: x => x.rt ? pc(100 * x.rt.p_sup_1, 0) : "—", sortv: x => x.rt?.p_sup_1 },
+      { k: "tr", t: "Tendance Rt", v: x => x.rt?.tendance_14j ? T(TEND[x.rt.tendance_14j]) : "—" },
+      { k: "det", t: "Détection (IC 95 %)", v: x => detTxt(x.detection), sortv: x => x.det },
+      { k: "trd", t: "Tendance détection", v: x => x.detection?.tendance ? T(TEND[x.detection.tendance]) : "—" },
+      { k: "pct_decedees_14j", t: "% alertes décédées 14 j", num: true, d: 0 }, { k: "pct_testees_14j", t: "% testées 14 j", num: true, d: 0 }, { k: "positivite_14j", t: "Positivité 14 j", num: true, d: 0 }],
+      { rowClick: true, rowKey: x => x.id, sort: "confirmes_28j", maxh: 520 }), { csv: "icl-geo" })}
+    ${map ? panel("Carte de la part des infections détectées", T("Carte de rapport (A4) ; légende et commentaire identiques à ceux du menu « Cartes pour rapport »"), `<img class="map-img" style="width:100%;height:auto;display:block;border:1px solid var(--line);border-radius:6px" src="${base}${encodeURIComponent(map.fichier)}" alt="${esc(map.titre)}" loading="lazy"><p class="map-cap">${capHtml(map.commentaire)}</p>`) : ""}`;
+  }
+  function iclCharts() {
+    const s = (ICLD().series || {})[S.iclG]; if (!s || !$("#c-icl-rt")) return;
+    const rows = Array.from({ length: s.n }, (_, i) => ({ date: addDays(s.debut, i), rt: s.rt.med[i] == null ? null : Math.min(s.rt.med[i], 4), lo: s.rt.lo[i] == null ? null : Math.min(s.rt.lo[i], 4), hi: s.rt.hi[i] == null ? null : Math.min(s.rt.hi[i], 4),
+      det: s.detection.med[i] == null ? null : 100 * s.detection.med[i], dlo: s.detection.lo[i] == null ? null : 100 * s.detection.lo[i], dhi: s.detection.hi[i] == null ? null : 100 * s.detection.hi[i] }));
+    const out = rows.slice(-150);
+    const prov = s.provisoire_des && out.some(x => x.date >= s.provisoire_des) ? { from: s.provisoire_des, label: T("provisoire") } : null;
+    const xl = (v, r, tip) => tip ? dfmt(v) : dshort(v);
+    Ch.xy($("#c-icl-rt"), { data: out, x: "date", height: 260, xLabel: xl, shade: prov, tipSkipNull: true, hlines: [{ y: 1, color: "--ink-2", dash: "6 4", label: "R = 1" }],
+      bands: [{ lo: "lo", hi: "hi", color: "--critical", label: T("IC 95 %"), opacity: .2 }], series: [{ key: "rt", label: T("Rt des infections"), color: "--critical", type: "line", width: 2.2 }] });
+    Ch.xy($("#c-icl-det"), { data: out, x: "date", height: 260, xLabel: xl, shade: prov, tipSkipNull: true, yFmt: v => nf(v, 0) + " %",
+      bands: [{ lo: "dlo", hi: "dhi", color: "--s1", label: T("IC 95 %"), opacity: .2 }], series: [{ key: "det", label: T("Part des infections détectées"), color: "--s1", type: "line", width: 2.2 }] });
+  }
   const RZ = () => D.rt_zones || { groupes: [], series: {}, taus: [7, 14, 21] };
   function rtzView() {
     const R = RZ(), gs = R.groupes || [];
@@ -1801,7 +1856,7 @@
       ${["7", "14", "21"].map(t => kpi(`Rt, fenêtre de ${t} jours`, d[t] ? nf(d[t].mediane, 2) : "—", d[t] ? `${T("IC 95 %")} ${nf(d[t].ic95[0], 2)}–${nf(d[t].ic95[1], 2)} · P(Rt>1) ${pc(100 * d[t].p_sup_1, 0)} · ${dshort(d[t].date)}${old(d[t]) ? ` · <b>${T("ancienne")}</b>` : ""}` : T("Trop peu de cas"), { color: TAU_COL[t] })).join("")}
       ${kpi("Cas (21 derniers jours)", nf(g.cas_21j), `${nf(g.cas)} ${T("cas au total")} · ${esc(T(g.niveau))}`)}
     </div>
-    ${panel(`Rt, ${g.niveau === "National" ? T("National") : esc(g.nom)}`, T("EpiEstim (Cori 2013) sur l’incidence par date de début des symptômes corrigée du retard de notification ; fenêtre glissante de 7, 14 ou 21 jours ; zone grisée : jours non consolidés ; Rt masqué quand la fenêtre compte moins de 5 cas."), `<div id="c-rtz"></div><div id="c-rtz-inc"></div>`, { png: "rt_" + g.nom })}
+    ${panel(`Rt, ${g.niveau === "National" ? T("National") : esc(g.nom)}`, T("EpiEstim (Cori 2013) sur l’incidence par date de début des symptômes corrigée du retard de notification ; fenêtre glissante de 7, 14 ou 21 jours ; zone grisée : jours non consolidés ; Rt masqué quand le territoire compte moins de 20 cas sur les 28 jours précédents (critère ICL–INRB)."), `<div id="c-rtz"></div><div id="c-rtz-inc"></div>`, { png: "rt_" + g.nom })}
     <div class="notice small"><b>${T("Lecture")} :</b> ${T("la fenêtre de 7 jours réagit vite mais fluctue ; 14 et 21 jours lissent les variations dues aux petits effectifs (zones avec peu de cas). Une zone est en croissance quand la borne inférieure de l’IC 95 % dépasse 1, en contrôle quand la borne supérieure est sous 1.")}</div>
     ${panel(S.rtzProv === "Toutes" ? "Dernier Rt par zone de santé" : `Dernier Rt par zone de santé, ${esc(S.rtzProv)}`, T("Cliquer une zone pour afficher ses courbes ; entre parenthèses : date de la dernière estimation quand elle date de plus de 21 jours"), table("rtz-geo", tbl, [
       { k: "nom", t: "Zone de santé" }, { k: "province", t: "Province" }, { k: "cas", t: "Cas", num: true }, { k: "cas_21j", t: "Cas 21 j", num: true }, rv("r7"), rv("r14"), rv("r21"),
