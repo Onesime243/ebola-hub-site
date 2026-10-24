@@ -4,7 +4,7 @@
  "nom": "Province : Haut Uele",
  "court": "Haut Uele",
  "date": "2026-10-21",
- "genere_le": "2026-10-23 02:49",
+ "genere_le": "2026-10-24 10:15",
  "pptx": "Presentation_Reunion_Haut_Uele_20261021.pptx",
  "diapositives": 10,
  "slides": [
@@ -80,7 +80,7 @@
   },
   "08_alertes_sources": {
    "fichier": "08_alertes_sources.png",
-   "titre": "Sources des alertes du jour, 35 alertes"
+   "titre": "Sources des alertes du jour, 38 alertes"
   },
   "07b_alertes_comparatif_3j": {
    "fichier": "07b_alertes_comparatif_3j.png",

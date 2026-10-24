@@ -4,7 +4,7 @@
  "nom": "Niveau national : RDC",
  "court": "RDC",
  "date": "2026-10-21",
- "genere_le": "2026-10-23 02:48",
+ "genere_le": "2026-10-24 10:14",
  "pptx": "Presentation_Reunion_National_20261021.pptx",
  "diapositives": 13,
  "slides": [
@@ -84,7 +84,7 @@
   },
   "04_cas_du_jour": {
    "fichier": "04_cas_du_jour.png",
-   "titre": "Répartition des 39 nouveaux cas par province"
+   "titre": "Répartition des 48 nouveaux cas par province"
   },
   "05_jours_sans_cas": {
    "fichier": "05_jours_sans_cas.png",
@@ -104,7 +104,7 @@
   },
   "08_alertes_sources": {
    "fichier": "08_alertes_sources.png",
-   "titre": "Sources des alertes du jour, 882 alertes"
+   "titre": "Sources des alertes du jour, 995 alertes"
   },
   "07b_alertes_comparatif_3j": {
    "fichier": "07b_alertes_comparatif_3j.png",

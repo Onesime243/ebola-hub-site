@@ -4,7 +4,7 @@
  "nom": "Province : Tshopo",
  "court": "Tshopo",
  "date": "2026-10-21",
- "genere_le": "2026-10-23 02:49",
+ "genere_le": "2026-10-24 10:15",
  "pptx": "Presentation_Reunion_Tshopo_20261021.pptx",
  "diapositives": 10,
  "slides": [
@@ -18,8 +18,7 @@
   {
    "titre": "Situation du jour",
    "images": [
-    "03_indicateurs_jour",
-    "04_cas_du_jour"
+    "03_indicateurs_jour"
    ]
   },
   {
@@ -66,10 +65,6 @@
    "fichier": "03_indicateurs_jour.png",
    "titre": "Situation épidémiologique du jour, 21 octobre 2026"
   },
-  "04_cas_du_jour": {
-   "fichier": "04_cas_du_jour.png",
-   "titre": "Répartition des 2 nouveaux cas par zone de santé"
-  },
   "05_jours_sans_cas": {
    "fichier": "05_jours_sans_cas.png",
    "titre": "Nombre de jours sans nouveau cas confirmé par zone de santé"
@@ -80,7 +75,7 @@
   },
   "08_alertes_sources": {
    "fichier": "08_alertes_sources.png",
-   "titre": "Sources des alertes du jour, 80 alertes"
+   "titre": "Sources des alertes du jour, 100 alertes"
   },
   "07b_alertes_comparatif_3j": {
    "fichier": "07b_alertes_comparatif_3j.png",

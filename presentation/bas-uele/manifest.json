@@ -4,7 +4,7 @@
  "nom": "Province : Bas Uele",
  "court": "Bas Uele",
  "date": "2026-10-21",
- "genere_le": "2026-10-23 02:49",
+ "genere_le": "2026-10-24 10:15",
  "pptx": "Presentation_Reunion_Bas_Uele_20261021.pptx",
  "diapositives": 9,
  "slides": [
@@ -73,7 +73,7 @@
   },
   "08_alertes_sources": {
    "fichier": "08_alertes_sources.png",
-   "titre": "Sources des alertes du jour, 77 alertes"
+   "titre": "Sources des alertes du jour, 86 alertes"
   },
   "07b_alertes_comparatif_3j": {
    "fichier": "07b_alertes_comparatif_3j.png",

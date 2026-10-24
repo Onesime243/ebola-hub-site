@@ -1,6 +1,6 @@
 {
- "date": "2026-10-22",
- "genere_le": "2026-10-23 02:49",
+ "date": "2026-10-23",
+ "genere_le": "2026-10-24 10:15",
  "niveaux": [
   {
    "code": "national",
@@ -331,7 +331,6 @@
     "01_indicateurs_cumul",
     "02_courbe_hebdomadaire",
     "03_indicateurs_jour",
-    "04_cas_du_jour",
     "05_jours_sans_cas",
     "07_indicateurs_alertes",
     "08_alertes_sources",
@@ -357,8 +356,7 @@
     {
      "titre": "Situation du jour",
      "images": [
-      "03_indicateurs_jour",
-      "04_cas_du_jour"
+      "03_indicateurs_jour"
      ]
     },
     {

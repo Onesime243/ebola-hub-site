@@ -4,7 +4,7 @@
  "nom": "Province : Ituri",
  "court": "Ituri",
  "date": "2026-10-21",
- "genere_le": "2026-10-23 02:48",
+ "genere_le": "2026-10-24 10:15",
  "pptx": "Presentation_Reunion_Ituri_20261021.pptx",
  "diapositives": 10,
  "slides": [
@@ -68,7 +68,7 @@
   },
   "04_cas_du_jour": {
    "fichier": "04_cas_du_jour.png",
-   "titre": "Répartition des 17 nouveaux cas par zone de santé"
+   "titre": "Répartition des 19 nouveaux cas par zone de santé"
   },
   "05_jours_sans_cas": {
    "fichier": "05_jours_sans_cas.png",
@@ -80,7 +80,7 @@
   },
   "08_alertes_sources": {
    "fichier": "08_alertes_sources.png",
-   "titre": "Sources des alertes du jour, 440 alertes"
+   "titre": "Sources des alertes du jour, 465 alertes"
   },
   "07b_alertes_comparatif_3j": {
    "fichier": "07b_alertes_comparatif_3j.png",
