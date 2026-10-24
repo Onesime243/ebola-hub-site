@@ -215,94 +215,248 @@
   }
   function histogram(container, opt) { xy(container, Object.assign({ series: [{ key: opt.y, label: opt.label, color: opt.color || "--s1" }], barWidth: .86 }, opt)); }
 
-  /* ---------------- Carte choroplèthe ---------------- */
-  function choropleth(container, opt) {
-    register(container, () => {
-      const feats = opt.features || [];
-      container.innerHTML = ""; container.classList.add("chart", "map");
-      if (!feats.length) { container.innerHTML = `<div class="empty">Géométrie indisponible</div>`; return; }
-      const rings = g => g.type === "Polygon" ? g.coordinates : g.coordinates.flat();
-      const focusF = opt.focus ? feats.filter(f => opt.focusIf ? opt.focusIf(f) : opt.value(f) > 0) : [];
-      const pts = (focusF.length ? focusF : feats).flatMap(f => rings(f.geometry).flat());
-      const xs = pts.map(p => p[0]), ys = pts.map(p => p[1]);
-      const minx = Math.min(...xs), maxx = Math.max(...xs), miny = Math.min(...ys), maxy = Math.max(...ys);
-      const W = Math.max(300, container.clientWidth || 700), ratio = (maxy - miny) / (maxx - minx || 1), H = Math.min(620, Math.max(320, W * ratio * 1.02)), pad = focusF.length ? 30 : 12;
-      const sc = Math.min((W - 2 * pad) / (maxx - minx || 1), (H - 2 * pad) / (maxy - miny || 1));
-      const ox = (W - (maxx - minx) * sc) / 2, oy = (H - (maxy - miny) * sc) / 2;
-      const P = p => [ox + (p[0] - minx) * sc, oy + (maxy - p[1]) * sc];
-      const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, style: "overflow:hidden" });
-      const vals = feats.map(f => opt.value(f)).filter(v => v > 0), mx = Math.max(1, ...vals);
-      const steps = ["--seq-1", "--seq-2", "--seq-3", "--seq-4", "--seq-5", "--seq-6", "--seq-7"].map(col);
-      const colorOf = opt.colorFn ? ((v, f) => opt.colorFn(v, f)) : (v => !v ? col("--seq-0") : steps[Math.min(steps.length - 1, Math.floor(Math.sqrt(v / mx) * steps.length * .999))]);
-      feats.forEach(f => {
-        const v = opt.value(f);
-        const d = rings(f.geometry).map(r => r.map((p, i) => { const q = P(p); return (i ? "L" : "M") + q[0].toFixed(1) + "," + q[1].toFixed(1); }).join("") + "Z").join("");
-        const p = el("path", { d, class: "zone" + (opt.selected && opt.selected === f.data_zone ? " sel" : ""), fill: colorOf(v, f), stroke: col("--map-stroke") || col("--surface") }, svg);
-        p.addEventListener("mousemove", ev => showTip(opt.tip(f, v), ev));
+  /* ---------------- Carte choroplèthe ----------------
+     Carte interactive : zoom (boutons, double-clic, Ctrl/⌘ + molette ou pincement), déplacement à la souris,
+     étiquettes posées sur la zone (jamais de trait de rappel : une étiquette qui ne tient pas est masquée et réapparaît
+     en zoomant), limites de province, encart RDC (province(s) concernée(s) en orange, zone sélectionnée en rouge,
+     emprise de la carte en rouge) et légende avec effectifs, comme les cartes de rapport. */
+  const TT = s => (window.HubT ? HubT(s) : s);
+  const MAPZ = new Map();
+  const ringsOf = g => g.type === "Polygon" ? g.coordinates : g.coordinates.flat();
+  let SEG = null, SEG_SRC = null;
+  function segTable(all) {                       // segments de contour, avec les zones qui les partagent (calculé une fois)
+    if (SEG && SEG_SRC === all) return SEG;
+    const m = new Map();
+    all.forEach(f => ringsOf(f.geometry).forEach(r => {
+      for (let i = 1; i < r.length; i++) {
+        const a = r[i - 1], b = r[i], ka = a[0] + "," + a[1], kb = b[0] + "," + b[1]; if (ka === kb) continue;
+        const k = ka < kb ? ka + "|" + kb : kb + "|" + ka, o = m.get(k);
+        if (o) o.f.push(f); else m.set(k, { a, b, f: [f] });
+      }
+    }));
+    SEG = [...m.values()]; SEG_SRC = all;
+    // segments non partagés (sommets voisins légèrement différents) : on regarde quelle zone se trouve de l'autre côté
+    const bb = all.map(f => { const p = ringsOf(f.geometry).flat(); let a = 1e9, b = 1e9, c = -1e9, d = -1e9; p.forEach(q => { if (q[0] < a) a = q[0]; if (q[0] > c) c = q[0]; if (q[1] < b) b = q[1]; if (q[1] > d) d = q[1]; }); return [a, b, c, d]; });
+    const inside = (f, x, y) => { let c = false; for (const r of ringsOf(f.geometry)) for (let i = 0, j = r.length - 1; i < r.length; j = i++) { const xi = r[i][0], yi = r[i][1], xj = r[j][0], yj = r[j][1]; if (((yi > y) !== (yj > y)) && (x < (xj - xi) * (y - yi) / (yj - yi) + xi)) c = !c; } return c; };
+    const zoneAt = (x, y, not) => { for (let i = 0; i < all.length; i++) { const b = bb[i]; if (x < b[0] || x > b[2] || y < b[1] || y > b[3] || all[i] === not) continue; if (inside(all[i], x, y)) return all[i]; } return null; };
+    SEG.forEach(s => {
+      if (s.f.length !== 1) return;
+      const f = s.f[0], mx = (s.a[0] + s.b[0]) / 2, my = (s.a[1] + s.b[1]) / 2, dx = s.b[0] - s.a[0], dy = s.b[1] - s.a[1], L = Math.hypot(dx, dy) || 1;
+      let o = null;
+      for (const e of [.0025, .008, .02]) {
+        const nx = -dy / L * e, ny = dx / L * e;
+        const p = inside(f, mx + nx, my + ny) ? [mx - nx, my - ny] : [mx + nx, my + ny];
+        o = zoneAt(p[0], p[1], f); if (o) break;
+      }
+      s.o = o;
+    });
+    return SEG;
+  }
+  // limites de province + contour du territoire affiché : segments non partagés par deux zones d'une même province
+  function provPath(feats, all, P) {
+    const inSet = new Set(feats); let d = "", last = null;
+    segTable(all).forEach(s => {
+      let u0 = null, u1 = null;
+      for (const f of s.f) { if (inSet.has(f)) { if (!u0) u0 = f; else { u1 = f; break; } } }
+      if (!u0 || (u1 && u1.province === u0.province)) return;
+      if (!u1 && s.f.length === 1 && s.o && inSet.has(s.o) && s.o.province === u0.province) return;   // faux bord (sommets décalés)
+      const p = P(s.a), q = P(s.b);
+      if (!last || Math.abs(last[0] - p[0]) > .01 || Math.abs(last[1] - p[1]) > .01) d += "M" + p[0].toFixed(1) + "," + p[1].toFixed(1);
+      d += "L" + q[0].toFixed(1) + "," + q[1].toFixed(1); last = q;
+    });
+    return d;
+  }
+  const INSET = { W: 210 };
+  let INSET_CACHE = null;
+  function insetBase(all) {                      // géométrie de l'encart RDC (mise en cache)
+    if (INSET_CACHE && INSET_CACHE.all === all) return INSET_CACHE;
+    const pts = all.flatMap(f => ringsOf(f.geometry).flat());
+    const minx = Math.min(...pts.map(p => p[0])), maxx = Math.max(...pts.map(p => p[0])), miny = Math.min(...pts.map(p => p[1])), maxy = Math.max(...pts.map(p => p[1]));
+    const pad = 4, W = INSET.W, sc = (W - 2 * pad) / (maxx - minx), H = Math.round((maxy - miny) * sc + 2 * pad);
+    const P = p => [pad + (p[0] - minx) * sc, pad + (maxy - p[1]) * sc];
+    const dOf = new Map(all.map(f => [f, ringsOf(f.geometry).map(r => r.map((p, i) => { const q = P(p); return (i ? "L" : "M") + q[0].toFixed(1) + "," + q[1].toFixed(1); }).join("") + "Z").join("")]));
+    INSET_CACHE = { all, W, H, P, dOf, prov: provPath(all, all, P), minx, maxx, miny, maxy };
+    return INSET_CACHE;
+  }
+  function choropleth(container, opt) { register(container, () => drawMap(container, opt)); }
+  function drawMap(container, opt) {
+    const feats = opt.features || [], all = opt.allFeatures || feats, report = !!opt.report;
+    container.innerHTML = ""; container.classList.add("chart", "map");
+    if (!feats.length) { container.innerHTML = `<div class="empty">${TT("Géométrie indisponible")}</div>`; return; }
+    const compact = !report && (container.clientWidth || 0) < 1000;   // panneau étroit : encart posé sur la carte, légende dessous
+    const grid = document.createElement("div"); grid.className = "map-grid" + (report ? " no-side" : compact ? " compact" : ""); container.appendChild(grid);
+    const main = document.createElement("div"); main.className = "map-main"; grid.appendChild(main);
+    const side = report ? null : document.createElement("aside"); if (side) { side.className = "map-side"; grid.appendChild(side); }
+    const focusF = opt.focus ? feats.filter(f => opt.focusIf ? opt.focusIf(f) : opt.value(f) > 0) : [];
+    const pts = (focusF.length ? focusF : feats).flatMap(f => ringsOf(f.geometry).flat());
+    const xs = pts.map(p => p[0]), ys = pts.map(p => p[1]);
+    const minx = Math.min(...xs), maxx = Math.max(...xs), miny = Math.min(...ys), maxy = Math.max(...ys);
+    const W = Math.max(300, main.clientWidth || container.clientWidth || 700), ratio = (maxy - miny) / (maxx - minx || 1), H = Math.min(640, Math.max(340, W * ratio * 1.02)), pad = focusF.length ? 26 : 12;
+    const sc = Math.min((W - 2 * pad) / (maxx - minx || 1), (H - 2 * pad) / (maxy - miny || 1));
+    const ox = (W - (maxx - minx) * sc) / 2, oy = (H - (maxy - miny) * sc) / 2;
+    const P = p => [ox + (p[0] - minx) * sc, oy + (maxy - p[1]) * sc];
+    const unP = q => [minx + (q[0] - ox) / sc, maxy - (q[1] - oy) / sc];
+    // état du zoom conservé entre deux rendus (clic sur une zone, changement de langue…)
+    const key = [feats.length, feats[0]?.data_zone, focusF.length, Math.round(W)].join("|"), zid = container.id || "map";
+    let st = MAPZ.get(zid); if (!st || st.key !== key || report) { st = { key, k: 1, tx: 0, ty: 0 }; if (!report) MAPZ.set(zid, st); }
+    const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, class: "geo-svg", style: "overflow:hidden" }, main);
+    el("rect", { x: 0, y: 0, width: W, height: H, fill: "transparent" }, svg);
+    const geo = el("g", { class: "geo" }, svg);
+    const vals = feats.map(f => opt.value(f)).filter(v => v > 0), mx = Math.max(1, ...vals);
+    const steps = ["--seq-1", "--seq-2", "--seq-3", "--seq-4", "--seq-5", "--seq-6", "--seq-7"].map(col);
+    const colorOf = opt.colorFn ? ((v, f) => opt.colorFn(v, f)) : (v => !v ? col("--seq-0") : steps[Math.min(steps.length - 1, Math.floor(Math.sqrt(v / mx) * steps.length * .999))]);
+    let dragged = false, selF = null;
+    feats.forEach(f => {
+      const v = opt.value(f);
+      const d = ringsOf(f.geometry).map(r => r.map((p, i) => { const q = P(p); return (i ? "L" : "M") + q[0].toFixed(1) + "," + q[1].toFixed(1); }).join("") + "Z").join("");
+      if (opt.selected && opt.selected === f.data_zone) selF = { f, d };
+      const p = el("path", { d, class: "zone", fill: colorOf(v, f), stroke: col("--map-stroke") || col("--surface"), "vector-effect": "non-scaling-stroke" }, geo);
+      if (!report) {
+        p.addEventListener("mousemove", ev => { if (!st.drag) showTip(opt.tip(f, v), ev); });
         p.addEventListener("mouseleave", hideTip);
-        p.addEventListener("click", () => opt.onClick && opt.onClick(f));
-      });
-      // ÉTIQUETTES : toutes les zones visibles portent leur nom.
-      //  · zones principales (labelIf) : « nom · valeur », placement garanti (décalé avec trait de rappel si nécessaire) ;
-      //  · zones non touchées : pas de nom (sauf labelAll: true).
-      const fs = opt.labelPx || 9.5, fsMin = Math.max(7.5, fs - 1.2);
-      const centroidOf = f => {                             // centre de gravité du plus grand anneau (aire signée)
-        const rs = rings(f.geometry), ring = rs.reduce((a, b) => b.length > a.length ? b : a, []);
-        let A = 0, cx = 0, cy = 0;
-        for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) { const k = ring[j][0] * ring[i][1] - ring[i][0] * ring[j][1]; A += k; cx += (ring[j][0] + ring[i][0]) * k; cy += (ring[j][1] + ring[i][1]) * k; }
-        if (Math.abs(A) < 1e-12) { const m = ring.reduce((a, p) => [a[0] + p[0], a[1] + p[1]], [0, 0]); return P([m[0] / ring.length, m[1] / ring.length]); }
-        return P([cx / (3 * A), cy / (3 * A)]);
-      };
-      const isMain = f => opt.labelIf ? !!opt.labelIf(f) : (opt.value(f) > 0);
-      const rank = f => opt.labelRank ? opt.labelRank(f) : (opt.value(f) || 0);
-      const showAll = opt.labelAll === true && opt.labelMode !== "none";   // noms des zones non touchées : désactivé par défaut
-      const cand = feats.map(f => ({ f, main: isMain(f), q: centroidOf(f) }))
-        .filter(o => opt.labelMode !== "none" && (o.main || showAll) && o.q[0] >= 0 && o.q[0] <= W && o.q[1] >= 0 && o.q[1] <= H)
-        .sort((a, b) => (b.main - a.main) || (rank(b.f) - rank(a.f)));
+        p.addEventListener("click", () => { if (dragged) return; opt.onClick && opt.onClick(f); });
+      }
+    });
+    el("path", { d: provPath(feats, all, P), class: "prov-line", "vector-effect": "non-scaling-stroke", fill: "none", stroke: "#2f363d", "stroke-width": 1.6, "stroke-linejoin": "round" }, geo);
+    if (selF) el("path", { d: selF.d, class: "zone-sel-outline", "vector-effect": "non-scaling-stroke", fill: "none", stroke: "#111", "stroke-width": 2.8 }, geo);
+    const lblG = el("g", { class: "lbls" }, svg);
+    // ÉTIQUETTES : « nom » + valeur dans un cercle, posées sur la zone ou juste à côté, sans trait de rappel
+    const fs = opt.labelPx || 9.5, fsMin = Math.max(7.5, fs - 1.2);
+    const centroidOf = f => {
+      const rs = ringsOf(f.geometry), ring = rs.reduce((a, b) => b.length > a.length ? b : a, []);
+      let A = 0, cx = 0, cy = 0;
+      for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) { const k = ring[j][0] * ring[i][1] - ring[i][0] * ring[j][1]; A += k; cx += (ring[j][0] + ring[i][0]) * k; cy += (ring[j][1] + ring[i][1]) * k; }
+      if (Math.abs(A) < 1e-12) { const m = ring.reduce((a, p) => [a[0] + p[0], a[1] + p[1]], [0, 0]); return P([m[0] / ring.length, m[1] / ring.length]); }
+      return P([cx / (3 * A), cy / (3 * A)]);
+    };
+    const isMain = f => opt.labelIf ? !!opt.labelIf(f) : (opt.value(f) > 0);
+    const rank = f => opt.labelRank ? opt.labelRank(f) : (opt.value(f) || 0);
+    const showAll = opt.labelAll === true && opt.labelMode !== "none";
+    const cands = opt.labelMode === "none" ? [] : feats.map(f => ({ f, main: isMain(f), q: centroidOf(f) })).filter(o => o.main || showAll)
+      .sort((a, b) => (b.main - a.main) || (rank(b.f) - rank(a.f)));
+    let hidden = 0;
+    const layout = () => {
+      lblG.innerHTML = ""; hidden = 0;
       const placed = [];
       const hit = r => r[0] < 2 || r[2] > W - 2 || r[1] < 2 || r[3] > H - 2 || placed.some(o => r[0] < o[2] && r[2] > o[0] && r[1] < o[3] && r[3] > o[1]);
-      const lblG = el("g", { class: "lbls" });
-      cand.forEach(({ f, main, q }) => {
+      cands.forEach(({ f, main, q: q0 }) => {
+        const q = [st.tx + st.k * q0[0], st.ty + st.k * q0[1]];
+        if (q[0] < 0 || q[0] > W || q[1] < 0 || q[1] > H) return;
         const v = opt.value(f), size = main ? fs : fsMin;
         const txt = main ? (opt.labelText ? opt.labelText(f, v) : `${f.data_zone} · ${v === null || v === undefined ? "—" : nf(v, opt.digits || 0)}`) : (opt.labelTextMinor ? opt.labelTextMinor(f) : f.data_zone);
-        // « nom · valeur » : le nom, et la valeur dans un cercle blanc au-dessous (comme les cartes de catégories)
         const sep = main ? String(txt).indexOf(" · ") : -1;
         const nm = sep >= 0 ? txt.slice(0, sep) : txt, vt = sep >= 0 ? txt.slice(sep + 3) : "";
         const rr = vt ? Math.max(size * 1.05, labelWidth(vt, size + .5) / 2 + 4) : 0;
-        const tw = Math.max(labelWidth(nm, size) + 6, 2 * rr + 2), th = size + 3 + (vt ? 2 * rr + 2 : 0), sy = th + 1;
+        const tw = Math.max(labelWidth(nm, size) + 6, 2 * rr + 2), th = size + 3 + (vt ? 2 * rr + 2 : 0);
         const rectAt = (x0, y0) => [x0 - tw / 2, y0 - size, x0 + tw / 2, y0 - size + th];
+        // positions proches uniquement : sur le centre, puis légèrement décalées (l'étiquette reste sur sa zone)
+        const dy0 = -th / 2 + size, near = [[0, dy0], [0, dy0 - th * .45], [0, dy0 + th * .45], [tw * .35, dy0], [-tw * .35, dy0]];
         let pos = null;
-        const near = [[0, 0], [0, -sy], [0, sy], [tw / 2 + 4, 0], [-tw / 2 - 4, 0], [tw / 2 + 4, -sy], [-tw / 2 - 4, sy], [tw / 2 + 4, sy], [-tw / 2 - 4, -sy]];
-        for (const [dx, dy] of near) { const r = rectAt(q[0] + dx, q[1] + dy); if (!hit(r)) { pos = [q[0] + dx, q[1] + dy, r]; break; } }
-        // repli : recherche en spirale autour de la zone (garantit l'affichage du nom)
-        for (let rad = sy * 2; !pos && rad < Math.max(W, H); rad += sy * .9) {
-          for (let k = 0; k < 24 && !pos; k++) { const ang = (k / 24) * 2 * Math.PI - Math.PI / 2, x0 = q[0] + Math.cos(ang) * rad * 1.6, y0 = q[1] + Math.sin(ang) * rad; const r = rectAt(x0, y0); if (!hit(r)) pos = [x0, y0, r]; }
+        for (const [dx, dy] of near) { const r = rectAt(q[0] + dx, q[1] + dy); if (!hit(r)) { pos = [q[0] + dx, q[1] + dy, r, true]; break; } }
+        if (!pos && main && vt) {        // repli : valeur seule dans son cercle, centrée sur la zone
+          const r = [q[0] - rr - 1, q[1] - rr - 1, q[0] + rr + 1, q[1] + rr + 1];
+          if (!hit(r)) pos = [q[0], q[1], r, false];
         }
-        if (!pos) return;
+        if (!pos) { if (main) hidden++; return; }
         placed.push(pos[2]);
-        const moved = Math.hypot(pos[0] - q[0], pos[1] - q[1]) > sy * 1.2;
-        if (moved) {
-          const ex = Math.max(pos[2][0], Math.min(pos[2][2], q[0])), ey = q[1] < pos[2][1] ? pos[2][1] : q[1] > pos[2][3] ? pos[2][3] : pos[1] - size * .4;
-          el("line", { x1: q[0], y1: q[1], x2: ex, y2: ey, class: "lbl-lead" + (main ? "" : " minor") }, lblG);
-          el("circle", { cx: q[0], cy: q[1], r: main ? 1.6 : 1.1, class: "lbl-dot" + (main ? "" : " minor") }, lblG);
+        const g = el("g", { class: "lbl-g" }, lblG);
+        el("title", {}, g).textContent = f.data_zone + (vt ? " : " + vt : "");
+        if (pos[3]) {
+          const t = el("text", { x: pos[0], y: pos[1], "text-anchor": "middle", class: "lbl" + (main ? "" : " lbl-minor"), style: `font-size:${size}px` }, g);
+          t.textContent = nm;
         }
-        const t = el("text", { x: pos[0], y: pos[1], "text-anchor": "middle", class: "lbl" + (main ? "" : " lbl-minor"), style: `font-size:${size}px` }, lblG);
-        t.textContent = nm;
         if (vt) {
-          const cy = pos[1] + 3 + rr;
-          el("circle", { cx: pos[0], cy, r: rr, fill: "#ffffff", stroke: "#5b6470", "stroke-width": 1.3 }, lblG);
-          const v2 = el("text", { x: pos[0], y: cy, "text-anchor": "middle", "dominant-baseline": "central", style: `font:800 ${size + .5}px system-ui,-apple-system,'Segoe UI',Arial,sans-serif;fill:#1f2328` }, lblG);
+          const cy = pos[3] ? pos[1] + 3 + rr : pos[1];
+          el("circle", { cx: pos[0], cy, r: rr, fill: "#ffffff", stroke: "#5b6470", "stroke-width": 1.3 }, g);
+          const v2 = el("text", { x: pos[0], y: cy, "text-anchor": "middle", "dominant-baseline": "central", style: `font:800 ${size + .5}px system-ui,-apple-system,'Segoe UI',Arial,sans-serif;fill:#1f2328` }, g);
           v2.textContent = vt;
         }
       });
-      svg.appendChild(lblG);
-      container.appendChild(svg);
-      container.__tbl = { cols: [window.HubT ? HubT("Zone de santé") : "Zone", stripTags(opt.unit || (window.HubT ? HubT("Valeur") : "Valeur"))],
-        rows: feats.map(f => [f.data_zone, opt.value(f)]).filter(r => r[1] !== null && r[1] !== undefined).sort((a, b) => (b[1] || 0) - (a[1] || 0)) };
-      const lg = document.createElement("div"); lg.className = "scale";
-      lg.innerHTML = opt.legendHTML || `<span>0</span><div class="ramp">${steps.map(s => `<i style="background:${s}"></i>`).join("")}</div><span>${nf(mx, opt.digits || 0)} ${esc(opt.unit || "")}</span>`;
-      container.appendChild(lg);
-    });
+      if (hintEl) hintEl.textContent = hidden ? `${hidden} ${TT("zone(s) sans étiquette à ce niveau de zoom : zoomez ou survolez la zone.")}` : "";
+    };
+    // ----- zoom et déplacement -----
+    const apply = () => { geo.setAttribute("transform", `translate(${st.tx.toFixed(2)} ${st.ty.toFixed(2)}) scale(${st.k.toFixed(4)})`); drawRect(); };
+    const clampPan = () => { st.tx = Math.min(W * .25, Math.max(W * .75 - W * st.k, st.tx)); st.ty = Math.min(H * .25, Math.max(H * .75 - H * st.k, st.ty)); if (st.k <= 1.0001) { st.k = 1; st.tx = 0; st.ty = 0; } };
+    let lt = null; const relayout = (ms) => { clearTimeout(lt); lt = setTimeout(layout, ms || 0); };
+    const zoomAt = (px, py, f) => { const k2 = Math.max(1, Math.min(16, st.k * f)); st.tx = px - (px - st.tx) * (k2 / st.k); st.ty = py - (py - st.ty) * (k2 / st.k); st.k = k2; clampPan(); apply(); relayout(120); };
+    const toView = ev => { const r = svg.getBoundingClientRect(); return [(ev.clientX - r.left) * W / r.width, (ev.clientY - r.top) * H / r.height]; };
+    let hintEl = null, rectEl = null, IB = null;
+    function drawRect() {
+      if (!rectEl || !IB) return;
+      const a = unP([(0 - st.tx) / st.k, (0 - st.ty) / st.k]), b = unP([(W - st.tx) / st.k, (H - st.ty) / st.k]);
+      const p = IB.P(a), q = IB.P(b);
+      const x0 = Math.max(1, Math.min(p[0], q[0])), y0 = Math.max(1, Math.min(p[1], q[1])), x1 = Math.min(IB.W - 1, Math.max(p[0], q[0])), y1 = Math.min(IB.H - 1, Math.max(p[1], q[1]));
+      rectEl.setAttribute("x", x0.toFixed(1)); rectEl.setAttribute("y", y0.toFixed(1)); rectEl.setAttribute("width", Math.max(3, x1 - x0).toFixed(1)); rectEl.setAttribute("height", Math.max(3, y1 - y0).toFixed(1));
+    }
+    if (!report) {
+      const zb = document.createElement("div"); zb.className = "map-zoom";
+      zb.innerHTML = `<button type="button" data-z="in" title="${TT("Zoomer")}" aria-label="${TT("Zoomer")}">+</button><button type="button" data-z="out" title="${TT("Dézoomer")}" aria-label="${TT("Dézoomer")}">−</button><button type="button" data-z="reset" title="${TT("Vue d’ensemble")}" aria-label="${TT("Vue d’ensemble")}">⤢</button>`;
+      main.appendChild(zb);
+      zb.addEventListener("click", ev => { const b = ev.target.closest("button"); if (!b) return; ev.stopPropagation(); const z = b.dataset.z;
+        if (z === "reset") { st.k = 1; st.tx = 0; st.ty = 0; apply(); layout(); } else zoomAt(W / 2, H / 2, z === "in" ? 1.6 : 1 / 1.6); });
+      svg.addEventListener("wheel", ev => { if (!ev.ctrlKey && !ev.metaKey) return; ev.preventDefault(); const [x, y] = toView(ev); zoomAt(x, y, Math.exp(-ev.deltaY * .0025)); }, { passive: false });
+      svg.addEventListener("dblclick", ev => { ev.preventDefault(); const [x, y] = toView(ev); zoomAt(x, y, ev.shiftKey ? 1 / 1.8 : 1.8); });
+      let down = null;
+      svg.addEventListener("pointerdown", ev => { if (ev.button !== 0) return; down = { x: ev.clientX, y: ev.clientY, tx: st.tx, ty: st.ty, id: ev.pointerId }; dragged = false; });
+      svg.addEventListener("pointermove", ev => {
+        if (!down || st.k <= 1) return;
+        const r = svg.getBoundingClientRect(), dx = (ev.clientX - down.x) * W / r.width, dy = (ev.clientY - down.y) * H / r.height;
+        if (!dragged && Math.hypot(dx, dy) < 4) return;
+        if (!dragged) { dragged = true; st.drag = true; hideTip(); svg.setPointerCapture(down.id); svg.classList.add("dragging"); lblG.style.display = "none"; }
+        st.tx = down.tx + dx; st.ty = down.ty + dy; clampPan(); apply();
+      });
+      const up = () => { if (!down) return; down = null; st.drag = false; svg.classList.remove("dragging"); if (dragged) { lblG.style.display = ""; layout(); setTimeout(() => { dragged = false; }, 0); } };
+      svg.addEventListener("pointerup", up); svg.addEventListener("pointercancel", up);
+      hintEl = document.createElement("div"); hintEl.className = "map-hint"; main.appendChild(hintEl);
+      const how = document.createElement("div"); how.className = "map-hint how";
+      how.textContent = TT("Zoom : boutons + / −, double-clic ou Ctrl (⌘) + molette ; glisser pour déplacer la carte zoomée.");
+      main.appendChild(how);
+    }
+    // ----- encart RDC -----
+    let insetSvg = null;
+    if (all.length > feats.length || opt.inset) {
+      IB = insetBase(all);
+      insetSvg = document.createElementNS(NS, "svg");
+      insetSvg.setAttribute("viewBox", `0 0 ${IB.W} ${IB.H}`); insetSvg.setAttribute("xmlns", NS);
+      const hiProv = new Set(opt.insetProvinces || []), selZ = opt.selected || null;
+      el("rect", { x: 0, y: 0, width: IB.W, height: IB.H, fill: "#ffffff" }, insetSvg);
+      all.forEach(f => el("path", { d: IB.dOf.get(f), fill: hiProv.has(f.province) ? "#f0a43a" : "#e7ebef", stroke: hiProv.has(f.province) ? "#f0a43a" : "#e7ebef", "stroke-width": .4 }, insetSvg));
+      if (selZ) all.filter(f => f.data_zone === selZ).forEach(f => el("path", { d: IB.dOf.get(f), fill: "#b8322a", stroke: "#7a1d17", "stroke-width": .6 }, insetSvg));
+      el("path", { d: IB.prov, fill: "none", stroke: "#6b7680", "stroke-width": .55, "stroke-linejoin": "round" }, insetSvg);
+      rectEl = el("rect", { fill: "none", stroke: "#d62828", "stroke-width": 1.6 }, insetSvg);
+      drawRect();
+    }
+    container.__inset = insetSvg;
+    // ----- légende (comme la carte de rapport) -----
+    const legend = opt.legend || null;
+    if (side) {
+      let h = "";
+      if (insetSvg) {
+        h += `<div class="map-inset"><div class="inset-title">${TT("Localisation en RDC")}</div><div class="inset-box"></div></div>`;
+      }
+      h += `<div class="map-legend"><div class="lg-title">${esc(opt.legendTitle || TT("Légende"))}</div>`;
+      if (legend) h += (legend.some(it => it.count !== undefined) ? `<div class="li head"><span></span><span class="n">${esc(opt.countLabel || TT("zones"))}</span></div>` : "") + legend.map(it => `<div class="li"><i style="background:${it.color}"></i><span>${esc(it.label)}</span>${it.count !== undefined ? `<span class="n">${nf(it.count)}</span>` : ""}</div>`).join("");
+      else if (opt.legendHTML) h += `<div class="lg-html">${opt.legendHTML}</div>`;
+      h += `<div class="li sym"><i class="ln prov"></i><span>${TT("Limite de province")}</span></div><div class="li sym"><i class="ln zone"></i><span>${TT("Limite de zone de santé")}</span></div>`;
+      if (selF) h += `<div class="li sym"><i class="sel"></i><span>${TT("Zone sélectionnée")} : ${esc(opt.selected)}</span></div>`;
+      if (insetSvg) {
+        h += `<div class="lg-sub">${TT("Encart")}</div><div class="li sym"><i style="background:#f0a43a"></i><span>${esc(opt.insetLabel || TT("Province(s) concernée(s)"))}</span></div>`;
+        if (selF) h += `<div class="li sym"><i style="background:#b8322a"></i><span>${TT("Zone sélectionnée")}</span></div>`;
+        h += `<div class="li sym"><i class="emp"></i><span>${TT("Emprise de la carte")}</span></div>`;
+      }
+      side.innerHTML = h + `</div>`;
+      if (insetSvg) {
+        side.querySelector(".inset-box").appendChild(insetSvg);
+        if (compact) { const ib = side.querySelector(".map-inset"); ib.classList.add("inset-over"); main.insertBefore(ib, svg.nextSibling); }
+      }
+    }
+    apply(); layout();
+    container.__tbl = { cols: [TT("Zone de santé"), stripTags(opt.unit || TT("Valeur"))],
+      rows: feats.map(f => [f.data_zone, opt.value(f)]).filter(r => r[1] !== null && r[1] !== undefined).sort((a, b) => (b[1] || 0) - (a[1] || 0)) };
+    container.__export = (name, panel) => reportMapPNG(container, {
+      title: panel?.querySelector(".panel-head h2")?.textContent || name, subtitle: panel?.querySelector(".panel-head .sub, .panel-head p")?.textContent || "",
+      legendTitle: opt.legendTitle, legend: legend || [], countLabel: opt.countLabel || TT("zones"), file: name, inset: insetSvg,
+      sideNotes: [TT("Limite noire épaisse : province ; encart : orange = province(s) concernée(s), rouge = zone sélectionnée, cadre rouge = emprise de la carte.")] });
   }
 
   /* ------------------------------------------------------------------
@@ -809,7 +963,7 @@
     box.style.cssText = `position:absolute;left:-12000px;top:0;width:${rep.width || 1000}px;background:#fff`;
     document.body.appendChild(box);
     try {
-      choropleth(box, Object.assign({}, opt, { labelPx: rep.labelPx || 11 }));
+      choropleth(box, Object.assign({}, opt, { labelPx: rep.labelPx || 11, report: true }));
       reportMapPNG(box, rep);
     } finally { registry.delete(box); box.remove(); }
   }
@@ -824,6 +978,7 @@
     for (let i = 0; i < src.children.length; i++) inlineStyles(src.children[i], dst.children[i]);
   }
   function downloadPNG(panel, name) {
+    const mc = panel.querySelector(".chart.map"); if (mc && mc.__export) { mc.__export(name, panel); return; }
     const svg = panel.querySelector("svg"); if (!svg) { alert("Aucun graphique à exporter dans ce panneau."); return; }
     const clone = svg.cloneNode(true); inlineStyles(svg, clone); fixHalo(clone);
     const vb = svg.viewBox.baseVal, w = vb && vb.width ? vb.width : svg.clientWidth, h = vb && vb.height ? vb.height : svg.clientHeight;
@@ -835,10 +990,22 @@
     const meas = document.createElement("canvas").getContext("2d"); meas.font = "12px system-ui,sans-serif";
     let lines = 1, lxm = 12; items.forEach(sp => { const wd = meas.measureText(sp.textContent.trim()).width + 32; if (lxm + wd > w - 12 && lxm > 12) { lines++; lxm = 12; } lxm += wd; });
     const img = new Image(), sc = 2, head = 44, legendH = items.length ? 10 + lines * 20 : ramp ? 30 : (panel.querySelector(".legend") ? 30 : 0);
+    // méthodologie du panneau (encadré .method-box) reprise sous le graphique
+    const mLines = [];
+    panel.querySelectorAll(".method-box").forEach(mb => {
+      [...mb.children].forEach(ch => {
+        const tag = ch.tagName.toLowerCase();
+        const wrapT = (txt, font, ind) => { meas.font = font; let cur = ""; String(txt).split(/\s+/).forEach(wd => { const n = cur ? cur + " " + wd : wd; if (meas.measureText(n).width > w - 24 - ind && cur) { mLines.push({ t: cur, font, ind }); cur = wd; } else cur = n; }); if (cur) mLines.push({ t: cur, font, ind }); };
+        if (tag === "h4") { mLines.push({ gap: 4 }); wrapT(ch.textContent.trim(), "700 12px system-ui,sans-serif", 0); }
+        else if (tag === "ul") ch.querySelectorAll("li").forEach(li => { const before = mLines.length; wrapT(li.textContent.trim(), "11.5px system-ui,sans-serif", 12); if (mLines[before]) mLines[before].bullet = true; });
+        else wrapT(ch.textContent.trim(), "11.5px system-ui,sans-serif", 0);
+      });
+    });
+    const methH = mLines.length ? 14 + mLines.reduce((a, l) => a + (l.gap || 16), 0) : 0;
     img.onload = () => {
-      const c = document.createElement("canvas"); c.width = w * sc; c.height = (h + head + legendH + 24) * sc;
+      const c = document.createElement("canvas"); c.width = w * sc; c.height = (h + head + legendH + methH + 24) * sc;
       const x = c.getContext("2d"); x.scale(sc, sc);
-      x.fillStyle = col("--surface") || "#fff"; x.fillRect(0, 0, w, h + head + legendH + 24);
+      x.fillStyle = col("--surface") || "#fff"; x.fillRect(0, 0, w, h + head + legendH + methH + 24);
       x.fillStyle = col("--ink"); x.font = "600 16px system-ui,sans-serif"; x.fillText(title, 12, 26);
       x.drawImage(img, 0, head, w, h);
       let lx = 12, ly = h + head + 10;
@@ -848,7 +1015,12 @@
       if (ramp) { const sp = ramp.parentElement.querySelectorAll(":scope > span"), cs = [...ramp.querySelectorAll("i")].map(i => getComputedStyle(i).backgroundColor);
         x.fillStyle = col("--ink-2"); const t0 = sp[0]?.textContent || ""; x.fillText(t0, 12, ly + 9); const rx = 18 + x.measureText(t0).width;
         cs.forEach((c, k) => { x.fillStyle = c; x.fillRect(rx + k * 26, ly, 26, 10); }); x.fillStyle = col("--ink-2"); x.fillText(sp[1]?.textContent || "", rx + cs.length * 26 + 6, ly + 9); }
-      x.fillStyle = col("--muted"); x.font = "10px system-ui,sans-serif"; x.fillText("Ebola Outbreak, SGI-TASK FORCE · " + (window.DASHBOARD_DATA?.meta?.cutoff || ""), 12, h + head + legendH + 16);
+      if (mLines.length) {
+        let my = h + head + legendH + 14; x.strokeStyle = col("--line") || "#ddd"; x.beginPath(); x.moveTo(12, my - 6); x.lineTo(w - 12, my - 6); x.stroke();
+        mLines.forEach(l => { if (l.gap) { my += l.gap; return; } x.font = l.font; x.fillStyle = l.font.startsWith("700") ? (col("--ink") || "#111") : (col("--ink-2") || "#333");
+          if (l.bullet) x.fillText("•", 14, my + 11); x.fillText(l.t, 12 + l.ind, my + 11); my += 16; });
+      }
+      x.fillStyle = col("--muted"); x.font = "10px system-ui,sans-serif"; x.fillText("Ebola Outbreak, SGI-TASK FORCE · " + (window.DASHBOARD_DATA?.meta?.cutoff || ""), 12, h + head + legendH + methH + 16);
       c.toBlob(b => { const a = document.createElement("a"); a.href = URL.createObjectURL(b); a.download = (name || title).replace(/[^\w\-]+/g, "_") + ".png"; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 2000); });
     };
     img.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(data);
@@ -862,12 +1034,15 @@
     const vb = svg.viewBox.baseVal, w = vb.width || svg.clientWidth, h = vb.height || svg.clientHeight;
     clone.setAttribute("width", w); clone.setAttribute("height", h);
     const img = new Image(), sc = 2.5, side = 270, head = 74, notes = opt.notes || [];
+    const insetSvg = opt.inset || container.__inset || null; let insetImg = insetSvg ? new Image() : null;
+    const insetH = insetSvg ? Math.round(side * insetSvg.viewBox.baseVal.height / insetSvg.viewBox.baseVal.width) + 26 : 0;
     const W = w + side + 36;
     const meas = document.createElement("canvas").getContext("2d"); meas.font = "11px system-ui,sans-serif";
     const wrap = (t, mw) => { const out = []; let cur = ""; String(t).split(" ").forEach(wd => { const n = cur ? cur + " " + wd : wd; if (meas.measureText(n).width > mw && cur) { out.push(cur); cur = wd; } else cur = n; }); if (cur) out.push(cur); return out; };
     const noteLines = notes.flatMap(n => wrap(n, W - 40));
-    const H = head + Math.max(h, 60 + (opt.legend || []).length * 24 + 90) + 20 + noteLines.length * 15 + 34;
-    img.onload = () => {
+    const H = head + Math.max(h, insetH + 60 + (opt.legend || []).length * 24 + 150) + 20 + noteLines.length * 15 + 34;
+    let pending = insetImg ? 2 : 1;
+    const draw = () => {
       const c = document.createElement("canvas"); c.width = W * sc; c.height = H * sc;
       const x = c.getContext("2d"); x.scale(sc, sc);
       x.fillStyle = "#ffffff"; x.fillRect(0, 0, W, H);
@@ -881,8 +1056,12 @@
       x.fillStyle = "#16202a"; x.beginPath(); x.moveTo(nx, ny); x.lineTo(nx - 7, ny + 20); x.lineTo(nx, ny + 15); x.closePath(); x.fill();
       x.fillStyle = "#ffffff"; x.strokeStyle = "#16202a"; x.beginPath(); x.moveTo(nx, ny); x.lineTo(nx + 7, ny + 20); x.lineTo(nx, ny + 15); x.closePath(); x.fill(); x.stroke();
       x.fillStyle = "#16202a"; x.font = "700 12px system-ui,sans-serif"; x.textAlign = "center"; x.fillText("N", nx, ny + 33); x.textAlign = "left";
-      // légende
+      // encart RDC puis légende
       const lx = 18 + w + 18; let ly = head + 8;
+      if (insetImg) {
+        x.fillStyle = "#16202a"; x.font = "700 12.5px system-ui,sans-serif"; x.fillText(TT("Localisation en RDC"), lx, ly + 11); ly += 18;
+        const ih = insetH - 26; x.drawImage(insetImg, lx, ly, side, ih); x.strokeStyle = "#9aa3ab"; x.strokeRect(lx, ly, side, ih); ly += ih + 14;
+      }
       x.fillStyle = "#16202a"; x.font = "700 13px system-ui,sans-serif"; wrap(opt.legendTitle || "Légende", side).forEach(t => { x.fillText(t, lx, ly + 12); ly += 17; });
       if ((opt.legend || []).some(it => it.count !== undefined)) { x.fillStyle = "#6b7680"; x.font = "10.5px system-ui,sans-serif"; x.textAlign = "right"; x.fillText(opt.countLabel || "zones", lx + side - 6, ly + 10); x.textAlign = "left"; ly += 14; }
       ly += 6; x.font = "12px system-ui,sans-serif";
@@ -892,6 +1071,17 @@
         if (it.count !== undefined) { x.fillStyle = "#6b7680"; x.textAlign = "right"; x.fillText(String(it.count), lx + side - 6, ly + 11); x.textAlign = "left"; }
         ly += 24;
       });
+      const sym = (kind, label) => {
+        if (kind === "prov") { x.strokeStyle = "#2f363d"; x.lineWidth = 2; x.beginPath(); x.moveTo(lx, ly + 7); x.lineTo(lx + 16, ly + 7); x.stroke(); }
+        else if (kind === "zone") { x.strokeStyle = "#b9c0c6"; x.lineWidth = 1; x.beginPath(); x.moveTo(lx, ly + 7); x.lineTo(lx + 16, ly + 7); x.stroke(); }
+        else if (kind === "emp") { x.strokeStyle = "#d62828"; x.lineWidth = 1.6; x.strokeRect(lx + 1, ly + 1, 14, 12); }
+        else { x.fillStyle = kind; x.fillRect(lx, ly, 16, 14); x.strokeStyle = "#9aa3ab"; x.lineWidth = 1; x.strokeRect(lx, ly, 16, 14); }
+        x.lineWidth = 1; x.fillStyle = "#26313b"; x.font = "12px system-ui,sans-serif"; x.fillText(label, lx + 24, ly + 11); ly += 22;
+      };
+      if (opt.symbols !== false) {
+        sym("prov", TT("Limite de province")); sym("zone", TT("Limite de zone de santé"));
+        if (insetImg) { sym("#f0a43a", TT("Province(s) concernée(s), encart")); sym("emp", TT("Emprise de la carte, encart")); }
+      }
       ly += 8; x.font = "11px system-ui,sans-serif"; x.fillStyle = "#4a5560";
       (opt.sideNotes || []).forEach(n => wrap(n, side).forEach(t => { x.fillText(t, lx, ly + 10); ly += 15; }));
       // notes
@@ -900,7 +1090,10 @@
       x.fillStyle = "#8a949d"; x.font = "10.5px system-ui,sans-serif"; x.fillText(opt.source || ("Ebola Outbreak, SGI-TASK FORCE · " + (window.DASHBOARD_DATA?.meta?.cutoff || "")), 18, H - 12);
       c.toBlob(b => { const a = document.createElement("a"); a.href = URL.createObjectURL(b); a.download = (opt.file || opt.title || "carte").replace(/[^\w\-]+/g, "_") + ".png"; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 2000); });
     };
+    const done = () => { if (--pending === 0) draw(); };
+    img.onload = done;
     img.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(new XMLSerializer().serializeToString(clone));
+    if (insetImg) { insetImg.onload = done; insetImg.onerror = () => { insetImg = null; done(); }; insetImg.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(new XMLSerializer().serializeToString(insetSvg)); }
   }
 
   /* PNG d'un panneau sans graphique SVG : rendu du tableau (40 premières lignes) sur un canevas */

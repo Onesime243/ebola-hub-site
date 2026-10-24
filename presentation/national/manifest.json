@@ -4,7 +4,7 @@
  "nom": "Niveau national : RDC",
  "court": "RDC",
  "date": "2026-10-21",
- "genere_le": "2026-10-24 10:14",
+ "genere_le": "2026-10-24 20:50",
  "pptx": "Presentation_Reunion_National_20261021.pptx",
  "diapositives": 13,
  "slides": [
@@ -128,11 +128,11 @@
   },
   "10_indicateurs_contacts": {
    "fichier": "10_indicateurs_contacts.png",
-   "titre": "Situation du suivi des contacts, SitRep n° 157 du 18 octobre 2026"
+   "titre": "Situation du suivi des contacts au 21 octobre 2026"
   },
   "12_contacts_tendance": {
    "fichier": "12_contacts_tendance.png",
-   "titre": "Taux de suivi des contacts (21 derniers jours, base DHIS2 : saisie partielle)"
+   "titre": "Taux de suivi des contacts (21 derniers jours)"
   },
   "12_contacts_taux": {
    "fichier": "12_contacts_taux.png",

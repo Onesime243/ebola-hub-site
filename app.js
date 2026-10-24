@@ -85,7 +85,7 @@
     lab: "Tous", nowH: 30, fLevel: "National", fTerr: "National", fTarget: "confirmes", fH: 30, tables: {},
     ovStack: "aucun", netIcons: true, gen: "0", idxPeriod: "0", ssSet: "", ssPlace: "Tous", ssMin: "2", ssCases: true, dynG: "National", growBase: "dds", growWin: "12s", dyStack: "sexe", dyBase: "o", dyDays: "60", rtDays: "120",
     siCmp: false, rlWin: "28j", projH: "30", distK: "dds_notification", recZone: "", recSup: "0.3", recColor: "issue", recX: "onset", recIcons: true, recDoc: false, epiMin: "3", resZone: "", perfG: "National",
-    rtmG: "National", rtmSet: "all", rtmDays: "120", zrCat: "Toutes", rtmMode: "zones", iclG: "National", rtzProv: "Toutes", rtzG: "National", rtzTau: "7", rtzDays: "60", opTab: "deces", opProv: "Toutes", opWin: "cumul", opZone: "Toutes", opCte: "Tous", opD1: "", opD2: "", opCls: "c", opChamp: "Tous", zrColor: "categorie", zrLab: "score", zrSel: "", pplProv: "Toutes", sitNiv: "national"
+    rtmG: "National", rtmSet: "all", rtmDays: "120", zrCat: "Toutes", rtmMode: "zones", iclG: "National", rtzProv: "Toutes", rtzG: "National", rtzTau: "7", rtzDays: "60", opTab: "deces", opProv: "Toutes", opWin: "cumul", opZone: "Toutes", opCte: "Tous", opD1: "", opD2: "", opCls: "c", opChamp: "Tous", iclTau: "14", jlD1: "", jlD2: "", jlBase: "exp", jlZone: "Toutes", jlSt: "Tous", zrColor: "categorie", zrLab: "score", zrSel: "", pplProv: "Toutes", sitNiv: "national"
   };
   const TABS = [
     { id: "overview", t: "Vue générale", g: "Situation", i: "M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z" },
@@ -438,8 +438,11 @@
     const val = f => { const r = byZ.get(String(f.data_zone).toUpperCase()); if (!r) return null; const v = r[m.k]; return v === null || v === undefined ? null : Number(v); };
     const touched = f => { const r = byZ.get(String(f.data_zone).toUpperCase()); return !!r && ((((D.zones_periodes || {}).tout || []).find(x => x.zone_sante === r.zone_sante) || {}).cas > 0); };
     const legendHTML = `<span>${T(m.t)}</span>${cls.map(c => `<span class="flex" style="gap:4px"><i style="display:inline-block;width:14px;height:10px;border-radius:2px;background:${c.color}"></i>${c.label}</span>`).join("")}<span class="flex" style="gap:4px"><i style="display:inline-block;width:14px;height:10px;border-radius:2px;background:${col(TL_NA)}"></i>${T("aucune donnée")}</span>`;
-    Ch.choropleth($("#c-map"), { features: feats, focus: S.mapFocus, focusIf: touched, value: val, selected: S.zoneSel, digits: m.d ?? 0,
-      colorFn: v => { const c = classOf(cls, m, v); return c ? c.color : col(TL_NA); }, legendHTML,
+    const legend = [...cls.map(c => ({ color: c.color, label: c.label, count: feats.filter(f => classOf(cls, m, val(f)) === c).length })), { color: col(TL_NA), label: T("aucune donnée"), count: feats.filter(f => !classOf(cls, m, val(f))).length }];
+    const insetProvinces = S.province !== "Toutes" ? [...new Set(feats.map(f => f.province))] : [...new Set(feats.filter(touched).map(f => f.province))];
+    Ch.choropleth($("#c-map"), { features: feats, allFeatures: D.map_zones || feats, focus: S.mapFocus, focusIf: touched, value: val, selected: S.zoneSel, digits: m.d ?? 0,
+      colorFn: v => { const c = classOf(cls, m, v); return c ? c.color : col(TL_NA); }, legendHTML, legend, legendTitle: T(m.t), countLabel: T("zones"), inset: true, insetProvinces,
+      insetLabel: S.province !== "Toutes" ? `${T("Province sélectionnée")} : ${S.province}` : T("Province(s) concernée(s)"),
       labelIf: f => { const v = val(f); return v !== null && (m.type !== "count" || v > 0) && touched(f); }, labelRank: f => { const r = byZ.get(String(f.data_zone).toUpperCase()); return r ? (r.cas || 0) : 0; },
       tip: (f, v) => { const r = byZ.get(String(f.data_zone).toUpperCase()) || {}; return `<b>${esc(f.data_zone)}</b><div class="row"><span>${T(m.t)}</span><b>${v === null ? "—" : nf(v, m.d ?? 1)}${m.unit === "%" && v !== null ? " %" : ""}</b></div><div class="row"><span>${T("Confirmés")}</span><b>${nf(r.confirmes)}</b></div><div class="row"><span>${T("Décès")}</span><b>${nf(r.deces_confirmes)}</b></div><div class="row"><span>${T("Contacts actifs")}</span><b>${nf(r.contacts_actifs)}</b></div>`; },
       onClick: f => { S.zoneSel = f.data_zone; render(); } });
@@ -778,13 +781,56 @@
       ${panel("Nœud sélectionné", T("Cliquer un nœud du graphe"), `<div id="node-detail">${nodeDetail()}</div><h3 class="small" style="margin:16px 0 6px">${T("Statut des contacts directs")}</h3>${stackbar(counts)}${legend(STATUS.filter(x => counts[x.k]).map(x => ({ t: x.k, c: x.c, n: counts[x.k] })))}`)}
     </div>
     ${panel("Contacts du cas index", `${T("Suivi individuel sur 21 jours, pseudonymisé")} · ${perTxt}`, table("jr-ct", ct, [
+      { k: "ixs", t: "ID index", v: x => `<span class="nowrap">${esc(ixBase(x))}</span>`, csv: x => ixBase(x), sortv: x => ixBase(x) },
       { k: "id", t: "ID contact", v: x => `<b>${esc(x.id)}</b> <span class="muted">${esc(x.ini)}</span>`, csv: x => x.id }, { k: "age", t: "Âge", num: true, d: 0 }, { k: "sexe", t: "Sexe" },
       { k: "rel", t: "Relation" }, { k: "type", t: "Exposition", v: x => esc(T(String(x.type || "—").replace(/^\d\.\s*/, ""))) + (x.hr ? " " + badge("Haut risque", "b-high") : "") + (x.hosp ? " " + badge("Soins", "b-info") : ""), csv: x => x.type },
       { k: "as", t: "Aire" }, { k: "exp", t: "Dernière exposition", v: x => dshort(x.exp) }, { k: "fin", t: "Fin de suivi", v: x => dshort(x.fin) },
       { k: "comp", t: "Jours vus / attendus", v: x => `<div class="flex" style="gap:6px;flex-wrap:nowrap"><div class="progress" style="width:80px"><i style="width:${x.ja ? Math.min(100, 100 * x.jv / x.ja) : 0}%;background:${col(stColor(x.st))}"></i></div><span class="small">${x.jv}/${x.ja}</span></div>`, sortv: x => x.comp, csv: x => `${x.jv}/${x.ja}` },
       { k: "vl", t: "Dernier vu", v: x => x.vl ? dshort(x.vl) : T("jamais") }, { k: "st", t: "Statut", v: x => statusBadge(x.st), csv: x => x.st },
       { k: "lk", t: "Rapprochement Linelist", v: x => x.lk && caseBy.has(x.lk) ? `<a href="#/journey/${encodeURIComponent(x.lk)}">${esc(caseBy.get(x.lk).id)}</a> ${badge(x.lkc, LINKC[x.lkc])}` : (x.lk ? badge(x.lkc, LINKC[x.lkc]) : "—"), csv: x => x.lk ? `${(caseBy.get(x.lk) || {}).id || x.lk} (${x.lkc})` : "" }],
-      { sort: "st", rowClick: true, rowKey: x => x.k, selected: x => x.k === S.nodeSel, maxh: 460 }), { csv: "jr-ct" })}`;
+      { sort: "st", rowClick: true, rowKey: x => x.k, selected: x => x.k === S.nodeSel, maxh: 460 }), { csv: "jr-ct" })}
+    ${contactListPanel()}`;
+  }
+  /* ID du cas index tel que saisi dans la base de suivi des contacts (sinon ID de la Linelist rapprochée) */
+  function ixBase(x) { return x.ixs || (caseBy.get(x.ix) || {}).id || String(x.ix || "").replace(/^EXT-/, "") || "—"; }
+  /* Liste de tous les contacts avec l'ID de leur cas index : depuis le début de l'épidémie ou pour des dates choisies */
+  function contactListPanel() {
+    const first = contacts.reduce((m, x) => (x.exp && (!m || x.exp < m) ? x.exp : m), "") || D.meta.plage_donnees?.[0] || "";
+    const last = REF();
+    const d1 = S.jlD1 || "", d2 = S.jlD2 || "";
+    const base = S.jlBase === "v1" ? "v1" : "exp";
+    const pz = contacts.filter(x => (S.province === "Toutes" || x.prov === S.province));
+    const zl = ["Toutes", ...[...new Set(pz.map(x => x.zs).filter(Boolean))].sort()];
+    if (!zl.includes(S.jlZone)) S.jlZone = "Toutes";
+    const stl = ["Tous", ...STATUS.map(x => x.k).filter(k => pz.some(x => x.st === k))];
+    const rows = pz.filter(x => (S.jlZone === "Toutes" || x.zs === S.jlZone) && (S.jlSt === "Tous" || x.st === S.jlSt)
+      && (!d1 || (x[base] && x[base] >= d1)) && (!d2 || (x[base] && x[base] <= d2)));
+    const nIdx = new Set(rows.map(x => x.ix)).size, nDev = rows.filter(x => x.sc === "C").length;
+    const perTxt = d1 || d2 ? `${T("du")} ${d1 ? dfmt(d1) : dfmt(first)} ${T("au")} ${dfmt(d2 || last)}` : `${T("depuis le début de l’épidémie")} (${dfmt(first)} → ${dfmt(last)})`;
+    const Q = [["all", "Depuis le début"], ["7", "7 j"], ["14", "14 j"], ["21", "21 j"], ["28", "28 j"], ["42", "42 j"], ["90", "90 j"]];
+    const qOn = k => k === "all" ? (!d1 && !d2) : (d2 === last && d1 === addDays(last, -(Number(k) - 1)));
+    return panel("Liste des contacts et de leur cas index", `${T("ID du cas index selon la base de suivi, ID du contact et rapprochement avec la Linelist")} · <b>${perTxt}</b>`, `
+      <div class="filters jl-filters">
+        <label class="small muted">${T("Date de référence")}<select data-state="jlBase"><option value="exp" ${base === "exp" ? "selected" : ""}>${T("Dernière exposition")}</option><option value="v1" ${base === "v1" ? "selected" : ""}>${T("Début du suivi (1re visite)")}</option></select></label>
+        <label class="small muted">${T("Du")}<input type="date" data-state="jlD1" value="${esc(d1)}" min="${esc(first)}" max="${esc(last)}"></label>
+        <label class="small muted">${T("au")}<input type="date" data-state="jlD2" value="${esc(d2)}" min="${esc(first)}" max="${esc(last)}"></label>
+        <div class="seg">${Q.map(([k, t]) => `<button type="button" data-jlq="${k}" class="${qOn(k) ? "on" : ""}">${T(t)}</button>`).join("")}</div>
+        <label class="small muted">${T("Zone de santé")}<select data-state="jlZone">${zl.map(z => `<option value="${esc(z)}" ${z === S.jlZone ? "selected" : ""}>${esc(T(z))}</option>`).join("")}</select></label>
+        <label class="small muted">${T("Statut")}<select data-state="jlSt">${stl.map(z => `<option value="${esc(z)}" ${z === S.jlSt ? "selected" : ""}>${esc(T(z))}</option>`).join("")}</select></label>
+      </div>
+      <div class="small muted" style="margin:6px 0 8px">${nf(rows.length)} ${T("contacts")} · ${nf(nIdx)} ${T("cas index")} · ${nf(nDev)} ${T("devenus cas confirmés")}${S.province !== "Toutes" ? ` · ${T("Province")} : ${esc(S.province)}` : ""}</div>
+      ${table("jr-all", rows, [
+        { k: "ixs", t: "ID index", v: x => `<b class="nowrap">${esc(ixBase(x))}</b>`, csv: x => ixBase(x), sortv: x => ixBase(x), txt: x => ixBase(x) },
+        { k: "ix", t: "Cas index dans la Linelist", v: x => caseBy.has(x.ix) ? `<a href="#/journey/${encodeURIComponent(x.ix)}">${esc(caseBy.get(x.ix).id || x.ix)}</a> ${x.ic ? badge(x.ic, CONF[x.ic]) : ""}` : `<span class="muted">${T("Hors Linelist")}</span>`, csv: x => caseBy.has(x.ix) ? `${caseBy.get(x.ix).id || x.ix} (${x.ic || ""})` : T("Hors Linelist"), txt: x => (caseBy.get(x.ix) || {}).id || "" },
+        { k: "id", t: "ID contact", v: x => `<b>${esc(x.id)}</b> <span class="muted">${esc(x.ini || "")}</span>`, csv: x => x.id, txt: x => `${x.id} ${x.ini || ""}` },
+        { k: "age", t: "Âge", num: true, d: 0 }, { k: "sexe", t: "Sexe" }, { k: "rel", t: "Relation" },
+        { k: "zs", t: "Zone de santé" }, { k: "as", t: "Aire" },
+        { k: "exp", t: "Dernière exposition", v: x => dshort(x.exp), csv: x => x.exp || "" }, { k: "v1", t: "1re visite", v: x => x.v1 ? dshort(x.v1) : "—", csv: x => x.v1 || "" },
+        { k: "fin", t: "Fin de suivi", v: x => dshort(x.fin), csv: x => x.fin || "" },
+        { k: "st", t: "Statut", v: x => statusBadge(x.st), csv: x => x.st },
+        { k: "lk", t: "Devenu cas (Linelist)", v: x => x.lk && caseBy.has(x.lk) ? `<a href="#/journey/${encodeURIComponent(x.lk)}">${esc(caseBy.get(x.lk).id)}</a>` : "—", csv: x => x.lk ? ((caseBy.get(x.lk) || {}).id || x.lk) : "" }],
+        { sort: "exp", rowClick: true, rowKey: x => x.ix, maxh: 520, limit: 100, searchText: x => `${ixBase(x)} ${(caseBy.get(x.ix) || {}).id || ""} ${x.id} ${x.ini || ""} ${x.zs || ""} ${x.as || ""}` })}`,
+      { csv: "jr-all", id: "jr-all-panel" });
   }
   function timelineHTML(c) {
     const EVL = { symptomes: ["Début des symptômes", "--s2"], notification: ["Notification", "--s1"], investigation: ["Investigation", "--s7"], prelevement: ["Prélèvement", "--s4"], laboratoire: ["Résultat laboratoire", "--s3"], admission: ["Admission (CTE)", "--s5"], sortie: ["Sortie / issue", "--st-done"], rapportage: ["Rapportage", "--muted"] };
@@ -1769,7 +1815,7 @@
   /* ---------------- Rt par province et zone de santé (EpiEstim, fenêtres 7 / 14 / 21 j) ---------------- */
   const TAU_COL = { "7": "--s1", "14": "--s3", "21": "--s7" };
   function rtmView() {
-    const modes = [["zones", "Par province et zone de santé"], ["methodes", "Comparaison des 10 méthodes"], ["detection", "Détection et Rt des infections (ICL)"]];
+    const modes = [["zones", "Par province et zone de santé"], ["methodes", "Comparaison des 10 méthodes"], ["detection", "Les deux Rt face à face (cas et infections, ICL)"]];
     const seg = `<div class="seg big-seg" data-seg="rtmMode" style="margin-bottom:12px">${modes.map(([v, t]) => `<button data-v="${v}" class="${S.rtmMode === v ? "on" : ""}">${T(t)}</button>`).join("")}</div>`;
     return seg + (S.rtmMode === "methodes" ? rtmMethodsView() : S.rtmMode === "detection" ? iclView() : rtzView());
   }
@@ -1799,10 +1845,18 @@
       ${kpi("Alertes déjà décédées (14 j)", pc(g.pct_decedees_14j, 0), `${nf(g.alertes_valides_14j)} ${T("alertes validées")}`, { color: "--ink-2" })}
       ${kpi("Alertes validées testées (14 j)", pc(g.pct_testees_14j, 0), `${T("positivité")} ${pc(g.positivite_14j, 0)}`, { color: low(g) ? "--critical" : "--s3", cls: low(g) ? "alert" : "" })}
     </div>
-    <div class="notice"><b>${T("Méthode (ICL–INRB)")} :</b> ${T("les alertes validées non testées reçoivent la probabilité d’être positives des alertes testées du même type (vivante / décédée). Une infection est détectée vivante avec la probabilité p, sinon elle meurt avec la létalité hors CTE")} (${pc(100 * (P.letalite_hors_cte || .428), 1)}) ${T("et devient une alerte décès ; p découle de la part d’alertes vivantes parmi les positives. Infections = alertes positives attendues / probabilité de générer une alerte. Rt = infections / infectiosité des infections antérieures, droite de Theil–Sen sur 13 jours, valeur au centre. Dates de début manquantes tirées au hasard dans le délai observé")} (${nf(P.imputations)} ${T("jeux imputés")} × ${nf(P.bootstraps)} ${T("bootstraps")}). ${T("Rt affiché seulement avec au moins 20 cas confirmés sur 28 jours.")}${low(g) ? `<br><b>${T("Attention")} :</b> ${T("moins de la moitié des alertes validées ont un résultat saisi ; si les non-cas ne sont pas saisis, la détection est sous-estimée et le Rt des infections peut être biaisé.")}` : ""}</div>
+    ${low(g) ? `<div class="notice"><b>${T("Attention")} :</b> ${T("moins de la moitié des alertes validées ont un résultat saisi ; si les non-cas ne sont pas saisis, la détection est sous-estimée et le Rt des infections peut être biaisé.")}</div>` : ""}
+    ${iclFaceToFace(g, r)}
     <div class="grid g2">
-      ${panel(`${T("Rt des infections")}, ${esc(g.nom)}`, T("Médiane et IC 95 % ; ligne pointillée : R = 1 ; zone grisée : jours non consolidés"), `<div id="c-icl-rt"></div>`, { png: "rt_infections_icl" })}
       ${panel(`${T("Part des infections détectées")}, ${esc(g.nom)}`, T("Cas confirmés / infections estimées, sommes glissantes sur 14 jours ; IC 95 %"), `<div id="c-icl-det"></div>`, { png: "detection_icl" })}
+      ${panel("Comment lire les deux Rt ensemble", T("Cas détectés = infections × part détectée"), `<div class="method-box">
+        <p>${T("Les deux courbes mesurent la même transmission avec des données différentes. Quand elles concordent, la tendance est solide. Quand elles divergent, l’écart renseigne sur la surveillance :")}</p>
+        <ul>
+          <li><b>${T("Rt des cas < Rt des infections")}</b> : ${T("la part des infections détectées baisse (alertes non testées, décès communautaires non prélevés) ; l’épidémie est probablement sous-estimée.")}</li>
+          <li><b>${T("Rt des cas > Rt des infections")}</b> : ${T("la détection s’améliore (plus de tests, recherche active) ; une partie de la hausse des cas vient de la détection, pas de la transmission.")}</li>
+          <li><b>${T("Les deux sous 1 avec un IC 95 % sous 1")}</b> : ${T("la transmission diminue réellement.")}</li>
+        </ul>
+        <p class="muted small">${T("Pour décider, regarder les deux Rt, la part des infections détectées et la part des alertes testées (cartes ci-dessus).")}</p></div>`)}
     </div>
     ${panel("Détection et Rt des infections par province et zone de santé", T("Zones avec au moins 20 cas confirmés sur 28 jours ou 100 cas au total ; tendance : comparaison avec 14 jours plus tôt (probabilité ≥ 80 %) ; ⚠ : moins de la moitié des alertes testées, détection probablement sous-estimée"), table("icl-geo", rows, [
       { k: "nom", t: "Territoire", v: x => `${esc(x.nom)}${low(x) ? ` <span title="${T("moins de la moitié des alertes testées")}">⚠</span>` : ""}` }, { k: "niveau", t: "Niveau", v: x => T(x.niveau) }, { k: "province", t: "Province", v: x => esc(x.province || "") },
@@ -1816,6 +1870,35 @@
       { rowClick: true, rowKey: x => x.id, sort: "confirmes_28j", maxh: 520 }), { csv: "icl-geo" })}
     ${map ? panel("Carte de la part des infections détectées", T("Carte de rapport (A4) ; légende et commentaire identiques à ceux du menu « Cartes pour rapport »"), `<img class="map-img" style="width:100%;height:auto;display:block;border:1px solid var(--line);border-radius:6px" src="${base}${encodeURIComponent(map.fichier)}" alt="${esc(map.titre)}" loading="lazy"><p class="map-cap">${capHtml(map.commentaire)}</p>`) : ""}`;
   }
+  /* Les deux Rt face à face : Rt des cas (EpiEstim) et Rt des infections (ICL–INRB), même territoire, même échelle */
+  function iclFaceToFace(g, r) {
+    const z = (RZ().series || {})[g.id], zd = ((RZ().groupes || []).find(x => x.id === g.id) || {}).dernier || {};
+    const tau = ["7", "14", "21"].includes(S.iclTau) ? S.iclTau : "14", rc = zd[tau];
+    const v = x => x ? `<b>${nf(x.mediane, 2)}</b> <span class="muted">(${T("IC 95 %")} ${nf(x.ic95[0], 2)}–${nf(x.ic95[1], 2)} · P(Rt>1) ${pc(100 * x.p_sup_1, 0)} · ${dshort(x.date)})</span>` : `<span class="muted">${T("données insuffisantes")}</span>`;
+    const caseM = `<div class="method-box">
+      <h4>${T("Méthode")}</h4><p>${T("Cas confirmés et probables comptés par date de début des symptômes (dates manquantes tirées dans le délai observé), jours récents corrigés du retard de notification. Rt = cas du jour / infectiosité des cas antérieurs (intervalle sériel Ebola), estimation bayésienne EpiEstim (Cori 2013) sur une fenêtre glissante ; IC 95 %. Masqué sous 20 cas confirmés en 28 jours.")}</p>
+      <h4>${T("Avantages")}</h4><ul><li>${T("Méthode de référence OMS, simple à expliquer et à reproduire.")}</li><li>${T("Réagit vite (fenêtre de 7 jours) et se calcule pour chaque zone de santé.")}</li><li>${T("Utilise seulement la Linelist des cas : disponible chaque jour.")}</li></ul>
+      <h4>${T("Limites")}</h4><ul><li>${T("Suppose que la part des cas détectés reste constante : si la détection baisse, le Rt est sous-estimé.")}</li><li>${T("Les derniers jours restent provisoires.")}</li></ul></div>`;
+    const infM = `<div class="method-box">
+      <h4>${T("Méthode")}</h4><p>${T("Les alertes validées non testées reçoivent la probabilité d’être positives des alertes testées du même type (vivante ou décédée). Infections = alertes positives attendues / probabilité qu’une infection produise une alerte (vivante, ou décès avec la létalité hors CTE). Rt = infections / infectiosité des infections antérieures, pente de Theil–Sen sur 13 jours ; 20 imputations × 10 bootstraps.")}</p>
+      <h4>${T("Avantages")}</h4><ul><li>${T("Corrige les variations de détection (alertes non testées, décès communautaires).")}</li><li>${T("Donne en plus la part des infections détectées, indicateur direct de la surveillance.")}</li><li>${T("Peu sensible aux jours atypiques (Theil–Sen) et à l’incertitude des dates (imputation).")}</li></ul>
+      <h4>${T("Limites")}</h4><ul><li>${T("Dépend de la saisie des résultats de toutes les alertes, y compris les non-cas.")}</li><li>${T("Létalité hors CTE supposée fixe (42,8 %).")}</li><li>${T("Plus lissé : réagit plus lentement, IC plus larges dans les petites zones.")}</li></ul></div>`;
+    let gap = "";
+    if (rc && r) {
+      const d = rc.mediane - r.mediane;
+      gap = Math.abs(d) < .1 ? T("Les deux Rt concordent (écart < 0,1) : tendance solide.")
+        : d < 0 ? T("Le Rt des cas est plus bas que le Rt des infections : la détection baisse probablement, l’épidémie peut être sous-estimée.")
+        : T("Le Rt des cas est plus haut que le Rt des infections : la détection s’améliore probablement ; une partie de la hausse des cas vient de la détection.");
+    }
+    return `
+    <div class="flex between" style="margin:4px 0 8px"><h3 class="h-sec">${T("Les deux Rt face à face")}, ${esc(g.nom)}</h3>
+      <div class="field"><span>${T("Fenêtre du Rt des cas")}</span><div class="seg" data-seg="iclTau">${["7", "14", "21"].map(t => `<button data-v="${t}" class="${tau === t ? "on" : ""}">${t} ${T("j")}</button>`).join("")}</div></div></div>
+    ${gap ? `<div class="notice small"><b>${T("Lecture")} :</b> ${gap}</div>` : ""}
+    <div class="grid g2 rt-f2f">
+      ${panel(`${T("Rt des cas (EpiEstim)")}, ${esc(g.nom)}`, `${T("Dernière estimation")} : ${v(rc)}`, z ? `<div id="c-icl-rtc"></div>${caseM}` : `<div class="empty">${T("Rt des cas indisponible pour ce territoire.")}</div>${caseM}`, { png: "rt_cas_epiestim" })}
+      ${panel(`${T("Rt des infections (ICL–INRB)")}, ${esc(g.nom)}`, `${T("Dernière estimation")} : ${v(r)}`, `<div id="c-icl-rt"></div>${infM}`, { png: "rt_infections_icl" })}
+    </div>`;
+  }
   function iclCharts() {
     const s = (ICLD().series || {})[S.iclG]; if (!s || !$("#c-icl-rt")) return;
     const rows = Array.from({ length: s.n }, (_, i) => ({ date: addDays(s.debut, i), rt: s.rt.med[i] == null ? null : Math.min(s.rt.med[i], 4), lo: s.rt.lo[i] == null ? null : Math.min(s.rt.lo[i], 4), hi: s.rt.hi[i] == null ? null : Math.min(s.rt.hi[i], 4),
@@ -1823,7 +1906,18 @@
     const out = rows.slice(-150);
     const prov = s.provisoire_des && out.some(x => x.date >= s.provisoire_des) ? { from: s.provisoire_des, label: T("provisoire") } : null;
     const xl = (v, r, tip) => tip ? dfmt(v) : dshort(v);
-    Ch.xy($("#c-icl-rt"), { data: out, x: "date", height: 260, xLabel: xl, shade: prov, tipSkipNull: true, hlines: [{ y: 1, color: "--ink-2", dash: "6 4", label: "R = 1" }],
+    // Rt des cas sur la même période et la même échelle que le Rt des infections
+    const z = (RZ().series || {})[S.iclG], tau = ["7", "14", "21"].includes(S.iclTau) ? S.iclTau : "14";
+    let ymax = Math.max(2, ...out.map(x => x.hi || 0));
+    if (z && z.rt && z.rt[tau] && $("#c-icl-rtc")) {
+      const zr = z.rt[tau], c = q => q === null || q === undefined ? null : Math.min(q, 4);
+      const crow = out.map(x => { const i = days(z.debut, x.date); return { date: x.date, rt: i >= 0 && i < z.n ? c(zr.med[i]) : null, lo: i >= 0 && i < z.n ? c(zr.lo[i]) : null, hi: i >= 0 && i < z.n ? c(zr.hi[i]) : null }; });
+      ymax = Math.max(ymax, ...crow.map(x => x.hi || 0)); ymax = Math.min(4, Math.ceil(ymax * 2) / 2);
+      const provC = z.provisoire_des && crow.some(x => x.date >= z.provisoire_des) ? { from: z.provisoire_des, label: T("provisoire") } : null;
+      Ch.xy($("#c-icl-rtc"), { data: crow, x: "date", height: 260, xLabel: xl, shade: provC, tipSkipNull: true, yMax: ymax, hlines: [{ y: 1, color: "--ink-2", dash: "6 4", label: "R = 1" }],
+        bands: [{ lo: "lo", hi: "hi", color: "--s1", label: T("IC 95 %"), opacity: .2 }], series: [{ key: "rt", label: `${T("Rt des cas")} (${tau} ${T("j")})`, color: "--s1", type: "line", width: 2.2 }] });
+    } else ymax = Math.min(4, Math.ceil(ymax * 2) / 2);
+    Ch.xy($("#c-icl-rt"), { data: out, x: "date", height: 260, xLabel: xl, shade: prov, tipSkipNull: true, yMax: ymax, hlines: [{ y: 1, color: "--ink-2", dash: "6 4", label: "R = 1" }],
       bands: [{ lo: "lo", hi: "hi", color: "--critical", label: T("IC 95 %"), opacity: .2 }], series: [{ key: "rt", label: T("Rt des infections"), color: "--critical", type: "line", width: 2.2 }] });
     Ch.xy($("#c-icl-det"), { data: out, x: "date", height: 260, xLabel: xl, shade: prov, tipSkipNull: true, yFmt: v => nf(v, 0) + " %",
       bands: [{ lo: "dlo", hi: "dhi", color: "--s1", label: T("IC 95 %"), opacity: .2 }], series: [{ key: "det", label: T("Part des infections détectées"), color: "--s1", type: "line", width: 2.2 }] });
@@ -2307,7 +2401,14 @@
     return { features: feats, focus: true, focusIf: f => { const z = by.get(norm(f.data_zone)); return z && z.categorie !== "Non touchée"; },
       value: f => S.zrColor === "score" ? (by.get(norm(f.data_zone))?.score_risque ?? null) : (code[by.get(norm(f.data_zone))?.categorie] || null),
       colorFn: (v, f) => { const z = by.get(norm(f.data_zone)); return S.zrColor === "score" ? (z ? PRIO_COL(z.score_risque || 0) : "#E9E6DF") : (ZCOL[z?.categorie] || "#E9E6DF"); },
-      selected: S.zrSel || null, onClick: f => { S.zrSel = by.get(norm(f.data_zone))?.zone_sante || f.data_zone; render(); },
+      selected: S.zrSel ? ((D.map_zones || []).find(f => norm(f.data_zone) === norm(S.zrSel))?.data_zone || S.zrSel) : null, onClick: f => { S.zrSel = by.get(norm(f.data_zone))?.zone_sante || f.data_zone; render(); },
+      allFeatures: D.map_zones || feats, inset: true, countLabel: T("zones"),
+      insetProvinces: S.province !== "Toutes" ? [...new Set(feats.map(f => f.province))] : [...new Set(feats.filter(f => { const z = by.get(norm(f.data_zone)); return z && z.categorie !== "Non touchée"; }).map(f => f.province))],
+      insetLabel: S.province !== "Toutes" ? `${T("Province sélectionnée")} : ${S.province}` : T("Province(s) concernée(s)"),
+      legendTitle: S.zrColor === "score" ? T("Niveau de priorité (score 0–100)") : T("Catégorie de la zone"),
+      legend: S.zrColor === "score"
+        ? [[70, 101, "Priorité 1 (≥ 70)", 80], [50, 70, "Priorité 2 (50–69)", 60], [30, 50, "Priorité 3 (30–49)", 40], [-1, 30, "Veille (< 30)", 10]].map(([a, b, t, v]) => ({ color: PRIO_COL(v), label: T(t), count: feats.filter(f => { const z = by.get(norm(f.data_zone)); return z && z.categorie !== "Non touchée" && (z.score_risque || 0) >= a && (z.score_risque || 0) < b; }).length }))
+        : ZORD.map(c => ({ color: ZCOL[c], label: T(c === "Rouge" ? "Rouge, hotspot" : c === "Orange" ? "Orange, cas < 21 j" : c === "Jaune" ? "Jaune, 22–42 j sans cas" : c === "Verte" ? "Verte, > 42 j sans cas" : "Non touchée"), count: feats.filter(f => (by.get(norm(f.data_zone))?.categorie || "Non touchée") === c).length })),
       labelMode: S.zrLab === "aucune" ? "none" : "all",
       labelIf: f => { const z = by.get(norm(f.data_zone)); return !!z && z.categorie !== "Non touchée" && (S.zrColor !== "score" || (z.score_risque || 0) >= 30); }, labelRank: f => by.get(norm(f.data_zone))?.score_risque || 0,
       labelText: f => { const z = by.get(norm(f.data_zone)); return S.zrLab === "nom" ? f.data_zone : `${f.data_zone} · ${nf(z?.score_risque, 0)}`; },
@@ -2654,6 +2755,8 @@
     const oq = t.closest("[data-opq]");
     if (oq) { const G = D.operations?.lignes; const last = G?.sources?.derniere_notification || D.meta.cutoff; S.opD2 = last;
       S.opD1 = oq.dataset.opq === "all" ? (D.meta.plage_donnees?.[0] || addDays(last, -365)) : addDays(last, -(Number(oq.dataset.opq) - 1)); render(); return; }
+    const jq = t.closest("[data-jlq]");
+    if (jq) { const last = REF(); if (jq.dataset.jlq === "all") { S.jlD1 = ""; S.jlD2 = ""; } else { S.jlD2 = last; S.jlD1 = addDays(last, -(Number(jq.dataset.jlq) - 1)); } render(); document.getElementById("jr-all-panel")?.scrollIntoView({ block: "start" }); return; }
     const sg = t.closest(".seg[data-seg] button"); if (sg) { S[sg.parentElement.dataset.seg] = sg.dataset.v; render(); return; }
     const th = t.closest("th[data-sort]"); if (th) { const [id, k] = th.dataset.sort.split("|"); const st = S.tables[id]; if (st.sort === k) st.dir *= -1; else { st.sort = k; st.dir = -1; } rerenderTable(id); return; }
     const mr = t.closest("[data-more]"); if (mr) { S.tables[mr.dataset.more].limit += 100; render(); return; }
@@ -2681,6 +2784,7 @@
       else if (id === "rtm-geo") { S.rtmG = key; render(); }
       else if (id === "zr-rank" || id === "zr") { S.zrSel = key; render(); scrollTo({ top: 0, behavior: "smooth" }); }
       else if (id === "rtz-geo") { S.rtzG = key; render(); scrollTo({ top: 0, behavior: "smooth" }); }
+      else if (id === "jr-all") { if (caseBy.has(key)) go("journey", key); }
       else if (id === "jr-ct") { S.nodeSel = key; $("#node-detail").innerHTML = nodeDetail(); $$("tr[data-row^='jr-ct|']").forEach(r => r.classList.toggle("selected", r === tr)); journeyCharts(); }
       return;
     }
