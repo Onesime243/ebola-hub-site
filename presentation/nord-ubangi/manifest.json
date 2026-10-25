@@ -3,9 +3,9 @@
  "niveau": "province",
  "nom": "Province : Nord Ubangi",
  "court": "Nord Ubangi",
- "date": "2026-10-21",
- "genere_le": "2026-10-24 20:50",
- "pptx": "Presentation_Reunion_Nord_Ubangi_20261021.pptx",
+ "date": "2026-10-24",
+ "genere_le": "2026-10-25 19:53",
+ "pptx": "Presentation_Reunion_Nord_Ubangi_20261024.pptx",
  "diapositives": 7,
  "slides": [
   {
@@ -29,7 +29,7 @@
   },
   {
    "titre": "Alertes",
-   "date": "2026-10-16",
+   "date": "2026-10-22",
    "images": [
     "07_indicateurs_alertes",
     "07b_alertes_comparatif_3j",
@@ -42,7 +42,7 @@
  "images": {
   "01_indicateurs_cumul": {
    "fichier": "01_indicateurs_cumul.png",
-   "titre": "Situation de la MVE au 21 octobre 2026, Province : Nord Ubangi"
+   "titre": "Situation de la MVE au 24 octobre 2026, Province : Nord Ubangi"
   },
   "02_courbe_hebdomadaire": {
    "fichier": "02_courbe_hebdomadaire.png",
@@ -50,7 +50,7 @@
   },
   "03_indicateurs_jour": {
    "fichier": "03_indicateurs_jour.png",
-   "titre": "Situation épidémiologique du jour, 21 octobre 2026"
+   "titre": "Situation épidémiologique du jour, 24 octobre 2026"
   },
   "05_jours_sans_cas": {
    "fichier": "05_jours_sans_cas.png",
@@ -58,7 +58,7 @@
   },
   "07_indicateurs_alertes": {
    "fichier": "07_indicateurs_alertes.png",
-   "titre": "Situation des alertes au 16 octobre 2026"
+   "titre": "Situation des alertes au 22 octobre 2026"
   },
   "08_alertes_sources": {
    "fichier": "08_alertes_sources.png",

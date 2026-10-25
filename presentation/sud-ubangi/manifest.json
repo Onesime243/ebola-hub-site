@@ -3,9 +3,9 @@
  "niveau": "province",
  "nom": "Province : Sud Ubangi",
  "court": "Sud Ubangi",
- "date": "2026-10-21",
- "genere_le": "2026-10-24 20:50",
- "pptx": "Presentation_Reunion_Sud_Ubangi_20261021.pptx",
+ "date": "2026-10-24",
+ "genere_le": "2026-10-25 19:53",
+ "pptx": "Presentation_Reunion_Sud_Ubangi_20261024.pptx",
  "diapositives": 7,
  "slides": [
   {
@@ -35,16 +35,14 @@
     "07b_alertes_comparatif_3j",
     "08_alertes_sources",
     "08b_alertes_sources_3j",
-    "08_alertes_tendance",
-    "09_alertes_unites",
-    "09b_alertes_sources_unites"
+    "08_alertes_tendance"
    ]
   }
  ],
  "images": {
   "01_indicateurs_cumul": {
    "fichier": "01_indicateurs_cumul.png",
-   "titre": "Situation de la MVE au 21 octobre 2026, Province : Sud Ubangi"
+   "titre": "Situation de la MVE au 24 octobre 2026, Province : Sud Ubangi"
   },
   "02_courbe_hebdomadaire": {
    "fichier": "02_courbe_hebdomadaire.png",
@@ -52,7 +50,7 @@
   },
   "03_indicateurs_jour": {
    "fichier": "03_indicateurs_jour.png",
-   "titre": "Situation épidémiologique du jour, 21 octobre 2026"
+   "titre": "Situation épidémiologique du jour, 24 octobre 2026"
   },
   "05_jours_sans_cas": {
    "fichier": "05_jours_sans_cas.png",
@@ -77,14 +75,6 @@
   "08_alertes_tendance": {
    "fichier": "08_alertes_tendance.png",
    "titre": "Alertes notifiées par jour (14 jours)"
-  },
-  "09_alertes_unites": {
-   "fichier": "09_alertes_unites.png",
-   "titre": "Alertes du jour par zone de santé"
-  },
-  "09b_alertes_sources_unites": {
-   "fichier": "09b_alertes_sources_unites.png",
-   "titre": "Sources des alertes du jour par zone de santé"
   }
  }
 }

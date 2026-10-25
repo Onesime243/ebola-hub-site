@@ -3,9 +3,9 @@
  "niveau": "province",
  "nom": "Province : Tshopo",
  "court": "Tshopo",
- "date": "2026-10-21",
- "genere_le": "2026-10-24 20:50",
- "pptx": "Presentation_Reunion_Tshopo_20261021.pptx",
+ "date": "2026-10-24",
+ "genere_le": "2026-10-25 19:53",
+ "pptx": "Presentation_Reunion_Tshopo_20261024.pptx",
  "diapositives": 10,
  "slides": [
   {
@@ -18,7 +18,8 @@
   {
    "titre": "Situation du jour",
    "images": [
-    "03_indicateurs_jour"
+    "03_indicateurs_jour",
+    "04_cas_du_jour"
    ]
   },
   {
@@ -29,7 +30,7 @@
   },
   {
    "titre": "Alertes",
-   "date": "2026-10-21",
+   "date": "2026-10-24",
    "images": [
     "07_indicateurs_alertes",
     "07b_alertes_comparatif_3j",
@@ -49,13 +50,13 @@
     "13_contacts_suivre_vus",
     "14_tableau_contacts"
    ],
-   "date": "2026-10-21"
+   "date": "2026-10-24"
   }
  ],
  "images": {
   "01_indicateurs_cumul": {
    "fichier": "01_indicateurs_cumul.png",
-   "titre": "Situation de la MVE au 21 octobre 2026, Province : Tshopo"
+   "titre": "Situation de la MVE au 24 octobre 2026, Province : Tshopo"
   },
   "02_courbe_hebdomadaire": {
    "fichier": "02_courbe_hebdomadaire.png",
@@ -63,7 +64,11 @@
   },
   "03_indicateurs_jour": {
    "fichier": "03_indicateurs_jour.png",
-   "titre": "Situation épidémiologique du jour, 21 octobre 2026"
+   "titre": "Situation épidémiologique du jour, 24 octobre 2026"
+  },
+  "04_cas_du_jour": {
+   "fichier": "04_cas_du_jour.png",
+   "titre": "Répartition des 2 nouveaux cas par zone de santé"
   },
   "05_jours_sans_cas": {
    "fichier": "05_jours_sans_cas.png",
@@ -71,11 +76,11 @@
   },
   "07_indicateurs_alertes": {
    "fichier": "07_indicateurs_alertes.png",
-   "titre": "Situation des alertes au 21 octobre 2026"
+   "titre": "Situation des alertes au 24 octobre 2026"
   },
   "08_alertes_sources": {
    "fichier": "08_alertes_sources.png",
-   "titre": "Sources des alertes du jour, 100 alertes"
+   "titre": "Sources des alertes du jour, 90 alertes"
   },
   "07b_alertes_comparatif_3j": {
    "fichier": "07b_alertes_comparatif_3j.png",
@@ -99,7 +104,7 @@
   },
   "10_indicateurs_contacts": {
    "fichier": "10_indicateurs_contacts.png",
-   "titre": "Situation du suivi des contacts au 21 octobre 2026"
+   "titre": "Situation du suivi des contacts au 24 octobre 2026"
   },
   "12_contacts_tendance": {
    "fichier": "12_contacts_tendance.png",
