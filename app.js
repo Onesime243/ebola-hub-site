@@ -85,7 +85,7 @@
     lab: "Tous", nowH: 30, fLevel: "National", fTerr: "National", fTarget: "confirmes", fH: 30, tables: {},
     ovStack: "aucun", netIcons: true, gen: "0", idxPeriod: "0", ssSet: "", ssPlace: "Tous", ssMin: "2", ssCases: true, dynG: "National", growBase: "dds", growWin: "12s", dyStack: "sexe", dyBase: "o", dyDays: "60", rtDays: "120",
     siCmp: false, rlWin: "28j", projH: "30", distK: "dds_notification", recZone: "", recSup: "0.3", recColor: "issue", recX: "onset", recIcons: true, recDoc: false, epiMin: "3", resZone: "", perfG: "National",
-    rtmG: "National", rtmSet: "all", rtmDays: "120", zrCat: "Toutes", rtmMode: "zones", iclG: "National", rtzProv: "Toutes", rtzG: "National", rtzTau: "7", rtzDays: "60", opTab: "deces", opProv: "Toutes", opWin: "cumul", opZone: "Toutes", opCte: "Tous", opD1: "", opD2: "", opCls: "c", opChamp: "Tous", iclTau: "14", jlD1: "", jlD2: "", jlBase: "exp", jlZone: "Toutes", jlSt: "Tous", zrColor: "categorie", zrLab: "score", zrSel: "", pplProv: "Toutes", sitNiv: "national"
+    rtmG: "National", rtmSet: "all", rtmDays: "120", zrCat: "Toutes", rtmMode: "zones", iclG: "National", rtzProv: "Toutes", rtzG: "National", rtzTau: "7", rtzDays: "60", opTab: "deces", opProv: "Toutes", opWin: "cumul", opZone: "Toutes", opCte: "Tous", opD1: "", opD2: "", opCls: "c", opMapK: "dec", opChamp: "Tous", iclTau: "14", jlD1: "", jlD2: "", jlBase: "exp", jlZone: "Toutes", jlSt: "Tous", zrColor: "categorie", zrLab: "score", zrSel: "", pplProv: "Toutes", sitNiv: "national"
   };
   const TABS = [
     { id: "overview", t: "Vue générale", g: "Situation", i: "M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z" },
@@ -2045,8 +2045,12 @@
       ${S.opTab === "deces" ? `<div class="field"><span>${T("Cas")}</span><div class="seg" data-seg="opCls"><button data-v="c" class="${S.opCls !== "cp" ? "on" : ""}">${T("Confirmés")}</button><button data-v="cp" class="${S.opCls === "cp" ? "on" : ""}">${T("Confirmés + probables")}</button></div></div>` : ""}
     </div><div class="small muted" style="margin-top:6px">${T("Période")} : ${dfmt(S.opD1)} → ${dfmt(S.opD2)} (${nf(days(S.opD1, S.opD2) + 1)} ${T("jours")}) · ${S.opProv === "Toutes" ? T("toutes les provinces") : esc(S.opProv)}${S.opZone !== "Toutes" ? " · " + esc(S.opZone) : ""}${S.opCte !== "Tous" && ["deces", "cte"].includes(S.opTab) ? " · " + esc(S.opCte) : ""}</div></div>`}`;
     const src = G.sources || {};
-    const stale = src.derniere_sortie_lln && S.opD2 > src.derniere_sortie_lln;
-    const staleNote = stale && ["deces", "cte"].includes(S.opTab) ? `<div class="notice warn"><b>${T("Données du CTE incomplètes après le")} ${dfmt(src.derniere_sortie_lln)}</b> : ${T("les issues au CTE (guérison, décès au CTE) et le lieu du décès viennent de l’export lln, dont la dernière sortie saisie date du")} ${dfmt(src.derniere_sortie_lln)}. ${T("Déposez un export lln récent dans « Charger les données » pour compléter les décès au CTE ; les décès à l’alerte (hors CTE) sont à jour jusqu’au")} ${dfmt(src.derniere_notification)}.</div>` : "";
+    const lastOut = src.derniere_sortie_pec || src.derniere_sortie_lln, viaPec = !!src.derniere_sortie_pec;
+    const stale = lastOut && S.opD2 > lastOut;
+    const staleNote = stale && ["deces", "cte"].includes(S.opTab) ? `<div class="notice warn"><b>${T("Données du CTE incomplètes après le")} ${dfmt(lastOut)}</b> : ${viaPec
+      ? `${T("les issues au CTE viennent de la base de prise en charge, dont la dernière sortie saisie date du")} ${dfmt(lastOut)}. ${T("Déposez une base de prise en charge récente dans « Charger les données » ; les décès à l’alerte (hors CTE) sont à jour jusqu’au")} ${dfmt(src.derniere_notification)}.`
+      : `${T("les issues au CTE (guérison, décès au CTE) et le lieu du décès viennent de l’export lln, dont la dernière sortie saisie date du")} ${dfmt(lastOut)}. ${T("Déposez la base de prise en charge (ou un export lln récent) dans « Charger les données » pour compléter les décès au CTE ; les décès à l’alerte (hors CTE) sont à jour jusqu’au")} ${dfmt(src.derniere_notification)}.`}</div>` : "";
+    const pecNote = viaPec && ["deces", "cte"].includes(S.opTab) && !stale ? `<div class="notice small"><b>${T("Source des issues au CTE")} :</b> ${T("base de prise en charge")} (${esc(G.pec?.fichier || "")}), ${nf(src.pec_apparie)} ${T("alertes appariées à la Linelist")}, ${T("dernière sortie saisie le")} ${dfmt(src.derniere_sortie_pec)}.</div>` : "";
     const col2 = (k, t, o = {}) => ({ k, t, num: true, ...o });
     const zt = (cols, sortK) => table("op-z-" + S.opTab, Z.filter(z => cols.some(c => z[c.k])), [{ k: "zone_sante", t: "Zone de santé" }, { k: "province", t: "Province" }, ...cols], { sort: sortK, maxh: 520 });
     const pcs = (x, y) => pc(y ? 100 * x / y : null, 1);
@@ -2054,8 +2058,10 @@
     if (S.opTab === "deces") {
       const t = tot, dec = t.dec || 0;
       const cteRows = (() => { const m = new Map(); const cls = S.opCls === "cp" ? [1, 2] : [1]; rows.forEach(r => { if (cls.includes(r.c) && r.pl === 1 && inR(r.dd, a, b)) { const k = r.cte >= 0 ? G.ctes[r.cte] : T("Nom du CTE non saisi"); m.set(k, (m.get(k) || 0) + 1); } }); return [...m].map(([k, v]) => ({ cte: k, n: v })); })();
+      const MK = [["dec", "Tous les décès"], ["dec_cte", "Décès au CTE"], ["dec_hors", "Décès hors CTE"], ["pcte", "% des décès survenus au CTE"]];
+      if (!MK.some(x => x[0] === S.opMapK)) S.opMapK = "dec";
       body = `
-      ${staleNote}
+      ${staleNote}${pecNote}
       <div class="grid g4">
         ${kpi("Décès (cas " + (S.opCls === "cp" ? "confirmés + probables" : "confirmés") + ")", nf(dec), `${dfmt(S.opD1)} → ${dfmt(S.opD2)}`, { color: "--ink-2" })}
         ${kpi("Décès au CTE", nf(t.dec_cte || 0), `${pcs(t.dec_cte || 0, dec)} ${T("des décès")}`, { color: "--s1" })}
@@ -2064,6 +2070,8 @@
       </div>
       <div class="notice small"><b>${T("Définitions")} :</b> ${esc(T(G.definitions.deces_cte))} ${esc(T(G.definitions.deces_hors_cte))}</div>
       ${panel("Décès au CTE et hors CTE par jour", T("Date du décès ; barres empilées"), `<div id="c-op-dec"></div>`, { png: "deces_cte_hors_cte" })}
+      ${panel(`${T("Carte")} : ${T((MK.find(x => x[0] === S.opMapK) || MK[0])[1])}, ${dfmt(S.opD1)} → ${dfmt(S.opD2)}`, T("Zone de notification ; période, province, CTE et classification choisis ci-dessus ; cliquer une zone pour la sélectionner"),
+        `<div class="seg" data-seg="opMapK" style="margin-bottom:10px">${MK.map(([k, t]) => `<button data-v="${k}" class="${S.opMapK === k ? "on" : ""}">${T(t)}</button>`).join("")}</div><div id="c-op-map"></div>`, { png: "carte_deces_" + S.opMapK })}
       <div class="grid g21">
         ${panel("Par zone de santé", T("Zone de notification ; tri par colonne ; export CSV"), zt([col2("dec", "Décès"), col2("dec_cte", "Au CTE"), col2("dec_hors", "Hors CTE"), col2("dec_comm", "dont communauté"), col2("dec_struct", "dont autre structure"), col2("dec_np", "dont lieu non précisé"), { k: "pcte", t: "% au CTE", v: x => pcs(x.dec_cte || 0, x.dec || 0), sortv: x => x.dec ? (x.dec_cte || 0) / x.dec : null }], "dec"), { csv: "op-z-deces" })}
         ${panel("Décès au CTE par CTE", T("Nom du CTE normalisé (fautes de frappe corrigées)"), table("op-cte-dec", cteRows, [{ k: "cte", t: "CTE" }, { k: "n", t: "Décès", num: true }], { search: false, sort: "n" }), { csv: "op-cte-dec" })}
@@ -2149,7 +2157,7 @@
     const champs = ["Tous", ...new Set(K.map(x => x.champ))];
     if (!champs.includes(S.opChamp)) S.opChamp = "Tous";
     return `
-    <div class="notice"><b>${T("Fraîcheur des données")} :</b> ${T("dernière notification")} ${dfmt(s.derniere_notification)} ; ${T("dernière admission saisie dans la Linelist")} ${dfmt(s.derniere_admission_linelist)} ; ${T("export lln : dernière admission")} ${dfmt(s.derniere_admission_lln)}, ${T("dernière sortie")} ${dfmt(s.derniere_sortie_lln)}.</div>
+    <div class="notice"><b>${T("Fraîcheur des données")} :</b> ${T("dernière notification")} ${dfmt(s.derniere_notification)} ; ${T("dernière admission saisie dans la Linelist")} ${dfmt(s.derniere_admission_linelist)} ; ${s.derniere_sortie_pec ? `${T("base de prise en charge : dernière admission")} ${dfmt(s.derniere_admission_pec)}, ${T("dernière sortie")} ${dfmt(s.derniere_sortie_pec)} ; ` : ""}${T("export lln : dernière admission")} ${dfmt(s.derniere_admission_lln)}, ${T("dernière sortie")} ${dfmt(s.derniere_sortie_lln)}.</div>
     ${panel("Contrôle avec les fichiers de base", T("Recompte direct dans les fichiers Excel / CSV déposés, sans traitement de l’outil ; chaque écart est expliqué"), table("op-ctl", C, [{ k: "indicateur", t: "Indicateur", wrap: true }, { k: "fichier", t: "Fichier" }, { k: "excel", t: "Fichier de base", num: true }, { k: "outil", t: "Outil", num: true },
       { k: "ecart", t: "Écart", num: true, v: x => x.ecart === null || x.ecart === undefined ? "—" : `<b style="color:${col(x.ecart === 0 ? "--good" : Math.abs(x.ecart) <= Math.max(20, .01 * (x.excel || 0)) ? "--warn" : "--critical")}">${x.ecart > 0 ? "+" : ""}${nf(x.ecart)}</b>` }, { k: "explication", t: "Explication", wrap: true }], { search: false, sort: null }), { csv: "op-ctl" })}
     ${panel("Incohérences de saisie à corriger", T("Nombre de lignes concernées et exemples d’identifiants (pseudonymisés) ; à transmettre aux équipes de saisie"), table("op-inc", Q, [{ k: "controle", t: "Contrôle", wrap: true }, { k: "lignes", t: "Lignes", num: true }, { k: "confirmes", t: "Dont confirmés", num: true }, { k: "exemples", t: "Exemples", wrap: true, v: x => `<span class="small">${esc((x.exemples || []).join(", "))}</span>`, csv: x => (x.exemples || []).join(" ") }], { search: false, sort: "lignes" }), { csv: "op-inc" })}
@@ -2169,6 +2177,28 @@
     const xl = (v, r, tip) => tip ? (weekly ? T("semaine du") + " " + dfmt(v) : dfmt(v)) : dshort(v);
     Ch.xy($("#c-op-dec"), { data, x: "date", height: 260, xLabel: xl, noClip: true, stacked: true, barWidth: .85,
       series: [{ key: "cte", label: T("Décès au CTE"), color: "--s1", type: "bar" }, { key: "hors", label: T("Décès hors CTE"), color: "--critical", type: "bar" }] });
+    // carte des décès par zone de santé (même modèle que les autres cartes : encart RDC, légende, zoom)
+    if ($("#c-op-map")) {
+      const { Z } = opsAgg(G, G._arr.filter(f), a, b);
+      const byZ = new Map(Z.map(z => [opNk(z.zone_sante), z]));
+      const k = S.opMapK || "dec", pct = k === "pcte";
+      const val = fz => { const z = byZ.get(opNk(fz.data_zone)); if (!z) return pct ? null : 0; return pct ? (z.dec ? 100 * (z.dec_cte || 0) / z.dec : null) : (z[k] || 0); };
+      const feats = (D.map_zones || []).filter(fz => S.opProv === "Toutes" || opNk(fz.province) === opNk(S.opProv));
+      const m = pct ? { k: "v", t: "% au CTE", type: "down", br: [10, 25, 50, 75], unit: "%", d: 0 } : { k: "v", t: "Décès", type: "count" };
+      const vrows = feats.map(fz => ({ v: val(fz) })).filter(r => r.v !== null);
+      const cls = classesFor(m, vrows);
+      const touched = fz => { const z = byZ.get(opNk(fz.data_zone)); return !!z && (z.dec || z.dal || z.conf); };
+      const legend = [...cls.map(c => ({ color: c.color, label: c.label, count: feats.filter(fz => classOf(cls, m, val(fz)) === c).length })), { color: col(TL_NA), label: T(pct ? "aucun décès" : "aucune donnée"), count: feats.filter(fz => !classOf(cls, m, val(fz))).length }];
+      const title = T((([["dec", "Tous les décès"], ["dec_cte", "Décès au CTE"], ["dec_hors", "Décès hors CTE"], ["pcte", "% des décès survenus au CTE"]]).find(x => x[0] === k) || [0, ""])[1]);
+      Ch.choropleth($("#c-op-map"), { features: feats, allFeatures: D.map_zones || feats, focus: true, focusIf: touched, value: val, selected: S.opZone !== "Toutes" ? (feats.find(fz => opNk(fz.data_zone) === opNk(S.opZone)) || {}).data_zone || null : null, digits: 0,
+        colorFn: v => { const c = classOf(cls, m, v); return c ? c.color : col(TL_NA); }, legend, legendTitle: title, countLabel: T("zones"), inset: true,
+        insetProvinces: S.opProv !== "Toutes" ? [...new Set(feats.map(fz => fz.province))] : [...new Set(feats.filter(touched).map(fz => fz.province))],
+        insetLabel: S.opProv !== "Toutes" ? `${T("Province sélectionnée")} : ${S.opProv}` : T("Province(s) concernée(s)"),
+        labelIf: fz => { const v = val(fz); return v !== null && (pct || v > 0); }, labelRank: fz => (byZ.get(opNk(fz.data_zone)) || {}).dec || 0,
+        labelText: (fz, v) => `${fz.data_zone} · ${pct ? nf(v, 0) + " %" : nf(v)}`, unit: pct ? "%" : T("décès"),
+        tip: fz => { const z = byZ.get(opNk(fz.data_zone)) || {}; return `<b>${esc(fz.data_zone)}</b><div class="row"><span>${T("Décès")}</span><b>${nf(z.dec || 0)}</b></div><div class="row"><span>${T("Au CTE")}</span><b>${nf(z.dec_cte || 0)}</b></div><div class="row"><span>${T("Hors CTE")}</span><b>${nf(z.dec_hors || 0)}</b></div><div class="row"><span>${T("dont communauté")}</span><b>${nf(z.dec_comm || 0)}</b></div><div class="row"><span>${T("% au CTE")}</span><b>${z.dec ? pc(100 * (z.dec_cte || 0) / z.dec, 0) : "—"}</b></div>`; },
+        onClick: fz => { const z = byZ.get(opNk(fz.data_zone)); if (!z) return; S.opZone = z.zone_sante; if (S.opProv === "Toutes") S.opProv = G.zone_province[z.zone_sante] || "Toutes"; render(); } });
+    }
   }
 
   /* ---------------- Personnel de santé (PPL) ---------------- */

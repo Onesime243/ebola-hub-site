@@ -1033,61 +1033,71 @@
     const clone = svg.cloneNode(true); inlineStyles(svg, clone); fixHalo(clone);
     const vb = svg.viewBox.baseVal, w = vb.width || svg.clientWidth, h = vb.height || svg.clientHeight;
     clone.setAttribute("width", w); clone.setAttribute("height", h);
-    const img = new Image(), sc = 2.5, side = 270, head = 74, notes = opt.notes || [];
+    const img = new Image(), sc = 2.5, side = 270, M = 22, GAP = 24, notes = opt.notes || [];
     const insetSvg = opt.inset || container.__inset || null; let insetImg = insetSvg ? new Image() : null;
     const insetH = insetSvg ? Math.round(side * insetSvg.viewBox.baseVal.height / insetSvg.viewBox.baseVal.width) + 26 : 0;
-    const W = w + side + 36;
-    const meas = document.createElement("canvas").getContext("2d"); meas.font = "11px system-ui,sans-serif";
-    const wrap = (t, mw) => { const out = []; let cur = ""; String(t).split(" ").forEach(wd => { const n = cur ? cur + " " + wd : wd; if (meas.measureText(n).width > mw && cur) { out.push(cur); cur = wd; } else cur = n; }); if (cur) out.push(cur); return out; };
-    const noteLines = notes.flatMap(n => wrap(n, W - 40));
-    const H = head + Math.max(h, insetH + 60 + (opt.legend || []).length * 24 + 150) + 20 + noteLines.length * 15 + 34;
+    const W = M + w + GAP + side + M + 8;                          // marge droite : rien ne touche le bord
+    const meas = document.createElement("canvas").getContext("2d");
+    const wrap = (t, mw, font) => { meas.font = font; const out = []; let cur = ""; String(t ?? "").split(/\s+/).filter(Boolean).forEach(wd => { const n = cur ? cur + " " + wd : wd; if (meas.measureText(n).width > mw && cur) { out.push(cur); cur = wd; } else cur = n; }); if (cur) out.push(cur); return out.length ? out : [""]; };
+    const F = { title: "700 19px system-ui,sans-serif", sub: "12.5px system-ui,sans-serif", lt: "700 13px system-ui,sans-serif", li: "12px system-ui,sans-serif", note: "11px system-ui,sans-serif" };
+    const titleL = wrap(opt.title || "", W - 2 * M, F.title), subL = opt.subtitle ? wrap(opt.subtitle, W - 2 * M, F.sub) : [];
+    const head = 18 + titleL.length * 24 + subL.length * 17 + 14;
+    const hasCount = (opt.legend || []).some(it => it.count !== undefined);
+    const legItems = (opt.legend || []).map(it => ({ ...it, lines: wrap(it.label, side - 26 - (hasCount ? 44 : 0), F.li) }));
+    const symItems = opt.symbols === false ? [] : [["prov", TT("Limite de province")], ["zone", TT("Limite de zone de santé")], ...(insetSvg ? [["#f0a43a", TT("Province(s) concernée(s), encart")], ["emp", TT("Emprise de la carte, encart")]] : [])]
+      .map(([k, l]) => ({ k, lines: wrap(l, side - 26, F.li) }));
+    const ltL = wrap(opt.legendTitle || TT("Légende"), side, F.lt);
+    const sideNoteL = (opt.sideNotes || []).flatMap(n => wrap(n, side, F.note));
+    const rowH = n => Math.max(24, n * 15 + 9);
+    const sideH = 8 + insetH + ltL.length * 17 + (hasCount ? 14 : 0) + 6 + legItems.reduce((a, it) => a + rowH(it.lines.length), 0)
+      + symItems.reduce((a, it) => a + Math.max(22, it.lines.length * 15 + 7), 0) + 10 + sideNoteL.length * 15 + 6;
+    const noteLines = notes.flatMap(n => wrap(n, W - 2 * M, F.note));
+    const bodyH = Math.max(h, sideH);
+    const H = head + bodyH + (noteLines.length ? 18 + noteLines.length * 15 : 8) + 30;
     let pending = insetImg ? 2 : 1;
     const draw = () => {
       const c = document.createElement("canvas"); c.width = W * sc; c.height = H * sc;
       const x = c.getContext("2d"); x.scale(sc, sc);
       x.fillStyle = "#ffffff"; x.fillRect(0, 0, W, H);
-      x.fillStyle = "#16202a"; x.font = "700 19px system-ui,sans-serif"; x.fillText(opt.title || "", 18, 32);
-      x.fillStyle = "#4a5560"; x.font = "12.5px system-ui,sans-serif"; x.fillText(opt.subtitle || "", 18, 54);
-      x.strokeStyle = "#d8dde2"; x.beginPath(); x.moveTo(18, head - 8); x.lineTo(W - 18, head - 8); x.stroke();
-      x.drawImage(img, 18, head, w, h);
-      x.strokeStyle = "#c9ced3"; x.strokeRect(18, head, w, h);
+      let ty = 18;
+      x.fillStyle = "#16202a"; x.font = F.title; titleL.forEach(t => { x.fillText(t, M, ty + 18); ty += 24; });
+      x.fillStyle = "#4a5560"; x.font = F.sub; subL.forEach(t => { x.fillText(t, M, ty + 13); ty += 17; });
+      x.strokeStyle = "#d8dde2"; x.beginPath(); x.moveTo(M, head - 7); x.lineTo(W - M, head - 7); x.stroke();
+      x.drawImage(img, M, head, w, h);
+      x.strokeStyle = "#c9ced3"; x.strokeRect(M, head, w, h);
       // nord
-      const nx = 18 + w - 26, ny = head + 16;
+      const nx = M + w - 26, ny = head + 16;
       x.fillStyle = "#16202a"; x.beginPath(); x.moveTo(nx, ny); x.lineTo(nx - 7, ny + 20); x.lineTo(nx, ny + 15); x.closePath(); x.fill();
       x.fillStyle = "#ffffff"; x.strokeStyle = "#16202a"; x.beginPath(); x.moveTo(nx, ny); x.lineTo(nx + 7, ny + 20); x.lineTo(nx, ny + 15); x.closePath(); x.fill(); x.stroke();
       x.fillStyle = "#16202a"; x.font = "700 12px system-ui,sans-serif"; x.textAlign = "center"; x.fillText("N", nx, ny + 33); x.textAlign = "left";
       // encart RDC puis légende
-      const lx = 18 + w + 18; let ly = head + 8;
+      const lx = M + w + GAP; let ly = head + 8;
       if (insetImg) {
         x.fillStyle = "#16202a"; x.font = "700 12.5px system-ui,sans-serif"; x.fillText(TT("Localisation en RDC"), lx, ly + 11); ly += 18;
-        const ih = insetH - 26; x.drawImage(insetImg, lx, ly, side, ih); x.strokeStyle = "#9aa3ab"; x.strokeRect(lx, ly, side, ih); ly += ih + 14;
-      }
-      x.fillStyle = "#16202a"; x.font = "700 13px system-ui,sans-serif"; wrap(opt.legendTitle || "Légende", side).forEach(t => { x.fillText(t, lx, ly + 12); ly += 17; });
-      if ((opt.legend || []).some(it => it.count !== undefined)) { x.fillStyle = "#6b7680"; x.font = "10.5px system-ui,sans-serif"; x.textAlign = "right"; x.fillText(opt.countLabel || "zones", lx + side - 6, ly + 10); x.textAlign = "left"; ly += 14; }
-      ly += 6; x.font = "12px system-ui,sans-serif";
-      (opt.legend || []).forEach(it => {
-        x.fillStyle = it.color; x.fillRect(lx, ly, 16, 14); x.strokeStyle = "#9aa3ab"; x.strokeRect(lx, ly, 16, 14);
-        x.fillStyle = "#26313b"; x.fillText(it.label, lx + 24, ly + 11);
-        if (it.count !== undefined) { x.fillStyle = "#6b7680"; x.textAlign = "right"; x.fillText(String(it.count), lx + side - 6, ly + 11); x.textAlign = "left"; }
-        ly += 24;
+        const ih = insetH - 26; x.drawImage(insetImg, lx, ly, side, ih); x.strokeStyle = "#9aa3ab"; x.strokeRect(lx, ly, side, ih); ly += ih + 8;
+      } else if (insetH) ly += insetH;
+      x.fillStyle = "#16202a"; x.font = F.lt; ltL.forEach(t => { x.fillText(t, lx, ly + 12); ly += 17; });
+      if (hasCount) { x.fillStyle = "#6b7680"; x.font = "10.5px system-ui,sans-serif"; x.textAlign = "right"; x.fillText(opt.countLabel || "zones", lx + side, ly + 10); x.textAlign = "left"; ly += 14; }
+      ly += 6;
+      legItems.forEach(it => {
+        x.fillStyle = it.color; x.fillRect(lx, ly, 16, 14); x.strokeStyle = "#9aa3ab"; x.lineWidth = 1; x.strokeRect(lx, ly, 16, 14);
+        x.fillStyle = "#26313b"; x.font = F.li; it.lines.forEach((t, i) => x.fillText(t, lx + 24, ly + 11 + i * 15));
+        if (it.count !== undefined) { x.fillStyle = "#6b7680"; x.textAlign = "right"; x.fillText(String(it.count), lx + side, ly + 11); x.textAlign = "left"; }
+        ly += rowH(it.lines.length);
       });
-      const sym = (kind, label) => {
-        if (kind === "prov") { x.strokeStyle = "#2f363d"; x.lineWidth = 2; x.beginPath(); x.moveTo(lx, ly + 7); x.lineTo(lx + 16, ly + 7); x.stroke(); }
-        else if (kind === "zone") { x.strokeStyle = "#b9c0c6"; x.lineWidth = 1; x.beginPath(); x.moveTo(lx, ly + 7); x.lineTo(lx + 16, ly + 7); x.stroke(); }
-        else if (kind === "emp") { x.strokeStyle = "#d62828"; x.lineWidth = 1.6; x.strokeRect(lx + 1, ly + 1, 14, 12); }
-        else { x.fillStyle = kind; x.fillRect(lx, ly, 16, 14); x.strokeStyle = "#9aa3ab"; x.lineWidth = 1; x.strokeRect(lx, ly, 16, 14); }
-        x.lineWidth = 1; x.fillStyle = "#26313b"; x.font = "12px system-ui,sans-serif"; x.fillText(label, lx + 24, ly + 11); ly += 22;
-      };
-      if (opt.symbols !== false) {
-        sym("prov", TT("Limite de province")); sym("zone", TT("Limite de zone de santé"));
-        if (insetImg) { sym("#f0a43a", TT("Province(s) concernée(s), encart")); sym("emp", TT("Emprise de la carte, encart")); }
-      }
-      ly += 8; x.font = "11px system-ui,sans-serif"; x.fillStyle = "#4a5560";
-      (opt.sideNotes || []).forEach(n => wrap(n, side).forEach(t => { x.fillText(t, lx, ly + 10); ly += 15; }));
-      // notes
-      let ny2 = head + Math.max(h, ly - head) + 22; x.fillStyle = "#4a5560"; x.font = "11px system-ui,sans-serif";
-      noteLines.forEach(t => { x.fillText(t, 18, ny2); ny2 += 15; });
-      x.fillStyle = "#8a949d"; x.font = "10.5px system-ui,sans-serif"; x.fillText(opt.source || ("Ebola Outbreak, SGI-TASK FORCE · " + (window.DASHBOARD_DATA?.meta?.cutoff || "")), 18, H - 12);
+      symItems.forEach(({ k, lines }) => {
+        if (k === "prov") { x.strokeStyle = "#2f363d"; x.lineWidth = 2; x.beginPath(); x.moveTo(lx, ly + 7); x.lineTo(lx + 16, ly + 7); x.stroke(); }
+        else if (k === "zone") { x.strokeStyle = "#b9c0c6"; x.lineWidth = 1; x.beginPath(); x.moveTo(lx, ly + 7); x.lineTo(lx + 16, ly + 7); x.stroke(); }
+        else if (k === "emp") { x.strokeStyle = "#d62828"; x.lineWidth = 1.6; x.strokeRect(lx + 1, ly + 1, 14, 12); }
+        else { x.fillStyle = k; x.fillRect(lx, ly, 16, 14); x.strokeStyle = "#9aa3ab"; x.lineWidth = 1; x.strokeRect(lx, ly, 16, 14); }
+        x.lineWidth = 1; x.fillStyle = "#26313b"; x.font = F.li; lines.forEach((t, i) => x.fillText(t, lx + 24, ly + 11 + i * 15)); ly += Math.max(22, lines.length * 15 + 7);
+      });
+      ly += 10; x.font = F.note; x.fillStyle = "#4a5560";
+      sideNoteL.forEach(t => { x.fillText(t, lx, ly + 10); ly += 15; });
+      // notes sous la carte, puis source
+      let ny2 = head + bodyH + 20; x.fillStyle = "#4a5560"; x.font = F.note;
+      noteLines.forEach(t => { x.fillText(t, M, ny2); ny2 += 15; });
+      x.fillStyle = "#8a949d"; x.font = "10.5px system-ui,sans-serif"; x.fillText(opt.source || ("Ebola Outbreak, SGI-TASK FORCE · " + (window.DASHBOARD_DATA?.meta?.cutoff || "")), M, H - 12);
       c.toBlob(b => { const a = document.createElement("a"); a.href = URL.createObjectURL(b); a.download = (opt.file || opt.title || "carte").replace(/[^\w\-]+/g, "_") + ".png"; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 2000); });
     };
     const done = () => { if (--pending === 0) draw(); };
