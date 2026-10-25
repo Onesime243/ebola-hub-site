@@ -1740,7 +1740,7 @@
   /* ======================================================================
      v3.4 : Rt multi-méthodes, zones à risque, analyses lln, Linelist fusionnée, chargement des fichiers
      ====================================================================== */
-  const RTM_COL = { RP: "--s1", RPa: "--s5", WT: "--s3", EG: "--s4", DSS: "--s2", BPS: "--s6", FBI: "--s7", FBIs: "--s8", SB: "--ink-2", ICL: "--critical" };
+  const RTM_COL = { RP: "--s1", RPa: "--s5", WT: "--s3", EG: "--s4", DSS: "--s2", BPS: "--s6", FBI: "--s7", FBIs: "--s8", SB: "--st-done", ICL: "--ink" };
   const RTM_INFO = {
     RP: ["Renouvellement (Cori 2013, EpiEstim)", "Fenêtre glissante de 7 jours, a priori Gamma(1, 5)", "Référence opérationnelle ; bien calibré en transmission modérée", "Retard d’environ une demi-fenêtre ; sensible au choix de la fenêtre et de l’intervalle sériel"],
     RPa: ["EpiEstim, fenêtre optimale (Parag & Donnelly 2020)", "Fenêtre choisie parmi 3 à 21 jours par l’erreur de prédiction cumulée (APE)", "Fenêtre objective, adaptée aux données", "Même hypothèses qu’EpiEstim"],
@@ -2538,7 +2538,7 @@
     const pal = { "Positif": "--critical", "Négatif": "--st-done", "Sans résultat": "--st-inc" };
     Ch.xy($("#c-eds-a"), { data: wkRows(d.hebdo_alertes_deces, keys), x: "week", stacked: true, height: 260, xLabel: wkLab, xTitle: T("Semaine"), series: keys.map(k => ({ key: k, label: T(k), color: pal[k] || "--s7" })) });
     Ch.xy($("#c-eds-w"), { data: (d.hebdo_eds || []).map(x => ({ week: x.semaine, eds: x.eds, fam: x.famille })), x: "week", stacked: true, height: 260, xLabel: wkLab, xTitle: T("Semaine"),
-      series: [{ key: "eds", label: T("Équipe d’enterrement (EDS)"), color: "--s2" }, { key: "fam", label: T("Famille / communauté"), color: "--critical" }] });
+      series: [{ key: "eds", label: T("Équipe d’enterrement (EDS)"), color: "--s1" }, { key: "fam", label: T("Famille / communauté"), color: "--critical" }] });
   }
 
   /* ---------------- Symptômes et score clinique ---------------- */

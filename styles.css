@@ -4,9 +4,9 @@
   --page:#f4f5f2;--surface:#fcfcfb;--surface-2:#f1f2ee;--surface-3:#e8e9e4;
   --ink:#0f1720;--ink-2:#46505a;--muted:#7c848b;--line:#e1e0d9;--line-2:#c9cbc3;
   --brand:#16324f;--brand-2:#0f8b8d;--accent:#2a78d6;
-  --s1:#2a78d6;--s2:#eb6834;--s3:#1baf7a;--s4:#eda100;--s5:#e87ba4;--s6:#008300;--s7:#4a3aa7;--s8:#e34948;
-  --good:#0ca30c;--warn:#fab219;--serious:#ec835a;--critical:#d03b3b;
-  --st-conf:#d03b3b;--st-susp:#ec835a;--st-nv:#e0a100;--st-v48:#86b6ef;--st-v24:#0ca30c;--st-done:#7a8a99;--st-inc:#c3c2b7;--st-dup:#e1e0d9;
+  --s1:#2a78d6;--s2:#eb6834;--s3:#1baf7a;--s4:#eda100;--s5:#e87ba4;--s6:#008300;--s7:#4a3aa7;--s8:#7f5539;
+  --good:#0ca30c;--warn:#fab219;--serious:#ec835a;--critical:#9b1b30;
+  --st-conf:#9b1b30;--st-susp:#c2549d;--st-nv:#e0a100;--st-v48:#86b6ef;--st-v24:#0ca30c;--st-done:#7a8a99;--st-inc:#c3c2b7;--st-dup:#e1e0d9;
   --seq-0:#e9eef3;--seq-1:#cde2fb;--seq-2:#9ec5f4;--seq-3:#6da7ec;--seq-4:#3987e5;--seq-5:#256abf;--seq-6:#184f95;--seq-7:#0d366b;
   --sex-m:#2a78d6;--sex-f:#c2417d;--sex-i:#9aa1a7;--map-stroke:#ffffff;--map-na:#eceae4;
   --rc-salmon:#f08a7c;--rc-purple:#9933ff;--rc-rt:#c65353;--rc-r1:#ac3973;--rc-bar:#5f6b78;--rc-grey:#9a9a9a;
@@ -19,8 +19,8 @@
   --page:#0d0f11;--surface:#17191b;--surface-2:#1f2225;--surface-3:#2a2d30;
   --ink:#f3f4f2;--ink-2:#c3c2b7;--muted:#8d9399;--line:#2c2e2f;--line-2:#3a3d3f;
   --brand:#9cc3ea;--brand-2:#3ec4c6;--accent:#3987e5;
-  --s1:#3987e5;--s2:#d95926;--s3:#199e70;--s4:#c98500;--s5:#d55181;--s6:#008300;--s7:#9085e9;--s8:#e66767;
-  --st-conf:#e05555;--st-susp:#ec835a;--st-nv:#fab219;--st-v48:#5598e7;--st-v24:#0ca30c;--st-done:#7d8b98;--st-inc:#55595c;--st-dup:#3a3d3f;
+  --s1:#3987e5;--s2:#d95926;--s3:#199e70;--s4:#c98500;--s5:#d55181;--s6:#008300;--s7:#9085e9;--s8:#b08968;--critical:#e8466c;
+  --st-conf:#e8466c;--st-susp:#d070b4;--st-nv:#fab219;--st-v48:#5598e7;--st-v24:#0ca30c;--st-done:#7d8b98;--st-inc:#55595c;--st-dup:#3a3d3f;
   --seq-0:#23282d;--seq-1:#1d3553;--seq-2:#184f95;--seq-3:#1c5cab;--seq-4:#2a78d6;--seq-5:#5598e7;--seq-6:#86b6ef;--seq-7:#cde2fb;
   --sex-m:#5598e7;--sex-f:#e06aa3;--sex-i:#6f767c;--map-stroke:#17191b;--map-na:#2a2d30;
   --rc-salmon:#e27b6e;--rc-purple:#b980ff;--rc-rt:#e07070;--rc-r1:#d06a9f;--rc-bar:#8d99a6;--rc-grey:#7d7d7d;
