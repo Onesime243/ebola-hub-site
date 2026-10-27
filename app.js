@@ -85,9 +85,10 @@
     lab: "Tous", nowH: 30, fLevel: "National", fTerr: "National", fTarget: "confirmes", fH: 30, tables: {},
     ovStack: "aucun", netIcons: true, gen: "0", idxPeriod: "0", ssSet: "", ssPlace: "Tous", ssMin: "2", ssCases: true, dynG: "National", growBase: "dds", growWin: "12s", dyStack: "sexe", dyBase: "o", dyDays: "60", rtDays: "120",
     siCmp: false, rlWin: "28j", projH: "30", distK: "dds_notification", recZone: "", recSup: "0.3", recColor: "issue", recX: "onset", recIcons: true, recDoc: false, epiMin: "3", resZone: "", perfG: "National",
-    rtmG: "National", rtmSet: "all", rtmDays: "120", zrCat: "Toutes", rtmMode: "zones", iclG: "National", rtzProv: "Toutes", rtzG: "National", rtzTau: "7", rtzDays: "60", opTab: "deces", opProv: "Toutes", opWin: "cumul", opZone: "Toutes", opCte: "Tous", opD1: "", opD2: "", opCls: "c", opMapK: "dec", opChamp: "Tous", iclTau: "14", jlD1: "", jlD2: "", jlBase: "exp", jlZone: "Toutes", jlSt: "Tous", zrColor: "categorie", zrLab: "score", zrSel: "", pplProv: "Toutes", sitNiv: "national"
+    rtmG: "National", rtmSet: "all", rtmDays: "120", zrCat: "Toutes", rtmMode: "zones", iclG: "National", rtzProv: "Toutes", rtzG: "National", rtzTau: "7", rtzDays: "60", opTab: "deces", opProv: "Toutes", opWin: "cumul", opZone: "Toutes", opCte: "Tous", opD1: "", opD2: "", opCls: "c", opMapK: "dec", opChamp: "Tous", iclTau: "14", pilT: "National", jlD1: "", jlD2: "", jlBase: "exp", jlZone: "Toutes", jlSt: "Tous", zrColor: "categorie", zrLab: "score", zrSel: "", pplProv: "Toutes", sitNiv: "national"
   };
   const TABS = [
+    { id: "pilotage", t: "Pilotage stratégique", g: "Situation", i: "M3 3h2v16h16v2H3zm4 12 4-5 3 3 5-7 1.6 1.2-6.4 9-3-3-2.6 3.4z" },
     { id: "overview", t: "Vue générale", g: "Situation", i: "M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z" },
     { id: "territories", t: "Territoires", g: "Situation", i: "M12 2C8 2 5 5 5 9c0 5 7 13 7 13s7-8 7-13c0-4-3-7-7-7zm0 9.5A2.5 2.5 0 1 1 12 6a2.5 2.5 0 0 1 0 5.5z" },
     { id: "maps", t: "Cartes pour rapport", g: "Situation", i: "M15 4 9 2 3 4v18l6-2 6 2 6-2V2zM9 4.4l6 2v13.2l-6-2z" },
@@ -2752,7 +2753,179 @@
     if (cp) { const el = $("#map-cap-" + cp.dataset.copyCap); if (el && navigator.clipboard) navigator.clipboard.writeText(el.innerText).then(() => { cp.textContent = "✓ " + T("Copié"); }); }
   });
 
-  const VIEWS = { overview: [overview, overviewCharts], territories: [territories, territoriesCharts], followup: [followup, followupCharts], index: [indexView, indexCharts], journey: [journey, journeyCharts], chains: [chainsView, chainsCharts], recon: [reconView, reconCharts], dynamics: [dynamicsView, dynamicsCharts], children: [kidsView, kidsCharts], superspreading: [superView, superCharts], resurgence: [resurgenceView, resurgenceCharts], labs: [labsView, labsCharts], nowcast: [nowcastView, nowcastCharts], forecast: [forecastView, forecastCharts], priority: [priorityView], rtm: [rtmView, rtmCharts], riskzones: [riskZonesView, riskZonesCharts], alerts: [alertsView, alertsCharts], eds: [edsView, edsCharts], clinic: [clinicView, clinicCharts], lab2: [lab2View, lab2Charts], pec: [pecView, pecCharts], fusion: [fusionView], maps: [mapsView], ops: [opsView, opsCharts], ppl: [pplView, pplCharts], situation: [sitView], upload: [O.uploadView, O.uploadWire], presentation: [O.presView, O.presWire], indicateurs: [() => O.indView(D), O.indWire], comptes: [O.comptesView, O.comptesWire], publication: [O.pubView, O.pubWire], quality: [qualityView], method: [methodView], terms: [termsView] };
+  /* ================= PILOTAGE STRATÉGIQUE (décideurs) =================
+     Cinq questions, une page : progression, foyers, détection / isolement, efficacité de la riposte, décisions du jour.
+     Indicateurs observés (comptés) et estimés (modèles) séparés ; chaque proportion avec son numérateur / dénominateur. */
+  const PIL = () => D.pilotage || null;
+  const pilKey = () => `hub-pil-${D.meta.cutoff}-${S.pilT}`;
+  function pilSaved() { try { return JSON.parse(localStorage.getItem(pilKey()) || "{}"); } catch (e) { return {}; } }
+  function pilSave(o) { try { localStorage.setItem(pilKey(), JSON.stringify(o)); } catch (e) { /* stockage indisponible */ } }
+  const pilTrend = (v, p, bad = "up") => {
+    if (v === null || v === undefined || p === null || p === undefined) return "";
+    const d = v - p; if (Math.abs(d) < 1e-9) return `<span class="pil-tr flat">= ${T("stable")}</span>`;
+    const up = d > 0, worse = bad === "up" ? up : !up;
+    return `<span class="pil-tr ${worse ? "worse" : "better"}">${up ? "▲" : "▼"} ${up ? "+" : "−"}${nf(Math.abs(d), Math.abs(d) < 10 && d % 1 ? 1 : 0)}</span>`;
+  };
+  const pilFrac = (o, d = 0) => o && o.den ? `${nf(o.num)} / ${nf(o.den)}` : "";
+  function pilCard(label, value, note, o = {}) {
+    return `<div class="kpi pil-kpi ${o.cls || ""}"><div class="label">${o.color ? `<i class="dot" style="background:${col(o.color)}"></i>` : ""}${T(label)}${o.estim ? ` <span class="pil-est">${T("Estimation")}</span>` : ""}</div>
+      <div class="value">${value}</div><div class="note">${note || ""}</div></div>`;
+  }
+  function pilotageView() {
+    const P = PIL();
+    if (!P) return `<div class="empty">${T("Pilotage stratégique indisponible : relancez l’analyse complète.")}</div>`;
+    if (!P.territoires[S.pilT]) S.pilT = "National";
+    const X = P.territoires[S.pilT], K = X.kpi, E = X.estim, B = X.bulletin, nat = S.pilT === "National";
+    const rt = K.rt, ri = K.rt_icl;
+    const rtCol = r => !r ? "--muted" : r.ic[0] > 1 ? "--critical" : r.ic[1] < 1 ? "--good" : "--warn";
+    const rtTxt = r => r ? `${nf(r.v, 2)}` : "—";
+    const nd = T("Non disponible");
+    const cards = [
+      pilCard("Cas confirmés cumulés", nf(K.cumul_confirmes.v), `<b>+${nf(K.cumul_confirmes.plus7)}</b> ${T("sur 7 jours")}${nat ? ` · ${T("source SitRep")}` : ` · ${T("Linelist")}`}`, { color: "--s2" }),
+      pilCard("Nouveaux cas confirmés (7 j)", nf(K.nouveaux_7j.v), `${T("vs")} ${nf(K.nouveaux_7j.prec)} ${T("les 7 jours précédents")} ${pilTrend(K.nouveaux_7j.v, K.nouveaux_7j.prec)} · ${nf(K.nouveaux_24h.v)} ${T("en 24 h")}`, { color: "--s2" }),
+      pilCard("Nouveaux décès confirmés (7 j)", nf(K.deces_7j.v), `${nf(K.deces_7j.cte)} ${T("au CTE")} · <b>${nf(K.deces_7j.hors_cte)} ${T("hors CTE")}</b> ${pilTrend(K.deces_7j.v, K.deces_7j.prec)}`, { color: "--critical" }),
+      pilCard("Létalité cumulée", pc(K.letalite.v, 1), `${T("décès / cas confirmés")} : ${pilFrac(K.letalite)}${K.letalite.sitrep ? ` · SitRep ${pc(K.letalite.sitrep, 1)}` : ""}`, { color: "--ink-2" }),
+      pilCard("Zones de santé actives (14 j)", nf(K.zones_actives_14j.v), T("avec au moins un cas confirmé notifié"), { color: "--s1" }),
+      pilCard("R(t) estimé", `<span style="color:${col(rtCol(rt))}">${rtTxt(rt)}</span>`, rt ? `${T("IC 95 %")} ${nf(rt.ic[0], 2)}–${nf(rt.ic[1], 2)} · P(R>1) ${pc(100 * rt.p_sup_1, 0)} · ${dshort(rt.date)}${ri ? `<br>${T("Rt des infections (ICL)")} ${nf(ri.v, 2)} (${nf(ri.ic[0], 2)}–${nf(ri.ic[1], 2)})` : ""}` : T("moins de 20 cas confirmés sur 28 jours"), { color: rtCol(rt), estim: true }),
+      pilCard("Cas issus des contacts connus", pc(K.cas_issus_contacts.v, 0), `${T("parmi les cas confirmés des 14 derniers jours")} : ${pilFrac(K.cas_issus_contacts)}`, { color: "--s3", cls: (K.cas_issus_contacts.v ?? 100) < 50 ? "alert" : "" }),
+      pilCard("Contacts vus dans les 24 h", pc(K.contacts_vus_24h.v, 0), `${T("parmi les contacts actifs")} : ${pilFrac(K.contacts_vus_24h)} · ${T("cible 95 %")}`, { color: "--st-v24", cls: (K.contacts_vus_24h.v ?? 100) < 80 ? "alert" : "" }),
+      pilCard("Délai symptômes → isolement", K.delai_isolement.v === null ? "—" : `${nf(K.delai_isolement.v, 1)} ${T("j")}`, `${T("médiane, cas admis sur 28 jours")} (n = ${nf(K.delai_isolement.n)}) ${pilTrend(K.delai_isolement.v, K.delai_isolement.prec)}`, { color: "--warn", cls: (K.delai_isolement.v ?? 0) > 3 ? "alert" : "" }),
+      pilCard("Alertes investiguées en moins de 24 h", pc(K.alertes_inv_24h.v, 0), `${T("alertes des 7 derniers jours avec date d’investigation")} : ${pilFrac(K.alertes_inv_24h)}`, { color: "--s7" }),
+      pilCard("Couverture vaccinale", nd, T("liste de vaccination et population cible à charger"), { color: "--muted", cls: "pil-nd" }),
+      pilCard("Zones nouvellement touchées (7 j)", nf(K.zones_nouvelles_7j.v), K.zones_nouvelles_7j.v ? esc(K.zones_nouvelles_7j.liste.join(", ")) : T("aucune nouvelle zone"), { color: "--critical", cls: K.zones_nouvelles_7j.v ? "alert" : "" }),
+    ].join("");
+    const saved = pilSaved();
+    const al = B.alertes || [];
+    const sit = B.situation;
+    const sitTxt = `${nf(sit.nouveaux_7j)} ${T("nouveaux cas confirmés en 7 jours")} (${T("vs")} ${nf(sit.prec7)}), ${nf(sit.deces_7j)} ${T("décès confirmés")}, ${nf(sit.zones_actives)} ${T("zones actives")}${sit.nouvelles_zones ? `, ${nf(sit.nouvelles_zones)} ${T("nouvelles zones")}` : ""}${sit.rt !== null && sit.rt !== undefined ? `, R(t) ${nf(sit.rt, 2)}` : ""}.`;
+    const tendance = sit.prec7 ? (sit.nouveaux_7j < sit.prec7 * .9 ? T("L’épidémie recule sur les 7 derniers jours.") : sit.nouveaux_7j > sit.prec7 * 1.1 ? T("L’épidémie progresse sur les 7 derniers jours.") : T("L’épidémie est stable sur les 7 derniers jours.")) : "";
+    const F = B.fiabilite || {};
+    const bulletin = `
+      <div class="pil-bul">
+        <div class="pil-blk"><h3>${T("Situation épidémiologique")}</h3><p><b>${tendance}</b> ${sitTxt}</p></div>
+        <div class="pil-blk"><h3>${T("Trois alertes prioritaires")}</h3>${al.length ? `<ol>${al.map(a => `<li>${esc(T(a.texte))}</li>`).join("")}</ol>` : `<p class="muted">${T("Aucune alerte prioritaire selon les règles de l’outil.")}</p>`}</div>
+        <div class="pil-blk pil-dec"><h3>${T("Trois décisions attendues")}</h3>${al.length ? al.map((a, i) => `<div class="pil-d"><div><b>${i + 1}.</b> ${esc(T(a.decision))}</div>
+          <div class="pil-d-f"><label>${T("Responsable")}<input type="text" data-pil="r${i}" value="${esc(saved["r" + i] || "")}" placeholder="${T("à désigner")}"></label>
+          <label>${T("Échéance")}<input type="text" data-pil="e${i}" value="${esc(saved["e" + i] || "")}" placeholder="${T("dans")} ${esc(a.delai)}"></label></div></div>`).join("") : `<p class="muted">—</p>`}
+          <div class="small muted">${T("Décisions proposées automatiquement à partir des alertes ; à valider en réunion. Responsable et échéance sont gardés sur cet ordinateur.")}</div></div>
+        <div class="pil-blk"><h3>${T("Fiabilité des données")}</h3><ul class="small">
+          <li>${T("Dernière notification")} : <b>${dfmt(F.derniere_notification)}</b> · ${T("analyse du")} ${dfmt(D.meta.extraction)}</li>
+          ${F.score_qualite !== null && F.score_qualite !== undefined ? `<li>${T("Score de qualité des données")} : <b>${pc(F.score_qualite, 0)}</b></li>` : ""}
+          <li>${T("Zones avec cas sur 42 jours sans alerte notifiée depuis 3 jours")} : <b>${nf((F.zones_silencieuses || []).length)}</b>${(F.zones_silencieuses || []).length ? ` (${esc(F.zones_silencieuses.join(", "))})` : ""}</li>
+          <li>${T("Corrections automatiques journalisées")} : ${nf(F.corrections)}</li>
+          <li>${T("Les 7 à 14 derniers jours sont provisoires : notifications et issues encore incomplètes.")}</li></ul></div>
+      </div>`;
+    // 20 KPI par dimension
+    const R = (dim, kpi, val, ctx, dec, tr = "") => ({ dim, kpi, val, ctx, dec, tr });
+    const rows = [
+      R("Transmission", "1. Nouveaux cas confirmés (24 h et 7 j)", `${nf(K.nouveaux_24h.v)} / ${nf(K.nouveaux_7j.v)}`, `${T("7 j précédents")} : ${nf(K.nouveaux_7j.prec)}`, "Mesurer l’évolution", pilTrend(K.nouveaux_7j.v, K.nouveaux_7j.prec)),
+      R("Transmission", "2. Variation des cas sur 7 jours", K.nouveaux_7j.var_pct === null ? "—" : `${K.nouveaux_7j.var_pct > 0 ? "+" : ""}${nf(K.nouveaux_7j.var_pct)} %`, T("7 derniers jours vs 7 jours précédents"), "Détecter une accélération"),
+      R("Transmission", "3. R(t) avec intervalle d’incertitude", rt ? `${nf(rt.v, 2)} (${nf(rt.ic[0], 2)}–${nf(rt.ic[1], 2)})` : "—", rt ? `EpiEstim 14 j, ${dshort(rt.date)}${ri ? ` · ICL ${nf(ri.v, 2)} (${nf(ri.ic[0], 2)}–${nf(ri.ic[1], 2)})` : ""}` : T("moins de 20 cas sur 28 jours"), "Évaluer la dynamique"),
+      R("Transmission", "4. Zones de santé actives (14 j)", nf(K.zones_actives_14j.v), esc(K.zones_actives_14j.liste.slice(0, 8).join(", ")) + (K.zones_actives_14j.liste.length > 8 ? "…" : ""), "Prioriser les zones"),
+      R("Mortalité et soins", "5. Nouveaux décès, au CTE et hors CTE (7 j)", `${nf(K.deces_7j.v)} (${nf(K.deces_7j.cte)} / ${nf(K.deces_7j.hors_cte)})`, `${T("au CTE / hors CTE")} · ${T("7 j précédents")} : ${nf(K.deces_7j.prec)}`, "Identifier les failles de prise en charge", pilTrend(K.deces_7j.v, K.deces_7j.prec)),
+      R("Mortalité et soins", "6. Taux de létalité", pc(K.letalite.v, 1), `${pilFrac(K.letalite)}${K.letalite.sitrep ? ` · SitRep ${pc(K.letalite.sitrep, 1)}` : ""}`, "Suivre la gravité observée"),
+      R("Mortalité et soins", "7. Délai symptômes → admission / isolement", K.delai_isolement.v === null ? "—" : `${nf(K.delai_isolement.v, 1)} ${T("j")}`, `${T("médiane, 28 j")}, n = ${nf(K.delai_isolement.n)} · ${T("28 j précédents")} : ${K.delai_isolement.prec === null ? "—" : nf(K.delai_isolement.prec, 1) + " " + T("j")}`, "Améliorer l’accès aux soins", pilTrend(K.delai_isolement.v, K.delai_isolement.prec)),
+      R("Surveillance", "8. Alertes reçues et investiguées en 24 h", `${nf(K.alertes_7j.v)} · ${pc(K.alertes_inv_24h.v, 0)}`, `${T("alertes 7 j")} · ${T("investiguées ≤ 24 h")} ${pilFrac(K.alertes_inv_24h)}`, "Renforcer la détection"),
+      R("Surveillance", "9. Délai prélèvement → résultat", K.delai_labo.v === null ? "—" : `${nf(K.delai_labo.v, 1)} ${T("j")}`, `${T("médiane, 28 j")}, n = ${nf(K.delai_labo.n)}`, "Réduire le retard diagnostique"),
+      R("Surveillance", "10. Cas détectés parmi les contacts connus", pc(K.cas_issus_contacts.v, 0), `${pilFrac(K.cas_issus_contacts)} ${T("cas confirmés, 14 j")}`, "Évaluer l’efficacité du traçage"),
+      R("Surveillance", "11. Cas sans lien épidémiologique connu", pc(K.cas_sans_lien.v, 0), `${pilFrac(K.cas_sans_lien)} ${T("cas confirmés, 14 j")}`, "Rechercher les chaînes cachées"),
+      R("Contacts", "12. Contacts actifs sous suivi", nf(K.contacts_actifs.v), T("fenêtre de 21 jours ouverte"), "Dimensionner les équipes"),
+      R("Contacts", "13. Contacts effectivement vus chaque jour", pc(K.contacts_vus_24h.v, 0), `${pilFrac(K.contacts_vus_24h)} ${T("vus dans les 24 h")}`, "Mesurer la couverture"),
+      R("Contacts", "14. Contacts perdus de vue (> 3 j)", nf(K.contacts_perdus.v), `${pc(K.contacts_perdus.pct, 0)} ${T("des contacts actifs")}`, "Déclencher une recherche"),
+      R("Riposte", "15. Couverture vaccinale des personnes éligibles", nd, T("charger la liste de vaccination (DHIS2) et la population cible"), "Réorienter les équipes"),
+      R("Riposte", "16. Délai confirmation → intervention autour du cas", nd, T("date de la première intervention autour du cas non saisie"), "Mesurer la rapidité"),
+      R("Riposte", "17. Points d’entrée avec surveillance fonctionnelle", nd, `${T("indicateur indirect")} : ${nf(K.alertes_poe_7j.v)} ${T("alertes notifiées par les points d’entrée en 7 j")}`, "Réaffecter les ressources"),
+      R("Qualité et capacité", "18. Complétude et fraîcheur des données", F.score_qualite !== null && F.score_qualite !== undefined ? pc(F.score_qualite, 0) : dfmt(K.derniere_notification), `${T("dernière notification")} ${dfmt(K.derniere_notification)} · ${nf(K.zones_silencieuses.v)} ${T("zones silencieuses")}`, "Vérifier la fiabilité des décisions"),
+      R("Qualité et capacité", "19. Capacité et occupation des CTE", `${nf(K.cte_occupes.v)} ${T("patients")}`, T("confirmés hospitalisés (admis ≤ 42 j, sans sortie) ; capacité en lits non disponible"), "Anticiper les besoins"),
+      R("Qualité et capacité", "20. Zones avec signaux d’alerte ou flambée récente", nf(K.zones_signal.v), esc(K.zones_signal.liste.slice(0, 8).join(", ")) + (K.zones_signal.liste.length > 8 ? "…" : ""), "Déclencher une réponse ciblée"),
+    ];
+    const tbl20 = `<div class="table-wrap" style="max-height:none"><table class="pil-20"><thead><tr><th>${T("Dimension")}</th><th>${T("KPI")}</th><th class="num">${T("Valeur")}</th><th>${T("Détail, dénominateur")}</th><th>${T("Décision rendue possible")}</th></tr></thead><tbody>${rows.map((r, i) => `<tr class="${r.val === nd ? "pil-nd-row" : ""}">${i === 0 || rows[i - 1].dim !== r.dim ? `<td rowspan="${rows.filter(x => x.dim === r.dim).length}" class="pil-dim">${T(r.dim)}</td>` : ""}<td>${T(r.kpi)}</td><td class="num"><b>${r.val}</b> ${r.tr}</td><td class="small">${r.ctx}</td><td class="small">${T(r.dec)}</td></tr>`).join("")}</tbody></table></div>`;
+    const si = P.intervalle_seriel;
+    const pv = E.prevision_7j, pv14 = E.prevision_14j, und = E.non_detecte_pct;
+    const estim = `
+      <div class="grid g4">
+        ${pilCard("Cas confirmés attendus à 7 jours", pv ? nf(pv.v) : "—", pv ? `${T("intervalle approché")} ${nf(pv.ic[0])}–${nf(pv.ic[1])}` : "", { color: "--s1", estim: true })}
+        ${pilCard("Cas confirmés attendus à 14 jours", pv14 ? nf(pv14.v) : "—", pv14 ? `${T("intervalle approché")} ${nf(pv14.ic[0])}–${nf(pv14.ic[1])}` : "", { color: "--s1", estim: true })}
+        ${pilCard("Transmission non détectée", und ? `${nf(und.v)} %` : "—", und ? `${T("part des infections non détectées")} (${nf(und.ic[0])}–${nf(und.ic[1])} %), ${dshort(und.periode[0])}–${dshort(und.periode[1])} · ${T("méthode ICL")}` : T("données insuffisantes"), { color: "--warn", estim: true })}
+        ${pilCard("Intervalle sériel", si ? `${nf(si.mediane)} ${T("j")}` : "—", si ? `${T("médiane")} · ${T("quartiles")} ${nf(si.q1)}–${nf(si.q3)} ${T("j")} · ${nf(si.n)} ${T("paires infecteur–infecté")}` : "", { color: "--s7", estim: true })}
+      </div>
+      <div class="grid g2">
+        ${panel("Zones non touchées les plus exposées", T("Zones sans cas confirmé voisines de zones ayant eu des cas dans les 21 derniers jours ; classement par nombre de cas voisins (risque relatif, pas une probabilité)"),
+          (E.risque_propagation || []).length ? table("pil-expo", E.risque_propagation, [{ k: "zone", t: "Zone de santé" }, { k: "province", t: "Province", v: x => esc(x.province || "—") }, { k: "cas_voisins_21j", t: "Cas voisins 21 j", num: true }, { k: "voisines_actives", t: "Zones voisines actives", num: true }, { k: "via", t: "Par", v: x => esc((x.via || []).join(", ")) }], { search: false, sort: "cas_voisins_21j" }) : `<div class="empty">${T("Aucune zone exposée identifiée.")}</div>`, { csv: "pil-expo" })}
+        ${panel("Létalité au CTE selon le délai d’admission", T("Confirmés admis avec issue connue (décès ou guérison) ; analyse brute, non ajustée sur la gravité ni l’âge"), `<div id="c-pil-cfr"></div>`, { png: "letalite_delai_admission" })}
+      </div>`;
+    const terrs = P.ordre.filter(t => P.territoires[t]);
+    return `
+    <div class="flex between" style="margin-bottom:10px;align-items:flex-end">
+      <label class="field">${T("Niveau")}<select data-state="pilT">${terrs.map(t => `<option value="${esc(t)}" ${S.pilT === t ? "selected" : ""}>${t === "National" ? T("National") : esc(t)}</option>`).join("")}</select></label>
+      <div class="flex"><span class="small muted">${T("Situation au")} <b>${dfmt(P.date)}</b></span><button class="btn sm" type="button" data-pil-print>🖨 ${T("Imprimer le bulletin")}</button></div>
+    </div>
+    <div class="grid g6 pil-cards">${cards}</div>
+    ${panel(`${T("Bulletin décisionnel du jour")}, ${S.pilT === "National" ? T("National") : esc(S.pilT)}`, T("Ce que le décideur doit voir chaque matin : situation, trois alertes, trois décisions, fiabilité"), bulletin, { id: "pil-bulletin" })}
+    <h2 class="pil-q">${T("1. L’épidémie progresse-t-elle ou recule-t-elle ?")}</h2>
+    <div class="grid g2">
+      ${panel("Courbe épidémique : cas confirmés par semaine de début des symptômes", T("Les deux dernières semaines (zone grisée) sont provisoires : notifications encore incomplètes ; ligne : semaine de notification"), `<div id="c-pil-epi"></div>`, { png: "courbe_dds_pilotage" })}
+      ${panel("Décès confirmés par semaine, au CTE et hors CTE", T("Semaine du décès ; une part élevée hors CTE signale des cas non isolés à temps"), `<div id="c-pil-dec"></div>`, { png: "deces_cte_hors_cte_hebdo" })}
+    </div>
+    <h2 class="pil-q">${T("2. Où sont les foyers actifs et les risques de propagation ?")}</h2>
+    ${panel("Zones de santé : foyers actifs, surveillance et signaux inhabituels", T("Rouge : cas dans les 21 derniers jours avec un signal d’aggravation ; orange : cas récents ; jaune : 22 à 42 jours sans cas, encore sous surveillance ; vert : plus de 42 jours sans cas"), `<div id="c-pil-map"></div><p class="small muted" style="margin-top:6px">${T("Matrice de mobilité : non disponible (aucune donnée de déplacement chargée).")}</p>`, { png: "carte_pilotage" })}
+    <h2 class="pil-q">${T("3. Détectons-nous et isolons-nous les cas assez tôt ?")}</h2>
+    <div class="grid g21">
+      ${panel("Délai entre symptômes et isolement", T("Médiane hebdomadaire (jours), confirmés admis, par semaine d’admission ; les deux dernières semaines sont provisoires (peu de cas, sorties incomplètes)"), `<div id="c-pil-del"></div>`, { png: "delai_isolement" })}
+      ${panel("Repères", "", `<div class="statgrid">${stat("Cas issus des contacts connus", pc(K.cas_issus_contacts.v, 0), pilFrac(K.cas_issus_contacts))}${stat("Cas sans lien connu", pc(K.cas_sans_lien.v, 0), pilFrac(K.cas_sans_lien))}${stat("Alertes investiguées ≤ 24 h", pc(K.alertes_inv_24h.v, 0), pilFrac(K.alertes_inv_24h))}${stat("Contacts perdus de vue", nf(K.contacts_perdus.v), `${pc(K.contacts_perdus.pct, 0)} ${T("des actifs")}`)}</div>`)}
+    </div>
+    <h2 class="pil-q">${T("4. Les interventions de riposte fonctionnent-elles ? Les 20 KPI prioritaires")}</h2>
+    ${panel("Les 20 KPI prioritaires pour les décideurs", T("Valeur actuelle, dénominateur et tendance ; « non disponible » : donnée absente des sources chargées"), tbl20, { png: "kpi_20" })}
+    <h2 class="pil-q">${T("Indicateurs estimés par modélisation")}</h2>
+    <div class="notice small">${T("Ces valeurs viennent de modèles (prévisions, méthode ICL, intervalle sériel, exposition des zones voisines) : elles sont à distinguer des indicateurs observés, surtout quand les données récentes sont incomplètes.")}</div>
+    ${estim}`;
+  }
+  function pilotageCharts() {
+    const P = PIL(); if (!P) return;
+    const X = P.territoires[S.pilT] || P.territoires.National;
+    const xl = (v, r, tip) => tip ? `${T("semaine du")} ${dfmt(v)}` : dshort(v);
+    const i0 = X.serie.findIndex(r => r.provisoire);
+    if ($("#c-pil-epi")) Ch.xy($("#c-pil-epi"), { data: X.serie, x: "semaine", xLabel: xl, height: 260, shade: i0 >= 0 ? { from: i0, label: T("provisoire") } : null,
+      series: [{ key: "cas_dds", label: T("Début des symptômes"), color: "--s2" }, { key: "cas_notif", label: T("Notification"), color: "--s1", type: "line", markers: false }] });
+    if ($("#c-pil-dec")) Ch.xy($("#c-pil-dec"), { data: X.deces, x: "semaine", xLabel: xl, height: 260, stacked: true,
+      series: [{ key: "cte", label: T("Décès au CTE"), color: "--s1" }, { key: "hors_cte", label: T("Décès hors CTE"), color: "--critical" }] });
+    if ($("#c-pil-del")) Ch.xy($("#c-pil-del"), { data: X.serie, x: "semaine", xLabel: (v, r, tip) => tip ? `${T("semaine du")} ${dfmt(v)} · n = ${nf(r.n_isoles)}` : dshort(v), height: 260, tipSkipNull: true, shade: i0 >= 0 ? { from: i0, label: T("provisoire") } : null,
+      hlines: [{ y: 3, color: "--good", dash: "5 4", label: T("objectif ≤ 3 j") }],
+      series: [{ key: "delai_isolement", label: T("Délai médian symptômes → isolement (j)"), color: "--warn", type: "line", width: 2.4 }] });
+    const cfr = (X.estim.letalite_delai || []).filter(r => r.n);
+    if ($("#c-pil-cfr")) Ch.xy($("#c-pil-cfr"), { data: cfr, x: "delai", height: 240, yMax: 100, barWidth: .6, xTitle: T("Délai symptômes → admission"),
+      xLabel: (v, r, tip) => tip ? `${v} · n = ${nf(r.n)} · ${T("IC 95 %")} ${nf(r.ic[0], 0)}–${nf(r.ic[1], 0)} %` : `${v} (n = ${nf(r.n)})`, yFmt: v => nf(v, 0) + " %",
+      series: [{ key: "letalite", label: T("Létalité au CTE (%)"), color: "--critical" }] });
+    if ($("#c-pil-map")) {
+      const Z = (D.zones_risque || {}).zones || [], by = new Map(Z.map(z => [norm(z.zone_sante), z]));
+      const pv = S.pilT === "National" ? null : S.pilT;
+      const feats = (D.map_zones || []).filter(f => !pv || norm(f.province) === norm(pv));
+      const cat = f => (by.get(norm(f.data_zone)) || {}).categorie || "Non touchée";
+      const code = { "Rouge": 5, "Orange": 4, "Jaune": 3, "Verte": 2, "Non touchée": 1 };
+      const LBL = { "Rouge": "Foyer actif avec signal d’aggravation", "Orange": "Cas récents (≤ 21 j)", "Jaune": "Sous surveillance (22–42 j sans cas)", "Verte": "Plus de 42 j sans cas", "Non touchée": "Non touchée" };
+      const c21 = f => (by.get(norm(f.data_zone)) || {}).cas_21j;
+      Ch.choropleth($("#c-pil-map"), { features: feats, allFeatures: D.map_zones || feats, focus: true, focusIf: f => cat(f) !== "Non touchée", value: f => code[cat(f)] || null,
+        colorFn: (v, f) => ZCOL[cat(f)] || "#E9E6DF", inset: true,
+        insetProvinces: pv ? [...new Set(feats.map(f => f.province))] : [...new Set(feats.filter(f => cat(f) !== "Non touchée").map(f => f.province))],
+        insetLabel: pv ? `${T("Province sélectionnée")} : ${pv}` : T("Province(s) concernée(s)"),
+        legendTitle: T("Situation des zones de santé"), countLabel: T("zones"),
+        legend: ZORD.map(c => ({ color: ZCOL[c], label: T(LBL[c]), count: feats.filter(f => cat(f) === c).length })),
+        labelIf: f => ["Rouge", "Orange"].includes(cat(f)), labelRank: f => c21(f) || 0, labelText: f => `${f.data_zone} · ${nf(c21(f) || 0)}`, unit: T("catégorie"),
+        tip: f => { const z = by.get(norm(f.data_zone)) || {}; return `<b>${esc(f.data_zone)}</b><div class="row"><span>${T("Situation")}</span><b>${esc(T(LBL[cat(f)]))}</b></div><div class="row"><span>${T("Cas 21 j")}</span><b>${nf(z.cas_21j)}</b></div>${z.explication ? `<div class="small" style="max-width:280px">${esc(T(z.explication))}</div>` : ""}`; },
+        onClick: f => { S.zrSel = (by.get(norm(f.data_zone)) || {}).zone_sante || f.data_zone; go("riskzones"); } });
+    }
+  }
+  function pilPrint() {
+    const box = $("#pil-bulletin"); if (!box) return;
+    const ifr = document.createElement("iframe"); ifr.style.cssText = "position:fixed;right:0;bottom:0;width:0;height:0;border:0";
+    document.body.appendChild(ifr);
+    const doc = ifr.contentDocument, css = [...document.querySelectorAll("link[rel=stylesheet],style")].map(n => n.outerHTML).join("");
+    const clone = box.cloneNode(true); clone.querySelectorAll("input").forEach(i => { const sp = doc.createElement("span"); sp.textContent = i.value || i.placeholder; sp.style.fontWeight = "600"; i.replaceWith(sp); });
+    clone.querySelectorAll(".panel-tools").forEach(n => n.remove());
+    doc.open(); doc.write(`<!doctype html><html lang="${lang}"><head><meta charset="utf-8"><title>${T("Bulletin décisionnel")} ${D.meta.cutoff}</title>${css}<style>body{background:#fff;padding:18px}.panel{box-shadow:none;border:1px solid #ccc}</style></head><body><div style="font:700 18px system-ui;margin-bottom:4px">Ebola Outbreak, SGI-TASK FORCE</div><div style="font:13px system-ui;color:#555;margin-bottom:12px">${T("Situation au")} ${dfmt(D.meta.cutoff)}</div>${clone.outerHTML}</body></html>`); doc.close();
+    setTimeout(() => { ifr.contentWindow.focus(); ifr.contentWindow.print(); setTimeout(() => ifr.remove(), 2000); }, 400);
+  }
+  const VIEWS = { pilotage: [pilotageView, pilotageCharts], overview: [overview, overviewCharts], territories: [territories, territoriesCharts], followup: [followup, followupCharts], index: [indexView, indexCharts], journey: [journey, journeyCharts], chains: [chainsView, chainsCharts], recon: [reconView, reconCharts], dynamics: [dynamicsView, dynamicsCharts], children: [kidsView, kidsCharts], superspreading: [superView, superCharts], resurgence: [resurgenceView, resurgenceCharts], labs: [labsView, labsCharts], nowcast: [nowcastView, nowcastCharts], forecast: [forecastView, forecastCharts], priority: [priorityView], rtm: [rtmView, rtmCharts], riskzones: [riskZonesView, riskZonesCharts], alerts: [alertsView, alertsCharts], eds: [edsView, edsCharts], clinic: [clinicView, clinicCharts], lab2: [lab2View, lab2Charts], pec: [pecView, pecCharts], fusion: [fusionView], maps: [mapsView], ops: [opsView, opsCharts], ppl: [pplView, pplCharts], situation: [sitView], upload: [O.uploadView, O.uploadWire], presentation: [O.presView, O.presWire], indicateurs: [() => O.indView(D), O.indWire], comptes: [O.comptesView, O.comptesWire], publication: [O.pubView, O.pubWire], quality: [qualityView], method: [methodView], terms: [termsView] };
   function buildNav() {
     let g = "";
     $("#navigation").innerHTML = TABS.map(t => { const h = t.g !== g ? `<div class="nav-group">${T(t.g)}</div>` : ""; g = t.g; return `${h}<button data-tab="${t.id}" class="${S.tab === t.id ? "active" : ""}"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="${t.i}"/></svg>${T(t.t)}</button>`; }).join("");
@@ -2799,6 +2972,7 @@
     if (t.closest("[data-zr-report]")) { zrReportPNG(); return; }
     const pn = t.closest("[data-png]"); if (pn) { Ch.downloadPNG(pn.closest(".panel"), pn.dataset.png); return; }
     if (t.closest("[data-print]")) { print(); return; }
+    if (t.closest("[data-pil-print]")) { pilPrint(); return; }
     if (t.closest("[data-reset-idx]")) { Object.assign(S, { idxZone: "Toutes", idxConf: "Toutes", idxActive: false, gen: "0", idxPeriod: "0" }); render(); return; }
     const gp = t.closest("[data-gen-pick]"); if (gp) { S.gen = gp.dataset.genPick; render(); return; }
     const oc = t.closest("[data-open-case]"); if (oc && !t.closest(".net-tools")) { go("journey", oc.dataset.openCase); return; }
@@ -2826,7 +3000,7 @@
     if (t.dataset.state) { const v = t.value; S[t.dataset.state] = /^\d+$/.test(v) && ["netDepth", "nowH", "fH"].includes(t.dataset.state) ? Number(v) : v; if (t.dataset.state === "fLevel") { S.fTerr = ""; } if (t.dataset.state === "opProv") { S.opZone = "Toutes"; } if (t.dataset.state === "rtzProv") { S.rtzG = v === "Toutes" ? "National" : `P:${v}`; } render(); }
     if (t.dataset.check) { S[t.dataset.check] = t.checked; render(); }
   });
-  let st; document.addEventListener("input", e => { const t = e.target; if (t.dataset.tsearch) { clearTimeout(st); st = setTimeout(() => { S.tables[t.dataset.tsearch].q = t.value; S.tables[t.dataset.tsearch].limit = 60; rerenderTable(t.dataset.tsearch); }, 250); } });
+  let st; document.addEventListener("input", e => { const t = e.target; if (t.dataset.pil) { const o = pilSaved(); o[t.dataset.pil] = t.value; pilSave(o); return; } if (t.dataset.tsearch) { clearTimeout(st); st = setTimeout(() => { S.tables[t.dataset.tsearch].q = t.value; S.tables[t.dataset.tsearch].limit = 60; rerenderTable(t.dataset.tsearch); }, 250); } });
 
   /* ================= Initialisation ================= */
   const provSel = $("#province-filter");

@@ -454,3 +454,22 @@ footer.foot .sig{flex:1 1 100%;line-height:1.5}footer.foot .sig a{color:inherit}
 .method-box ul{margin:0;padding-left:18px}
 .method-box li{margin:2px 0}
 .h-sec{margin:0;font-size:15px}
+/* ---- pilotage stratégique ---- */
+.pil-cards .pil-kpi .value{font-size:26px}
+.pil-kpi.pil-nd .value{font-size:16px;color:var(--muted)}
+.pil-est{font-size:10px;font-weight:600;color:var(--s7);border:1px solid currentColor;border-radius:4px;padding:0 4px;margin-left:4px;vertical-align:1px}
+.pil-tr{font-size:11.5px;font-weight:700;white-space:nowrap}.pil-tr.worse{color:var(--critical)}.pil-tr.better{color:var(--good)}.pil-tr.flat{color:var(--muted)}
+.pil-q{font-size:16px;margin:22px 0 10px;color:var(--ink)}
+.pil-bul{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+@media (max-width:900px){.pil-bul{grid-template-columns:1fr}}
+.pil-blk{border:1px solid var(--line);border-radius:8px;padding:12px 14px;background:var(--surface-2)}
+.pil-blk h3{margin:0 0 6px;font-size:13.5px}
+.pil-blk p,.pil-blk ol,.pil-blk ul{margin:0;font-size:13px;line-height:1.5}
+.pil-blk ol,.pil-blk ul{padding-left:18px}
+.pil-d{padding:6px 0;border-bottom:1px dashed var(--line);font-size:13px}
+.pil-d-f{display:flex;gap:10px;margin-top:4px;flex-wrap:wrap}
+.pil-d-f label{display:flex;align-items:center;gap:5px;font-size:11.5px;color:var(--muted)}
+.pil-d-f input{font:inherit;font-size:12px;padding:3px 6px;border:1px solid var(--line);border-radius:5px;background:var(--surface);color:var(--ink);width:150px}
+table.pil-20 td.pil-dim{font-weight:700;vertical-align:top;background:var(--surface-2);white-space:nowrap}
+table.pil-20 tr.pil-nd-row td{color:var(--muted)}
+table.pil-20 td{white-space:normal}
