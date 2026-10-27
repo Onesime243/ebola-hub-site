@@ -2855,29 +2855,42 @@
         ${panel("Létalité au CTE selon le délai d’admission", T("Confirmés admis avec issue connue (décès ou guérison) ; analyse brute, non ajustée sur la gravité ni l’âge"), `<div id="c-pil-cfr"></div>`, { png: "letalite_delai_admission" })}
       </div>`;
     const terrs = P.ordre.filter(t => P.territoires[t]);
+    const tile = (label, value, sub, o = {}) => `<div class="pil-tile ${o.cls || ""}"><span>${T(label)}</span><b>${value}</b>${sub ? `<small>${sub}</small>` : ""}</div>`;
+    const daily = [
+      tile("Cas confirmés 24 h", nf(K.nouveaux_24h.v)),
+      tile("Décès confirmés notifiés 24 h", nf(K.deces_24h?.v)),
+      tile("Alertes 24 h", nf(K.alertes_24h?.v)),
+      tile("Positivité 7 j", pc(K.positivite_7j?.v, 0), pilFrac(K.positivite_7j)),
+      tile("Patients en CTE", nf(K.cte_occupes.v)),
+      tile("Contacts actifs", nf(K.contacts_actifs.v)),
+      tile("Nouveaux contacts suivis 24 h", nf(K.contacts_nouveaux_24h?.v)),
+      tile("Contacts perdus de vue > 3 j", nf(K.contacts_perdus.v), "", { cls: K.contacts_perdus.v ? "warn" : "" }),
+      tile("Personnel de santé infecté 7 j", nf(K.ppl_7j?.v), "", { cls: K.ppl_7j?.v ? "warn" : "" }),
+      tile("Alertes décès prélevées 7 j", pc(K.deces_preleves_7j?.v, 0), pilFrac(K.deces_preleves_7j)),
+      tile("Zones avec signal d’alerte", nf(K.zones_signal.v)),
+      tile("Zones silencieuses", nf(K.zones_silencieuses.v), "", { cls: K.zones_silencieuses.v ? "warn" : "" }),
+    ].join("");
     return `
     <div class="flex between" style="margin-bottom:10px;align-items:flex-end">
       <label class="field">${T("Niveau")}<select data-state="pilT">${terrs.map(t => `<option value="${esc(t)}" ${S.pilT === t ? "selected" : ""}>${t === "National" ? T("National") : esc(t)}</option>`).join("")}</select></label>
-      <div class="flex"><span class="small muted">${T("Situation au")} <b>${dfmt(P.date)}</b></span><button class="btn sm" type="button" data-pil-print>🖨 ${T("Imprimer le bulletin")}</button></div>
+      <span class="small muted">${T("Situation au")} <b>${dfmt(P.date)}</b></span>
     </div>
     <div class="grid g6 pil-cards">${cards}</div>
-    ${panel(`${T("Bulletin décisionnel du jour")}, ${S.pilT === "National" ? T("National") : esc(S.pilT)}`, T("Ce que le décideur doit voir chaque matin : situation, trois alertes, trois décisions, fiabilité"), bulletin, { id: "pil-bulletin" })}
-    <h2 class="pil-q">${T("1. L’épidémie progresse-t-elle ou recule-t-elle ?")}</h2>
+    <h2 class="pil-q">${T("Indicateurs du jour")}</h2>
+    <div class="pil-tiles">${daily}</div>
+    <h2 class="pil-q">${T("Évolution de l’épidémie")}</h2>
     <div class="grid g2">
       ${panel("Courbe épidémique : cas confirmés par semaine de début des symptômes", T("Les deux dernières semaines (zone grisée) sont provisoires : notifications encore incomplètes ; ligne : semaine de notification"), `<div id="c-pil-epi"></div>`, { png: "courbe_dds_pilotage" })}
       ${panel("Décès confirmés par semaine, au CTE et hors CTE", T("Semaine du décès ; une part élevée hors CTE signale des cas non isolés à temps"), `<div id="c-pil-dec"></div>`, { png: "deces_cte_hors_cte_hebdo" })}
     </div>
-    <h2 class="pil-q">${T("2. Où sont les foyers actifs et les risques de propagation ?")}</h2>
-    ${panel("Zones de santé : foyers actifs, surveillance et signaux inhabituels", T("Rouge : cas dans les 21 derniers jours avec un signal d’aggravation ; orange : cas récents ; jaune : 22 à 42 jours sans cas, encore sous surveillance ; vert : plus de 42 jours sans cas"), `<div id="c-pil-map"></div><p class="small muted" style="margin-top:6px">${T("Matrice de mobilité : non disponible (aucune donnée de déplacement chargée).")}</p>`, { png: "carte_pilotage" })}
-    <h2 class="pil-q">${T("3. Détectons-nous et isolons-nous les cas assez tôt ?")}</h2>
+    <h2 class="pil-q">${T("Foyers actifs et risque de propagation")}</h2>
+    ${panel("Zones de santé : foyers actifs, surveillance et signaux inhabituels", T("Rouge : cas dans les 21 derniers jours avec un signal d’aggravation ; orange : cas récents ; jaune : 22 à 42 jours sans cas, encore sous surveillance ; vert : plus de 42 jours sans cas"), `<div id="c-pil-map"></div>`, { png: "carte_pilotage" })}
+    <h2 class="pil-q">${T("Détection et isolement des cas")}</h2>
     <div class="grid g21">
       ${panel("Délai entre symptômes et isolement", T("Médiane hebdomadaire (jours), confirmés admis, par semaine d’admission ; les deux dernières semaines sont provisoires (peu de cas, sorties incomplètes)"), `<div id="c-pil-del"></div>`, { png: "delai_isolement" })}
-      ${panel("Repères", "", `<div class="statgrid">${stat("Cas issus des contacts connus", pc(K.cas_issus_contacts.v, 0), pilFrac(K.cas_issus_contacts))}${stat("Cas sans lien connu", pc(K.cas_sans_lien.v, 0), pilFrac(K.cas_sans_lien))}${stat("Alertes investiguées ≤ 24 h", pc(K.alertes_inv_24h.v, 0), pilFrac(K.alertes_inv_24h))}${stat("Contacts perdus de vue", nf(K.contacts_perdus.v), `${pc(K.contacts_perdus.pct, 0)} ${T("des actifs")}`)}</div>`)}
+      ${panel("Repères", "", `<div class="statgrid">${stat("Cas issus des contacts connus", pc(K.cas_issus_contacts.v, 0), pilFrac(K.cas_issus_contacts))}${stat("Cas sans lien connu", pc(K.cas_sans_lien.v, 0), pilFrac(K.cas_sans_lien))}${stat("Alertes investiguées ≤ 24 h", pc(K.alertes_inv_24h.v, 0), pilFrac(K.alertes_inv_24h))}${stat("Délai prélèvement → résultat", K.delai_labo.v === null ? "—" : `${nf(K.delai_labo.v, 1)} ${T("j")}`, "")}</div>`)}
     </div>
-    <h2 class="pil-q">${T("4. Les interventions de riposte fonctionnent-elles ? Les 20 KPI prioritaires")}</h2>
-    ${panel("Les 20 KPI prioritaires pour les décideurs", T("Valeur actuelle, dénominateur et tendance ; « non disponible » : donnée absente des sources chargées"), tbl20, { png: "kpi_20" })}
     <h2 class="pil-q">${T("Indicateurs estimés par modélisation")}</h2>
-    <div class="notice small">${T("Ces valeurs viennent de modèles (prévisions, méthode ICL, intervalle sériel, exposition des zones voisines) : elles sont à distinguer des indicateurs observés, surtout quand les données récentes sont incomplètes.")}</div>
     ${estim}`;
   }
   function pilotageCharts() {

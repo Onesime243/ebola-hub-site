@@ -473,3 +473,11 @@ footer.foot .sig{flex:1 1 100%;line-height:1.5}footer.foot .sig a{color:inherit}
 table.pil-20 td.pil-dim{font-weight:700;vertical-align:top;background:var(--surface-2);white-space:nowrap}
 table.pil-20 tr.pil-nd-row td{color:var(--muted)}
 table.pil-20 td{white-space:normal}
+.pil-tiles{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px;margin-bottom:14px}
+@media (max-width:1300px){.pil-tiles{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media (max-width:700px){.pil-tiles{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.pil-tile{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 12px;display:flex;flex-direction:column;gap:2px}
+.pil-tile span{font-size:11.5px;color:var(--muted);line-height:1.25}
+.pil-tile b{font-size:21px;color:var(--ink);font-variant-numeric:tabular-nums}
+.pil-tile small{font-size:11px;color:var(--muted)}
+.pil-tile.warn b{color:var(--critical)}
