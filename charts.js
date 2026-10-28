@@ -279,15 +279,19 @@
     return INSET_CACHE;
   }
   function choropleth(container, opt) { register(container, () => drawMap(container, opt)); }
+  const MAPV = new Map();   // vue choisie pour chaque carte : « zone » (zones concernées) ou « rdc » (RDC entière)
   function drawMap(container, opt) {
-    const feats = opt.features || [], all = opt.allFeatures || feats, report = !!opt.report;
+    const report = !!opt.report, all0 = opt.allFeatures || opt.features || [];
+    const canFull = !report && (all0.length > (opt.features || []).length || !!opt.focus);
+    const full = canFull && MAPV.get(container.id || "map") === "rdc";
+    const feats = full ? all0 : (opt.features || []), all = all0;
     container.innerHTML = ""; container.classList.add("chart", "map");
     if (!feats.length) { container.innerHTML = `<div class="empty">${TT("Géométrie indisponible")}</div>`; return; }
     const compact = !report && (container.clientWidth || 0) < 1000;   // panneau étroit : encart posé sur la carte, légende dessous
     const grid = document.createElement("div"); grid.className = "map-grid" + (report ? " no-side" : compact ? " compact" : ""); container.appendChild(grid);
     const main = document.createElement("div"); main.className = "map-main"; grid.appendChild(main);
     const side = report ? null : document.createElement("aside"); if (side) { side.className = "map-side"; grid.appendChild(side); }
-    const focusF = opt.focus ? feats.filter(f => opt.focusIf ? opt.focusIf(f) : opt.value(f) > 0) : [];
+    const focusF = opt.focus && !full ? feats.filter(f => opt.focusIf ? opt.focusIf(f) : opt.value(f) > 0) : [];
     const pts = (focusF.length ? focusF : feats).flatMap(f => ringsOf(f.geometry).flat());
     const xs = pts.map(p => p[0]), ys = pts.map(p => p[1]);
     const minx = Math.min(...xs), maxx = Math.max(...xs), miny = Math.min(...ys), maxy = Math.max(...ys);
@@ -392,6 +396,13 @@
       const zb = document.createElement("div"); zb.className = "map-zoom";
       zb.innerHTML = `<button type="button" data-z="in" title="${TT("Zoomer")}" aria-label="${TT("Zoomer")}">+</button><button type="button" data-z="out" title="${TT("Dézoomer")}" aria-label="${TT("Dézoomer")}">−</button><button type="button" data-z="reset" title="${TT("Vue d’ensemble")}" aria-label="${TT("Vue d’ensemble")}">⤢</button>`;
       main.appendChild(zb);
+      if (canFull) {   // deux vues : zones concernées (zoom automatique) ou RDC entière
+        const vb = document.createElement("div"); vb.className = "map-view seg";
+        vb.innerHTML = `<button type="button" data-mv="zone" class="${full ? "" : "on"}">${TT("Zones concernées")}</button><button type="button" data-mv="rdc" class="${full ? "on" : ""}">${TT("RDC entière")}</button>`;
+        main.appendChild(vb);
+        vb.addEventListener("click", ev => { const b = ev.target.closest("button"); if (!b) return; ev.stopPropagation();
+          const v = b.dataset.mv; if ((v === "rdc") === full) return; MAPV.set(container.id || "map", v); MAPZ.delete(container.id || "map"); hideTip(); drawMap(container, opt); });
+      }
       zb.addEventListener("click", ev => { const b = ev.target.closest("button"); if (!b) return; ev.stopPropagation(); const z = b.dataset.z;
         if (z === "reset") { st.k = 1; st.tx = 0; st.ty = 0; apply(); layout(); } else zoomAt(W / 2, H / 2, z === "in" ? 1.6 : 1 / 1.6); });
       svg.addEventListener("wheel", ev => { if (!ev.ctrlKey && !ev.metaKey) return; ev.preventDefault(); const [x, y] = toView(ev); zoomAt(x, y, Math.exp(-ev.deltaY * .0025)); }, { passive: false });

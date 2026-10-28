@@ -845,6 +845,13 @@ Object.assign(window.HUB_EN_TPL = window.HUB_EN_TPL || {}, {
   "Analyse indisponible : relancez l’analyse complète.": "Analysis unavailable: rerun the full analysis.",
   "Période choisie : situation à la date de fin, tendances et cumuls sur tout l’historique jusqu’à cette date": "Selected period: situation at the end date, trends and totals over the full history up to that date",
   "Devenues cas confirmés ": "Became confirmed cases",
+  /* ---- livrables de période ---- */
+  "Produits automatiquement pour la période du": "Produced automatically for the period from",
+  "à partir des données arrêtées à cette date": "from the data as of that date",
+  "Produits automatiquement à chaque exécution, à partir des dernières données chargées": "Produced automatically at each run, from the latest data loaded",
+  /* ---- vue de carte ---- */
+  "Zones concernées": "Affected zones",
+  "RDC entière": "Whole DRC",
   /* ---- divers ---- */
   "EpiEstim (renouvellement, 7 j)": "EpiEstim (renewal, 7 d)",
   "Wallinga–Teunis (Rt de cas)": "Wallinga–Teunis (case Rt)",

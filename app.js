@@ -2781,9 +2781,9 @@
   let MAPSET = null;
   const capHtml = t => esc(t || "").replace(/&lt;(\/?)b&gt;/g, "<$1b>");
   function mapsView() {
-    const set = PER ? MAPSET : (D.cartes || null);
+    const set = PER ? (MAPSET || D.cartes || null) : (D.cartes || null);
     const L = D.livrables || {}, lb = L.base || "../reports/";
-    const dl = (L.rapport || L.presentation) ? panel("Rapport national et présentation", T("Produits automatiquement à chaque exécution, pour la situation complète"), `<div class="flex" style="gap:10px;flex-wrap:wrap">
+    const dl = (L.rapport || L.presentation) ? panel("Rapport national et présentation", PER && !isPublic ? `${T("Produits automatiquement pour la période du")} ${dfmt(PER.debut)} ${T("au")} ${dfmt(PER.fin)} ${T("à partir des données arrêtées à cette date")}` : T("Produits automatiquement à chaque exécution, à partir des dernières données chargées"), `<div class="flex" style="gap:10px;flex-wrap:wrap">
       ${L.rapport ? `<a class="btn primary" href="${lb}${encodeURIComponent(L.rapport)}" download="${esc(L.rapport)}">⤓ ${T("Rapport épidémiologique national (PDF)")}</a>` : ""}
       ${L.presentation ? `<a class="btn" href="${lb}${encodeURIComponent(L.presentation)}" download="${esc(L.presentation)}">⤓ ${T("Présentation de la riposte (PowerPoint)")}</a>` : ""}</div>
       <p class="small muted" style="margin-top:8px">${T("Question opérationnelle de la présentation")} : ${esc(T(L.question || ""))}</p>`) : "";
