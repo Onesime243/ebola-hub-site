@@ -155,3 +155,22 @@
 .ind-tab col.c-lib{width:250px}.ind-tab col.c-seuil{width:95px}.ind-tab col.c-obs{width:270px}
 a.btn{text-decoration:none}
 .ind-wrap{max-height:none !important}
+
+/* Pilotage stratégique */
+.pil-bar{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;margin-bottom:12px}
+.pil-bar .field{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--ink-2)}
+.pil-bar select,.pil-bar input{font:inherit;font-size:13px;padding:6px 8px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink)}
+.pil-bar .small{margin-left:auto;font-size:12px}
+.pil-q{font-size:15px;margin:18px 0 10px;color:var(--ink)}
+.pil-kpi .note{line-height:1.35}
+.pil-est{font-size:10px;font-weight:600;padding:1px 6px;border-radius:999px;background:color-mix(in srgb,var(--s7) 16%,transparent);color:var(--ink-2)}
+.pil-tr{font-weight:600;white-space:nowrap}.pil-tr.worse{color:var(--critical)}.pil-tr.better{color:var(--good)}.pil-tr.flat{color:var(--muted)}
+.pil-tiles{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px;margin-bottom:14px}
+@media (max-width:1300px){.pil-tiles{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media (max-width:700px){.pil-tiles{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.pil-tile{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 12px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.pil-tile span{font-size:11.5px;color:var(--muted);line-height:1.25}
+.pil-tile b{font-size:21px;color:var(--ink);font-variant-numeric:tabular-nums}
+.pil-tile small{font-size:11px;color:var(--muted);overflow-wrap:anywhere}
+.pil-tile.warn b{color:var(--critical)}
+.pil-tile.txt b{font-size:15px}

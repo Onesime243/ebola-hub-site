@@ -54,7 +54,7 @@
   /* ------------------------------------------------------------------ état */
   const lastDate = P.meta.date_rapport;
   const firstDate = (() => { const a = CAS.map(c => c.date).filter(Boolean).sort(); return a[0] || addDays(lastDate, -90); })();
-  const S = { page: "accueil", date: lastDate, preset: "21", from: null, zone: null, mapInd: "categorie", tables: {}, upZone: null, menu: false };
+  const S = { page: "accueil", date: lastDate, preset: "21", from: null, zone: null, aire: null, mapInd: "categorie", tables: {}, upZone: null, menu: false };
   S.from = addDays(S.date, -20);
   try {
     const h = new URLSearchParams(location.hash.slice(1));
@@ -152,7 +152,7 @@
   const ICON = {
     presentation: "M2 3h20v13H2zm2 2v9h16V5zm5 13h6l1 3H8zM6 12l3-4 3 2 4-4 2 1.5-6 5-3-2-1.5 1.5z",
     indicateurs: "M3 3h18v18H3zm2 2v4h4V5zm6 0v4h8V5zm-6 6v4h4v-4zm6 0v4h8v-4zm-6 6v2h4v-2zm6 0v2h8v-2z",
-    accueil: "M12 3 2 12h3v8h6v-6h2v6h6v-8h3z", situation: "M3 19h18v2H3zM5 17V9h3v8zm5 0V5h3v12zm5 0v-6h3v6z", zones: "M4 6h16v2H4zm0 5h16v2H4zm0 5h10v2H4z",
+    pilotage: "M3 3h2v16h16v2H3zm4 12 4-5 3 3 5-7 1.6 1.2-6.4 9-3-3-2.6 3.4z", accueil: "M12 3 2 12h3v8h6v-6h2v6h6v-8h3z", situation: "M3 19h18v2H3zM5 17V9h3v8zm5 0V5h3v12zm5 0v-6h3v6z", zones: "M4 6h16v2H4zm0 5h16v2H4zm0 5h10v2H4z",
     carte: "M15 4 9 2 3 4v18l6-2 6 2 6-2V2zM9 4.4l6 2v13.2l-6-2z", contacts: "M16 11c1.7 0 3-1.3 3-3s-1.3-3-3-3-3 1.3-3 3 1.3 3 3 3zm-8 0c1.7 0 3-1.3 3-3S9.7 5 8 5 5 6.3 5 8s1.3 3 3 3zm0 2c-2.3 0-7 1.2-7 3.5V19h14v-2.5C15 14.2 10.3 13 8 13zm8 0h-1c1.2.9 2 2 2 3.5V19h6v-2.5c0-2.3-4.7-3.5-7-3.5z",
     alertes: "M12 22a2 2 0 0 0 2-2h-4a2 2 0 0 0 2 2zm6-6V11a6 6 0 0 0-5-5.9V4h-2v1.1A6 6 0 0 0 6 11v5l-2 2v1h16v-1z", donnees: "M5 20h14v-2H5zm7-16-5 5h3v6h4V9h3z",
     comptes: "M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zm-8 8c0-3.3 3.6-6 8-6s8 2.7 8 6z", publication: "M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm6.9 6h-3a15.7 15.7 0 0 0-1.4-3.6A8 8 0 0 1 18.9 8zM12 4c.8 1.2 1.5 2.5 1.9 4h-3.8c.4-1.5 1.1-2.8 1.9-4zM4.3 14a8.2 8.2 0 0 1 0-4h3.4a16.5 16.5 0 0 0 0 4zm.8 2h3a15.7 15.7 0 0 0 1.4 3.6A8 8 0 0 1 5.1 16zM8 8H5.1a8 8 0 0 1 4.4-3.6C9 5.5 8.5 6.7 8 8zm4 12c-.8-1.2-1.5-2.5-1.9-4h3.8c-.4 1.5-1.1 2.8-1.9 4zm2.3-6H9.7a14.7 14.7 0 0 1 0-4h4.6a14.7 14.7 0 0 1 0 4zm.3 5.6c.6-1.1 1.1-2.3 1.4-3.6h3a8 8 0 0 1-4.4 3.6zM16.3 14a16.5 16.5 0 0 0 0-4h3.4a8.2 8.2 0 0 1 0 4z",
@@ -275,7 +275,129 @@
     G.map(el_, { areas: ZONES.map(z => ({ key: z.code, name: z.nom })), geo, value: val, color: v => color(v), selected: S.zone,
       label: k => { const v = val(k), r = rows[k]; if (!r) return ""; if (ind === "categorie") return r.cs.n7 ? `${r.cs.n7}` : ""; return typeof v === "number" ? (m[2].startsWith("down") ? pc(v, 0) : nf(v, m[3] || 0)) : ""; },
       tipHtml: k => { const r = rows[k]; if (!r) return esc(k); return `<b>${esc(r.nom)}</b>${r.cat} · ${nf(r.cs.n)} cas (${nf(r.cs.n7)} en 7 j, ${nf(r.cs.n21)} en 21 j) · ${nf(r.cs.deces)} décès${r.s ? `<br>${nf(r.s.a_suivre)} contacts à suivre · ${pc(r.s.taux, 0)} vus` : ""}${r.al && r.al.total ? `<br>${nf(r.al.total)} alertes (7 j) · ${pc(r.al.inv_pct, 0)} investiguées` : ""}<br><i>${DETAIL.has(k) ? "Cliquez pour ouvrir le tableau de bord de la zone" : "Cliquez pour filtrer sur cette zone"}</i>`; },
-      onClick: k => { if (S.page === "accueil" && DETAIL.has(k)) location.href = openZS(k); else { S.zone = S.zone === k ? null : k; render(); } }, legend: leg, valueLabel: m[1] });
+      onClick: k => { if (S.page === "accueil" && DETAIL.has(k)) location.href = openZS(k); else { S.zone = S.zone === k ? null : k; S.aire = null; render(); } }, legend: leg, valueLabel: m[1] });
+  }
+
+  /* ================================================================== PILOTAGE STRATÉGIQUE (décideurs)
+     Situation au jour choisi (date « au »), pour la province, une zone de santé ou une aire de santé.
+     Cas : liste labo ; suivi des contacts et alertes : base chiffrée (par zone) ; Rt : analyse provinciale détaillée. */
+  const LB = rowsToObj(P.labo); LB.forEach(r => r._d = day(r.date));
+  const lastLab = LB.length ? Math.max(...LB.map(r => r._d)) : null;
+  function pageP() {
+    const t = day(S.date), z = S.zone, zone = z ? ZB[z] : null;
+    const airesZ = z ? [...new Set(CAS.filter(c => c.zone === z && c.aire && c._d !== null && c._d <= t).map(c => c.aire))].sort((a, b) => a.localeCompare(b)) : [];
+    if (!airesZ.includes(S.aire)) S.aire = null;
+    const A = S.aire, sub = !!z, lvl = A ? "A" : z ? "Z" : "P";
+    const inSel = c => (!z || c.zone === z) && (!A || c.aire === A);
+    const L = CAS.filter(c => c._d !== null && c._d <= t && inSel(c));
+    const win = (a, b) => L.filter(c => c._d >= a && c._d <= b);
+    const c24 = win(t, t), c7 = win(t - 6, t), c7p = win(t - 13, t - 7);
+    const dec = x => x.filter(c => c.deces).length;
+    const unitOf = c => sub ? c.aire : c.zone, unitName = u => sub ? u : (ZN[u] || u);
+    const act14 = new Set(win(t - 13, t).map(unitOf).filter(Boolean));
+    const first = {}; L.forEach(c => { const u = unitOf(c); if (u && (first[u] === undefined || c._d < first[u])) first[u] = c._d; });
+    const nouv = Object.keys(first).filter(u => first[u] >= t - 6).map(unitName).sort();
+    const trait = L.filter(c => c.issue === "En traitement" && c._d >= t - 42).length;
+    const rt = A ? null : zone ? zone.rt : P.rt;
+    const rtCol = r => !r ? "--muted" : r.lo > 1 ? "--critical" : r.hi < 1 ? "--good" : "--warn";
+    // suivi des contacts et alertes : zone ou province (pas de détail par aire dans la base chiffrée)
+    const s = z ? suiviAt(z, t) : suiviProv(t);
+    const sv7 = SV.filter(r => r._d > t - 7 && r._d <= t && (!z || r.zone === z));
+    const sus7 = sv7.reduce((a, r) => a + (+r.suspects || 0), 0);
+    const al7 = alertesPer(z, t - 6, t), al24 = alertesPer(z, t, t), al7p = alertesPer(z, t - 13, t - 7);
+    // délai début des symptômes → confirmation (médiane, cas confirmés des 28 derniers jours)
+    const med = a => { const v = a.filter(x => x !== null && isFinite(x)).sort((p, q) => p - q); return v.length ? (v.length % 2 ? v[(v.length - 1) / 2] : (v[v.length / 2 - 1] + v[v.length / 2]) / 2) : null; };
+    const dl = c => c.debut ? c._d - day(c.debut) : null, okd = c => { const d = dl(c); return d !== null && d >= 0 && d <= 60; };
+    const d28 = med(win(t - 27, t).filter(okd).map(dl)), d28p = med(win(t - 55, t - 28).filter(okd).map(dl));
+    // positivité (liste labo de tous les résultats, 7 derniers jours disponibles)
+    const tl = lastLab === null ? null : Math.min(t, lastLab);
+    const lb7 = tl === null ? [] : LB.filter(r => r._d > tl - 7 && r._d <= tl && (!z || r.zone === z));
+    const ln = lb7.reduce((a, r) => a + r.n, 0), lp = lb7.reduce((a, r) => a + r.pos, 0);
+    const labStale = tl !== null && t - tl > 7;
+    // zones silencieuses : cas sur 42 jours, aucune alerte notifiée depuis 3 jours (province seulement)
+    const zs42 = !sub ? [...new Set(L.filter(c => c._d >= t - 41).map(c => c.zone))] : [];
+    const sil = zs42.filter(k => !AL.some(r => r.zone === k && r._d >= t - 2 && r._d <= t && r.total > 0)).map(k => ZN[k] || k).sort();
+    const tr = (v, p, bad = "up") => { if (v === null || v === undefined || p === null || p === undefined) return ""; const d = v - p; if (Math.abs(d) < 1e-9) return `<span class="pil-tr flat">= stable</span>`; const up = d > 0, worse = bad === "up" ? up : !up; return `<span class="pil-tr ${worse ? "worse" : "better"}">${up ? "▲ +" : "▼ −"}${nf(Math.abs(d), Math.abs(d) < 10 && d % 1 ? 1 : 0)}</span>`; };
+    const card = (label, value, note, o = {}) => `<div class="kpi pil-kpi ${o.cls || ""}"><div class="label">${o.color ? `<i class="dot" style="background:${col(o.color)}"></i>` : ""}${label}${o.estim ? ` <span class="pil-est">Estimation</span>` : ""}</div><div class="value">${value}</div><div class="note">${note || ""}</div></div>`;
+    const tile = (label, value, sub_, cls = "") => `<div class="pil-tile ${cls}"><span>${label}</span><b>${value}</b>${sub_ ? `<small>${sub_}</small>` : ""}</div>`;
+    const zoneNote = A ? ` <span class="muted">(zone de ${esc(ZN[z])})</span>` : "";
+    const cards = [
+      card("Cas confirmés cumulés", nf(L.length), `<b>+${nf(c7.length)}</b> sur 7 jours · liste labo`, { color: "--s2" }),
+      card("Nouveaux cas confirmés (7 j)", nf(c7.length), `vs ${nf(c7p.length)} les 7 jours précédents ${tr(c7.length, c7p.length)} · ${nf(c24.length)} en 24 h`, { color: "--s2", cls: c7.length > c7p.length ? "alert" : "" }),
+      card("Nouveaux décès confirmés (7 j)", nf(dec(c7)), `vs ${nf(dec(c7p))} les 7 jours précédents ${tr(dec(c7), dec(c7p))}`, { color: "--rc-rt" }),
+      card("Létalité cumulée", pc(ratio(dec(L), L.length), 1), `décès / cas confirmés : ${nf(dec(L))} / ${nf(L.length)}`, { color: "--ink-2" }),
+      card(sub ? "Aires de santé actives (14 j)" : "Zones de santé actives (14 j)", nf(act14.size), "avec au moins un cas confirmé", { color: "--s1" }),
+      card("R(t) estimé", `<span style="color:${col(rtCol(rt))}">${rt ? nf(rt.rt, 2) : "—"}</span>`, rt ? `IC 95 % ${nf(rt.lo, 2)}–${nf(rt.hi, 2)} · P(R>1) ${pc(100 * (rt.p_sup_1 || 0), 0)} · au ${dfr(rt.date, false)}` : A ? "non estimé à l'échelle de l'aire de santé" : "trop peu de cas pour une estimation fiable", { color: rtCol(rt), estim: true }),
+      card("Contacts vus (dernier jour)", s ? pc(s.taux, 0) : "—", s ? `${nf(s.vus)} / ${nf(s.a_suivre)} contacts à suivre · cible ${nf(C.taux_suivi_pct)} %${zoneNote}` : "pas de rapport de suivi récent", { color: "--st-v24", cls: s && s.taux < C.taux_suivi_pct ? "alert" : "" }),
+      card("Contacts jamais vus / perdus de vue", s ? `${nf(s.jmv)} / ${nf(s.pdv)}` : "—", s ? `à rechercher en priorité${zoneNote}` : "", { color: "--warn", cls: s && (s.jmv + s.pdv) > 0 ? "alert" : "" }),
+      card("Alertes investiguées (7 j)", pc(al7.inv_pct, 0), `${nf(al7.inv)} / ${nf(al7.total)} alertes${zoneNote}`, { color: "--brand-2" }),
+      card("Délai symptômes → confirmation", d28 === null ? "—" : `${nf(d28, 1)} j`, `médiane, cas des 28 derniers jours ${tr(d28, d28p)}`, { color: "--warn", cls: d28 !== null && d28 > 3 ? "alert" : "" }),
+      card("Patients en traitement", nf(trait), "cas confirmés « en traitement », confirmés depuis 42 jours au plus", { color: "--s3" }),
+      card(sub ? "Aires nouvellement touchées (7 j)" : "Zones nouvellement touchées (7 j)", nf(nouv.length), nouv.length ? esc(nouv.join(", ")) : (sub ? "aucune nouvelle aire" : "aucune nouvelle zone"), { color: "--critical", cls: nouv.length ? "alert" : "" }),
+    ].join("");
+    const tiles = [
+      tile("Cas confirmés 24 h", nf(c24.length)),
+      tile("Décès confirmés 24 h", nf(dec(c24))),
+      tile("Alertes 24 h", nf(al24.total)),
+      tile("Alertes décès 24 h", nf(al24.deces), "", al24.deces ? "warn" : ""),
+      tile("Écouvillons post-mortem (7 j)", nf(al7.swab), `pour ${nf(al7.deces)} alertes décès`),
+      tile("Positivité 7 j", ln ? pc(ratio(lp, ln), 0) : "—", ln ? `${nf(lp)} / ${nf(ln)}${labStale ? ` · au ${dfr(iso(tl), false)}` : ""}` : "liste labo absente"),
+      tile("Contacts à suivre", s ? nf(s.a_suivre) : "—"),
+      tile("Nouveaux contacts (24 h)", s ? nf(s.nouveaux) : "—"),
+      tile("Contacts devenus suspects (7 j)", nf(sus7), "", sus7 ? "warn" : ""),
+      tile("Alertes validées (7 j)", pc(ratio(al7.val, al7.total), 0), `${nf(al7.val)} / ${nf(al7.total)}`),
+      tile("Alertes 7 j vs 7 j précédents", nf(al7.total), `${nf(al7p.total)} ${tr(al7.total, al7p.total, "none")}`),
+      sub ? tile("Catégorie de la zone", esc(casZone(z, t).cat), "", ["Rouge", "Orange"].includes(casZone(z, t).cat) ? "warn txt" : "txt") : tile("Zones silencieuses", nf(sil.length), sil.length ? esc(sil.join(", ")) : "cas sur 42 j, aucune alerte depuis 3 j", sil.length ? "warn" : ""),
+    ].join("");
+    // séries hebdomadaires (16 semaines)
+    const w1 = wk(t), ws = []; for (let k = 15; k >= 0; k--) ws.push(w1 - 7 * k);
+    const inW = (d, w) => d !== null && d >= w && d < w + 7;
+    after(() => {
+      const ons = ws.map(w => L.filter(c => inW(c.debut ? day(c.debut) : null, w)).length);
+      G.bars($("#c-pil-epi"), { labels: ws.map(iso), h: 260, fmtX: (d, l) => l ? "Semaine du " + dfr(d) : dshort(d),
+        series: [{ label: "Début des symptômes", color: col("--s2"), values: ons.map((v, i) => i >= ws.length - 2 ? 0 : v) }, { label: "Provisoire (2 dernières semaines)", color: col("--line-2"), values: ons.map((v, i) => i >= ws.length - 2 ? v : 0) }] });
+      G.bars($("#c-pil-iss"), { labels: ws.map(iso), h: 260, fmtX: (d, l) => l ? "Semaine du " + dfr(d) : dshort(d),
+        series: [["Décédés", "--rc-rt", c => c.deces], ["En traitement", "--s3", c => !c.deces && c.issue === "En traitement"], ["Guéris", "--good", c => !c.deces && c.issue === "Guéri"], ["Autre / non précisé", "--rc-grey", c => !c.deces && !["En traitement", "Guéri"].includes(c.issue)]]
+          .map(([lab, cl, f]) => ({ label: lab, color: col(cl), values: ws.map(w => L.filter(c => inW(c._d, w) && f(c)).length) })) });
+      drawMap($("#c-pil-map"), "categorie", t);
+      G.lines($("#c-pil-del"), { labels: ws.map(iso), h: 240, digits: 1, target: 3, fmtX: (d, l) => l ? "Semaine du " + dfr(d) : dshort(d),
+        series: [{ label: "Délai médian symptômes → confirmation (j)", color: col("--warn"), values: ws.map(w => med(L.filter(c => inW(c._d, w) && okd(c)).map(dl))) }] });
+      const days = []; for (let d = t - 41; d <= t; d++) days.push(d);
+      G.lines($("#c-pil-suivi"), { labels: days.map(iso), h: 240, pct: 1, max: 100, target: C.taux_suivi_pct, digits: 1, fmtX: (d, l) => l ? dfr(d) : dshort(d),
+        series: [{ label: "Contacts vus (%)", color: col("--s1"), values: days.map(d => { const o = z ? suiviAt(z, d, 0) : suiviProv(d); return o && o.a_suivre ? o.taux : null; }) }] });
+    });
+    const proj = rt && rt.variation_hebdo !== null && rt.variation_hebdo !== undefined ? Math.max(0, Math.round(c7.length * (1 + rt.variation_hebdo / 100))) : null;
+    const where = [z ? `Zone de santé de ${esc(ZN[z])}` : `Province du ${esc(PROV)}`, A ? `aire de santé ${esc(A)}` : ""].filter(Boolean).join(" › ");
+    return `
+    <div class="pil-bar">
+      <label class="field">Zone de santé<select id="pil-zone"><option value="">Toute la province</option>${ZONES.filter(x => casZone(x.code, t).n || SVZ[x.code]).map(x => `<option value="${x.code}" ${z === x.code ? "selected" : ""}>${esc(x.nom)}</option>`).join("")}</select></label>
+      ${z ? `<label class="field">Aire de santé<select id="pil-aire"><option value="">Toutes</option>${airesZ.map(a => `<option value="${esc(a)}" ${A === a ? "selected" : ""}>${esc(a)}</option>`).join("")}</select></label>` : ""}
+      <label class="field">Situation au<input type="date" id="pil-date" value="${S.date}" min="${firstDate}" max="${lastDate}"></label>
+      <span class="small muted"><b>${where}</b> · situation au <b>${dfr(S.date)}</b></span>
+    </div>
+    <div class="grid g6 pil-cards">${cards}</div>
+    <h2 class="pil-q">Indicateurs du jour</h2>
+    <div class="pil-tiles">${tiles}</div>
+    <h2 class="pil-q">Évolution de l'épidémie</h2>
+    <div class="grid g2">
+      ${panel("Courbe épidémique : cas confirmés par semaine de début des symptômes", "Les deux dernières semaines (gris) sont provisoires : délai entre les symptômes et la confirmation", `<div id="c-pil-epi"></div>`, { png: "pilotage_courbe" })}
+      ${panel("Issue des cas confirmés par semaine de confirmation", "Décédés, en traitement, guéris (liste labo)", `<div id="c-pil-iss"></div>`, { png: "pilotage_issues" })}
+    </div>
+    <h2 class="pil-q">Foyers actifs et risque de propagation</h2>
+    ${panel("Catégorie des zones de santé", "Rouge : cas dans les 7 derniers jours ; orange : 8 à 21 jours ; jaune : 22 à 42 jours ; vert : plus de 42 jours · cliquez une zone pour l'afficher", `<div id="c-pil-map"></div>`, { png: "pilotage_carte" })}
+    <h2 class="pil-q">Détection, isolement et suivi des contacts</h2>
+    <div class="grid g2">
+      ${panel("Délai entre symptômes et confirmation", "Médiane hebdomadaire (jours), semaine de confirmation", `<div id="c-pil-del"></div>`, { png: "pilotage_delai" })}
+      ${panel("Contacts vus chaque jour", `${z ? esc(ZN[z]) : "Province"} · 42 derniers jours`, `<div id="c-pil-suivi"></div>`, { png: "pilotage_suivi" })}
+    </div>
+    <h2 class="pil-q">Indicateurs estimés</h2>
+    <div class="grid g4">
+      ${card("R(t) de la période récente", rt ? nf(rt.rt, 2) : "—", rt ? `IC 95 % ${nf(rt.lo, 2)}–${nf(rt.hi, 2)} · ${rt.provisoire ? "provisoire" : "consolidé"} au ${dfr(rt.date, false)}` : A ? "non estimé à l'échelle de l'aire" : "données insuffisantes", { color: rtCol(rt), estim: true })}
+      ${card(rt && rt.sens === "décroissance" ? "Temps de demi-vie" : "Temps de doublement", rt && (rt.doublement || rt.demi) ? `${nf(rt.doublement || rt.demi, 0)} j` : "—", rt ? `tendance : ${esc(rt.sens || "—")} · variation ${rt.variation_hebdo !== null && rt.variation_hebdo !== undefined ? (rt.variation_hebdo > 0 ? "+" : "") + nf(rt.variation_hebdo, 0) + " % par semaine" : "—"}` : "", { color: "--s7", estim: true })}
+      ${card("Cas attendus les 7 prochains jours", proj === null ? "—" : nf(proj), proj === null ? "" : "projection simple : cas des 7 derniers jours × variation hebdomadaire récente", { color: "--s1", estim: true })}
+      ${card("Couverture du rapportage", s ? `${nf(s.zones || 1)}` : "—", z ? (s ? `rapport de suivi du ${dfr(s.date, false)}` : "pas de rapport récent") : `zones ayant rapporté le suivi des contacts (≤ 3 j) sur ${nf(ZONES.filter(x => casZone(x.code, t).n21).length)} zones actives`, { color: "--muted" })}
+    </div>
+    <p class="note">Suivi des contacts et alertes : base chiffrée provinciale, détaillée par zone de santé (pas par aire). Rt : analyse provinciale détaillée (zones de 25 cas ou plus).</p>`;
   }
 
   /* ================================================================== SITUATION ÉPIDÉMIOLOGIQUE */
@@ -606,7 +728,7 @@
   }
 
   /* ------------------------------------------------------------------ navigation */
-  const PAGES = [["accueil", "Accueil", "Province"], ["situation", "Situation épidémiologique", "Province"], ["zones", "Zones de santé", "Province"], ["carte", "Carte et rapports", "Province"],
+  const PAGES = [["accueil", "Accueil", "Province"], ["pilotage", "Pilotage stratégique", "Province"], ["situation", "Situation épidémiologique", "Province"], ["zones", "Zones de santé", "Province"], ["carte", "Carte et rapports", "Province"],
     ["alertes", "Surveillance des alertes", "Riposte"], ["presentation", "Présentation (diapositives)", "Réunions"], ["indicateurs", "Indicateurs du pilier surveillance", "Réunions"], ["donnees", PUBLIC ? "État des données" : "Données des zones", "Données"],
     ["comptes", "Comptes", "Administration", () => isProv() && !PUBLIC], ["publication", "Publication en ligne", "Administration", () => isProv() && !PUBLIC]];
   const DETAIL_PAGES = [["index", "Cas index", "M4 6h16v2H4zm0 5h16v2H4zm0 5h10v2H4z"], ["journey", "Parcours des cas", "M12 2a4 4 0 1 1 0 8 4 4 0 0 1 0-8zm-7 18c0-3.9 3.1-7 7-7s7 3.1 7 7H5zM19 3l3 3-3 3"],
@@ -614,9 +736,9 @@
     ["dynamics", "Dynamique et Rt", "M3 19h18v2H3zM4 15l4-6 4 3 5-8 3 2-6.6 10.3-4-3L6.2 16.4z"], ["children", "Enfants (0–18 ans)", "M12 2a3 3 0 1 1 0 6 3 3 0 0 1 0-6zm-4 8h8l-1 6h-1v6h-4v-6H9z"],
     ["deces", "Décès et EDS communautaires", "M10 2h4v6h6v4h-6v10h-4V12H4V8h6z"], ["labo", "Laboratoire et positivité", "M9 2h6v2h-1v5l5 9a2 2 0 0 1-2 3H7a2 2 0 0 1-2-3l5-9V4H9z"],
 ["pec", "Prise en charge et expositions", "M19 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm-2 10h-4v4h-2v-4H7v-2h4V7h2v4h4z"]];
-  const VIEWS = { accueil: pageAccueil, situation: pageSituation, zones: pageZones, carte: pageCarte, contacts: pageContacts, alertes: pageAlertes, donnees: pageDonnees, comptes: pageComptes, publication: pagePublication, presentation: pagePresentation, indicateurs: pageIndicateurs };
+  const VIEWS = { accueil: pageAccueil, pilotage: pageP, situation: pageSituation, zones: pageZones, carte: pageCarte, contacts: pageContacts, alertes: pageAlertes, donnees: pageDonnees, comptes: pageComptes, publication: pagePublication, presentation: pagePresentation, indicateurs: pageIndicateurs };
   const PERIOD_PAGES = new Set(["situation", "contacts", "alertes", "carte"]);
-  const SUBT = { accueil: () => `Situation au ${dfr(S.date)}`, zones: () => `Bulletin au ${dfr(S.date)}`, donnees: () => `Analyse provinciale du ${esc(P.meta.genere_le)}`, indicateurs: () => `Canevas mensuel PID-MIO · situation au ${dfr(P.meta.date_rapport)}`, presentation: () => `Graphiques et diapositives prêts pour les réunions · situation au ${dfr(P.meta.date_rapport)}`, comptes: () => "Accès des zones de santé et de la province", publication: () => "Lien de partage en lecture seule" };
+  const SUBT = { accueil: () => `Situation au ${dfr(S.date)}`, pilotage: () => `Tableau de bord des décideurs · situation au ${dfr(S.date)}`, zones: () => `Bulletin au ${dfr(S.date)}`, donnees: () => `Analyse provinciale du ${esc(P.meta.genere_le)}`, indicateurs: () => `Canevas mensuel PID-MIO · situation au ${dfr(P.meta.date_rapport)}`, presentation: () => `Graphiques et diapositives prêts pour les réunions · situation au ${dfr(P.meta.date_rapport)}`, comptes: () => "Accès des zones de santé et de la province", publication: () => "Lien de partage en lecture seule" };
   function shell() {
     const pages = PAGES.filter(p => !p[3] || p[3]());
     if (!pages.find(p => p[0] === S.page)) S.page = "accueil";
@@ -704,6 +826,9 @@
   document.addEventListener("change", e => {
     const t = e.target;
     if (t.id === "zone-select") { S.zone = t.value || null; render(); return; }
+    if (t.id === "pil-zone") { S.zone = t.value || null; S.aire = null; render(); return; }
+    if (t.id === "pil-aire") { S.aire = t.value || null; render(); return; }
+    if (t.id === "pil-date") { if (t.value && t.value >= firstDate && t.value <= lastDate) { S.date = t.value; applyPreset(); } render(); return; }
     if (t.id === "pb-to") { if (t.value && t.value >= firstDate && t.value <= lastDate) { S.date = t.value; if (S.preset === "custom") { if (S.from > S.date) S.from = S.date; } else applyPreset(); } render(); return; }
     if (t.id === "pb-from") { if (t.value) { S.from = t.value > S.date ? S.date : t.value; S.preset = "custom"; } render(); return; }
     if (t.dataset.openzs !== undefined && t.value) { location.href = openZS(t.value); return; }
