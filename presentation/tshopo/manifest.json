@@ -3,9 +3,9 @@
  "niveau": "province",
  "nom": "Province : Tshopo",
  "court": "Tshopo",
- "date": "2026-10-24",
- "genere_le": "2026-10-28 00:57",
- "pptx": "Presentation_Reunion_Tshopo_20261024.pptx",
+ "date": "2026-10-27",
+ "genere_le": "2026-10-28 07:06",
+ "pptx": "Presentation_Reunion_Tshopo_20261027.pptx",
  "diapositives": 10,
  "slides": [
   {
@@ -30,7 +30,7 @@
   },
   {
    "titre": "Alertes",
-   "date": "2026-10-24",
+   "date": "2026-10-27",
    "images": [
     "07_indicateurs_alertes",
     "07b_alertes_comparatif_3j",
@@ -50,13 +50,13 @@
     "13_contacts_suivre_vus",
     "14_tableau_contacts"
    ],
-   "date": "2026-10-24"
+   "date": "2026-10-27"
   }
  ],
  "images": {
   "01_indicateurs_cumul": {
    "fichier": "01_indicateurs_cumul.png",
-   "titre": "Situation de la MVE au 24 octobre 2026, Province : Tshopo"
+   "titre": "Situation de la MVE au 27 octobre 2026, Province : Tshopo"
   },
   "02_courbe_hebdomadaire": {
    "fichier": "02_courbe_hebdomadaire.png",
@@ -64,7 +64,7 @@
   },
   "03_indicateurs_jour": {
    "fichier": "03_indicateurs_jour.png",
-   "titre": "Situation épidémiologique du jour, 24 octobre 2026"
+   "titre": "Situation épidémiologique du jour, 27 octobre 2026"
   },
   "04_cas_du_jour": {
    "fichier": "04_cas_du_jour.png",
@@ -76,11 +76,11 @@
   },
   "07_indicateurs_alertes": {
    "fichier": "07_indicateurs_alertes.png",
-   "titre": "Situation des alertes au 24 octobre 2026"
+   "titre": "Situation des alertes au 27 octobre 2026"
   },
   "08_alertes_sources": {
    "fichier": "08_alertes_sources.png",
-   "titre": "Sources des alertes du jour, 90 alertes"
+   "titre": "Sources des alertes du jour, 128 alertes"
   },
   "07b_alertes_comparatif_3j": {
    "fichier": "07b_alertes_comparatif_3j.png",
@@ -104,7 +104,7 @@
   },
   "10_indicateurs_contacts": {
    "fichier": "10_indicateurs_contacts.png",
-   "titre": "Situation du suivi des contacts au 24 octobre 2026"
+   "titre": "Situation du suivi des contacts au 27 octobre 2026"
   },
   "12_contacts_tendance": {
    "fichier": "12_contacts_tendance.png",
