@@ -2722,11 +2722,12 @@
     const rows = [...g.tableau, ...(g.total ? [g.total] : [])];
     const tot = g.total || {};
     const g2 = g.tableau.filter(x => x.generation >= 2).reduce((a, x) => ({ p: a.p + (x.personnes || 0), k: a.k + (x.devenus_cas || 0) }), { p: 0, k: 0 });
-    return `<div class="grid g4">
+    return `<div class="grid ${g.recycles ? "g5" : "g4"}">
       ${kpi("Contacts devenus cas confirmés", nf(tot.devenus_cas), `${pc(tot.pct, 2)} ${T("des personnes listées")} (${nf(tot.personnes)}) · ${nf(tot.devenus_verifies)} ${T("vérifiés Linelist")}, ${nf(tot.devenus_declares)} ${T("déclarés au suivi")}`, { color: "--st-conf" })}
       ${kpi("Contacts des cas index devenus cas (G1)", pc(g.tableau[0]?.pct, 2), `${nf(g.tableau[0]?.devenus_cas)} / ${nf(g.tableau[0]?.personnes)} ${T("personnes")}`, { color: "--s2" })}
       ${kpi("Contacts de contacts devenus cas (G2 et plus)", nf(g2.k), `${pc(g2.p ? 100 * g2.k / g2.p : null, 2)} ${T("de")} ${nf(g2.p)} ${T("personnes listées")}`, { color: "--critical" })}
       ${kpi("Devenus cas ayant leurs contacts listés", pc(tot.pct_devenus_cas_avec_liste, 0), `${nf(tot.devenus_cas_avec_liste)} ${T("cas devenus à leur tour cas index")}`, { color: "--s7" })}
+      ${g.recycles ? kpi("Contacts recyclés devenus cas", nf(g.recycles.devenus_cas), `${pc(g.recycles.pct, 2)} ${T("de")} ${nf(g.recycles.personnes)} ${T("contacts recyclés (remis en suivi après une nouvelle exposition)")}`, { color: "--warn" }) : ""}
     </div>` + panel("Contacts devenus cas confirmés par génération", `${T("G1 = contacts des cas index ; G2 = contacts de contacts devenus cas ; etc.")} ${esc(T(g.methode || ""))}`,
       `<div id="c-gen"></div><div>${table("gen", rows, [{ k: "generation", t: "Génération", v: x => x.generation ? "G" + x.generation : T("Total") }, { k: "libelle", t: "Description", wrap: true, v: x => esc(T(x.libelle)) }, { k: "listes", t: "Listes de contacts", num: true }, { k: "personnes", t: "Personnes listées", num: true }, { k: "devenus_cas", t: "Devenues cas confirmés", num: true }, { k: "devenus_verifies", t: "dont vérifiés Linelist", num: true }, { k: "pct", t: "% devenus cas [IC 95 %]", v: x => `<b>${pc(x.pct, 2)}</b> [${nf(x.ic95?.[0], 2)}–${nf(x.ic95?.[1], 2)}]` }, { k: "pct_lignes", t: "% par ligne de contact", v: x => pc(x.pct_lignes, 2) }, { k: "pct_devenus_cas_avec_liste", t: "Devenus cas ayant leurs propres contacts listés", v: x => `${nf(x.devenus_cas_avec_liste)} (${pc(x.pct_devenus_cas_avec_liste, 0)})` }], { search: false, sort: null })}</div>
       <div class="notice small">${T("Un contact devenu cas dont les propres contacts ne sont pas listés interrompt la chaîne de suivi : la part « ayant leurs propres contacts listés » doit tendre vers 100 %.")}</div>`, { png: "conversion_generations" })

@@ -855,6 +855,9 @@ Object.assign(window.HUB_EN_TPL = window.HUB_EN_TPL || {}, {
   /* ---- synthèse par zone ---- */
   "Rapport national, présentation et synthèse par zone": "National report, presentation and summary by zone",
   "Synthèse par zone de santé (Excel)": "Summary by health zone (Excel)",
+  /* ---- recyclés ---- */
+  "Contacts recyclés devenus cas": "Recycled contacts who became cases",
+  "contacts recyclés (remis en suivi après une nouvelle exposition)": "recycled contacts (followed again after a new exposure)",
   /* ---- divers ---- */
   "EpiEstim (renouvellement, 7 j)": "EpiEstim (renewal, 7 d)",
   "Wallinga–Teunis (Rt de cas)": "Wallinga–Teunis (case Rt)",
