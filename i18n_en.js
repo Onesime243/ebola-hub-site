@@ -852,6 +852,9 @@ Object.assign(window.HUB_EN_TPL = window.HUB_EN_TPL || {}, {
   /* ---- vue de carte ---- */
   "Zones concernées": "Affected zones",
   "RDC entière": "Whole DRC",
+  /* ---- synthèse par zone ---- */
+  "Rapport national, présentation et synthèse par zone": "National report, presentation and summary by zone",
+  "Synthèse par zone de santé (Excel)": "Summary by health zone (Excel)",
   /* ---- divers ---- */
   "EpiEstim (renouvellement, 7 j)": "EpiEstim (renewal, 7 d)",
   "Wallinga–Teunis (Rt de cas)": "Wallinga–Teunis (case Rt)",
@@ -912,7 +915,7 @@ Object.assign(window.HUB_EN_TPL = window.HUB_EN_TPL || {}, {
   "Part des infections détectées (méthode ICL)": "Share of infections detected (ICL method)",
   "Comptes": "Accounts",
   "Système de gestion de l’incident, SGI-RDC": "Incident Management System, SGI-RDC",
-  ", avec l’appui de UMIE-INRB · Équipe de développement : Onesime Mbulayi, Christian Ibolobolo, Patrick Mulu, Leader Lawanga, Prof. Dav Ebengo, Prof. Tania Bishola, Prof. Marc YambaYamba, Dr John Kombe (chargé des opérations) et partenaires · Pour tout contact : ": ", with support from UMIE-INRB · Development team: Onesime Mbulayi, Christian Ibolobolo, Patrick Mulu, Leader Lawanga, Prof. Dav Ebengo, Prof. Tania Bishola, Prof. Marc YambaYamba, Dr John Kombe (operations lead) and partners · Contact: ",
+  ", avec l’appui de UMIE-INRB · Équipe de développement : Onesime Mbulayi et al. · Pour tout contact : ": ", with support from UMIE-INRB · Development team: Onesime Mbulayi et al. · Contact: ",
   "Carte et commentaire dans une seule image": "Map and commentary in a single image",
   "Pour chaque méthode temps réel, Rt(t) × Λ(t+1) prédit les cas du lendemain sur les 60 derniers jours consolidés. Score logarithmique (plus bas = meilleur), erreur absolue moyenne et couverture de l'intervalle à 95 % (idéal : 95 %).": "For each real-time method, Rt(t) × Λ(t+1) predicts the next day's cases over the last 60 consolidated days. Log score (lower = better), mean absolute error and coverage of the 95 % interval (ideal: 95 %).",
   ", age groups [0 ; 5[, [5 ; 10[, [10 ; 18[ ans révolus ; adultes ≥ 18 ans en comparaison.": ", age groups [0 ; 5[, [5 ; 10[, [10 ; 18[ completed years; adults ≥ 18 years for comparison.",
