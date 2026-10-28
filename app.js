@@ -2383,11 +2383,7 @@
     ${panel("Lieux d'exposition et risque de devenir cas", T("Contacts listés par lieu d’exposition déclaré : part devenue suspecte ou cas (IC 95 % de Wilson)"),
       (hr0 ? `<div class="notice crit"><b>${T("Lieu de plus haut risque")} : ${esc(T(hr0.categorie))}</b>, ${pc(hr0.taux_cas_pct)} ${T("des contacts qui y ont été exposés sont devenus des cas")} (${nf(hr0.devenus_cas)} / ${nf(hr0.contacts)}). ${T("Renforcer en priorité la PCI et le suivi des contacts autour de ce type d’exposition.")}</div>` : "")
       + `<div class="grid g2">${table("sit-exl", exL, [{ k: "categorie", t: "Lieu d’exposition" }, ...exCols.slice(1)], { sort: "taux_cas_pct", search: false })}${table("sit-ext", exT, [{ k: "categorie", t: "Type de contact" }, ...exCols.slice(1)], { sort: "taux_cas_pct", search: false })}</div>`, { csv: "sit-exl" })}
-    ${panel("Actions PCI réalisées", sr.numero ? `SitRep n° ${esc(String(sr.numero))} du ${dfmt(sr.date)}, pilier PCI/EDS` : T("Déposez le SitRep PDF du jour dans les données"),
-      `<div class="sit-pci">${pci}</div>` + (eds.eds_realise !== null && eds.eds_realise !== undefined ? `<div class="notice small"><b>EDS</b> : ${nf(eds.eds_realise)} ${T("réalisés")}, ${nf(eds.eds_non_realise)} ${T("non réalisés")} (${T("cumul Linelist/lln")})${eds.eds_attendus_24h !== null && eds.eds_attendus_24h !== undefined ? ` ; ${T("dernières 24 h (SitRep)")} : ${nf(eds.eds_realises_24h)} / ${nf(eds.eds_attendus_24h)} ${T("EDS réalisés")}, ${nf(eds.corps_swabes_24h)} ${T("corps swabés")}` : ""}.</div>` : ""))}
-    ${panel("Texte prêt à envoyer", T("Résumé de la fiche à copier dans un message ou un rapport"), `<pre class="sit-txt" id="sit-txt" style="white-space:pre-wrap;font:inherit;font-size:13px;margin:0">${esc(sitTexte(nom, N, Sx))}</pre>`,
-      { tools: `<button class="btn sm" type="button" data-sit-copy>${T("Copier le texte")}</button>` })}
-    <details class="panel" style="padding:14px 18px"><summary><b>${T("Définitions et sources")}</b></summary>${Object.entries(Sx.definitions || {}).map(([k, v]) => `<p><b>${esc(k)}</b> : ${esc(T(v))}</p>`).join("")}</details>`;
+    `;
   }
   document.addEventListener("click", e => {
     const b = e.target.closest("[data-sit-copy]");
