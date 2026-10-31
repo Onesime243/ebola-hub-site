@@ -3,9 +3,9 @@
  "niveau": "province",
  "nom": "Province : Sud Kivu",
  "court": "Sud Kivu",
- "date": "2026-10-27",
- "genere_le": "2026-10-29 14:33",
- "pptx": "Presentation_Reunion_Sud_Kivu_20261027.pptx",
+ "date": "2026-10-30",
+ "genere_le": "2026-10-31 06:34",
+ "pptx": "Presentation_Reunion_Sud_Kivu_20261030.pptx",
  "diapositives": 7,
  "slides": [
   {
@@ -42,7 +42,7 @@
  "images": {
   "01_indicateurs_cumul": {
    "fichier": "01_indicateurs_cumul.png",
-   "titre": "Situation de la MVE au 27 octobre 2026, Province : Sud Kivu"
+   "titre": "Situation de la MVE au 30 octobre 2026, Province : Sud Kivu"
   },
   "02_courbe_hebdomadaire": {
    "fichier": "02_courbe_hebdomadaire.png",
@@ -50,7 +50,7 @@
   },
   "03_indicateurs_jour": {
    "fichier": "03_indicateurs_jour.png",
-   "titre": "Situation épidémiologique du jour, 27 octobre 2026"
+   "titre": "Situation épidémiologique du jour, 30 octobre 2026"
   },
   "05_jours_sans_cas": {
    "fichier": "05_jours_sans_cas.png",
