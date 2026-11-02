@@ -2,6 +2,8 @@
 (function () {
   "use strict";
   const D = window.DASHBOARD_DATA;
+  /* version des fichiers produits : une nouvelle exécution change l'adresse, le navigateur ne montre jamais une ancienne carte */
+  const VQ = () => "?v=" + encodeURIComponent((D.meta && D.meta.generated_at) || "");
   const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
   const Ch = window.HubCharts, esc = Ch.esc, col = Ch.col;
   const O = window.HubOutil;
@@ -1921,7 +1923,7 @@
       { k: "trd", t: "Tendance détection", v: x => x.detection?.tendance ? T(TEND[x.detection.tendance]) : "—" },
       { k: "pct_decedees_14j", t: "% alertes décédées 14 j", num: true, d: 0 }, { k: "pct_testees_14j", t: "% testées 14 j", num: true, d: 0 }, { k: "positivite_14j", t: "Positivité 14 j", num: true, d: 0 }],
       { rowClick: true, rowKey: x => x.id, sort: "confirmes_28j", maxh: 520 }), { csv: "icl-geo" })}
-    ${map ? panel("Carte de la part des infections détectées", T("Carte de rapport (A4) ; légende et commentaire identiques à ceux du menu « Cartes pour rapport »"), `<img class="map-img" style="width:100%;height:auto;display:block;border:1px solid var(--line);border-radius:6px" src="${base}${encodeURIComponent(map.fichier)}" alt="${esc(map.titre)}" loading="lazy"><p class="map-cap">${capHtml(map.commentaire)}</p>`) : ""}`;
+    ${map ? panel("Carte de la part des infections détectées", T("Carte de rapport (A4) ; légende et commentaire identiques à ceux du menu « Cartes pour rapport »"), `<img class="map-img" style="width:100%;height:auto;display:block;border:1px solid var(--line);border-radius:6px" src="${base}${encodeURIComponent(map.fichier)}${VQ()}" alt="${esc(map.titre)}" loading="lazy"><p class="map-cap">${capHtml(map.commentaire)}</p>`) : ""}`;
   }
   /* Les deux Rt face à face : Rt des cas (EpiEstim) et Rt des infections (ICL–INRB), même territoire, même échelle */
   function iclFaceToFace(g, r) {
@@ -2256,7 +2258,7 @@
 
   /* ---------------- Personnel de santé (PPL) ---------------- */
   const SIT_BASE = () => isPublic ? "situation/" : "../reports/situation/";
-  const dlBtn = (f, lab, primary) => f ? `<a class="btn ${primary ? "primary" : ""} sm" href="${SIT_BASE()}${encodeURIComponent(f)}" download="${esc(f)}">⤓ ${T(lab)}</a>` : "";
+  const dlBtn = (f, lab, primary) => f ? `<a class="btn ${primary ? "primary" : ""} sm" href="${SIT_BASE()}${encodeURIComponent(f)}${VQ()}" download="${esc(f)}">⤓ ${T(lab)}</a>` : "";
   function pplView() {
     const P = D.ppl; if (!P || !P.totaux) return `<div class="empty">${PER ? T("Disponible pour la situation complète : choisissez « Tout » dans la période d’analyse.") : T("Analyse des PPL indisponible : relancez l’analyse complète.")}</div>`;
     const provs = ["Toutes", ...P.provinces.map(p => p.province)];
@@ -2781,9 +2783,9 @@
     const set = PER ? (MAPSET || D.cartes || null) : (D.cartes || null);
     const L = D.livrables || {}, lb = L.base || "../reports/";
     const dl = (L.rapport || L.presentation || L.synthese) ? panel("Rapport national, présentation et synthèse par zone", PER && !isPublic ? `${T("Produits automatiquement pour la période du")} ${dfmt(PER.debut)} ${T("au")} ${dfmt(PER.fin)} ${T("à partir des données arrêtées à cette date")}` : T("Produits automatiquement à chaque exécution, à partir des dernières données chargées"), `<div class="flex" style="gap:10px;flex-wrap:wrap">
-      ${L.rapport ? `<a class="btn primary" href="${lb}${encodeURIComponent(L.rapport)}" download="${esc(L.rapport)}">⤓ ${T("Rapport épidémiologique national (PDF)")}</a>` : ""}
-      ${L.presentation ? `<a class="btn" href="${lb}${encodeURIComponent(L.presentation)}" download="${esc(L.presentation)}">⤓ ${T("Présentation de la riposte (PowerPoint)")}</a>` : ""}
-      ${L.synthese ? `<a class="btn" href="${lb}${encodeURIComponent(L.synthese)}" download="${esc(L.synthese)}">⤓ ${T("Synthèse par zone de santé (Excel)")}</a>` : ""}</div>
+      ${L.rapport ? `<a class="btn primary" href="${lb}${encodeURIComponent(L.rapport)}${VQ()}" download="${esc(L.rapport)}">⤓ ${T("Rapport épidémiologique national (PDF)")}</a>` : ""}
+      ${L.presentation ? `<a class="btn" href="${lb}${encodeURIComponent(L.presentation)}${VQ()}" download="${esc(L.presentation)}">⤓ ${T("Présentation de la riposte (PowerPoint)")}</a>` : ""}
+      ${L.synthese ? `<a class="btn" href="${lb}${encodeURIComponent(L.synthese)}${VQ()}" download="${esc(L.synthese)}">⤓ ${T("Synthèse par zone de santé (Excel)")}</a>` : ""}</div>
       <p class="small muted" style="margin-top:8px">${T("Question opérationnelle de la présentation")} : ${esc(T(L.question || ""))}</p>`) : "";
     const intro = dl + `<div class="notice">${T("Cartes thématiques prêtes pour les rapports et présentations : titre, cadre, flèche du nord, échelle en km, légende avec bornes et effectifs par classe, limites de province, source, projection (Mercator, WGS 84) et date ; chacune est accompagnée d’un commentaire (méthode, résultats, limites) à reprendre dans le rapport.")} ${T("Fichiers PNG haute définition (A4 paysage) dans le dossier reports du projet.")}</div>`;
     if (PER && !set && isPublic) return `${intro}<div class="notice">${T("Sur le site public, les cartes sont publiées pour la situation complète : revenez à « Tout » dans la période d’analyse.")}</div>`;
@@ -2792,8 +2794,8 @@
     const base = set.base || `../reports/${encodeURIComponent(set.dossier)}/`;
     return `${intro}<div class="maps-grid">${set.cartes.map((c, i) => `
       <section class="panel map-card"><div class="panel-head"><div><div class="eyebrow">${T("Carte")} ${i + 1}</div><h2>${esc(T(c.titre))}</h2></div>
-        <div class="panel-tools"><button class="btn sm" type="button" data-map-png="${i}" data-map-file="${esc(c.fichier)}" title="${T("Carte et commentaire dans une seule image")}">⤓ PNG</button><a class="btn sm" href="${base}${encodeURIComponent(c.fichier)}" target="_blank" rel="noopener">${T("Ouvrir")}</a><button class="btn sm" type="button" data-copy-cap="${i}">${T("Copier le commentaire")}</button></div></div>
-        <a href="${base}${encodeURIComponent(c.fichier)}" target="_blank" rel="noopener"><img class="map-img" src="${base}${encodeURIComponent(c.fichier)}" alt="${esc(c.titre)}" loading="lazy"></a>
+        <div class="panel-tools"><button class="btn sm" type="button" data-map-png="${i}" data-map-file="${esc(c.fichier)}" title="${T("Carte et commentaire dans une seule image")}">⤓ PNG</button><a class="btn sm" href="${base}${encodeURIComponent(c.fichier)}${VQ()}" target="_blank" rel="noopener">${T("Ouvrir")}</a><button class="btn sm" type="button" data-copy-cap="${i}">${T("Copier le commentaire")}</button></div></div>
+        <a href="${base}${encodeURIComponent(c.fichier)}${VQ()}" target="_blank" rel="noopener"><img class="map-img" src="${base}${encodeURIComponent(c.fichier)}${VQ()}" alt="${esc(c.titre)}" loading="lazy"></a>
         <p class="map-cap" id="map-cap-${i}">${capHtml(c.commentaire)}</p></section>`).join("")}</div>`;
   }
   async function mapsRun() {
