@@ -685,7 +685,64 @@
     return `<div class="target" style="margin-bottom:14px"><label class="field">Présentation de<select data-state="presZone">
         <option value="">Province du ${esc(P.meta.province)}</option>${zs.map(z => `<option value="${z.code}" ${cur && cur.code === z.code ? "selected" : ""}>Zone de santé de ${esc(z.nom)}</option>`).join("")}</select></label>
         <span class="note">Une présentation est produite pour la province et pour chaque zone de santé ayant des cas confirmés.</span></div>
+      ${!cur ? periodePanel() : ""}
       ${NKPres.html(base, pptx, cur ? "Zone de santé de " + cur.nom : "Province du " + P.meta.province, "situation au " + dfr(P.meta.date_rapport))}`;
+  }
+
+  /* ---- rapport et présentation d'une période choisie (la production par défaut, situation complète, reste inchangée) */
+  function periodePanel() {
+    if (PUBLIC || !isProv()) return "";
+    const dmax = P.meta.date_rapport;
+    after(() => { periodeListe(); periodeWire(); });
+    return panel("Rapport et présentation d'une période", `Par défaut, le rapport et la présentation ci-dessous décrivent la situation complète au ${dfr(dmax)}. Choisissez un nombre de jours (ou des dates) pour produire en plus une version de la période : indicateurs clés (KPI) de la période en tête du PowerPoint, rapport PDF et tableaux Excel.`,
+      `<div class="per-form" style="display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end">
+        <div class="seg" id="per-presets">${[7, 14, 21, 28, 42].map(n => `<button type="button" class="btn sm" data-perj="${n}">${n} derniers jours</button>`).join("")}</div>
+        <label class="field" style="min-width:150px">Nombre de jours<input type="number" id="per-n" min="1" max="400" step="1" placeholder="ex. 10"></label>
+        <span class="note">ou</span>
+        <label class="field">Du<input type="date" id="per-d0" max="${dmax}"></label>
+        <label class="field">au<input type="date" id="per-d1" max="${dmax}" value="${dmax}"></label>
+        <button class="btn primary" type="button" id="per-go">Produire le rapport et la présentation</button></div>
+        <p class="note" id="per-etat" style="margin-top:8px"></p>
+        <div id="per-liste" style="margin-top:8px"></div>`);
+  }
+  async function periodeListe() {
+    const el = document.getElementById("per-liste"); if (!el) return;
+    let L = [];
+    try { const r = await fetch(outp("periodes/liste.json") + "?v=" + Date.now(), { credentials: "same-origin" }); if (r.ok) L = await r.json(); } catch (e) { L = []; }
+    if (!L.length) { el.innerHTML = `<p class="note">Aucune période produite pour l'instant.</p>`; return; }
+    const lien = (x, f, t, cls) => f ? `<a class="btn sm ${cls || ""}" href="../${x.base.split("/").map(encodeURIComponent).join("/")}${f.split("/").map(encodeURIComponent).join("/")}?v=${encodeURIComponent(x.produit_le)}" download="${esc(f.split("/").pop())}">⤓ ${t}</a>` : "";
+    const k = x => x.kpi || {};
+    el.innerHTML = `<div class="table-wrap"><table><thead><tr><th>Période</th><th class="num">Jours</th><th class="num">Cas</th><th class="num">Décès</th><th class="num">ZS touchées</th><th class="num">Taux de suivi</th><th class="num">Alertes</th><th>Téléchargements</th><th>Produit le</th></tr></thead><tbody>${L.map(x => `<tr>
+      <td>du ${dfr(x.debut)} au ${dfr(x.fin)}</td><td class="num">${x.jours}</td><td class="num">${nf(k(x).cas)}</td><td class="num">${nf(k(x).deces)}</td><td class="num">${nf(k(x).zones_touchees)}</td>
+      <td class="num">${k(x).suivi_taux == null ? "—" : nf(k(x).suivi_taux, 1) + " %"}</td><td class="num">${nf(k(x).alertes)}</td>
+      <td style="white-space:nowrap">${lien(x, x.presentation, "PowerPoint", "primary")} ${lien(x, x.rapport, "Rapport PDF")} ${lien(x, x.classeur, "Excel")}</td><td>${esc(x.produit_le)}</td></tr>`).join("")}</tbody></table></div>`;
+  }
+  function periodeWire() {
+    const go = async body => {
+      const st = document.getElementById("per-etat");
+      st.textContent = "Production en cours…";
+      try {
+        const r = await fetch("/api/periode", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body), credentials: "same-origin" });
+        const j = await r.json().catch(() => ({}));
+        if (!r.ok) { st.textContent = j.erreur || "Production impossible."; return; }
+        const poll = async () => {
+          const s = await (await fetch("/api/etat", { credentials: "same-origin" })).json();
+          const last = (s.log || "").trim().split("\n").filter(Boolean).pop() || "";
+          if (s.running) { st.textContent = "Production en cours… " + last; setTimeout(poll, 1200); return; }
+          st.textContent = s.ok ? "Terminé : téléchargez les fichiers de la période ci-dessous." : "Échec : " + last;
+          periodeListe();
+        };
+        poll();
+      } catch (e) { st.textContent = "Serveur injoignable : relancez l'outil."; }
+    };
+    document.querySelectorAll("[data-perj]").forEach(b => b.addEventListener("click", () => go({ jours: Number(b.dataset.perj) })));
+    const g = document.getElementById("per-go");
+    if (g) g.addEventListener("click", () => {
+      const n = Number(document.getElementById("per-n").value), d0 = document.getElementById("per-d0").value, d1 = document.getElementById("per-d1").value;
+      if (d0 && d1) go({ debut: d0, fin: d1 });
+      else if (n >= 1) go({ jours: Math.round(n) });
+      else document.getElementById("per-etat").textContent = "Indiquez un nombre de jours ou les deux dates.";
+    });
   }
 
   /* ================================================================== INDICATEURS DU PILIER SURVEILLANCE (canevas PID-MIO) */
