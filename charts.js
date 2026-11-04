@@ -1098,7 +1098,7 @@
       });
       symItems.forEach(({ k, lines }) => {
         if (k === "prov") { x.strokeStyle = "#2f363d"; x.lineWidth = 2; x.beginPath(); x.moveTo(lx, ly + 7); x.lineTo(lx + 16, ly + 7); x.stroke(); }
-        else if (k === "zone") { x.strokeStyle = "#b9c0c6"; x.lineWidth = 1; x.beginPath(); x.moveTo(lx, ly + 7); x.lineTo(lx + 16, ly + 7); x.stroke(); }
+        else if (k === "zone") { x.strokeStyle = "#3a3a3a"; x.lineWidth = 1; x.beginPath(); x.moveTo(lx, ly + 7); x.lineTo(lx + 16, ly + 7); x.stroke(); }
         else if (k === "emp") { x.strokeStyle = "#d62828"; x.lineWidth = 1.6; x.strokeRect(lx + 1, ly + 1, 14, 12); }
         else { x.fillStyle = k; x.fillRect(lx, ly, 16, 14); x.strokeStyle = "#9aa3ab"; x.lineWidth = 1; x.strokeRect(lx, ly, 16, 14); }
         x.lineWidth = 1; x.fillStyle = "#26313b"; x.font = F.li; lines.forEach((t, i) => x.fillText(t, lx + 24, ly + 11 + i * 15)); ly += Math.max(22, lines.length * 15 + 7);

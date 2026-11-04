@@ -87,7 +87,7 @@
     lab: "Tous", nowH: 30, fLevel: "National", fTerr: "National", fTarget: "confirmes", fH: 30, tables: {},
     ovStack: "aucun", netIcons: true, gen: "0", idxPeriod: "0", ssSet: "", ssPlace: "Tous", ssMin: "2", ssCases: true, dynG: "National", growBase: "dds", growWin: "12s", dyStack: "sexe", dyBase: "o", dyDays: "60", rtDays: "120",
     siCmp: false, rlWin: "28j", projH: "30", distK: "dds_notification", recZone: "", recSup: "0.3", recColor: "issue", recX: "onset", recIcons: true, recDoc: false, epiMin: "3", resZone: "", perfG: "National",
-    rtmG: "National", rtmSet: "all", rtmDays: "120", zrCat: "Toutes", rtmMode: "zones", iclG: "National", rtzProv: "Toutes", rtzG: "National", rtzTau: "7", rtzDays: "60", opTab: "deces", opProv: "Toutes", opWin: "cumul", opZone: "Toutes", opCte: "Tous", opD1: "", opD2: "", opCls: "c", opMapK: "dec", opChamp: "Tous", iclTau: "14", pilT: "National", pilZ: "", pilA: "", jlD1: "", jlD2: "", jlBase: "exp", jlZone: "Toutes", jlSt: "Tous", zrColor: "categorie", zrLab: "score", zrSel: "", pplProv: "Toutes", sitNiv: "national"
+    rtmG: "National", rtmSet: "all", rtmDays: "120", zrCat: "Toutes", rtmMode: "zones", iclG: "National", rtzProv: "Toutes", rtzG: "National", rtzTau: "7", rtzDays: "60", opTab: "deces", opProv: "Toutes", opWin: "cumul", opZone: "Toutes", opCte: "Tous", opD1: "", opD2: "", opCls: "c", opMapK: "dec", opChamp: "Tous", iclTau: "14", pilT: "National", pilZ: "", pilA: "", jlD1: "", jlD2: "", jlBase: "exp", jlZone: "Toutes", jlSt: "Tous", zrColor: "categorie", zrLab: "score", zrSel: "", gsProv: "Toutes", gsSel: "", gsNiv: "Prioritaires", gsLab: "rang", gsDate: "", pplProv: "Toutes", sitNiv: "national"
   };
   const TABS = [
     { id: "pilotage", t: "Pilotage stratégique", g: "Situation", i: "M3 3h2v16h16v2H3zm4 12 4-5 3 3 5-7 1.6 1.2-6.4 9-3-3-2.6 3.4z" },
@@ -95,6 +95,7 @@
     { id: "territories", t: "Territoires", g: "Situation", i: "M12 2C8 2 5 5 5 9c0 5 7 13 7 13s7-8 7-13c0-4-3-7-7-7zm0 9.5A2.5 2.5 0 1 1 12 6a2.5 2.5 0 0 1 0 5.5z" },
     { id: "maps", t: "Cartes pour rapport", g: "Situation", i: "M15 4 9 2 3 4v18l6-2 6 2 6-2V2zM9 4.4l6 2v13.2l-6-2z" },
     { id: "riskzones", t: "Zones à risque", g: "Situation", i: "M12 2 1 21h22L12 2zm1 15h-2v2h2zm0-7h-2v5h2z" },
+    { id: "spatialrisk", t: "Google Invasion Spatial Risque", g: "Situation", i: "M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm0 2a8 8 0 0 1 7.7 6h-3.2l-2-3-3 6-2-3H4.3A8 8 0 0 1 12 4zm0 16a8 8 0 0 1-7.7-6h3.2l2 3 3-6 2 3h5.2A8 8 0 0 1 12 20z" },
     { id: "index", t: "Cas index", g: "Contact tracing", i: "M4 6h16v2H4zm0 5h16v2H4zm0 5h10v2H4z", priv: true },
     { id: "journey", t: "Parcours du cas", g: "Contact tracing", i: "M12 2a4 4 0 1 1 0 8 4 4 0 0 1 0-8zm-7 18c0-3.9 3.1-7 7-7s7 3.1 7 7H5zM19 3l3 3-3 3", priv: true },
     { id: "chains", t: "Chaînes de transmission", g: "Contact tracing", i: "M7 7a3 3 0 1 1-2 5.2L10 15a3 3 0 1 1-.8 1.8L4.3 14A3 3 0 0 1 7 7zm10-4a3 3 0 1 1 0 6 3 3 0 0 1 0-6z" },
@@ -117,7 +118,7 @@
     { id: "indicateurs", t: "Indicateurs du pilier surveillance", g: "Réunions", i: "M3 3h18v18H3zm2 2v4h4V5zm6 0v4h8V5zm-6 6v4h4v-4zm6 0v4h8v-4zm-6 6v2h4v-2zm6 0v2h8v-2z", role: "lecteur", pub: true },
     { id: "presentation", t: "Présentation", g: "Réunions", i: "M3 4h18v2H3zm1 3h16v10H4zm7 11h2v3h-2zm-4 3h10v1H7zM7 14l3-4 2 2 3-4 2 6z", role: "lecteur", pub: true },
     { id: "upload", t: "Charger les données", g: "Données", i: "M5 20h14v-2H5zm7-16-5 5h3v6h4V9h3z", priv: true, role: "analyste" },
-    { id: "comptes", t: "Comptes", g: "Administration", i: "M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zm0 2c-4 0-8 2-8 5v1h16v-1c0-3-4-5-8-5z", priv: true, role: "admin" },
+    { id: "comptes", t: "Admin : comptes et accès", g: "Administration", i: "M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zm0 2c-4 0-8 2-8 5v1h16v-1c0-3-4-5-8-5z", priv: true, role: "admin" },
     { id: "publication", t: "Publication en ligne", g: "Administration", i: "M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm6.9 6h-3a15 15 0 0 0-1.3-3.9A8 8 0 0 1 18.9 8zM12 4c.8 1.2 1.5 2.5 1.9 4h-3.8c.4-1.5 1.1-2.8 1.9-4zM4.3 14a8 8 0 0 1 0-4h3.4a16 16 0 0 0 0 4zm.8 2h3a15 15 0 0 0 1.3 3.9A8 8 0 0 1 5.1 16zm3-8h-3a8 8 0 0 1 4.3-3.9A15 15 0 0 0 8.1 8zM12 20c-.8-1.2-1.5-2.5-1.9-4h3.8c-.4 1.5-1.1 2.8-1.9 4zm2.3-6H9.7a14 14 0 0 1 0-4h4.6a14 14 0 0 1 0 4zm.3 5.9a15 15 0 0 0 1.3-3.9h3a8 8 0 0 1-4.3 3.9zm1.7-5.9a16 16 0 0 0 0-4h3.4a8 8 0 0 1 0 4z", priv: true, role: "admin" }
   ].filter(t => !(isPublic && t.priv && !(pubParcours && PARCOURS_TABS.has(t.id))))
    .filter(t => !t.role || !O || !(window.HUB_USER) || O.can(t.role));
@@ -2520,6 +2521,185 @@
       file: `carte_${score ? "score_risque" : "categories_zones"}_${PER ? PER.debut + "_" + PER.fin : (Z.date || D.meta.cutoff)}${S.province === "Toutes" ? "" : "_" + S.province}` });
   }
 
+  /* ---------------- Google Invasion Spatial Risque : profils hebdomadaires Google AI + INRB (contenu des fichiers déposés seulement) ---------------- */
+  const GS_ORD = ["Haute urgence", "Veille renforcée", "Routine, signal", "Routine, niveau de base"];
+  const GS_TILE = { "Haute urgence": "#bd0026", "Veille renforcée": "#fd8d3c", "Routine, signal": "#fed976", "Routine, niveau de base": "#ffffcc" };
+  const YLORRD = ["#ffffcc", "#ffeda0", "#fed976", "#feb24c", "#fd8d3c", "#fc4e2a", "#e31a1c", "#bd0026", "#800026"];
+  const ylorrd = v => {   /* couleurs du rapport PDF (matplotlib YlOrRd), risque relatif 0 → 1 */
+    v = Math.min(Math.max(Number(v) || 0, 0), 1); const x = v * (YLORRD.length - 1), i = Math.min(Math.floor(x), YLORRD.length - 2), t = x - i;
+    const a = YLORRD[i], b = YLORRD[i + 1], c = [1, 3, 5].map(k => Math.round(parseInt(a.slice(k, k + 2), 16) * (1 - t) + parseInt(b.slice(k, k + 2), 16) * t));
+    return "#" + c.map(n => n.toString(16).padStart(2, "0")).join("");
+  };
+  const GS_BR = [0, .2, .4, .6, .8, 1.0001];
+  const gsAll = () => { const R = window.RISQUE_SPATIAL || D.risque_spatial; if (!R) return null; return R.profils ? R : { profils: [R], courant: R.coupure }; };
+  const gsData = () => { const A = gsAll(); if (!A || !(A.profils || []).length) return null; return A.profils.find(p => p.coupure === S.gsDate) || A.profils[0]; };
+  const gsVal = z => S.gsProv === "Toutes" ? z.score : (z.score_prov ?? z.score);
+  const gsNum = (v, d = 4) => v === null || v === undefined ? "—" : nf(v, d);
+  const gsFac = f => lang === "en" && f[3] ? f[3] : f[0];
+  const gsLevel = z => `<span class="badge"><i style="background:${GS_TILE[z.classe] || GS_TILE[z.niveau]};border:1px solid #c9c9c9"></i>${esc(T(z.niveau))}</span>`;
+  function gsFeatZone(R) { const m = new Map(); (R.zones || []).forEach(z => { if (z.carte) m.set(z.carte, z); }); return m; }
+  function gsView() {
+    const A = gsAll(), R = gsData();
+    if (!R) return `<div class="notice"><b>${T("Aucun profil de risque d’invasion spatiale chargé.")}</b> ${T("Déposez dans « Charger les données » le profil hebdomadaire (CSV « DRC_Weekly_Ebola_Emergence_Risk_Profile ») et le rapport PDF « DRC Ebola Outbreak Prediction » de la même semaine, puis relancez l’analyse : les fichiers sont reconnus par leur contenu.")}</div>`;
+    if (!S.gsDate || !(A.profils || []).some(p => p.coupure === S.gsDate)) S.gsDate = R.coupure;
+    const Sy = R.synthese || {}, F = R.fichiers || {}, base = F.base || `../reports/risque_spatial/${R.coupure.replace(/-/g, "")}/`;
+    const provs = (R.provinces || []).filter(p => p.zones).map(p => p.province);
+    if (S.gsProv !== "Toutes" && !provs.includes(S.gsProv)) S.gsProv = "Toutes";
+    const inP = z => S.gsProv === "Toutes" || z.province === S.gsProv;
+    const Z = (R.zones || []).filter(inP);
+    const shown = S.gsNiv === "Toutes" ? Z : S.gsNiv === "Prioritaires" ? Z.filter(z => z.niveau !== "Routine") : Z.filter(z => z.classe === S.gsNiv || z.niveau === S.gsNiv);
+    const f0 = R.fenetre?.[0], f1 = R.fenetre?.[1];
+    const dl = (f, t, cls = "") => f ? `<a class="btn ${cls}" href="${base}${encodeURIComponent(f)}${VQ()}" download="${esc(f)}">⤓ ${T(t)}</a>` : "";
+    const cnt = c => Z.filter(z => z.classe === c).length;
+    const tile = (c, label, note) => `<div class="kpi clickable" data-gsniv="${c}"><div class="label"><i class="dot" style="background:${GS_TILE[c]};border:1px solid #c9c9c9"></i>${T(label)}</div><div class="value">${nf(cnt(c))}</div><div class="note">${note}</div></div>`;
+    const forte = Z.filter(z => (z.concordance || "").startsWith("Forte"));
+    const nDeja = (R.deja_touchees || []).filter(inP).length;
+    return `
+    <div class="flex" style="gap:12px;flex-wrap:wrap;align-items:flex-end;margin-bottom:10px">
+      <label class="field" style="min-width:230px"><span>${T("Profil de risque du")}</span><select data-state="gsDate">${(A.profils || []).map((p, i) => `<option value="${p.coupure}" ${p.coupure === R.coupure ? "selected" : ""}>${dfmt(p.coupure)}${i === 0 ? " · " + T("le plus récent") : ""}</option>`).join("")}</select></label>
+      <label class="field" style="min-width:220px"><span>${T("Province")}</span><select data-state="gsProv"><option value="Toutes">${T("Toutes les provinces")}</option>${provs.map(p => `<option value="${esc(p)}" ${S.gsProv === p ? "selected" : ""}>${esc(p)}</option>`).join("")}</select></label>
+      <div class="flex" style="gap:8px;flex-wrap:wrap">${dl(F.pdf, "Rapport Google AI + INRB (PDF)", "primary")}${dl(F.xlsx, "Profil de risque (Excel)")}${dl(F.csv, "Profil de risque (CSV)")}</div>
+    </div>
+    <p class="small muted" style="margin:0 0 12px">${T("Semaine de prévision du")} ${dfmt(f0)} ${T("au")} ${dfmt(f1)} · ${T("date de coupure")} ${dfmt(R.coupure)}${R.fraicheur?.sitrep_jusqu_au ? ` · ${T("cas du SitRep jusqu’au")} ${dfmt(R.fraicheur.sitrep_jusqu_au)}` : ""} · ${T("source : profil CSV et rapport PDF déposés, sans autre donnée")}</p>
+    <div class="grid g5">
+      ${tile("Haute urgence", "Haute urgence", `${T("zones indemnes")}${S.gsProv === "Toutes" ? ` · ${nf((Sy.provinces_haute || []).length)} ${T("provinces")}` : ""}`)}
+      ${tile("Veille renforcée", "Veille renforcée", T("zones indemnes"))}
+      ${tile("Routine, signal", "Routine, risque détectable", T("risque prédit au-dessus du plancher"))}
+      <div class="kpi clickable" data-gsniv="Déjà touchée"><div class="label"><i class="dot" style="background:repeating-linear-gradient(45deg,#ffffcc 0 2px,#777 2px 3px)"></i>${T("Déjà touchées")}</div><div class="value">${nf(nDeja)}</div><div class="note">${T("hors classement d’invasion")}</div></div>
+      <div class="kpi"><div class="label">${T("Concordance forte")}</div><div class="value">${nf(forte.length)}</div><div class="note">${T("Google et INRB ≤ 20")}</div></div>
+    </div>
+    <div class="grid g21">
+      ${panel(S.gsProv === "Toutes" ? "Risque national d’invasion spatiale" : `${T("Risque d’invasion spatiale")}, ${esc(S.gsProv)}`, `${S.gsProv === "Toutes" ? T("Risque relatif d’invasion (score RRF ramené entre 0 et 1), couleurs du rapport") : T("Risque relatif dans la province (0 = faible, 1 = élevé), comme les cartes provinciales du rapport")} · ${T("survolez une zone pour le détail, cliquez pour l’analyser")}`, `
+        <div class="flex" style="margin-bottom:8px;flex-wrap:wrap">${segBtns("gsLab", [["rang", "Étiquettes : rang"], ["nom", "Noms seuls"], ["aucune", "Sans étiquette"]])}</div>
+        <div id="c-gs-map"></div>`, { tools: `<button class="btn sm" type="button" data-gs-report title="${T("Carte de rapport (légende, effectifs, source)")}">⤓ ${T("Carte (PNG rapport)")}</button>` })}
+      ${gsDetail(R)}
+    </div>
+    ${panel("Synthèse par province", T("Cliquer une province pour zoomer la carte et filtrer les tableaux"), table("gs-prov", (R.provinces || []).filter(p => p.zones), [
+      { k: "province", t: "Province" }, { k: "haute", t: "Haute urgence", num: true }, { k: "veille", t: "Veille renforcée", num: true }, { k: "signal", t: "Risque détectable", num: true },
+      { k: "zones", t: "Zones classées", num: true }, { k: "top", t: "Zone la mieux classée", v: x => x.top ? `${esc(x.top)} <span class="muted">(${nf(x.top_rrf)})</span>` : "—", sortv: x => x.top_rrf },
+      { k: "vuln_haute", t: "Prioritaires très vulnérables", num: true }, { k: "deja_touchees", t: "Déjà touchées", num: true },
+      { k: "zones_prioritaires", t: "Zones prioritaires", v: x => esc((x.zones_prioritaires || []).join(", ")) || "—", wrap: true }], { rowClick: true, rowKey: x => x.province, sort: null, search: false }), { csv: "gs-prov" })}
+    ${panel(`${T("Zones de santé classées")}${S.gsProv === "Toutes" ? "" : ", " + esc(S.gsProv)}`, T("Rang RRF national ; concordance « forte » : les deux modèles classent la zone dans leurs 20 premières ; facteurs : part signée de l’attribution du modèle"), `
+      <div style="margin-bottom:8px">${segBtns("gsNiv", [["Prioritaires", "Prioritaires"], ["Haute urgence", "Haute urgence"], ["Veille renforcée", "Veille renforcée"], ["Routine, signal", "Risque détectable"], ["Toutes", "Toutes"]])}</div>
+      ${table("gs-z", shown, [
+        { k: "rrf", t: "Rang RRF", num: true }, { k: "zone", t: "Zone de santé" }, { k: "province", t: "Province" },
+        { k: "niveau", t: "Niveau", v: x => gsLevel(x), sortv: x => GS_ORD.indexOf(x.classe), csv: x => x.niveau }, { k: "google", t: "Rang Google", num: true }, { k: "inrb", t: "Rang INRB", num: true },
+        { k: "concordance", t: "Concordance" }, { k: "risque", t: "Risque prédit", v: x => gsNum(x.risque), sortv: x => x.risque }, { k: "ic", t: "IC 95 %", v: x => x.ic && x.ic[0] !== null ? `${gsNum(x.ic[0])} – ${gsNum(x.ic[1])}` : "—", sortv: x => x.ic?.[1] },
+        { k: "score", t: "Risque relatif", v: x => `<span class="score-pill" style="background:${ylorrd(gsVal(x))};color:${(gsVal(x) || 0) > .55 ? "#fff" : "#3a2a20"}">${nf(gsVal(x), 2)}</span>`, sortv: x => gsVal(x) },
+        { k: "vuln", t: "Vulnérabilité", v: x => nf(x.vuln, 2), sortv: x => x.vuln },
+        { k: "facteurs", t: "Facteurs principaux", v: x => esc((x.facteurs || []).slice(0, 3).map(f => `${gsFac(f)} (${f[1] > 0 ? "+" : ""}${nf(f[1], 1)} %)`).join(" ; ")) || "—", wrap: true }],
+        { sort: "rrf", dir: 1, limit: 40, rowClick: true, rowKey: x => x.carte || x.zone, selected: x => (x.carte || x.zone) === S.gsSel })}`, { csv: "gs-z" })}
+    ${gsTouched(R)}
+    ${gsHistory(A)}
+    ${gsGallery(R, base)}
+    ${gsProse("Méthode", [T("Le profil classe chaque semaine les zones de santé encore indemnes selon leur risque de première invasion. Deux modèles sont combinés par fusion des rangs réciproques : score = 1/(60 + rang Google) + 1/(60 + rang INRB). Google AI (gradient boosting) utilise la gravité spatiale, les flux de mobilité téléphonique (Flowminder), le temps de trajet jusqu’aux zones actives et des indicateurs socio-économiques ; l’INRB fournit un modèle SEIR."),
+      `${T("Le niveau d’alerte (haute urgence, veille renforcée, routine) provient du profil ; « risque détectable » : risque prédit au-dessus du plancher du modèle")} (${nf(R.methode?.plancher, 4)}). ${T("Les cartes reprennent les couleurs du rapport : risque relatif national, ou risque relatif dans la province quand une province est choisie.")}`])}
+    ${gsProse("Limites", null, [...(lang === "en" && R.limites_en ? R.limites_en : (R.limites || [])), T("Le classement est relatif : une zone en routine n’est pas « sans risque ». Les valeurs absolues sont faibles et les IC larges : prioriser sur le rang et le niveau.")])}
+    ${gsProse("Lecture pour les opérations", [T("Lecture tirée uniquement du profil et du rapport de la semaine ; à valider en réunion de coordination.")], null,
+      (R.messages || []).map(m => `<div class="gs-msg"><h3>${esc(lang === "en" && m.titre_en ? m.titre_en : m.titre)}</h3><p>${esc(lang === "en" && m.texte_en ? m.texte_en : m.texte)}</p></div>`).join(""))}`;
+  }
+  /* bloc de texte : titre puis paragraphes (et liste), même présentation que les autres textes explicatifs de l’outil */
+  function gsProse(title, paras, items, extra) {
+    return `<section class="prose-block"><h2>${T(title)}</h2>${(paras || []).map(p => `<p>${p}</p>`).join("")}${items ? `<ul>${items.map(i => `<li>${esc(i)}</li>`).join("")}</ul>` : ""}${extra || ""}</section>`;
+  }
+  function gsDetail(R) {
+    const fz = gsFeatZone(R);
+    const zs = (R.zones || []).filter(z => S.gsProv === "Toutes" || z.province === S.gsProv);
+    let z = S.gsSel ? fz.get(S.gsSel) || (R.zones || []).find(x => x.zone === S.gsSel) : null;
+    const dt = !z && S.gsSel ? (R.deja_touchees || []).find(d => d.zone === S.gsSel) : null;
+    if (dt) {
+      const pr = R.previsions || {}, f = l => (l || []).find(x => x.carte === dt.zone || x.zone === dt.zone), A = f(pr.A), B = f(pr.B), C = f(pr.C);
+      return panel(`${esc(dt.zone)}`, `${esc(dt.province || "")} · ${T("zone déjà touchée (hors classement d’invasion)")}`, `
+        ${A ? `<table class="rsum"><tbody><tr><td>${T("Cas confirmés attendus sur 7 jours")}</td><td class="num"><b>${nf(A.prevision7, 1)}</b> (${T("IC 80 %")} ${A.i80[0]}–${A.i80[1]})</td></tr><tr><td>${T("Cas des 7 / 28 derniers jours")}</td><td class="num">${nf(A.cas7)} / ${nf(A.cas28)}</td></tr></tbody></table>` : ""}
+        ${B ? `<p class="small">${T("Probabilité d’au moins 5 nouveaux cas")} : <b>${pc(100 * B.p5, 0)}</b> ; ${T("d’au moins 1 cas")} : <b>${pc(100 * B.p1, 0)}</b> (${T("rang")} ${B.rang} ${T("des points chauds")}).</p>` : ""}
+        ${C ? `<div class="notice warn">${T("Aucun cas la semaine dernière mais probabilité d’au moins un cas cette semaine")} : <b>${pc(100 * C.p1, 0)}</b>.</div>` : ""}
+        ${!A && !B && !C ? `<div class="muted small">${T("Pas de prévision à 7 jours pour cette zone dans le rapport de la semaine.")}</div>` : ""}`);
+    }
+    if (!z) z = [...zs].sort((a, b) => (a.rrf || 999) - (b.rrf || 999))[0];
+    if (!z) return panel("Zone sélectionnée", "", `<div class="empty">${T("Aucune zone")}</div>`);
+    const fac = z.facteurs || [], mx = Math.max(1, ...fac.map(f => Math.abs(f[1])));
+    const movers = z.rang_prec ? ` · ${T("semaine précédente")} : ${z.rang_prec}` : "";
+    return panel(`${esc(z.zone)}, ${T("rang")} ${nf(z.rrf)}`, `${esc(z.province)} · ${gsLevel(z)}${movers}`, `
+      <table class="rsum"><tbody>
+        <tr><td>${T("Rang Google / rang INRB")}</td><td class="num"><b>${nf(z.google)}</b> / <b>${nf(z.inrb)}</b> · ${esc(T(z.concordance || ""))}</td></tr>
+        <tr><td>${T("Risque prédit (IC 95 %)")}</td><td class="num">${gsNum(z.risque)} (${gsNum(z.ic?.[0])} – ${gsNum(z.ic?.[1])})</td></tr>
+        ${z.inrb_pred != null ? `<tr><td>${T("Prédiction INRB")}</td><td class="num">${gsNum(z.inrb_pred)}</td></tr>` : ""}
+        <tr><td>${T("Risque relatif national / dans la province")}</td><td class="num"><span class="score-pill" style="background:${ylorrd(z.score)};color:${(z.score || 0) > .55 ? "#fff" : "#3a2a20"}">${nf(z.score, 2)}</span> <span class="score-pill" style="background:${ylorrd(z.score_prov)};color:${(z.score_prov || 0) > .55 ? "#fff" : "#3a2a20"}">${nf(z.score_prov, 2)}</span></td></tr>
+        <tr><td>${T("Vulnérabilité (0–1)")}</td><td class="num"><b>${nf(z.vuln, 2)}</b></td></tr>
+        ${z.prio ? `<tr><td>${T("Rang de priorité (rapport)")}</td><td class="num">${nf(z.prio)}</td></tr>` : ""}
+      </tbody></table>
+      ${fac.length ? `<div class="small muted" style="margin:10px 0 4px">${T("Facteurs qui expliquent le classement (part signée ; rouge = augmente le risque)")}</div>
+      <div class="gs-fac">${fac.map(f => `<div class="gs-f"><span title="${esc(gsFac(f))}">${esc(gsFac(f))}</span><div class="gs-axis"><i style="${f[1] >= 0 ? "left:50%" : `right:50%`};width:${50 * Math.abs(f[1]) / mx}%;background:${f[1] >= 0 ? "#e31a1c" : "#7FA3C6"}"></i></div><b>${f[1] > 0 ? "+" : ""}${nf(f[1], 1)} %</b></div>`).join("")}</div>` : `<div class="small muted" style="margin-top:8px">${T("Facteurs non détaillés dans le rapport PDF pour cette zone (seulement pour le top 25 et les provinces prioritaires).")}</div>`}`);
+  }
+  function gsTouched(R) {
+    const pr = R.previsions || {}, inP = x => S.gsProv === "Toutes" || x.province === S.gsProv;
+    const A = (pr.A || []).filter(inP), B = (pr.B || []).filter(inP), C = (pr.C || []).filter(inP);
+    if (!A.length && !B.length && !C.length) return "";
+    return `<div class="grid g2" id="gs-touched">
+      ${panel("Zones déjà touchées : cas attendus sur 7 jours", `${T("Semaine du")} ${dfmt(R.fenetre?.[0])} ${T("au")} ${dfmt(R.fenetre?.[1])} · ${T("section A du rapport")}`, table("gs-a", A, [
+        { k: "rang", t: "#", num: true }, { k: "zone", t: "Zone" }, { k: "province", t: "Province" }, { k: "cas7", t: "Cas 7 j", num: true }, { k: "cas28", t: "Cas 28 j", num: true },
+        { k: "prevision7", t: "Prévision 7 j", num: true, d: 1 }, { k: "i80", t: "IC 80 %", v: x => `${x.i80[0]}–${x.i80[1]}`, sortv: x => x.i80[1] }, { k: "persistance", t: "Persistance", num: true }],
+        { sort: "prevision7", search: false, rowClick: true, rowKey: x => x.carte || x.zone }), { csv: "gs-a" })}
+      <div>
+      ${panel("Points chauds : probabilité d’au moins 5 nouveaux cas", T("Section B du rapport : zones déjà touchées classées par P(≥ 5 cas) sur 7 jours"), hbars(B.map(x => ({ z: `${x.zone} (${x.province})`, v: 100 * x.p5 })), "z", "v", { pct: true, limit: 20, color: r => r.v >= 70 ? "--critical" : r.v >= 50 ? "--high" : "--moderate" }))}
+      ${C.length ? panel("Récurrence : zones sans cas la semaine dernière", T("Section C du rapport : probabilité d’au moins un cas cette semaine"), table("gs-c", C, [{ k: "rang", t: "#", num: true }, { k: "zone", t: "Zone" }, { k: "province", t: "Province" }, { k: "p1", t: "P(≥ 1 cas)", v: x => pc(100 * x.p1, 0), sortv: x => x.p1 }, { k: "cas28", t: "Cas 28 j", num: true }], { search: false, sort: null, rowClick: true, rowKey: x => x.carte || x.zone })) : ""}
+      </div></div>`;
+  }
+  function gsHistory(A) {
+    const H = A.profils || [];
+    if (H.length < 2) return "";
+    return panel("Évolution des zones en haute urgence", T("Profils des semaines déposées"), table("gs-h", H.map(p => ({ date: p.coupure, haute: p.zones.filter(z => z.niveau === "Haute urgence").map(z => z.zone), veille: p.zones.filter(z => z.niveau === "Veille renforcée").map(z => z.zone) })),
+      [{ k: "date", t: "Coupure", v: x => dfmt(x.date) }, { k: "haute", t: "Haute urgence", v: x => esc(x.haute.join(", ")), wrap: true }, { k: "veille", t: "Veille renforcée", v: x => esc(x.veille.join(", ")), wrap: true }], { search: false, sort: null }));
+  }
+  function gsGallery(R, base) {
+    const C = (R.fichiers || {}).cartes || [];
+    if (!C.length) return "";
+    return panel("Cartes pour le rapport", T("PNG haute définition (A4 paysage), aux couleurs du rapport ; cliquer pour ouvrir"), `<div class="maps-grid">${C.map(c => `
+      <section class="panel map-card"><div class="panel-head"><div><h2>${esc(lang === "en" && c.titre_en ? c.titre_en : c.titre)}</h2></div><div class="panel-tools"><a class="btn sm" href="${base}${encodeURIComponent(c.fichier)}${VQ()}" download="${esc(c.fichier)}">⤓ PNG</a></div></div>
+        <a href="${base}${encodeURIComponent(c.fichier)}${VQ()}" target="_blank" rel="noopener"><img class="map-img" src="${base}${encodeURIComponent(c.fichier)}${VQ()}" alt="${esc(c.titre)}"></a>
+        <p class="map-cap">${esc(lang === "en" && c.commentaire_en ? c.commentaire_en : (c.commentaire || ""))}</p></section>`).join("")}</div>`);
+  }
+  function gsMapOpts() {
+    const R = gsData() || { zones: [] }, fz = gsFeatZone(R);
+    const deja = new Map((R.deja_touchees || []).map(d => [d.zone, d]));
+    const feats = (D.map_zones || []).filter(f => S.gsProv === "Toutes" || norm(f.province) === norm(S.gsProv) || norm(fz.get(f.data_zone)?.province) === norm(S.gsProv));
+    const val = f => { const z = fz.get(f.data_zone); return z ? gsVal(z) || 0 : null; };
+    const legendItems = GS_BR.slice(0, -1).map((a, i) => { const b = Math.min(GS_BR[i + 1], 1); return { color: ylorrd((a + b) / 2), label: `${nf(a, 1)} – ${nf(b, 1)}`, count: feats.filter(f => { const v = val(f); return v !== null && v >= a && v < GS_BR[i + 1]; }).length }; })
+      .concat([{ color: "#fffbe0", label: T("Déjà touchée (hors classement)"), count: feats.filter(f => deja.has(f.data_zone)).length }]);
+    const pri = f => { const z = fz.get(f.data_zone); return !!z && z.niveau !== "Routine"; };
+    return { features: feats, focus: S.gsProv !== "Toutes", focusIf: f => S.gsProv === "Toutes" ? pri(f) : true,
+      value: f => val(f) ?? (deja.has(f.data_zone) ? 0 : null),
+      colorFn: (v, f) => fz.get(f.data_zone) ? ylorrd(val(f)) : deja.has(f.data_zone) ? "#fffbe0" : "#E9E6DF",
+      selected: S.gsSel || null, onClick: f => { S.gsSel = f.data_zone; render(); },
+      allFeatures: D.map_zones || feats, inset: true, countLabel: T("zones"),
+      insetProvinces: S.gsProv !== "Toutes" ? [S.gsProv] : [...new Set((R.zones || []).filter(z => z.niveau !== "Routine").map(z => z.province))],
+      insetLabel: S.gsProv !== "Toutes" ? `${T("Province sélectionnée")} : ${S.gsProv}` : T("Provinces avec zone prioritaire"),
+      legendTitle: S.gsProv === "Toutes" ? T("Risque relatif d’invasion (score RRF)") : T("Risque relatif dans la province"), legend: legendItems,
+      legendHTML: legendItems.map(x => `<span><i style="background:${x.color};display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:4px;border:1px solid #bbb"></i>${esc(x.label)} (${nf(x.count)})</span>`).join(" "),
+      labelMode: S.gsLab === "aucune" ? "none" : "all",
+      labelIf: f => { const z = fz.get(f.data_zone); return !!z && (z.niveau !== "Routine" || (S.gsProv !== "Toutes" && (z.rrf || 999) <= 60)); }, labelRank: f => -(fz.get(f.data_zone)?.rrf || 999),
+      labelText: f => { const z = fz.get(f.data_zone); return S.gsLab === "nom" ? f.data_zone : `${f.data_zone} · ${z?.rrf ?? ""}`; },
+      tip: f => { const z = fz.get(f.data_zone);
+        if (!z) return `<b>${esc(f.data_zone)}</b><div class="row"><span>${T("Province")}</span><b>${esc(f.province || "")}</b></div>${deja.has(f.data_zone) ? `<div class="row"><span>${T("Statut")}</span><b>${T("Déjà touchée (hors classement)")}</b></div>` : ""}`;
+        return `<b>${esc(z.zone)}</b> <span class="muted">(${esc(z.province)})</span><div class="row"><span>${T("Niveau")}</span><b>${esc(T(z.niveau))}</b></div><div class="row"><span>${T("Rang RRF")}</span><b>${nf(z.rrf)}</b></div><div class="row"><span>${T("Google / INRB")}</span><b>${nf(z.google)} / ${nf(z.inrb)}</b></div><div class="row"><span>${T("Risque relatif")}</span><b>${nf(gsVal(z), 2)}</b></div><div class="row"><span>${T("Risque prédit")}</span><b>${gsNum(z.risque)}</b></div><div class="row"><span>${T("Vulnérabilité")}</span><b>${nf(z.vuln, 2)}</b></div>${z.facteurs ? `<div class="small" style="max-width:280px">${esc(z.facteurs.slice(0, 2).map(x => `${gsFac(x)} (${x[1] > 0 ? "+" : ""}${nf(x[1], 1)} %)`).join(" ; "))}</div>` : ""}`; },
+      unit: T("risque relatif (0–1)") };
+  }
+  function gsCharts() { if ($("#c-gs-map")) Ch.choropleth($("#c-gs-map"), gsMapOpts()); }
+  function gsReportPNG() {
+    const R = gsData(); if (!R) return;
+    const opt = gsMapOpts();
+    const pv = S.gsProv === "Toutes" ? T("RDC entière") : `${T("Province")} : ${S.gsProv}`;
+    const top = (R.zones || []).filter(z => (S.gsProv === "Toutes" || z.province === S.gsProv) && z.niveau !== "Routine").sort((a, b) => a.rrf - b.rrf).slice(0, 8);
+    Ch.reportChoropleth(opt, {
+      title: S.gsProv === "Toutes" ? T("Risque national d’invasion spatiale de la MVE") : `${T("Risque d’invasion spatiale par zone de santé")}, ${S.gsProv}`,
+      subtitle: `${T("Profil Google AI + INRB du")} ${dfmt(R.coupure)} · ${T("semaine du")} ${dfmt(R.fenetre?.[0])} ${T("au")} ${dfmt(R.fenetre?.[1])} · ${pv}`,
+      legendTitle: opt.legendTitle, legend: opt.legend, countLabel: T("zones"),
+      sideNotes: [T("Rang RRF = fusion des rangs Google AI et INRB (k = 60). Couleurs du rapport : du jaune pâle (faible) au rouge sombre (élevé).")],
+      notes: top.length ? [`${T("Zones prioritaires")} : ${top.map(z => `${z.zone} (${z.rrf}, ${T(z.niveau).toLowerCase()})`).join(" ; ")}.`] : [],
+      source: `${T("Source")} : DRC Ebola Outbreak Prediction (Google AI + INRB) · Ebola Outbreak, SGI-TASK FORCE`,
+      file: `carte_risque_invasion_${R.coupure}${S.gsProv === "Toutes" ? "" : "_" + S.gsProv}` });
+  }
+
   /* ---------------- Linelist lln : surveillance des alertes ---------------- */
   const LL = () => D.lln || {};
   const noLln = () => `<div class="empty">${T("Ajoutez le Linelist lln (export lln_mve_notifications) pour ces analyses.")}</div>`;
@@ -2745,6 +2925,11 @@
   function enhancePanels() {
     $$("#content .panel").forEach((p, i) => {
       if (p.dataset.enh) return; p.dataset.enh = "1";
+      /* panneau de texte seul (méthode, règles, limites…) : titre puis texte, comme les autres textes explicatifs */
+      const body = [...p.children].filter(c => !c.classList.contains("panel-head"));
+      const ttl = (p.querySelector(".panel-head h2")?.textContent || "").trim();
+      if (body.length && !p.closest(".maps-grid") && /^(Méthode|Méthodologie|Methodology|Method|Limites|Limits|Limitations|Lecture|Reading|Interprétation|Interpretation|Règles|Rules|Définitions|Definitions|Comment lire|How to read|Hypothèses|Assumptions|Sources|Notes|À propos|About|Conditions|Terms|Glossaire|Glossary|Principe|Démarche)/i.test(ttl) && !p.querySelector("table,svg,canvas,img,.kpi,.chart,input,select,textarea,button:not(.btn.sm),.hbars,.stackbar,[id^='c-']")
+          && body.reduce((n, c) => n + (c.textContent || "").trim().length, 0) > 160) { p.classList.add("prose-panel"); body.forEach(c => c.classList.add("prose-body")); }
       const tools = p.querySelector(".panel-tools"); if (!tools) return;
       const charts = [...p.querySelectorAll(".chart")].filter(c => c.__tbl);
       const hasTable = !!p.querySelector("table"), hasSvg = !!p.querySelector("svg");
@@ -2988,7 +3173,7 @@
     doc.open(); doc.write(`<!doctype html><html lang="${lang}"><head><meta charset="utf-8"><title>${T("Bulletin décisionnel")} ${D.meta.cutoff}</title>${css}<style>body{background:#fff;padding:18px}.panel{box-shadow:none;border:1px solid #ccc}</style></head><body><div style="font:700 18px system-ui;margin-bottom:4px">Ebola Outbreak, SGI-TASK FORCE</div><div style="font:13px system-ui;color:#555;margin-bottom:12px">${T("Situation au")} ${dfmt(D.meta.cutoff)}</div>${clone.outerHTML}</body></html>`); doc.close();
     setTimeout(() => { ifr.contentWindow.focus(); ifr.contentWindow.print(); setTimeout(() => ifr.remove(), 2000); }, 400);
   }
-  const VIEWS = { pilotage: [pilotageView, pilotageCharts], overview: [overview, overviewCharts], territories: [territories, territoriesCharts], followup: [followup, followupCharts], index: [indexView, indexCharts], journey: [journey, journeyCharts], chains: [chainsView, chainsCharts], recon: [reconView, reconCharts], dynamics: [dynamicsView, dynamicsCharts], children: [kidsView, kidsCharts], vaccycles: [vcView, vcCharts], superspreading: [superView, superCharts], resurgence: [resurgenceView, resurgenceCharts], labs: [labsView, labsCharts], nowcast: [nowcastView, nowcastCharts], forecast: [forecastView, forecastCharts], priority: [priorityView], rtm: [rtmView, rtmCharts], riskzones: [riskZonesView, riskZonesCharts], alerts: [alertsView, alertsCharts], eds: [edsView, edsCharts], clinic: [clinicView, clinicCharts], lab2: [lab2View, lab2Charts], pec: [pecView, pecCharts], fusion: [fusionView], maps: [mapsView], ops: [opsView, opsCharts], ppl: [pplView, pplCharts], situation: [sitView], upload: [O.uploadView, O.uploadWire], presentation: [O.presView, O.presWire], indicateurs: [() => O.indView(D), O.indWire], comptes: [O.comptesView, O.comptesWire], publication: [O.pubView, O.pubWire], quality: [qualityView], method: [methodView], terms: [termsView] };
+  const VIEWS = { pilotage: [pilotageView, pilotageCharts], overview: [overview, overviewCharts], territories: [territories, territoriesCharts], followup: [followup, followupCharts], index: [indexView, indexCharts], journey: [journey, journeyCharts], chains: [chainsView, chainsCharts], recon: [reconView, reconCharts], dynamics: [dynamicsView, dynamicsCharts], children: [kidsView, kidsCharts], vaccycles: [vcView, vcCharts], superspreading: [superView, superCharts], resurgence: [resurgenceView, resurgenceCharts], labs: [labsView, labsCharts], nowcast: [nowcastView, nowcastCharts], forecast: [forecastView, forecastCharts], priority: [priorityView], rtm: [rtmView, rtmCharts], riskzones: [riskZonesView, riskZonesCharts], spatialrisk: [gsView, gsCharts], alerts: [alertsView, alertsCharts], eds: [edsView, edsCharts], clinic: [clinicView, clinicCharts], lab2: [lab2View, lab2Charts], pec: [pecView, pecCharts], fusion: [fusionView], maps: [mapsView], ops: [opsView, opsCharts], ppl: [pplView, pplCharts], situation: [sitView], upload: [O.uploadView, O.uploadWire], presentation: [O.presView, O.presWire], indicateurs: [() => O.indView(D), O.indWire], comptes: [O.comptesView, O.comptesWire], publication: [O.pubView, O.pubWire], quality: [qualityView], method: [methodView], terms: [termsView] };
   function buildNav() {
     let g = "";
     $("#navigation").innerHTML = TABS.map(t => { const h = t.g !== g ? `<div class="nav-group">${T(t.g)}</div>` : ""; g = t.g; return `${h}<button data-tab="${t.id}" class="${S.tab === t.id ? "active" : ""}"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="${t.i}"/></svg>${T(t.t)}</button>`; }).join("");
@@ -3003,7 +3188,7 @@
     $("#page-sub").textContent = PER ? `${T("Période du")} ${dfmt(PER.debut)} ${T("au")} ${dfmt(PER.fin)} · ${T("données extraites le")} ${dfmt(D.meta.donnees_jusqu_au || D.meta.extraction)}`
       : `${T("Situation au")} ${dfmt(D.meta.cutoff)} · ${T("données extraites le")} ${dfmt(D.meta.extraction)}`;
     buildNav();
-    { const pb = $("#periodbar"); if (pb) pb.style.display = (S.tab === "ops" && !PER) ? "none" : ""; }   // le menu Opérations a son propre filtre de dates (instantané)
+    { const pb = $("#periodbar"); if (pb) pb.style.display = ((S.tab === "ops" && !PER) || ["comptes", "publication"].includes(S.tab)) ? "none" : ""; }   // le menu Opérations a son propre filtre de dates (instantané)
     Ch.clearRegistry(); Ch.hideTip();
     const [html, charts] = VIEWS[S.tab];
     $("#content").innerHTML = html();
@@ -3033,6 +3218,8 @@
     const pa = t.closest("[data-png-any]"); if (pa) { const p = pa.closest(".panel"); Ch.downloadPanelPNG(p, (p.querySelector(".panel-head h2")?.textContent || "panneau").replace(/[^\w\-]+/g, "_")); return; }
     const zc = t.closest("[data-zrcat]"); if (zc) { S.zrCat = S.zrCat === zc.dataset.zrcat ? "Toutes" : zc.dataset.zrcat; render(); return; }
     if (t.closest("[data-zr-report]")) { zrReportPNG(); return; }
+    const gn = t.closest("[data-gsniv]"); if (gn) { S.gsNiv = gn.dataset.gsniv === "Déjà touchée" ? S.gsNiv : (S.gsNiv === gn.dataset.gsniv ? "Prioritaires" : gn.dataset.gsniv); if (gn.dataset.gsniv === "Déjà touchée") { render(); document.getElementById("gs-touched")?.scrollIntoView({ behavior: "smooth" }); return; } render(); return; }
+    if (t.closest("[data-gs-report]")) { gsReportPNG(); return; }
     const pn = t.closest("[data-png]"); if (pn) { Ch.downloadPNG(pn.closest(".panel"), pn.dataset.png); return; }
     if (t.closest("[data-print]")) { print(); return; }
     if (t.closest("[data-pil-print]")) { pilPrint(); return; }
@@ -3050,6 +3237,8 @@
       else if (id === "res") { S.resZone = key; render(); }
       else if (id === "rtm-geo") { S.rtmG = key; render(); }
       else if (id === "zr-rank" || id === "zr") { S.zrSel = key; render(); scrollTo({ top: 0, behavior: "smooth" }); }
+      else if (id === "gs-z" || id === "gs-a" || id === "gs-c") { S.gsSel = key; render(); document.getElementById("c-gs-map")?.scrollIntoView({ behavior: "smooth", block: "center" }); }
+      else if (id === "gs-prov") { S.gsProv = S.gsProv === key ? "Toutes" : key; S.gsSel = ""; render(); }
       else if (id === "rtz-geo") { S.rtzG = key; render(); scrollTo({ top: 0, behavior: "smooth" }); }
       else if (id === "jr-all") { if (caseBy.has(key)) go("journey", key); }
       else if (id === "jr-ct") { S.nodeSel = key; $("#node-detail").innerHTML = nodeDetail(); $$("tr[data-row^='jr-ct|']").forEach(r => r.classList.toggle("selected", r === tr)); journeyCharts(); }
@@ -3060,7 +3249,7 @@
   document.addEventListener("change", e => {
     const t = e.target;
     if (t.dataset.state === "caseKey") { if (t.value) go("journey", t.value); return; }
-    if (t.dataset.state) { const v = t.value; S[t.dataset.state] = /^\d+$/.test(v) && ["netDepth", "nowH", "fH"].includes(t.dataset.state) ? Number(v) : v; if (t.dataset.state === "fLevel") { S.fTerr = ""; } if (t.dataset.state === "opProv") { S.opZone = "Toutes"; } if (t.dataset.state === "pilT") { S.pilZ = ""; S.pilA = ""; const gp = v === "National" ? "Toutes" : v; if ((D.provinces || []).some(x => x.province === gp) || gp === "Toutes") { S.province = gp; S._pilGP = gp; S.zoneSel = ""; S.follZone = "Toutes"; S.idxZone = "Toutes"; provSel.value = gp; } } if (t.dataset.state === "pilZ") { S.pilA = ""; } if (t.dataset.state === "rtzProv") { S.rtzG = v === "Toutes" ? "National" : `P:${v}`; } render(); }
+    if (t.dataset.state) { const v = t.value; S[t.dataset.state] = /^\d+$/.test(v) && ["netDepth", "nowH", "fH"].includes(t.dataset.state) ? Number(v) : v; if (t.dataset.state === "fLevel") { S.fTerr = ""; } if (t.dataset.state === "opProv") { S.opZone = "Toutes"; } if (t.dataset.state === "pilT") { S.pilZ = ""; S.pilA = ""; const gp = v === "National" ? "Toutes" : v; if ((D.provinces || []).some(x => x.province === gp) || gp === "Toutes") { S.province = gp; S._pilGP = gp; S.zoneSel = ""; S.follZone = "Toutes"; S.idxZone = "Toutes"; provSel.value = gp; } } if (t.dataset.state === "pilZ") { S.pilA = ""; } if (t.dataset.state === "gsProv" || t.dataset.state === "gsDate") { S.gsSel = ""; } if (t.dataset.state === "rtzProv") { S.rtzG = v === "Toutes" ? "National" : `P:${v}`; } render(); }
     if (t.dataset.check) { S[t.dataset.check] = t.checked; render(); }
   });
   let st; document.addEventListener("input", e => { const t = e.target; if (t.dataset.pil) { const o = pilSaved(); o[t.dataset.pil] = t.value; pilSave(o); return; } if (t.dataset.tsearch) { clearTimeout(st); st = setTimeout(() => { S.tables[t.dataset.tsearch].q = t.value; S.tables[t.dataset.tsearch].limit = 60; rerenderTable(t.dataset.tsearch); }, 250); } });
@@ -3102,9 +3291,17 @@
         <label class="pb-date">${T("Du")}<input type="date" id="pb-d0" value="${d0}" min="${DMIN}" max="${DMAX}" ${SERVED_P ? "" : "disabled"}></label>
         <label class="pb-date">${T("au")}<input type="date" id="pb-d1" value="${d1}" min="${DMIN}" max="${DMAX}" ${SERVED_P ? "" : "disabled"}></label>
         <div class="seg pb-presets">${PRESETS.map(([k, t]) => `<button type="button" data-pp="${k}" class="${presetOn(k) ? "on" : ""}" ${SERVED_P ? "" : "disabled"}>${T(t)}</button>`).join("")}</div>
+        <label class="pb-date" title="${T("Nombre de jours jusqu’à la dernière date des données")}">${T("Derniers")}<input type="number" id="pb-n" min="1" max="${days(DMIN, DMAX) + 1}" step="1" value="${PER && PER.fin === DMAX ? days(PER.debut, PER.fin) + 1 : ""}" placeholder="${T("N")}" style="width:72px" ${SERVED_P ? "" : "disabled"}>${T("jours")}</label>
         <span class="pb-state small" id="pb-state">${SERVED_P ? T("Choisissez les dates : tous les menus se recalculent automatiquement.") : T("Pour recalculer par période, ouvrez l’outil avec 00_INTERFACE.")}</span>
       </div>
-      ${PER ? `<div class="pb-active"><b>${T("Résultats du")} ${dfmt(PER.debut)} ${T("au")} ${dfmt(PER.fin)}</b>, ${T("cas notifiés et contacts suivis pendant la période ; statuts de suivi et zones à risque à la date de fin ; Rt et prévisions estimés sur tout l’historique jusqu’à la date de fin, affichés sur la période.")} <button class="btn sm" type="button" data-pp="all">✕ ${T("Revenir à toute la période")}</button></div>` : ""}`;
+      ${PER ? `<div class="pb-active"><b>${T("Résultats du")} ${dfmt(PER.debut)} ${T("au")} ${dfmt(PER.fin)}</b>, ${T("cas notifiés et contacts suivis pendant la période ; statuts de suivi et zones à risque à la date de fin ; Rt et prévisions estimés sur tout l’historique jusqu’à la date de fin, affichés sur la période.")} <button class="btn sm" type="button" data-pp="all">✕ ${T("Revenir à toute la période")}</button>${pbLivrables()}</div>` : ""}`;
+  }
+  /* livrables de la période (rapport, présentation avec les KPI de la période, synthèse) : produits au recalcul de la période */
+  function pbLivrables() {
+    const L = D.livrables || {}, lb = L.base || "../reports/periodes/";
+    if (!(L.rapport || L.presentation || L.synthese)) return "";
+    const a = (f, t) => f ? `<a class="btn sm ${t === "Présentation (PowerPoint)" ? "primary" : ""}" href="${lb}${encodeURIComponent(f)}${VQ()}" download="${esc(f)}">⤓ ${T(t)}</a>` : "";
+    return `<div class="flex" style="gap:6px;flex-wrap:wrap;margin-top:6px"><span class="small"><b>${T("Livrables de la période")} :</b></span>${a(L.presentation, "Présentation (PowerPoint)")}${a(L.rapport, "Rapport (PDF)")}${a(L.synthese, "Synthèse par zone (Excel)")}</div>`;
   }
   function gotoPeriod(d0, d1) {
     const base = location.pathname + (d0 ? `?p=${d0}_${d1}` : "") + location.hash;
@@ -3141,6 +3338,13 @@
     } catch (e) { overlay(true, T("Serveur local injoignable"), T("Relancez 00_INTERFACE puis réessayez.")); }
   }
   document.addEventListener("change", e => {
+    if (e.target.id === "pb-n") {
+      const n = Math.round(Number(e.target.value));
+      if (!(n >= 1)) return;
+      clearTimeout(pbTimer);
+      applyPeriod(addDays(DMAX, -(Math.min(n, days(DMIN, DMAX) + 1) - 1)), DMAX);
+      return;
+    }
     if (e.target.id === "pb-d0" || e.target.id === "pb-d1") {
       clearTimeout(pbTimer);
       const d0 = $("#pb-d0").value, d1 = $("#pb-d1").value;

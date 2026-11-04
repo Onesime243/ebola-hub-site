@@ -224,26 +224,37 @@ window.HubOutil = (function () {
   let CPTS = null;
   function comptesView() {
     if (!SERVED || !can("admin")) return panel("Comptes", "", `<div class="notice">${T("Réservé aux administrateurs, dans l'outil installé sur l'ordinateur.")}</div>`);
-    return `${panel("Comptes de l'outil", T("Administrateur : tout (données, analyse, publication, comptes). Analyste : charger les données, lancer l'analyse, produire les présentations. Lecteur : consulter. Les mêmes identifiants ouvrent la version en ligne."), `<div id="cpt-list"><p class="muted small">${T("Chargement…")}</p></div><div class="msg small" id="cpt-msg" role="status"></div>`)}
+    const u = user() || {};
+    return `<div class="grid g3" id="cpt-kpis"></div>
+      ${panel("Comptes de l'outil", T("Créer, modifier, désactiver ou supprimer les comptes à tout moment. Les mêmes identifiants ouvrent la version en ligne (après une nouvelle publication)."), `<div id="cpt-list"><p class="muted small">${T("Chargement…")}</p></div><div class="msg small" id="cpt-msg" role="status"></div>`)}
+      <div class="grid g2">
       ${panel("Créer un compte", "", `<form id="cpt-new" class="cpt-form">
         <label class="field">${T("Nom affiché")}<input type="text" name="nom" placeholder="ex. Équipe surveillance Ituri"></label>
-        <label class="field">${T("Identifiant")}<input type="text" name="identifiant" required pattern="[a-z0-9._\\-]{3,32}" placeholder="ex. analyste.ituri" autocapitalize="none"></label>
+        <label class="field">${T("Identifiant")}<input type="text" name="identifiant" required pattern="[a-z0-9._\\-]{3,32}" placeholder="ex. analyste.ituri" autocapitalize="none" title="${T("3 à 32 caractères : lettres minuscules, chiffres, point, tiret")}"></label>
         <label class="field">${T("Rôle")}<select name="role">${Object.entries(ROLES).map(([k, t]) => `<option value="${k}" ${k === "lecteur" ? "selected" : ""}>${T(t)}</option>`).join("")}</select></label>
-        <label class="field">${T("Mot de passe (8 caractères au moins)")}<input type="password" name="mot_de_passe" required minlength="8" autocomplete="new-password"></label>
+        <label class="field">${T("Mot de passe (8 caractères au moins)")}<span class="flex" style="gap:6px"><input type="password" name="mot_de_passe" id="cpt-new-mdp" required minlength="8" autocomplete="new-password" style="flex:1"><button class="btn sm" type="button" data-cpt-gen>${T("Générer")}</button><button class="btn sm" type="button" data-cpt-voir>${T("Afficher")}</button></span></label>
         <button class="btn primary" type="submit">${T("Créer le compte")}</button></form>
-        <p class="muted small">${T("Transmettez l'identifiant et le mot de passe à la personne de vive voix ou par un canal sûr, jamais dans un groupe de discussion.")}</p>`)}`;
+        <p class="muted small">${T("Transmettez l'identifiant et le mot de passe à la personne de vive voix ou par un canal sûr, jamais dans un groupe de discussion. Elle pourra ensuite changer son mot de passe (menu de son nom, en haut à droite).")}</p>`)}
+      ${panel("Mon compte", `${esc(u.nom || "")} · ${esc(u.identifiant || "")} · ${T(ROLES[u.role] || u.role || "")}`, `<div class="flex" style="gap:8px;flex-wrap:wrap"><button class="btn" type="button" data-user-mdp>${T("Changer mon mot de passe")}</button><button class="btn" type="button" data-cpt-nom="${esc(u.identifiant || "")}" data-nom="${esc(u.nom || "")}">${T("Modifier mon nom affiché")}</button></div>
+        <h3 style="margin:18px 0 6px">${T("Rôles")}</h3>
+        <ul class="small" style="line-height:1.6;margin:0;padding-left:18px"><li><b>${T("Administrateur")}</b> : ${T("tout (données, analyse, publication en ligne, comptes)")}</li><li><b>${T("Analyste")}</b> : ${T("charger les données, lancer l'analyse, produire les présentations")}</li><li><b>${T("Lecteur")}</b> : ${T("consulter les résultats et télécharger les rapports")}</li></ul>
+        <p class="muted small" style="margin-top:10px">${T("Un compte désactivé ne peut plus se connecter mais reste dans la liste ; un compte supprimé disparaît définitivement. L'outil garde toujours au moins un administrateur actif.")}</p>`)}
+      </div>`;
   }
   async function loadComptes() {
     const j = await (await fetch("/api/comptes", { cache: "no-store" })).json().catch(() => ({}));
     const el = $("#cpt-list"); if (!el || !j.ok) return;
     CPTS = j.comptes; const me = user().identifiant;
+    const kp = $("#cpt-kpis"), n = r => CPTS.filter(c => c.role === r && c.actif).length;
+    if (kp) kp.innerHTML = [[T("Comptes actifs"), CPTS.filter(c => c.actif).length, `${CPTS.filter(c => !c.actif).length} ${T("désactivé(s)")}`], [T("Administrateurs / analystes"), `${n("admin")} / ${n("analyste")}`, T("comptes actifs")], [T("Lecteurs"), n("lecteur"), T("comptes actifs")]]
+      .map(([l, v, t]) => `<div class="kpi"><div class="label">${l}</div><div class="value">${v}</div><div class="note">${t}</div></div>`).join("");
     el.innerHTML = `<div class="table-wrap"><table><thead><tr><th>${T("Nom")}</th><th>${T("Identifiant")}</th><th>${T("Rôle")}</th><th>${T("État")}</th><th>${T("Accès en ligne")}</th><th>${T("Dernière connexion")}</th><th></th></tr></thead><tbody>
       ${CPTS.map(c => `<tr><td>${esc(c.nom)}</td><td><b>${esc(c.identifiant)}</b>${c.identifiant === me ? ` <span class="muted small">(${T("vous")})</span>` : ""}</td>
         <td><select data-cpt-role="${esc(c.identifiant)}" ${c.identifiant === me ? "disabled" : ""}>${Object.entries(ROLES).map(([k, t]) => `<option value="${k}" ${k === c.role ? "selected" : ""}>${T(t)}</option>`).join("")}</select></td>
         <td>${c.actif ? `<span class="badge b-good">${T("actif")}</span>` : `<span class="badge b-crit">${T("désactivé")}</span>`}</td>
         <td class="small">${c.en_ligne ? T("prêt") : `<span class="muted">${T("après sa première connexion ici")}</span>`}</td>
         <td class="small">${esc(c.derniere_connexion || "—")}</td>
-        <td><div class="cpt-acts"><button class="btn sm" type="button" data-cpt-mdp="${esc(c.identifiant)}">${T("Nouveau mot de passe")}</button>
+        <td><div class="cpt-acts"><button class="btn sm" type="button" data-cpt-mdp="${esc(c.identifiant)}">${T("Nouveau mot de passe")}</button><button class="btn sm" type="button" data-cpt-nom="${esc(c.identifiant)}" data-nom="${esc(c.nom || "")}">${T("Modifier le nom")}</button>
           ${c.identifiant === me ? "" : `<button class="btn sm" type="button" data-cpt-actif="${esc(c.identifiant)}" data-v="${c.actif ? 0 : 1}">${T(c.actif ? "Désactiver" : "Réactiver")}</button>
           <button class="btn sm" type="button" data-cpt-del="${esc(c.identifiant)}">${T("Supprimer")}</button>`}</div></td></tr>`).join("")}
       </tbody></table></div>`;
@@ -284,12 +295,27 @@ window.HubOutil = (function () {
     ctl.insertAdjacentHTML("beforeend", `<div class="user-chip" id="user-chip"><button class="btn" type="button" data-user-menu aria-haspopup="true">👤 ${esc(u.nom || u.identifiant)}</button>
       <div class="user-menu" hidden><div class="small"><b>${esc(u.identifiant)}</b><br><span class="muted">${T(ROLES[u.role] || u.role)}${ONLINE ? " · " + T("version en ligne") : ""}</span></div>
       ${SERVED ? `<button class="btn sm" type="button" data-user-mdp>${T("Changer mon mot de passe")}</button>` : ""}
+      ${SERVED && can("admin") ? `<button class="btn sm" type="button" onclick="this.closest('.user-menu').hidden=true;document.querySelector('#navigation button[data-tab=comptes]')?.click()">${T("Gérer les comptes (admin)")}</button>` : ""}
       <button class="btn sm" type="button" data-user-out>${T("Se déconnecter")}</button></div></div>`);
   }
   async function deconnexion() {
     if (ONLINE && window.HUB_DECONNEXION) return window.HUB_DECONNEXION();
     try { await post("/api/deconnexion"); } catch (e) { /* hors ligne */ }
     location.href = "connexion.html";
+  }
+  function dialogNom(id, nom) {
+    const d = document.createElement("dialog"); d.className = "mdp-dlg";
+    d.innerHTML = `<form method="dialog"><h3>${T("Nom affiché")} : ${esc(id)}</h3><label class="field">${T("Nom affiché")}<input type="text" name="nom" required maxlength="80" value="${esc(nom)}"></label>
+      <div class="msg small" role="status"></div><div class="flex"><button class="btn primary" value="ok">${T("Enregistrer")}</button><button class="btn" value="annuler" formnovalidate>${T("Annuler")}</button></div></form>`;
+    document.body.appendChild(d); d.showModal();
+    const f = d.querySelector("form"), m = d.querySelector(".msg");
+    f.addEventListener("submit", async e => {
+      if (e.submitter && e.submitter.value === "annuler") { d.remove(); return; }
+      e.preventDefault();
+      const j = await post("/api/comptes", { action: "modifier", identifiant: id, nom: new FormData(f).get("nom") });
+      if (!j.ok) { m.className = "msg small err"; m.textContent = j.error || T("Erreur"); return; }
+      d.remove(); cptMsg(T("Nom modifié.")); loadComptes();
+    });
   }
   function dialogMdp(titre, onOk, avecAncien) {
     const d = document.createElement("dialog"); d.className = "mdp-dlg";
@@ -321,6 +347,9 @@ window.HubOutil = (function () {
     if (t.closest("[data-pub-run]")) { const j = await post("/api/publier"); if (!j.ok) { $("#job-state").textContent = j.error || ""; return; } suivre(() => pubWire()); return; }
     const cr = t.closest("[data-cpt-mdp]"); if (cr) { const id = cr.dataset.cptMdp; dialogMdp(`${T("Nouveau mot de passe pour")} ${id}`, async v => { const j = await post("/api/comptes", { action: "modifier", identifiant: id, mot_de_passe: v.nouveau }); if (!j.ok) return j.error; cptMsg(T("Mot de passe modifié : transmettez-le à la personne par un canal sûr.")); loadComptes(); return null; }); return; }
     const ca = t.closest("[data-cpt-actif]"); if (ca) { cptAct({ action: "modifier", identifiant: ca.dataset.cptActif, actif: ca.dataset.v === "1" }, T("Compte modifié.")); return; }
+    if (t.closest("[data-cpt-gen]")) { const a = "abcdefghijkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789", r = crypto.getRandomValues(new Uint32Array(12)); const v = [...r].map(x => a[x % a.length]).join(""); const i = $("#cpt-new-mdp"); if (i) { i.value = v; i.type = "text"; } return; }
+    if (t.closest("[data-cpt-voir]")) { const i = $("#cpt-new-mdp"); if (i) i.type = i.type === "password" ? "text" : "password"; return; }
+    const cn = t.closest("[data-cpt-nom]"); if (cn) { dialogNom(cn.dataset.cptNom, cn.dataset.nom || ""); return; }
     const cd = t.closest("[data-cpt-del]"); if (cd) { if (confirm(`${T("Supprimer définitivement le compte")} ${cd.dataset.cptDel} ?`)) cptAct({ action: "supprimer", identifiant: cd.dataset.cptDel }, T("Compte supprimé.")); return; }
     const um = t.closest("[data-user-menu]"); if (um) { const m = um.parentElement.querySelector(".user-menu"); m.hidden = !m.hidden; return; }
     if (t.closest("[data-user-out]")) { deconnexion(); return; }
