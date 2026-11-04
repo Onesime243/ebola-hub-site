@@ -1,6 +1,6 @@
 {
  "date": "2026-11-02",
- "genere_le": "2026-11-04 09:41",
+ "genere_le": "2026-11-04 23:14",
  "niveaux": [
   {
    "code": "national",
@@ -462,58 +462,6 @@
    ]
   },
   {
-   "code": "sud-kivu",
-   "niveau": "province",
-   "nom": "Province : Sud Kivu",
-   "court": "Sud Kivu",
-   "date": "2026-10-31",
-   "pptx": "Presentation_Reunion_Sud_Kivu_20261031.pptx",
-   "diapositives": 7,
-   "images": [
-    "01_indicateurs_cumul",
-    "02_courbe_hebdomadaire",
-    "03_indicateurs_jour",
-    "05_jours_sans_cas",
-    "07_indicateurs_alertes",
-    "08_alertes_sources",
-    "07b_alertes_comparatif_3j",
-    "08b_alertes_sources_3j",
-    "08_alertes_tendance"
-   ],
-   "slides": [
-    {
-     "titre": "Situation cumulée",
-     "images": [
-      "01_indicateurs_cumul",
-      "02_courbe_hebdomadaire"
-     ]
-    },
-    {
-     "titre": "Situation du jour",
-     "images": [
-      "03_indicateurs_jour"
-     ]
-    },
-    {
-     "titre": "Jours sans nouveau cas",
-     "images": [
-      "05_jours_sans_cas"
-     ]
-    },
-    {
-     "titre": "Alertes",
-     "date": "2026-10-22",
-     "images": [
-      "07_indicateurs_alertes",
-      "07b_alertes_comparatif_3j",
-      "08_alertes_sources",
-      "08b_alertes_sources_3j",
-      "08_alertes_tendance"
-     ]
-    }
-   ]
-  },
-  {
    "code": "nord-ubangi",
    "niveau": "province",
    "nom": "Province : Nord Ubangi",
@@ -555,6 +503,58 @@
     {
      "titre": "Alertes",
      "date": "2026-10-28",
+     "images": [
+      "07_indicateurs_alertes",
+      "07b_alertes_comparatif_3j",
+      "08_alertes_sources",
+      "08b_alertes_sources_3j",
+      "08_alertes_tendance"
+     ]
+    }
+   ]
+  },
+  {
+   "code": "sud-kivu",
+   "niveau": "province",
+   "nom": "Province : Sud Kivu",
+   "court": "Sud Kivu",
+   "date": "2026-10-31",
+   "pptx": "Presentation_Reunion_Sud_Kivu_20261031.pptx",
+   "diapositives": 7,
+   "images": [
+    "01_indicateurs_cumul",
+    "02_courbe_hebdomadaire",
+    "03_indicateurs_jour",
+    "05_jours_sans_cas",
+    "07_indicateurs_alertes",
+    "08_alertes_sources",
+    "07b_alertes_comparatif_3j",
+    "08b_alertes_sources_3j",
+    "08_alertes_tendance"
+   ],
+   "slides": [
+    {
+     "titre": "Situation cumulée",
+     "images": [
+      "01_indicateurs_cumul",
+      "02_courbe_hebdomadaire"
+     ]
+    },
+    {
+     "titre": "Situation du jour",
+     "images": [
+      "03_indicateurs_jour"
+     ]
+    },
+    {
+     "titre": "Jours sans nouveau cas",
+     "images": [
+      "05_jours_sans_cas"
+     ]
+    },
+    {
+     "titre": "Alertes",
+     "date": "2026-10-22",
      "images": [
       "07_indicateurs_alertes",
       "07b_alertes_comparatif_3j",

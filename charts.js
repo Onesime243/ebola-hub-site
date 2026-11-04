@@ -132,20 +132,19 @@
       const up = idx.map(i => `${X(i)},${Y(val(data[i], opt.band.hi))}`), lo = idx.map(i => `${X(i)},${Y(val(data[i], opt.band.lo))}`).reverse();
       el("polygon", { points: up.concat(lo).join(" "), fill: col(opt.band.color || "--s2"), "fill-opacity": .16 }, svg);
     }
-    // barres
-    const gap = Math.min(2, bw * .15), inner = Math.max(1, bw * (opt.barWidth || .72));
+    // barres jointives (histogramme épidémiologique) : aucune marge entre les barres ni entre les segments empilés,
+    // bord sombre fin quand la barre est assez large pour qu'il reste lisible (sinon la couleur seule)
+    const inner = opt.keepGap ? Math.max(1, bw * (opt.barWidth || .72)) : bw;
+    const edge = opt.barStroke && opt.keepGap ? col(opt.barStroke) : (bw / Math.max(1, opt.stacked ? 1 : bars.length) >= 4 ? "#1b1b1b" : null);
     data.forEach((r, i) => {
       let acc = 0;
       bars.forEach((b, j) => {
         const v = val(r, b.key); if (v <= 0) return;
         let x, w, y0, y1;
         if (opt.stacked) { x = X(i) - inner / 2; w = inner; y0 = Y(acc); y1 = Y(acc + v); acc += v; }
-        else { const gw = inner / bars.length; x = X(i) - inner / 2 + j * gw; w = Math.max(1, gw - (bars.length > 1 ? gap : 0)); y0 = Y(0); y1 = Y(v); }
-        const hgt = Math.max(0, y0 - y1 - (opt.stacked && acc - v > 0 ? gap : 0));
-        const top = opt.stacked ? j === bars.length - 1 || bars.slice(j + 1).every(bb => val(r, bb.key) <= 0) : true;
-        const rad = top ? Math.min(3, w / 2, hgt) : 0;
-        const p = `M${x},${y0 - (opt.stacked && acc - v > 0 ? gap : 0)}V${y1 + rad}q0,-${rad} ${rad},-${rad}h${w - 2 * rad}q${rad},0 ${rad},${rad}V${y0 - (opt.stacked && acc - v > 0 ? gap : 0)}Z`;
-        el("path", { d: hgt > 0 ? p : `M${x},${y0}h${w}`, fill: col(b.color), stroke: opt.barStroke ? col(opt.barStroke) : null, "stroke-width": opt.barStroke ? .8 : null }, svg);
+        else { const gw = inner / bars.length; x = X(i) - inner / 2 + j * gw; w = Math.max(1, gw); y0 = Y(0); y1 = Y(v); }
+        const hgt = Math.max(0, y0 - y1);
+        el("path", { d: hgt > 0 ? `M${x},${y0}V${y1}H${x + w}V${y0}Z` : `M${x},${y0}h${w}`, fill: col(b.color), stroke: edge, "stroke-width": edge ? .7 : null, "shape-rendering": "crispEdges" }, svg);
         // représentation « un carré = un cas » (incidence::plot(show_cases = TRUE))
         if (opt.showCases && ymax <= 60 && hgt > 0) for (let u = 1; u < v; u++) { const yy = opt.stacked ? Y(acc - v + u) : Y(u); el("line", { x1: x, x2: x + w, y1: yy, y2: yy, stroke: col("--surface"), "stroke-width": 1 }, svg); }
       });
