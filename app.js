@@ -3243,7 +3243,7 @@
       <span class="small muted"><b>${where}</b> · ${T("situation au")} <b>${dfmt(P.date)}</b>${P.periode ? `<br>${T("Période choisie : situation à la date de fin, tendances et cumuls sur tout l’historique jusqu’à cette date")}` : ""}</span>
     </div>
     <div class="grid g6 pil-cards">${cards}</div>
-    <h2 class="pil-q">${T("Indicateurs du jour")}</h2>
+    <h2 class="pil-q">${T("Indicateurs du jour")}${P.jour_24h ? ` <span class="small muted" style="font-weight:400">· ${T("« 24 h » = notifications du")} ${dfmt(P.jour_24h)}${P.jour_24h_complet === false ? ` (${T("dernier jour complet ; le jour de l’extraction est encore presque vide")})` : ""}</span>` : ""}</h2>
     <div class="pil-tiles">${daily}</div>
     <h2 class="pil-q">${T("Évolution de l’épidémie")}</h2>
     <div class="grid g2">
