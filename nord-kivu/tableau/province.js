@@ -785,6 +785,31 @@
   }
 
   /* ------------------------------------------------------------------ navigation */
+
+  /* ---- menu latéral en blocs dépliables (même présentation que l'outil national) ---- */
+  const NAVB_KEY = "zs-nav-ouverts";
+  const NAVB_IC = {
+    "Situation et risque": "M12 2 3 6v6c0 5 3.8 9.3 9 10 5.2-.7 9-5 9-10V6zm-1 14-4-4 1.4-1.4 2.6 2.6 5.6-5.6L18 9z",
+    "Contact tracing": "M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zm7 0a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM9 13c-3.3 0-7 1.7-7 4.5V20h14v-2.5C16 14.7 12.3 13 9 13zm7 0c-.5 0-1 0-1.5.1 1.5 1 2.5 2.5 2.5 4.4V20h5v-2.5c0-2.8-3.4-4.5-6-4.5z",
+    "Analyses": "M3 3h2v16h16v2H3zm4 10h3v5H7zm5-5h3v10h-3zm5 3h3v7h-3z",
+    "Surveillance et riposte": "M12 22a2 2 0 0 0 2-2h-4a2 2 0 0 0 2 2zm6-6V11a6 6 0 0 0-5-5.9V4h-2v1.1A6 6 0 0 0 6 11v5l-2 2v1h16v-1z",
+    "Communauté": "M12 3 2 9l10 6 10-6zm-6 9.2V16c0 1.7 2.7 3 6 3s6-1.3 6-3v-3.8l-6 3.6z",
+    "Réunions": "M3 4h18v2H3zm1 3h16v10H4zm7 11h2v3h-2zm-4 3h10v1H7z",
+    "Données et administration": "M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8zm9.4 5.5-1.9-1.1v-.8l1.9-1.1-2-3.5-2 1.1-.7-.4V5.5h-4v2.2l-.7.4-2-1.1-2 3.5 1.9 1.1v.8l-1.9 1.1 2 3.5 2-1.1.7.4v2.2h4v-2.2l.7-.4 2 1.1z",
+    "Zones de santé": "M12 2C8 2 5 5 5 9c0 5 7 13 7 13s7-8 7-13c0-4-3-7-7-7zm0 9.5A2.5 2.5 0 1 1 12 6a2.5 2.5 0 0 1 0 5.5z",
+  };
+  function navBlocs(groups) {   // groups : [{ g, items: [{ html, active }], ouvert }]
+    let open; try { open = new Set(JSON.parse(localStorage.getItem(NAVB_KEY) || "[]")); } catch (e) { open = new Set(); }
+    return groups.filter(x => x.items.length).map((x, i) => {
+      const act = x.items.some(it => it.active), on = act || x.ouvert || open.has(x.g), id = `ng-${i}`, n = x.compte ?? x.items.length;
+      return `<section class="ng ${on ? "open" : ""} ${act ? "has-active" : ""}"><button class="ng-h" data-ng="${esc(x.g)}" aria-expanded="${on}" aria-controls="${id}"><i class="ng-ic"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="${NAVB_IC[x.g] || NAVB_IC.Analyses}"/></svg></i><span class="ng-t">${x.g}</span>${n ? `<span class="ng-n">${n}</span>` : ""}<svg class="ng-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><div class="ng-b" id="${id}"><div class="ng-in">${x.items.map(it => it.html).join("")}</div></div></section>`;
+    }).join("");
+  }
+  function navBlocToggle(btn) {
+    const sec = btn.closest(".ng"), on = !sec.classList.contains("open");
+    sec.classList.toggle("open", on); btn.setAttribute("aria-expanded", on);
+    try { const o = new Set(JSON.parse(localStorage.getItem(NAVB_KEY) || "[]")); on ? o.add(btn.dataset.ng) : o.delete(btn.dataset.ng); localStorage.setItem(NAVB_KEY, JSON.stringify([...o])); } catch (e) { /* stockage indisponible */ }
+  }
   const PAGES = [["accueil", "Accueil", "Province"], ["pilotage", "Pilotage stratégique", "Province"], ["situation", "Situation épidémiologique", "Province"], ["zones", "Zones de santé", "Province"], ["carte", "Carte et rapports", "Province"],
     ["alertes", "Surveillance des alertes", "Riposte"], ["presentation", "Présentation (diapositives)", "Réunions"], ["indicateurs", "Indicateurs du pilier surveillance", "Réunions"], ["donnees", PUBLIC ? "État des données" : "Données des zones", "Données"],
     ["comptes", "Comptes", "Administration", () => isProv() && !PUBLIC], ["publication", "Publication en ligne", "Administration", () => isProv() && !PUBLIC]];
@@ -801,12 +826,18 @@
     if (!pages.find(p => p[0] === S.page)) S.page = "accueil";
     document.title = `Ebola : Province du ${PROV}`;
     $("#brand-sub").textContent = `Outil provincial · ${PROV}`;
-    let g0 = "";
     const zl = ZONES.filter(z => DETAIL.has(z.code));
     const DET = P.meta.detail_province;
-    const detLinks = DET ? `<div class="nav-group">Analyses détaillées · province</div>` + DETAIL_PAGES.map(([k, l, ic]) => `<a class="navlink" href="zs.html?zone=${encodeURIComponent(DET)}#p=${k}"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="${ic}"/></svg>${l}</a>`).join("") : "";
-    $("#nav").innerHTML = pages.map(([k, l, g]) => { const head = g !== g0 ? `<div class="nav-group">${g}</div>` : ""; g0 = g; return `${head}<button data-page="${k}" class="${S.page === k ? "active" : ""}">${svgI(k)}${l}</button>`; }).join("") + detLinks
-      + (zl.length ? `<div class="nav-group">Tableaux de bord des zones</div><div class="zs-switch"><select data-openzs aria-label="Ouvrir le tableau de bord d'une zone de santé"><option value="">Ouvrir une zone de santé…</option>${zl.map(z => `<option value="${z.code}">${esc(z.nom)}${myZone() && myZone().code === z.code ? " (ma zone)" : ""}</option>`).join("")}</select></div>` : "");
+    const PG = { accueil: "Situation et risque", pilotage: "Situation et risque", situation: "Situation et risque", zones: "Situation et risque", carte: "Situation et risque",
+      alertes: "Surveillance et riposte", presentation: "Réunions", indicateurs: "Réunions", donnees: "Données et administration", comptes: "Données et administration", publication: "Données et administration" };
+    const DG = { index: "Contact tracing", journey: "Contact tracing", chains: "Contact tracing", recon: "Contact tracing" };
+    const ORDRE = ["Situation et risque", "Contact tracing", "Analyses", "Surveillance et riposte", "Réunions", "Données et administration"];
+    const G = ORDRE.map(g => ({ g, items: [] }));
+    const put = (g, it) => (G.find(x => x.g === g) || G[G.push({ g, items: [] }) - 1]).items.push(it);
+    pages.forEach(([k, l, g]) => put(PG[k] || g, { active: S.page === k, html: `<button data-page="${k}" class="${S.page === k ? "active" : ""}" ${S.page === k ? 'aria-current="page"' : ""}>${svgI(k)}<span>${l}</span></button>` }));
+    if (DET) DETAIL_PAGES.forEach(([k, l, ic]) => put(DG[k] || "Analyses", { active: false, html: `<a class="navlink" href="zs.html?zone=${encodeURIComponent(DET)}#p=${k}" title="Analyse détaillée de la province"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="${ic}"/></svg><span>${l}</span></a>` }));
+    if (zl.length) G.push({ g: "Zones de santé", compte: zl.length, ouvert: false, items: [{ active: false, html: `<div class="zs-switch"><select data-openzs aria-label="Ouvrir le tableau de bord d'une zone de santé"><option value="">Ouvrir une zone de santé…</option>${zl.map(z => `<option value="${z.code}">${esc(z.nom)}${myZone() && myZone().code === z.code ? " (ma zone)" : ""}</option>`).join("")}</select></div>` }] });
+    $("#nav").innerHTML = navBlocs(G);
     const p = pages.find(x => x[0] === S.page);
     $("#title").textContent = p[1];
     $("#subtitle").innerHTML = (SUBT[S.page] || (() => `${scope()} · ${perTxt()}`))();
@@ -863,6 +894,7 @@
     if (t.closest("[data-logout]") && window.NK_DECONNEXION) { window.NK_DECONNEXION(); return; }
     if (t.closest("[data-logout]")) { await fetch("/api/deconnexion", { method: "POST", credentials: "same-origin" }); location.href = "connexion.html"; return; }
     if (t.closest("[data-mdp]")) { S.menu = false; shell(); modalMdp(); return; }
+    const ngh = t.closest(".ng-h"); if (ngh) { navBlocToggle(ngh); return; }
     const nav = t.closest("[data-page]"); if (nav) { go(nav.dataset.page); return; }
     const gg = t.closest("[data-go]"); if (gg) { if (gg.dataset.upz) S.upZone = gg.dataset.upz; go(gg.dataset.go); return; }
     const pr = t.closest("[data-preset]"); if (pr) { S.preset = pr.dataset.preset; applyPreset(); render(); return; }

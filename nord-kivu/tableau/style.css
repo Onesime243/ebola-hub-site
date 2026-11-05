@@ -433,3 +433,33 @@ tr.sel td{background:color-mix(in srgb,var(--accent) 12%,transparent)}
 @media print{.periodbar,.foot{display:none!important}}
 .kpi .note{background:none;border:0;padding:0;margin:4px 0 0;font-size:11.5px;color:var(--muted);border-radius:0}
 .seg{max-width:100%;overflow-x:auto}
+
+/* ---- Menu latéral en blocs dépliables ---- */
+.sidebar nav{display:flex;flex-direction:column;gap:3px}
+.ng{border-radius:12px;transition:background .18s}
+.ng.open{background:rgba(255,255,255,.045)}
+.sidebar nav .ng-h{display:flex;align-items:center;gap:10px;width:100%;min-height:42px;padding:7px 8px 7px 7px;border:0;border-radius:11px;background:transparent;color:rgba(255,255,255,.9);font-size:13.5px;font-weight:600;letter-spacing:.005em;cursor:pointer;text-align:left}
+.sidebar nav .ng-h:hover{background:rgba(255,255,255,.07);color:#fff}
+.sidebar nav .ng-h:focus-visible,.sidebar nav .ng-in button:focus-visible,.sidebar nav .ng-in a:focus-visible{outline:2px solid #5ad1c1;outline-offset:1px}
+.ng-ic{flex:none;width:28px;height:28px;border-radius:8px;display:grid;place-items:center;background:rgba(255,255,255,.08);transition:background .18s,color .18s}
+.sidebar nav .ng-ic svg{width:16px;height:16px;opacity:1}
+.ng.has-active .ng-ic{background:rgba(90,209,193,.2);color:#8fe6da}
+.ng-t{flex:1;min-width:0;line-height:1.25}
+.ng-n{flex:none;min-width:20px;height:18px;padding:0 6px;border-radius:9px;background:rgba(255,255,255,.1);font-size:10.5px;font-weight:600;line-height:18px;text-align:center;color:rgba(255,255,255,.7);font-variant-numeric:tabular-nums;transition:opacity .15s}
+.ng.open .ng-n{opacity:0}
+.ng.has-active:not(.open) .ng-n{background:#5ad1c1;color:#0d2a3f}
+.sidebar nav .ng-chev{flex:none;width:16px;height:16px;opacity:.6;transition:transform .22s ease}
+.ng.open .ng-chev{transform:rotate(90deg)}
+.ng-b{display:grid;grid-template-rows:0fr;transition:grid-template-rows .24s ease}
+.ng.open .ng-b{grid-template-rows:1fr}
+.ng-in{overflow:hidden;min-height:0;margin-left:21px;padding-left:9px;border-left:1px solid rgba(255,255,255,.13)}
+.ng.open .ng-in{padding-bottom:6px}
+.sidebar nav .ng-in button,.sidebar nav .ng-in a.navlink{position:relative;display:flex;align-items:center;gap:9px;width:100%;padding:7px 9px;margin:1px 0;border-radius:8px;font-size:13px;line-height:1.3;color:rgba(255,255,255,.76);box-shadow:none}
+.sidebar nav .ng-in svg{width:16px;height:16px;opacity:.75}
+.sidebar nav .ng-in button:hover,.sidebar nav .ng-in a.navlink:hover{background:rgba(255,255,255,.07);color:#fff}
+.sidebar nav .ng-in button.active{background:rgba(255,255,255,.13);color:#fff;font-weight:600;box-shadow:none}
+.sidebar nav .ng-in button.active::before{content:"";position:absolute;left:-10px;top:7px;bottom:7px;width:3px;border-radius:2px;background:#5ad1c1}
+.sidebar nav .ng-in button.active svg{opacity:1}
+.sidebar nav .ng-in .ext{margin-left:auto;opacity:.45;font-size:11px}
+.ng-in .zs-switch{margin:4px 0 4px 2px}
+@media (prefers-reduced-motion:reduce){.ng-b,.ng-chev,.ng,.ng-ic{transition:none!important}}
