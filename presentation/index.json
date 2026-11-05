@@ -1,14 +1,14 @@
 {
- "date": "2026-11-02",
- "genere_le": "2026-11-04 23:14",
+ "date": "2026-11-05",
+ "genere_le": "2026-11-05 13:11",
  "niveaux": [
   {
    "code": "national",
    "niveau": "national",
    "nom": "Niveau national : RDC",
    "court": "RDC",
-   "date": "2026-10-31",
-   "pptx": "Presentation_Reunion_National_20261031.pptx",
+   "date": "2026-11-04",
+   "pptx": "Presentation_Reunion_National_20261104.pptx",
    "diapositives": 13,
    "images": [
     "01_indicateurs_cumul",
@@ -64,7 +64,7 @@
     },
     {
      "titre": "Alertes",
-     "date": "2026-10-31",
+     "date": "2026-11-04",
      "images": [
       "07_indicateurs_alertes",
       "07b_alertes_comparatif_3j",
@@ -84,7 +84,7 @@
       "13_contacts_suivre_vus",
       "14_tableau_contacts"
      ],
-     "date": "2026-10-31"
+     "date": "2026-11-04"
     },
     {
      "titre": "Laboratoire",
@@ -93,7 +93,7 @@
       "16_labo_resultats",
       "17_labo_positivite"
      ],
-     "date": "2026-10-31"
+     "date": "2026-11-04"
     }
    ]
   },
@@ -102,8 +102,8 @@
    "niveau": "province",
    "nom": "Province : Ituri",
    "court": "Ituri",
-   "date": "2026-10-31",
-   "pptx": "Presentation_Reunion_Ituri_20261031.pptx",
+   "date": "2026-11-04",
+   "pptx": "Presentation_Reunion_Ituri_20261104.pptx",
    "diapositives": 10,
    "images": [
     "01_indicateurs_cumul",
@@ -147,7 +147,7 @@
     },
     {
      "titre": "Alertes",
-     "date": "2026-10-31",
+     "date": "2026-11-04",
      "images": [
       "07_indicateurs_alertes",
       "07b_alertes_comparatif_3j",
@@ -167,7 +167,7 @@
       "13_contacts_suivre_vus",
       "14_tableau_contacts"
      ],
-     "date": "2026-10-31"
+     "date": "2026-11-04"
     }
    ]
   },
@@ -176,8 +176,8 @@
    "niveau": "province",
    "nom": "Province : Nord Kivu",
    "court": "Nord Kivu",
-   "date": "2026-10-31",
-   "pptx": "Presentation_Reunion_Nord_Kivu_20261031.pptx",
+   "date": "2026-11-04",
+   "pptx": "Presentation_Reunion_Nord_Kivu_20261104.pptx",
    "diapositives": 10,
    "images": [
     "01_indicateurs_cumul",
@@ -221,7 +221,7 @@
     },
     {
      "titre": "Alertes",
-     "date": "2026-10-31",
+     "date": "2026-11-04",
      "images": [
       "07_indicateurs_alertes",
       "07b_alertes_comparatif_3j",
@@ -241,7 +241,7 @@
       "13_contacts_suivre_vus",
       "14_tableau_contacts"
      ],
-     "date": "2026-10-31"
+     "date": "2026-11-04"
     }
    ]
   },
@@ -250,8 +250,8 @@
    "niveau": "province",
    "nom": "Province : Haut Uele",
    "court": "Haut Uele",
-   "date": "2026-10-31",
-   "pptx": "Presentation_Reunion_Haut_Uele_20261031.pptx",
+   "date": "2026-11-04",
+   "pptx": "Presentation_Reunion_Haut_Uele_20261104.pptx",
    "diapositives": 10,
    "images": [
     "01_indicateurs_cumul",
@@ -295,7 +295,7 @@
     },
     {
      "titre": "Alertes",
-     "date": "2026-10-31",
+     "date": "2026-11-04",
      "images": [
       "07_indicateurs_alertes",
       "07b_alertes_comparatif_3j",
@@ -315,7 +315,7 @@
       "13_contacts_suivre_vus",
       "14_tableau_contacts"
      ],
-     "date": "2026-10-31"
+     "date": "2026-11-04"
     }
    ]
   },
@@ -324,8 +324,8 @@
    "niveau": "province",
    "nom": "Province : Tshopo",
    "court": "Tshopo",
-   "date": "2026-10-31",
-   "pptx": "Presentation_Reunion_Tshopo_20261031.pptx",
+   "date": "2026-11-04",
+   "pptx": "Presentation_Reunion_Tshopo_20261104.pptx",
    "diapositives": 10,
    "images": [
     "01_indicateurs_cumul",
@@ -369,7 +369,7 @@
     },
     {
      "titre": "Alertes",
-     "date": "2026-10-31",
+     "date": "2026-11-04",
      "images": [
       "07_indicateurs_alertes",
       "07b_alertes_comparatif_3j",
@@ -389,7 +389,7 @@
       "13_contacts_suivre_vus",
       "14_tableau_contacts"
      ],
-     "date": "2026-10-31"
+     "date": "2026-11-04"
     }
    ]
   },
@@ -398,8 +398,8 @@
    "niveau": "province",
    "nom": "Province : Bas Uele",
    "court": "Bas Uele",
-   "date": "2026-10-31",
-   "pptx": "Presentation_Reunion_Bas_Uele_20261031.pptx",
+   "date": "2026-11-04",
+   "pptx": "Presentation_Reunion_Bas_Uele_20261104.pptx",
    "diapositives": 9,
    "images": [
     "01_indicateurs_cumul",
@@ -439,7 +439,7 @@
     },
     {
      "titre": "Alertes",
-     "date": "2026-10-31",
+     "date": "2026-11-04",
      "images": [
       "07_indicateurs_alertes",
       "07b_alertes_comparatif_3j",
@@ -466,8 +466,8 @@
    "niveau": "province",
    "nom": "Province : Nord Ubangi",
    "court": "Nord Ubangi",
-   "date": "2026-10-31",
-   "pptx": "Presentation_Reunion_Nord_Ubangi_20261031.pptx",
+   "date": "2026-11-04",
+   "pptx": "Presentation_Reunion_Nord_Ubangi_20261104.pptx",
    "diapositives": 7,
    "images": [
     "01_indicateurs_cumul",
@@ -478,7 +478,9 @@
     "08_alertes_sources",
     "07b_alertes_comparatif_3j",
     "08b_alertes_sources_3j",
-    "08_alertes_tendance"
+    "08_alertes_tendance",
+    "09_alertes_unites",
+    "09b_alertes_sources_unites"
    ],
    "slides": [
     {
@@ -502,13 +504,15 @@
     },
     {
      "titre": "Alertes",
-     "date": "2026-10-28",
+     "date": "2026-11-04",
      "images": [
       "07_indicateurs_alertes",
       "07b_alertes_comparatif_3j",
       "08_alertes_sources",
       "08b_alertes_sources_3j",
-      "08_alertes_tendance"
+      "08_alertes_tendance",
+      "09_alertes_unites",
+      "09b_alertes_sources_unites"
      ]
     }
    ]
@@ -518,8 +522,8 @@
    "niveau": "province",
    "nom": "Province : Sud Kivu",
    "court": "Sud Kivu",
-   "date": "2026-10-31",
-   "pptx": "Presentation_Reunion_Sud_Kivu_20261031.pptx",
+   "date": "2026-11-04",
+   "pptx": "Presentation_Reunion_Sud_Kivu_20261104.pptx",
    "diapositives": 7,
    "images": [
     "01_indicateurs_cumul",
@@ -570,8 +574,8 @@
    "niveau": "province",
    "nom": "Province : Sud Ubangi",
    "court": "Sud Ubangi",
-   "date": "2026-10-31",
-   "pptx": "Presentation_Reunion_Sud_Ubangi_20261031.pptx",
+   "date": "2026-11-04",
+   "pptx": "Presentation_Reunion_Sud_Ubangi_20261104.pptx",
    "diapositives": 7,
    "images": [
     "01_indicateurs_cumul",

@@ -84,7 +84,7 @@
     tab: "overview", province: "Toutes", zone: "", caseKey: "", nodeSel: "", netLayout: "radial", netDepth: 2,
     curveBy: "notification", mapMetric: "cas", mapPeriod: "14", mapFocus: "1", jrPeriod: "0", dlPeriod: "0", zoneSel: "", follLevel: "zone", follZone: "Toutes",
     idxQuery: "", idxActive: false, idxConf: "Toutes", idxZone: "Toutes", chain: "", chainLayout: "time",
-    lab: "Tous", nowH: 30, fLevel: "National", fTerr: "National", fTarget: "confirmes", fH: 30, tables: {},
+    lab: "Tous", nowH: 30, fLevel: "National", fTerr: "National", pcT: "National", pcZ: "", fTarget: "confirmes", fH: 30, tables: {},
     ovStack: "aucun", netIcons: true, gen: "0", idxPeriod: "0", ssSet: "", ssPlace: "Tous", ssMin: "2", ssCases: true, dynG: "National", growBase: "dds", growWin: "12s", dyStack: "sexe", dyBase: "o", dyDays: "60", rtDays: "120",
     siCmp: false, rlWin: "28j", projH: "30", distK: "dds_notification", recZone: "", recSup: "0.3", recColor: "issue", recX: "onset", recIcons: true, recDoc: false, epiMin: "3", resZone: "", perfG: "National",
     rtmG: "National", rtmSet: "all", rtmDays: "120", zrCat: "Toutes", rtmMode: "zones", iclG: "National", rtzProv: "Toutes", rtzG: "National", rtzTau: "7", rtzDays: "60", opTab: "deces", opProv: "Toutes", opWin: "cumul", opZone: "Toutes", opCte: "Tous", opD1: "", opD2: "", opCls: "c", opMapK: "dec", opChamp: "Tous", iclTau: "14", pilT: "National", pilZ: "", pilA: "", jlD1: "", jlD2: "", jlBase: "exp", jlZone: "Toutes", jlSt: "Tous", zrColor: "categorie", zrLab: "score", zrSel: "", rgPrio: "P1-P2", rgStat: "actifs", rgSel: "", gsProv: "Toutes", gsSel: "", gsNiv: "Prioritaires", gsLab: "rang", gsDate: "", pplProv: "Toutes", sitNiv: "national"
@@ -1732,6 +1732,9 @@
     const tot = rows.reduce((s, x) => s + x.attendu, 0), sdT = Math.sqrt(rows.reduce((s, x) => s + Math.pow((x.borne_sup_95 - x.borne_inf_95) / 3.92, 2), 0));
     const lo = Math.max(0, tot - 1.96 * sdT), hi = tot + 1.96 * sdT;
     return `
+    <h2 class="pil-q" style="margin-top:0">${T("Prévision à court terme : cas confirmés des 3 et 7 prochains jours")}</h2>
+    ${pcBlock()}
+    <h2 class="pil-q">${T("Prévisions à moyen terme et autres indicateurs")}</h2>
     <div class="flex" style="margin-bottom:12px">
       <label class="field">${T("Niveau")}<select data-state="fLevel">${["National", "Province", "Zone de santé"].map(x => `<option value="${x}" ${S.fLevel === x ? "selected" : ""}>${T(x)}</option>`).join("")}</select></label>
       <label class="field">${T("Territoire")}<select data-state="fTerr">${terr.map(x => `<option ${S.fTerr === x ? "selected" : ""}>${esc(x)}</option>`).join("")}</select></label>
@@ -1743,6 +1746,7 @@
     ${panel("Validation rétrospective des modèles", T("Erreur sur les derniers jours retenus ; poids de l’ensemble inversement proportionnels à la MAE"), table("fv", (D.forecast_validation || []).filter(x => x.target === S.fTarget), [{ k: "modele", t: "Modèle" }, { k: "MAE", t: "MAE", num: true, d: 2 }, { k: "RMSE", t: "RMSE", num: true, d: 2 }, { k: "WIS95", t: "WIS95", num: true, d: 2 }, { k: "couverture_95_pct", t: "Couverture 95 %", num: true, d: 0 }], { search: false }))}`;
   }
   function forecastCharts() {
+    pcChart();
     const all = S.fLevel === "National" ? (D.forecast_national || []) : (D.forecast_geo || []).filter(x => x.niveau === S.fLevel);
     const rows = all.filter(x => x.territoire === S.fTerr && x.cible === S.fTarget && x.horizon_jour <= S.fH);
     let hist = [];
@@ -3197,10 +3201,12 @@
     ].join("");
     const si = P.intervalle_seriel;
     const pv = E.prevision_7j, pv14 = E.prevision_14j, und = E.non_detecte_pct;
+    const pcN = (lvl === "N" || lvl === "P") && !P.periode ? pcLevel(S.pilT) : null;
+    const pcZA = !P.periode && (lvl === "Z" || lvl === "A") ? pcZACards(S.pilT, S.pilZ, lvl === "A" ? S.pilA : null) : null;
     const estim = `
       <div class="grid g4">
-        ${pilCard("Cas confirmés attendus à 7 jours", pv ? nf(pv.v) : "—", pv ? `${T("intervalle approché")} ${nf(pv.ic[0])}–${nf(pv.ic[1])}` : lvl === "A" ? noAire : "", { color: "--s1", estim: true })}
-        ${pilCard("Cas confirmés attendus à 14 jours", pv14 ? nf(pv14.v) : "—", pv14 ? `${T("intervalle approché")} ${nf(pv14.ic[0])}–${nf(pv14.ic[1])}` : lvl === "A" ? noAire : "", { color: "--s1", estim: true })}
+        ${pcZA ? pcZA[0] : pcN ? pcCard(pcN, "j3", "Cas confirmés attendus dans les 3 prochains jours") : pilCard("Cas confirmés attendus à 7 jours", pv ? nf(pv.v) : "—", pv ? `${T("intervalle approché")} ${nf(pv.ic[0])}–${nf(pv.ic[1])}` : lvl === "A" ? noAire : "", { color: "--s1", estim: true })}
+        ${pcZA ? pcZA[1] : pcN ? pcCard(pcN, "j7", "Cas confirmés attendus dans les 7 prochains jours") : pilCard("Cas confirmés attendus à 14 jours", pv14 ? nf(pv14.v) : "—", pv14 ? `${T("intervalle approché")} ${nf(pv14.ic[0])}–${nf(pv14.ic[1])}` : lvl === "A" ? noAire : "", { color: "--s1", estim: true })}
         ${pilCard("Transmission non détectée", und ? `${nf(und.v)} %` : "—", und ? `${T("part des infections non détectées")} (${nf(und.ic[0])}–${nf(und.ic[1])} %), ${dshort(und.periode[0])}–${dshort(und.periode[1])} · ${T("méthode ICL")}` : (lvl === "A" ? noAire : T("données insuffisantes")), { color: "--warn", estim: true })}
         ${pilCard("Intervalle sériel", si ? `${nf(si.mediane)} ${T("j")}` : "—", si ? `${T("médiane")} · ${T("quartiles")} ${nf(si.q1)}–${nf(si.q3)} ${T("j")} · ${nf(si.n)} ${T("paires infecteur–infecté")}${nat ? "" : ` · ${T("valeur nationale")}`}` : "", { color: "--s7", estim: true })}
       </div>
@@ -3241,7 +3247,7 @@
     <div class="pil-tiles">${daily}</div>
     <h2 class="pil-q">${T("Évolution de l’épidémie")}</h2>
     <div class="grid g2">
-      ${panel("Courbe épidémique : cas confirmés par semaine de début des symptômes", T("Les deux dernières semaines (zone grisée) sont provisoires : notifications encore incomplètes ; ligne : semaine de notification"), `<div id="c-pil-epi"></div>`, { png: "courbe_dds_pilotage" })}
+      ${panel("Courbe épidémique : cas confirmés par semaine de début des symptômes", T("Zone grisée : semaines provisoires (cas pas encore notifiés) et projection ; pointillés : estimation corrigée du délai de notification puis projection à 4 semaines, avec intervalle à 90 %"), `<div id="c-pil-epi"></div>${pilProj(X)}`, { png: "courbe_dds_pilotage" })}
       ${panel("Décès confirmés par semaine, au CTE et hors CTE", T("Semaine du décès ; une part élevée hors CTE signale des cas non isolés à temps"), `<div id="c-pil-dec"></div>`, { png: "deces_cte_hors_cte_hebdo" })}
     </div>
     <h2 class="pil-q">${T("Foyers actifs et risque de propagation")}</h2>
@@ -3254,13 +3260,123 @@
     <h2 class="pil-q">${T("Indicateurs estimés par modélisation")}</h2>
     ${estim}`;
   }
+  /* prévision à court terme des cas confirmés (scripts/prevision_courte.py) */
+  const pcLevel = t => ((D.prevision_courte || {}).niveaux || {})[t] || null;
+  const pcPer = q => `${dshort(q.du)}–${dshort(q.au)}`;
+  function pcCard(n, h, label) {
+    const q = n[h], v = n.validation && n.validation[h];
+    return pilCard(label, nf(q.med), `${T("du")} ${pcPer(q)} · ${T("IC 90 %")} ${nf(q.ic90[0])}–${nf(q.ic90[1])}${v ? `<br>${T("erreur moyenne en validation")} : ± ${nf(v.erreur_rel_pct)} %` : ""}<br><span class="muted">${T("détails : menu Prévisions")}</span>`, { color: "--s1", estim: true });
+  }
+  const pcZone = (pv, z) => ((D.prevision_courte || {}).zones || []).find(r => norm(r.province) === norm(pv) && norm(r.zone) === norm(z));
+  const pcAire = (pv, z, a) => ((D.prevision_courte || {}).aires || []).find(r => norm(r.province) === norm(pv) && norm(r.zone) === norm(z) && norm(r.aire) === norm(a));
+  function pcZACards(pv, z, a) {
+    const PC = D.prevision_courte; if (!PC || !PC.zones) return null;
+    const d1 = dshort(new Date(Date.parse(PC.origine) + 864e5).toISOString().slice(0, 10)), d = h => dshort(new Date(Date.parse(PC.origine) + h * 864e5).toISOString().slice(0, 10));
+    const more = `<br><span class="muted">${T("détails : menu Prévisions")}</span>`;
+    if (a) {
+      const r = pcAire(pv, z, a);
+      const none = pilCard("Probabilité d’au moins un cas confirmé (7 prochains jours)", "—", T("aucun cas confirmé dans cette aire depuis 42 jours : pas de prévision propre"), { color: "--s1", estim: true });
+      if (!r) return [pilCard("Probabilité d’au moins un cas confirmé (3 prochains jours)", "—", T("aucun cas confirmé dans cette aire depuis 42 jours : pas de prévision propre"), { color: "--s1", estim: true }), none];
+      return [pilCard("Probabilité d’au moins un cas confirmé (3 prochains jours)", `${nf(r.p3)} %`, `${T("du")} ${d1}–${d(3)}${more}`, { color: r.p3 >= 50 ? "--critical" : "--s1", estim: true }),
+              pilCard("Probabilité d’au moins un cas confirmé (7 prochains jours)", `${nf(r.p7)} %`, `${T("du")} ${d1}–${d(7)} · ${T("cas attendus")} : ${nf(r.attendu7, 1)}${more}`, { color: r.p7 >= 50 ? "--critical" : "--s1", estim: true })];
+    }
+    const r = pcZone(pv, z);
+    if (!r) return [pilCard("Cas confirmés attendus dans les 3 prochains jours", "0", T("aucun cas confirmé dans cette zone depuis 42 jours"), { color: "--s1", estim: true }), pilCard("Cas confirmés attendus dans les 7 prochains jours", "0", T("aucun cas confirmé dans cette zone depuis 42 jours"), { color: "--s1", estim: true })];
+    return [pilCard("Cas confirmés attendus dans les 3 prochains jours", nf(r.j3.med), `${T("du")} ${d1}–${d(3)} · ${T("IC 90 %")} ${nf(r.j3.ic90[0])}–${nf(r.j3.ic90[1])} · P(≥ 1) ${nf(r.p3)} %${more}`, { color: "--s1", estim: true }),
+            pilCard("Cas confirmés attendus dans les 7 prochains jours", nf(r.j7.med), `${T("du")} ${d1}–${d(7)} · ${T("IC 90 %")} ${nf(r.j7.ic90[0])}–${nf(r.j7.ic90[1])} · P(≥ 1) ${nf(r.p7)} %${more}`, { color: "--s1", estim: true })];
+  }
+  function pcZABlock() {
+    const PC = D.prevision_courte; if (!PC || !PC.zones || !PC.zones.length) return "";
+    const pv = S.pcT === "National" ? null : S.pcT;
+    const Z = PC.zones.filter(r => !pv || r.province === pv);
+    const zl = [...new Set(PC.aires.filter(r => !pv || r.province === pv).map(r => r.zone))].sort();
+    if (S.pcZ && !zl.includes(S.pcZ)) S.pcZ = "";
+    const A = PC.aires.filter(r => (!pv || r.province === pv) && (!S.pcZ || r.zone === S.pcZ));
+    const VZ = ((PC.validation_initiale || {}).zones_aires) || {};
+    const ic = q => `${nf(q.ic90[0])}–${nf(q.ic90[1])}`, dl = r => r.dernier_cas ? dshort(r.dernier_cas) : "—";
+    const pct = k => ({ k, t: k === "p3" ? "P(≥ 1 cas) 3 j" : "P(≥ 1 cas) 7 j", num: true, v: x => `<b style="color:${col(x[k] >= 75 ? "--critical" : x[k] >= 50 ? "--warn" : "--ink-2")}">${nf(x[k])} %</b>` });
+    return `
+    <h2 class="pil-q">${T("Prévision par zone de santé et par aire de santé")}</h2>
+    <p class="small muted" style="margin-top:-4px">${T("La prévision de la province est répartie entre ses zones, puis celle de chaque zone entre ses aires, selon leur part des cas confirmés des 28 derniers jours (corrigée des retards de saisie, les jours récents pesant plus). Seules les unités ayant eu au moins un cas en 42 jours sont listées.")}${pv ? "" : ` ${T("Choisissez une province ci-dessus pour filtrer.")}`}</p>
+    <div>
+      ${panel("Zones de santé : cas confirmés attendus", T("Médiane et intervalle à 90 % ; P(≥ 1 cas) : probabilité d’au moins un cas confirmé notifié"), table("pc-zones", Z.map(r => ({ ...r, m3: r.j3.med, m7: r.j7.med })), [
+        { k: "zone", t: "Zone de santé", v: x => `<b>${esc(x.zone)}</b>${pv ? "" : `<br><span class="small muted">${esc(x.province)}</span>`}` },
+        { k: "m3", t: "Attendus 3 j", num: true, v: x => `<b>${nf(x.m3)}</b> <span class="small muted">${ic(x.j3)}</span>` },
+        { k: "m7", t: "Attendus 7 j", num: true, v: x => `<b>${nf(x.m7)}</b> <span class="small muted">${ic(x.j7)}</span>` },
+        pct("p7"), { k: "cas_7j", t: "Cas 7 derniers j", num: true }, { k: "cas_28j", t: "Cas 28 j", num: true }, { k: "dernier_cas", t: "Dernier cas", v: dl }],
+        { search: true, sort: "m7", maxh: 520 }), { csv: "pc-zones" })}
+      ${panel("Aires de santé : probabilité d’au moins un cas confirmé", T("Probabilités recalibrées sur la validation ; classement pour orienter recherche active, vaccination et surveillance"),
+        `<div class="flex" style="margin-bottom:8px"><label class="field">${T("Zone de santé")}<select data-state="pcZ"><option value="">${T("Toutes")}</option>${zl.map(z => `<option value="${esc(z)}" ${S.pcZ === z ? "selected" : ""}>${esc(z)}</option>`).join("")}</select></label></div>` +
+        table("pc-aires", A, [{ k: "aire", t: "Aire de santé", v: x => `<b>${esc(x.aire)}</b><br><span class="small muted">${esc(x.zone)}${pv ? "" : `, ${esc(x.province)}`}</span>` },
+          pct("p3"), pct("p7"), { k: "attendu7", t: "Cas attendus 7 j", num: true, d: 1 }, { k: "cas_7j", t: "Cas 7 derniers j", num: true }, { k: "cas_28j", t: "Cas 28 j", num: true }, { k: "dernier_cas", t: "Dernier cas", v: dl }],
+          { search: true, sort: "p7", maxh: 520 }), { csv: "pc-aires" })}
+    </div>
+    ${VZ.zones ? panel("Fiabilité des prévisions par zone et par aire", T(VZ.note || ""), `
+      <div>
+        <div>${table("pc-vz", VZ.zones, [{ k: "modele", t: "Zones : modèle", v: x => esc(T(x.modele)) }, { k: "wis_rel_reel_j3", t: "WIS relatif 3 j", num: true, d: 2 }, { k: "wis_rel_reel_j7", t: "WIS relatif 7 j", num: true, d: 2 }, { k: "couverture90_reel_j7_pct", t: "Couverture IC 90 % (7 j)", num: true, v: x => nf(x.couverture90_reel_j7_pct) + " %" }], { search: false })}</div>
+        <div>${table("pc-va", VZ.aires, [{ k: "modele", t: "Aires : modèle", v: x => esc(T(x.modele)) }, { k: "brier_reel_j7", t: "Score de Brier 7 j", num: true, d: 3 }, { k: "auc_reel_j7", t: "AUC 7 j", num: true, d: 2 }], { search: false })}</div>
+      </div>
+      <p class="small muted">${T("Extractions réelles ; WIS relatif < 1 : meilleur que la moyenne brute de la zone ; Brier : plus bas = meilleur ; AUC : capacité à distinguer les aires qui auront un cas (1 = parfait, 0,5 = hasard).")} ${esc(T(VZ.calibration_aires || ""))}</p>`) : ""}`;
+  }
+  function pcBlock() {
+    const PC = D.prevision_courte;
+    if (!PC) return `<div class="empty">${T("Prévision à court terme non calculée : relancez l’analyse complète.")}</div>`;
+    if (!PC.niveaux[S.pcT]) S.pcT = "National";
+    const n = PC.niveaux[S.pcT], v = n.validation, V0 = PC.validation_initiale || {};
+    const vrow = h => v && v[h] ? `<tr><td>${h === "j3" ? T("3 jours") : T("7 jours")}</td><td class="num">± ${nf(v[h].erreur_abs_moy, 0)} ${T("cas")} (${nf(v[h].erreur_rel_pct)} %)</td><td class="num">± ${nf(v[h].erreur_abs_moy_naif, 0)}</td><td class="num">${nf(v[h].wis_relatif, 2)}</td><td class="num">${nf(v[h].couverture90_pct)} %</td></tr>` : "";
+    const memb = Object.entries(n.membres).map(([k, x]) => `<tr><td>${T(k)}</td><td class="num">${nf(x.j3)}</td><td class="num">${nf(x.j7)}</td></tr>`).join("");
+    const reel = (V0.reel || {}).modeles || [];
+    return `
+    <div class="flex between" style="margin-bottom:10px;align-items:flex-end">
+      <label class="field">${T("Territoire")}<select data-state="pcT">${PC.ordre.map(t => `<option value="${esc(t)}" ${S.pcT === t ? "selected" : ""}>${esc(t === "National" ? T("National") : t)}</option>`).join("")}</select></label>
+      <span class="small muted">${T("Données au")} <b>${dfmt(PC.origine)}</b> · ${T("cas confirmés par date de notification")}</span>
+    </div>
+    <div class="grid g4">
+      ${kpi("Cas confirmés attendus dans les 3 prochains jours", nf(n.j3.med), `${pcPer(n.j3)} · ${T("IC 50 %")} ${nf(n.j3.ic50[0])}–${nf(n.j3.ic50[1])} · ${T("IC 90 %")} ${nf(n.j3.ic90[0])}–${nf(n.j3.ic90[1])}`, { color: "--s1" })}
+      ${kpi("Cas confirmés attendus dans les 7 prochains jours", nf(n.j7.med), `${pcPer(n.j7)} · ${T("IC 50 %")} ${nf(n.j7.ic50[0])}–${nf(n.j7.ic50[1])} · ${T("IC 90 %")} ${nf(n.j7.ic90[0])}–${nf(n.j7.ic90[1])}`, { color: "--s1" })}
+      ${kpi("Moyenne journalière récente", nf(n.moyenne_7j_corrigee, 1), `${T("corrigée des retards de saisie ; brute")} : ${nf(n.moyenne_7j_brute, 1)}`, { color: "--s2" })}
+      ${kpi("R(t) utilisé par le modèle de renouvellement", nf(n.rt[0], 2), `${T("IC 90 %")} ${nf(n.rt[1], 2)}–${nf(n.rt[2], 2)} · ${T("cas notifiés entre J-21 et J-7")}`, { color: n.rt[1] > 1 ? "--critical" : n.rt[2] < 1 ? "--good" : "--warn" })}
+    </div>
+    <div class="grid g21">
+      ${panel("Cas confirmés par jour : 21 derniers jours et 7 prochains jours", T("Barres : cas saisis à ce jour ; pointillés : estimation corrigée des retards de saisie (les derniers jours sont encore incomplets) ; ligne pleine et zones colorées : prévision médiane, intervalles à 50 % et 90 %"), `<div id="c-pc"></div>`, { png: "prevision_courte_confirmes" })}
+      ${panel("Méthode retenue et fiabilité", "", `
+        <p class="small" style="margin-top:0">${T("Ensemble de quatre modèles appliqués après correction des retards de saisie. Les deux derniers jours, trop incomplets, sont écartés ; la prévision repart de J-2.")}</p>
+        <table class="rsum"><thead><tr><th>${T("Modèle")}</th><th class="num">${T("3 j")}</th><th class="num">${T("7 j")}</th></tr></thead><tbody>${memb}<tr><td><b>${T("Ensemble retenu")}</b></td><td class="num"><b>${nf(n.j3.med)}</b></td><td class="num"><b>${nf(n.j7.med)}</b></td></tr></tbody></table>
+        ${v ? `<p class="small" style="margin-bottom:4px"><b>${T("Validation sur les données actuelles")}</b> (${nf(v.origines)} ${T("origines du")} ${dshort(v.periode[0])} ${T("au")} ${dshort(v.periode[1])})</p>
+        <table class="rsum"><thead><tr><th>${T("Horizon")}</th><th class="num">${T("Erreur moyenne")}</th><th class="num">${T("Erreur de la moyenne brute 7 j")}</th><th class="num">${T("WIS relatif")}</th><th class="num">${T("Couverture IC 90 %")}</th></tr></thead><tbody>${vrow("j3")}${vrow("j7")}</tbody></table>` : `<p class="small muted">${T("Validation propre à ce territoire non disponible : profil de saisie national appliqué.")}</p>`}
+        <p class="small muted">${T("WIS relatif < 1 : meilleur que la moyenne brute des 7 derniers jours.")} ${n.profil === "national" ? T("Profil de saisie : national.") : ""}</p>`)}
+    </div>
+    ${reel.length ? panel("Pourquoi ce modèle : comparaison sur les extractions réelles", T((V0.reel || {}).note || ""), table("pc-reel", reel, [{ k: "modele", t: "Modèle", v: x => esc(T(x.modele)) }, { k: "wis_j3", t: "WIS 3 j", num: true, d: 1 }, { k: "wis_j7", t: "WIS 7 j", num: true, d: 1 }, { k: "couverture90_j3_pct", t: "Couverture IC 90 % (3 j)", num: true, v: x => nf(x.couverture90_j3_pct) + " %" }, { k: "couverture90_j7_pct", t: "Couverture IC 90 % (7 j)", num: true, v: x => nf(x.couverture90_j7_pct) + " %" }], { search: false, sort: "wis_j3", dir: 1 }), { csv: "pc-reel" }) : ""}
+    ${pcZABlock()}`;
+  }
+  function pcChart() {
+    const PC = D.prevision_courte, n = PC && PC.niveaux[S.pcT]; if (!n || !$("#c-pc")) return;
+    const data = n.jours.map(r => ({ ...r }));
+    const i0 = data.findIndex(r => r.type === "prévision");
+    if (i0 > 0) { const a = data[i0 - 1]; a.prevu = a.estime ?? a.observe; }
+    Ch.xy($("#c-pc"), { data, x: "date", height: 300, tipSkipNull: true, xLabel: (v, r, tip) => tip ? dfmt(v) : dshort(v),
+      shade: i0 >= 0 ? { from: i0, label: T("prévision") } : null,
+      bands: [{ lo: "lo90", hi: "hi90", color: "--s1", opacity: .14, label: T("Intervalle à 90 %") }, { lo: "lo50", hi: "hi50", color: "--s1", opacity: .26, label: T("Intervalle à 50 %") }],
+      series: [{ key: "observe", label: T("Cas confirmés saisis"), color: "--seq-3" }, { key: "estime", label: T("Estimation corrigée des retards"), color: "--critical", type: "line", dash: "6 4", width: 2 },
+               { key: "prevu", label: T("Prévision médiane"), color: "--s1", type: "line", width: 2.4 }] });
+  }
+  function pilProj(X) {
+    const p = X && X.estim && X.estim.projection;
+    if (!p) return `<p class="small muted" style="margin:6px 0 0">${T("Projection non calculée : trop peu de cas récents dans ce territoire.")}</p>`;
+    const [v, lo, hi] = p.cas_28j;
+    return `<p class="small" style="margin:6px 0 0"><b>${T("Projection sur 28 jours")}</b> (${T("jusqu’au")} ${dfmt(p.jusqu_au)}) : ${nf(v)} ${T("cas")} (${T("IC 90 %")} ${nf(lo)}–${nf(hi)}) · R<sub>t</sub> ${nf(p.rt, 2)} (${nf(p.rt_ic[0], 2)}–${nf(p.rt_ic[1], 2)}) · ${T("probabilité que l’épidémie croisse")} : ${nf(p.p_croissance)} %. <span class="muted">${T("Hypothèse : la transmission mesurée entre J-21 et J-8 se maintient ; à relire chaque jour.")}</span></p>`;
+  }
   function pilotageCharts() {
     const P = PIL(); if (!P) return;
     const X = P.territoires[pilSel(P).key] || P.territoires.National;
     const xl = (v, r, tip) => tip ? `${T("semaine du")} ${dfmt(v)}` : dshort(v);
     const i0 = X.serie.findIndex(r => r.provisoire);
-    if ($("#c-pil-epi")) Ch.xy($("#c-pil-epi"), { data: X.serie, x: "semaine", xLabel: xl, height: 260, shade: i0 >= 0 ? { from: i0, label: T("provisoire") } : null,
-      series: [{ key: "cas_dds", label: T("Début des symptômes"), color: "--s2" }, { key: "cas_notif", label: T("Notification"), color: "--s1", type: "line", markers: false }] });
+    const hasEst = X.serie.some(r => r.estim !== undefined && r.estim !== null);
+    if ($("#c-pil-epi")) Ch.xy($("#c-pil-epi"), { data: X.serie, x: "semaine", xLabel: xl, height: 280, tipSkipNull: true,
+      shade: i0 >= 0 ? { from: i0, label: hasEst ? T("provisoire · projection") : T("provisoire") } : null,
+      band: hasEst ? { lo: "estim_lo", hi: "estim_hi", color: "--critical", label: T("Intervalle à 90 %") } : null,
+      series: [{ key: "cas_dds", label: T("Début des symptômes (observé)"), color: "--s2" }, { key: "cas_notif", label: T("Notification"), color: "--s1", type: "line", markers: false },
+               ...(hasEst ? [{ key: "estim", label: T("Estimation corrigée et projection"), color: "--critical", type: "line", dash: "6 4", width: 2.2 }] : [])] });
     if ($("#c-pil-dec")) Ch.xy($("#c-pil-dec"), { data: X.deces, x: "semaine", xLabel: xl, height: 260, stacked: true,
       series: [{ key: "cte", label: T("Décès au CTE"), color: "--s1" }, { key: "hors_cte", label: T("Décès hors CTE"), color: "--critical" }] });
     if ($("#c-pil-del")) Ch.xy($("#c-pil-del"), { data: X.serie, x: "semaine", xLabel: (v, r, tip) => tip ? `${T("semaine du")} ${dfmt(v)} · n = ${nf(r.n_isoles)}` : dshort(v), height: 260, tipSkipNull: true, shade: i0 >= 0 ? { from: i0, label: T("provisoire") } : null,
