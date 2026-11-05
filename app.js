@@ -84,18 +84,18 @@
     tab: "overview", province: "Toutes", zone: "", caseKey: "", nodeSel: "", netLayout: "radial", netDepth: 2,
     curveBy: "notification", mapMetric: "cas", mapPeriod: "14", mapFocus: "1", jrPeriod: "0", dlPeriod: "0", zoneSel: "", follLevel: "zone", follZone: "Toutes",
     idxQuery: "", idxActive: false, idxConf: "Toutes", idxZone: "Toutes", chain: "", chainLayout: "time",
-    lab: "Tous", nowH: 30, fLevel: "National", fTerr: "National", pcT: "National", pcZ: "", fTarget: "confirmes", fH: 30, tables: {},
+    lab: "Tous", labTab: "act", nowH: 30, fLevel: "National", fTerr: "National", pcT: "National", pcZ: "", fTarget: "confirmes", fH: 30, tables: {},
     ovStack: "aucun", netIcons: true, gen: "0", idxPeriod: "0", ssSet: "", ssPlace: "Tous", ssMin: "2", ssCases: true, dynG: "National", growBase: "dds", growWin: "12s", dyStack: "sexe", dyBase: "o", dyDays: "60", rtDays: "120",
     siCmp: false, rlWin: "28j", projH: "30", distK: "dds_notification", recZone: "", recSup: "0.3", recColor: "issue", recX: "onset", recIcons: true, recDoc: false, epiMin: "3", resZone: "", perfG: "National",
     rtmG: "National", rtmSet: "all", rtmDays: "120", zrCat: "Toutes", rtmMode: "zones", iclG: "National", rtzProv: "Toutes", rtzG: "National", rtzTau: "7", rtzDays: "60", opTab: "deces", opProv: "Toutes", opWin: "cumul", opZone: "Toutes", opCte: "Tous", opD1: "", opD2: "", opCls: "c", opMapK: "dec", opChamp: "Tous", iclTau: "14", pilT: "National", pilZ: "", pilA: "", jlD1: "", jlD2: "", jlBase: "exp", jlZone: "Toutes", jlSt: "Tous", zrColor: "categorie", zrLab: "score", zrSel: "", rgPrio: "P1-P2", rgStat: "actifs", rgSel: "", gsProv: "Toutes", gsSel: "", gsNiv: "Prioritaires", gsLab: "rang", gsDate: "", pplProv: "Toutes", sitNiv: "national"
   };
   const TABS = [
-    { id: "pilotage", t: "Pilotage stratégique", g: "Situation", i: "M3 3h2v16h16v2H3zm4 12 4-5 3 3 5-7 1.6 1.2-6.4 9-3-3-2.6 3.4z" },
-    { id: "overview", t: "Vue générale", g: "Situation", i: "M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z" },
-    { id: "territories", t: "Territoires", g: "Situation", i: "M12 2C8 2 5 5 5 9c0 5 7 13 7 13s7-8 7-13c0-4-3-7-7-7zm0 9.5A2.5 2.5 0 1 1 12 6a2.5 2.5 0 0 1 0 5.5z" },
-    { id: "maps", t: "Cartes pour rapport", g: "Situation", i: "M15 4 9 2 3 4v18l6-2 6 2 6-2V2zM9 4.4l6 2v13.2l-6-2z" },
-    { id: "riskzones", t: "Zones à risque", g: "Situation", i: "M12 2 1 21h22L12 2zm1 15h-2v2h2zm0-7h-2v5h2z" },
-    { id: "spatialrisk", t: "Google Invasion Spatial Risque", g: "Situation", i: "M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm0 2a8 8 0 0 1 7.7 6h-3.2l-2-3-3 6-2-3H4.3A8 8 0 0 1 12 4zm0 16a8 8 0 0 1-7.7-6h3.2l2 3 3-6 2 3h5.2A8 8 0 0 1 12 20z" },
+    { id: "pilotage", t: "Pilotage stratégique", g: "Situation et risque", i: "M3 3h2v16h16v2H3zm4 12 4-5 3 3 5-7 1.6 1.2-6.4 9-3-3-2.6 3.4z" },
+    { id: "overview", t: "Vue générale", g: "Situation et risque", i: "M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z" },
+    { id: "territories", t: "Territoires", g: "Situation et risque", i: "M12 2C8 2 5 5 5 9c0 5 7 13 7 13s7-8 7-13c0-4-3-7-7-7zm0 9.5A2.5 2.5 0 1 1 12 6a2.5 2.5 0 0 1 0 5.5z" },
+    { id: "maps", t: "Cartes pour rapport", g: "Situation et risque", i: "M15 4 9 2 3 4v18l6-2 6 2 6-2V2zM9 4.4l6 2v13.2l-6-2z" },
+    { id: "riskzones", t: "Zones à risque", g: "Situation et risque", i: "M12 2 1 21h22L12 2zm1 15h-2v2h2zm0-7h-2v5h2z" },
+    { id: "spatialrisk", t: "Google Invasion Spatial Risque", g: "Situation et risque", i: "M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm0 2a8 8 0 0 1 7.7 6h-3.2l-2-3-3 6-2-3H4.3A8 8 0 0 1 12 4zm0 16a8 8 0 0 1-7.7-6h3.2l2 3 3-6 2 3h5.2A8 8 0 0 1 12 20z" },
     { id: "index", t: "Cas index", g: "Contact tracing", i: "M4 6h16v2H4zm0 5h16v2H4zm0 5h10v2H4z", priv: true },
     { id: "journey", t: "Parcours du cas", g: "Contact tracing", i: "M12 2a4 4 0 1 1 0 8 4 4 0 0 1 0-8zm-7 18c0-3.9 3.1-7 7-7s7 3.1 7 7H5zM19 3l3 3-3 3", priv: true },
     { id: "chains", t: "Chaînes de transmission", g: "Contact tracing", i: "M7 7a3 3 0 1 1-2 5.2L10 15a3 3 0 1 1-.8 1.8L4.3 14A3 3 0 0 1 7 7zm10-4a3 3 0 1 1 0 6 3 3 0 0 1 0-6z" },
@@ -107,25 +107,25 @@
     { id: "ppl", t: "Personnel de santé (PPL)", g: "Analyses", i: "M10 2h4v4h4v4h-4v4h-4v-4H6V6h4zM4 18h16v3H4z" },
     { id: "ops", t: "Opérations par zone (EDS, CTE, swabs, PPL)", g: "Analyses", i: "M3 3h8v8H3zm10 0h8v8h-8zM3 13h8v8H3zm13 0h2v3h3v2h-3v3h-2v-3h-3v-2h3z" },
     { id: "children", t: "Enfants (0–18 ans)", g: "Analyses", i: "M12 2a3 3 0 1 1 0 6 3 3 0 0 1 0-6zm-4 8h8l-1 6h-1v6h-4v-6H9z" },
-    { id: "labs", t: "Laboratoires", g: "Analyses", i: "M9 2h6v2h-1v5l5 9a2 2 0 0 1-2 3H7a2 2 0 0 1-2-3l5-9V4H9z" },
+    { id: "labs", t: "Laboratoires", g: "Analyses", alias: ["lab2"], i: "M9 2h6v2h-1v5l5 9a2 2 0 0 1-2 3H7a2 2 0 0 1-2-3l5-9V4H9z" },
     { id: "nowcast", t: "Nowcasting", g: "Analyses", i: "M3 17l6-6 4 4 8-8v4h2V3h-8v2h4l-6 6-4-4-8 8z" },
     { id: "forecast", t: "Prévisions", g: "Analyses", i: "M3 20h18v2H3zm2-3l4-5 4 3 6-8 1.6 1.2-7.2 9.6-4-3L6.6 18z" },
-    { id: "alerts", t: "Surveillance des alertes", g: "Linelist lln", i: "M12 22a2 2 0 0 0 2-2h-4a2 2 0 0 0 2 2zm6-6V11a6 6 0 0 0-5-5.9V4h-2v1.1A6 6 0 0 0 6 11v5l-2 2v1h16v-1z" },
-    { id: "eds", t: "Décès et EDS", g: "Linelist lln", i: "M10 2h4v6h6v4h-6v10h-4V12H4V8h6z" },
-    { id: "clinic", t: "Symptômes et clinique", g: "Linelist lln", i: "M12 21l-1.5-1.3C5.4 15.4 2 12.3 2 8.5 2 5.4 4.4 3 7.5 3c1.7 0 3.4.8 4.5 2.1C13.1 3.8 14.8 3 16.5 3 19.6 3 22 5.4 22 8.5c0 3.8-3.4 6.9-8.5 11.2z" },
-    { id: "lab2", t: "Laboratoire (Ct, délais)", g: "Linelist lln", i: "M9 2h6v2h-1v5l5 9a2 2 0 0 1-2 3H7a2 2 0 0 1-2-3l5-9V4H9z" },
-    { id: "pec", t: "Prise en charge, vaccination, expositions", g: "Linelist lln", i: "M19 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm-2 10h-4v4h-2v-4H7v-2h4V7h2v4h4z" },
+    { id: "alerts", t: "Surveillance des alertes", g: "Surveillance (Linelist lln)", i: "M12 22a2 2 0 0 0 2-2h-4a2 2 0 0 0 2 2zm6-6V11a6 6 0 0 0-5-5.9V4h-2v1.1A6 6 0 0 0 6 11v5l-2 2v1h16v-1z" },
+    { id: "eds", t: "Décès et EDS", g: "Surveillance (Linelist lln)", i: "M10 2h4v6h6v4h-6v10h-4V12H4V8h6z" },
+    { id: "clinic", t: "Symptômes et clinique", g: "Surveillance (Linelist lln)", i: "M12 21l-1.5-1.3C5.4 15.4 2 12.3 2 8.5 2 5.4 4.4 3 7.5 3c1.7 0 3.4.8 4.5 2.1C13.1 3.8 14.8 3 16.5 3 19.6 3 22 5.4 22 8.5c0 3.8-3.4 6.9-8.5 11.2z" },
+    { id: "pec", t: "Prise en charge, vaccination, expositions", g: "Surveillance (Linelist lln)", i: "M19 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm-2 10h-4v4h-2v-4H7v-2h4V7h2v4h4z" },
     { id: "situation", t: "Situation par province", g: "Réunions", i: "M4 3h16v18H4zm3 4v2h10V7zm0 4v2h10v-2zm0 4v2h6v-2z" },
     { id: "indicateurs", t: "Indicateurs du pilier surveillance", g: "Réunions", i: "M3 3h18v18H3zm2 2v4h4V5zm6 0v4h8V5zm-6 6v4h4v-4zm6 0v4h8v-4zm-6 6v2h4v-2zm6 0v2h8v-2z", role: "lecteur", pub: true },
     { id: "presentation", t: "Présentation", g: "Réunions", i: "M3 4h18v2H3zm1 3h16v10H4zm7 11h2v3h-2zm-4 3h10v1H7zM7 14l3-4 2 2 3-4 2 6z", role: "lecteur", pub: true },
-    { id: "upload", t: "Charger les données", g: "Données", i: "M5 20h14v-2H5zm7-16-5 5h3v6h4V9h3z", priv: true, role: "analyste" },
-    { id: "comptes", t: "Admin : comptes et accès", g: "Administration", i: "M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zm0 2c-4 0-8 2-8 5v1h16v-1c0-3-4-5-8-5z", priv: true, role: "admin" },
-    { id: "publication", t: "Publication en ligne", g: "Administration", i: "M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm6.9 6h-3a15 15 0 0 0-1.3-3.9A8 8 0 0 1 18.9 8zM12 4c.8 1.2 1.5 2.5 1.9 4h-3.8c.4-1.5 1.1-2.8 1.9-4zM4.3 14a8 8 0 0 1 0-4h3.4a16 16 0 0 0 0 4zm.8 2h3a15 15 0 0 0 1.3 3.9A8 8 0 0 1 5.1 16zm3-8h-3a8 8 0 0 1 4.3-3.9A15 15 0 0 0 8.1 8zM12 20c-.8-1.2-1.5-2.5-1.9-4h3.8c-.4 1.5-1.1 2.8-1.9 4zm2.3-6H9.7a14 14 0 0 1 0-4h4.6a14 14 0 0 1 0 4zm.3 5.9a15 15 0 0 0 1.3-3.9h3a8 8 0 0 1-4.3 3.9zm1.7-5.9a16 16 0 0 0 0-4h3.4a8 8 0 0 1 0 4z", priv: true, role: "admin" }
+    { id: "upload", t: "Charger les données", g: "Données et administration", i: "M5 20h14v-2H5zm7-16-5 5h3v6h4V9h3z", priv: true, role: "analyste" },
+    { id: "comptes", t: "Admin : comptes et accès", g: "Données et administration", i: "M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zm0 2c-4 0-8 2-8 5v1h16v-1c0-3-4-5-8-5z", priv: true, role: "admin" },
+    { id: "publication", t: "Publication en ligne", g: "Données et administration", i: "M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm6.9 6h-3a15 15 0 0 0-1.3-3.9A8 8 0 0 1 18.9 8zM12 4c.8 1.2 1.5 2.5 1.9 4h-3.8c.4-1.5 1.1-2.8 1.9-4zM4.3 14a8 8 0 0 1 0-4h3.4a16 16 0 0 0 0 4zm.8 2h3a15 15 0 0 0 1.3 3.9A8 8 0 0 1 5.1 16zm3-8h-3a8 8 0 0 1 4.3-3.9A15 15 0 0 0 8.1 8zM12 20c-.8-1.2-1.5-2.5-1.9-4h3.8c-.4 1.5-1.1 2.8-1.9 4zm2.3-6H9.7a14 14 0 0 1 0-4h4.6a14 14 0 0 1 0 4zm.3 5.9a15 15 0 0 0 1.3-3.9h3a8 8 0 0 1-4.3 3.9zm1.7-5.9a16 16 0 0 0 0-4h3.4a8 8 0 0 1 0 4z", priv: true, role: "admin" }
   ].filter(t => !(isPublic && t.priv && !(pubParcours && PARCOURS_TABS.has(t.id))))
    .filter(t => !t.role || !O || !(window.HUB_USER) || O.can(t.role));
 
   function readHash() {
     const h = decodeURIComponent(location.hash.replace(/^#\/?/, "")).split("/");
+    if (h[0] === "lab2") { S.tab = "labs"; S.labTab = "ct"; return; }   // ancien menu « Laboratoire (Ct, délais) », fusionné dans Laboratoires
     if (h[0] && TABS.some(t => t.id === h[0])) S.tab = h[0];
     if (S.tab === "journey" && h[1]) S.caseKey = h[1];
     if (S.tab === "chains" && h[1]) S.chain = h[1];
@@ -1704,6 +1704,16 @@
     Ch.xy($("#c-lab1"), { data: w, x: "week", stacked: true, height: 250, xLabel: (v, r, tip) => tip ? `${T("Semaine du")} ${dfmt(v)}` : dshort(v), series: [{ key: "positifs", label: T("Positifs"), color: "--s2" }, { key: "non_positifs", label: T("Négatifs"), color: "--seq-2" }] });
     Ch.xy($("#c-lab2"), { data: w, x: "week", height: 250, percent: true, xLabel: (v, r, tip) => tip ? `${T("Semaine du")} ${dfmt(v)}` : dshort(v), series: [{ key: "positivite_pct", label: T("Positivité"), color: "--s1", type: "line" }] });
   }
+
+  /* Laboratoires : activité des laboratoires (fichier labo) et valeurs Ct / délais (Linelist lln) réunis dans un seul menu */
+  function labsAllView() {
+    const hasCt = !!LL().laboratoire;
+    if (!hasCt && S.labTab === "ct") S.labTab = "act";
+    const sub = [["act", "Activité et positivité", "échantillons, positivité, comparaison des laboratoires"], ["ct", "Valeurs Ct et délais", "gravité, circuit de laboratoire, machines (Linelist lln)"]];
+    const tabs = `<div class="subtabs" role="tablist">${sub.map(([k, l, d]) => `<button role="tab" aria-selected="${S.labTab === k}" data-subtab="labTab" data-v="${k}" class="${S.labTab === k ? "on" : ""}" ${k === "ct" && !hasCt ? "disabled" : ""}><b>${T(l)}</b><small>${T(d)}</small></button>`).join("")}</div>`;
+    return tabs + (S.labTab === "ct" ? lab2View() : labsView());
+  }
+  function labsAllCharts() { (S.labTab === "ct" ? lab2Charts : labsCharts)(); }
 
   /* ================= NOWCASTING ================= */
   function nowcastView() {
@@ -3422,10 +3432,35 @@
     doc.open(); doc.write(`<!doctype html><html lang="${lang}"><head><meta charset="utf-8"><title>${T("Bulletin décisionnel")} ${D.meta.cutoff}</title>${css}<style>body{background:#fff;padding:18px}.panel{box-shadow:none;border:1px solid #ccc}</style></head><body><div style="font:700 18px system-ui;margin-bottom:4px">Ebola Outbreak, SGI-TASK FORCE</div><div style="font:13px system-ui;color:#555;margin-bottom:12px">${T("Situation au")} ${dfmt(D.meta.cutoff)}</div>${clone.outerHTML}</body></html>`); doc.close();
     setTimeout(() => { ifr.contentWindow.focus(); ifr.contentWindow.print(); setTimeout(() => ifr.remove(), 2000); }, 400);
   }
-  const VIEWS = { pilotage: [pilotageView, pilotageCharts], overview: [overview, overviewCharts], territories: [territories, territoriesCharts], followup: [followup, followupCharts], index: [indexView, indexCharts], journey: [journey, journeyCharts], chains: [chainsView, chainsCharts], recon: [reconView, reconCharts], dynamics: [dynamicsView, dynamicsCharts], children: [kidsView, kidsCharts], vaccycles: [vcView, vcCharts], superspreading: [superView, superCharts], resurgence: [resurgenceView, resurgenceCharts], labs: [labsView, labsCharts], nowcast: [nowcastView, nowcastCharts], forecast: [forecastView, forecastCharts], priority: [priorityView], rtm: [rtmView, rtmCharts], riskzones: [riskZonesView, riskZonesCharts], spatialrisk: [gsView, gsCharts], rings: [ringsView, ringsCharts], alerts: [alertsView, alertsCharts], eds: [edsView, edsCharts], clinic: [clinicView, clinicCharts], lab2: [lab2View, lab2Charts], pec: [pecView, pecCharts], fusion: [fusionView], maps: [mapsView], ops: [opsView, opsCharts], ppl: [pplView, pplCharts], situation: [sitView], upload: [O.uploadView, O.uploadWire], presentation: [O.presView, O.presWire], indicateurs: [() => O.indView(D), O.indWire], comptes: [O.comptesView, O.comptesWire], publication: [O.pubView, O.pubWire], quality: [qualityView], method: [methodView], terms: [termsView] };
+  const VIEWS = { pilotage: [pilotageView, pilotageCharts], overview: [overview, overviewCharts], territories: [territories, territoriesCharts], followup: [followup, followupCharts], index: [indexView, indexCharts], journey: [journey, journeyCharts], chains: [chainsView, chainsCharts], recon: [reconView, reconCharts], dynamics: [dynamicsView, dynamicsCharts], children: [kidsView, kidsCharts], vaccycles: [vcView, vcCharts], superspreading: [superView, superCharts], resurgence: [resurgenceView, resurgenceCharts], labs: [labsAllView, labsAllCharts], nowcast: [nowcastView, nowcastCharts], forecast: [forecastView, forecastCharts], priority: [priorityView], rtm: [rtmView, rtmCharts], riskzones: [riskZonesView, riskZonesCharts], spatialrisk: [gsView, gsCharts], rings: [ringsView, ringsCharts], alerts: [alertsView, alertsCharts], eds: [edsView, edsCharts], clinic: [clinicView, clinicCharts], pec: [pecView, pecCharts], fusion: [fusionView], maps: [mapsView], ops: [opsView, opsCharts], ppl: [pplView, pplCharts], situation: [sitView], upload: [O.uploadView, O.uploadWire], presentation: [O.presView, O.presWire], indicateurs: [() => O.indView(D), O.indWire], comptes: [O.comptesView, O.comptesWire], publication: [O.pubView, O.pubWire], quality: [qualityView], method: [methodView], terms: [termsView] };
+  /* Menu latéral en blocs dépliables : un bloc par thème, le bloc de la page ouverte est toujours déplié ;
+     les blocs ouverts par l'utilisateur sont mémorisés (navigateur). */
+  const NAV_G = {
+    "Situation et risque": "M12 2 3 6v6c0 5 3.8 9.3 9 10 5.2-.7 9-5 9-10V6zm-1 14-4-4 1.4-1.4 2.6 2.6 5.6-5.6L18 9z",
+    "Contact tracing": "M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zm7 0a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM9 13c-3.3 0-7 1.7-7 4.5V20h14v-2.5C16 14.7 12.3 13 9 13zm7 0c-.5 0-1 0-1.5.1 1.5 1 2.5 2.5 2.5 4.4V20h5v-2.5c0-2.8-3.4-4.5-6-4.5z",
+    "Analyses": "M3 3h2v16h16v2H3zm4 10h3v5H7zm5-5h3v10h-3zm5 3h3v7h-3z",
+    "Surveillance (Linelist lln)": "M12 22a2 2 0 0 0 2-2h-4a2 2 0 0 0 2 2zm6-6V11a6 6 0 0 0-5-5.9V4h-2v1.1A6 6 0 0 0 6 11v5l-2 2v1h16v-1z",
+    "Réunions": "M3 4h18v2H3zm1 3h16v10H4zm7 11h2v3h-2zm-4 3h10v1H7z",
+    "Données et administration": "M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8zm9.4 5.5-1.9-1.1v-.8l1.9-1.1-2-3.5-2 1.1-.7-.4V5.5h-4v2.2l-.7.4-2-1.1-2 3.5 1.9 1.1v.8l-1.9 1.1 2 3.5 2-1.1.7.4v2.2h4v-2.2l.7-.4 2 1.1z",
+  };
+  const NAV_KEY = "hub-nav-ouverts";
+  function navOpenSet() { try { return new Set(JSON.parse(localGet(NAV_KEY) || "[]")); } catch (e) { return new Set(); } }
   function buildNav() {
-    let g = "";
-    $("#navigation").innerHTML = TABS.map(t => { const h = t.g !== g ? `<div class="nav-group">${T(t.g)}</div>` : ""; g = t.g; return `${h}<button data-tab="${t.id}" class="${S.tab === t.id ? "active" : ""}"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="${t.i}"/></svg>${T(t.t)}</button>`; }).join("");
+    const groups = [];
+    TABS.forEach(t => { let g = groups.find(x => x.g === t.g); if (!g) groups.push(g = { g: t.g, items: [] }); g.items.push(t); });
+    const open = navOpenSet();
+    $("#navigation").innerHTML = groups.map((g, i) => {
+      const act = g.items.some(t => t.id === S.tab), isOpen = act || open.has(g.g), id = `ng-${i}`;
+      const items = g.items.map(t => `<button data-tab="${t.id}" class="${S.tab === t.id ? "active" : ""}" ${S.tab === t.id ? 'aria-current="page"' : ""}><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="${t.i}"/></svg><span>${T(t.t)}</span></button>`).join("");
+      return `<section class="ng ${isOpen ? "open" : ""} ${act ? "has-active" : ""}">
+        <button class="ng-h" data-ng="${esc(g.g)}" aria-expanded="${isOpen}" aria-controls="${id}"><i class="ng-ic"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="${NAV_G[g.g] || g.items[0].i}"/></svg></i><span class="ng-t">${T(g.g)}</span><span class="ng-n">${g.items.length}</span><svg class="ng-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        <div class="ng-b" id="${id}"><div class="ng-in">${items}</div></div></section>`;
+    }).join("");
+  }
+  function toggleNavGroup(btn) {
+    const sec = btn.closest(".ng"), on = !sec.classList.contains("open");
+    sec.classList.toggle("open", on); btn.setAttribute("aria-expanded", on);
+    const o = navOpenSet(); on ? o.add(btn.dataset.ng) : o.delete(btn.dataset.ng); localSet(NAV_KEY, JSON.stringify([...o]));
   }
   window.__hubRender = () => render();
   function render() {
@@ -3450,6 +3485,8 @@
   /* ================= Événements (délégation) ================= */
   document.addEventListener("click", e => {
     const t = e.target;
+    const ngh = t.closest("#navigation .ng-h"); if (ngh) { toggleNavGroup(ngh); return; }
+    const sbt = t.closest("[data-subtab]"); if (sbt && !sbt.disabled) { S[sbt.dataset.subtab] = sbt.dataset.v; render(); return; }
     const nav = t.closest("#navigation button[data-tab]"); if (nav) { go(nav.dataset.tab, nav.dataset.tab === "journey" ? S.caseKey : undefined); return; }
     const kg = t.closest(".kpi[data-go]"); if (kg) { go(kg.dataset.go); return; }
     const oq = t.closest("[data-opq]");

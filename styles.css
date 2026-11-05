@@ -522,3 +522,56 @@ table.pil-20 td{white-space:normal}
 .interp .q{font-size:14px}
 .prose-block .gs-msg h3{margin-top:18px}
 .interp>b,.method-box h4,.prose-block h2,.prose-block h3{color:var(--prose-title)}
+/* ---- Menu latéral en blocs dépliables ---- */
+.sidebar nav{display:flex;flex-direction:column;gap:3px}
+.ng{border-radius:12px;transition:background .18s}
+.ng.open{background:rgba(255,255,255,.045)}
+.sidebar nav .ng-h{display:flex;align-items:center;gap:10px;width:100%;min-height:42px;padding:7px 8px 7px 7px;border:0;border-radius:11px;background:transparent;color:rgba(255,255,255,.9);font-size:13.5px;font-weight:600;letter-spacing:.005em;cursor:pointer;text-align:left}
+.sidebar nav .ng-h:hover{background:rgba(255,255,255,.07);color:#fff}
+.sidebar nav .ng-h:focus-visible,.sidebar nav .ng-in button:focus-visible,.sidebar nav .ng-in a:focus-visible{outline:2px solid #5ad1c1;outline-offset:1px}
+.ng-ic{flex:none;width:28px;height:28px;border-radius:8px;display:grid;place-items:center;background:rgba(255,255,255,.08);transition:background .18s,color .18s}
+.sidebar nav .ng-ic svg{width:16px;height:16px;opacity:1}
+.ng.has-active .ng-ic{background:rgba(90,209,193,.2);color:#8fe6da}
+.ng-t{flex:1;min-width:0;line-height:1.25}
+.ng-n{flex:none;min-width:20px;height:18px;padding:0 6px;border-radius:9px;background:rgba(255,255,255,.1);font-size:10.5px;font-weight:600;line-height:18px;text-align:center;color:rgba(255,255,255,.7);font-variant-numeric:tabular-nums;transition:opacity .15s}
+.ng.open .ng-n{opacity:0}
+.ng.has-active:not(.open) .ng-n{background:#5ad1c1;color:#0d2a3f}
+.sidebar nav .ng-chev{flex:none;width:16px;height:16px;opacity:.6;transition:transform .22s ease}
+.ng.open .ng-chev{transform:rotate(90deg)}
+.ng-b{display:grid;grid-template-rows:0fr;transition:grid-template-rows .24s ease}
+.ng.open .ng-b{grid-template-rows:1fr}
+.ng-in{overflow:hidden;min-height:0;margin-left:21px;padding-left:9px;border-left:1px solid rgba(255,255,255,.13)}
+.ng.open .ng-in{padding-bottom:6px}
+.sidebar nav .ng-in button,.sidebar nav .ng-in a.navlink{position:relative;display:flex;align-items:center;gap:9px;width:100%;padding:7px 9px;margin:1px 0;border-radius:8px;font-size:13px;line-height:1.3;color:rgba(255,255,255,.76);box-shadow:none}
+.sidebar nav .ng-in svg{width:16px;height:16px;opacity:.75}
+.sidebar nav .ng-in button:hover,.sidebar nav .ng-in a.navlink:hover{background:rgba(255,255,255,.07);color:#fff}
+.sidebar nav .ng-in button.active{background:rgba(255,255,255,.13);color:#fff;font-weight:600;box-shadow:none}
+.sidebar nav .ng-in button.active::before{content:"";position:absolute;left:-10px;top:7px;bottom:7px;width:3px;border-radius:2px;background:#5ad1c1}
+.sidebar nav .ng-in button.active svg{opacity:1}
+.sidebar nav .ng-in .ext{margin-left:auto;opacity:.45;font-size:11px}
+.ng-in .zs-switch{margin:4px 0 4px 2px}
+@media (prefers-reduced-motion:reduce){.ng-b,.ng-chev,.ng,.ng-ic{transition:none!important}}
+/* sous-onglets (menu fusionné) */
+.subtabs{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 16px}
+.subtabs button{display:flex;flex-direction:column;align-items:flex-start;gap:2px;min-width:220px;padding:10px 14px;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--ink);cursor:pointer;text-align:left}
+.subtabs button b{font-size:14px}
+.subtabs button small{font-size:12px;color:var(--muted)}
+.subtabs button:hover{border-color:var(--accent)}
+.subtabs button.on{border-color:var(--brand);box-shadow:inset 0 -3px 0 var(--brand-2);background:var(--surface)}
+.subtabs button:disabled{opacity:.5;cursor:not-allowed}
+.subtabs button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+/* ---- relief des boutons du menu (effet de volume discret) ---- */
+.sidebar nav .ng-h{background:linear-gradient(180deg,rgba(255,255,255,.075),rgba(255,255,255,.025));box-shadow:inset 0 1px 0 rgba(255,255,255,.09),inset 0 -1px 0 rgba(0,0,0,.18),0 1px 2px rgba(0,0,0,.22);transition:background .18s,box-shadow .18s,transform .12s}
+.sidebar nav .ng-h:hover{background:linear-gradient(180deg,rgba(255,255,255,.11),rgba(255,255,255,.04));box-shadow:inset 0 1px 0 rgba(255,255,255,.13),inset 0 -1px 0 rgba(0,0,0,.2),0 3px 8px rgba(0,0,0,.26)}
+.sidebar nav .ng-h:active{transform:translateY(1px);box-shadow:inset 0 1px 3px rgba(0,0,0,.3),0 0 0 rgba(0,0,0,0)}
+.ng.open>.ng-h{background:linear-gradient(180deg,rgba(255,255,255,.12),rgba(255,255,255,.05))}
+.ng.open{background:rgba(0,0,0,.12);box-shadow:inset 0 1px 3px rgba(0,0,0,.22)}
+.ng-ic{background:linear-gradient(180deg,rgba(255,255,255,.16),rgba(255,255,255,.05));box-shadow:inset 0 1px 0 rgba(255,255,255,.18),0 1px 2px rgba(0,0,0,.3)}
+.ng.has-active .ng-ic{background:linear-gradient(180deg,#6fe0d2,#2fae9e);color:#0b2a36;box-shadow:inset 0 1px 0 rgba(255,255,255,.45),0 2px 6px rgba(47,174,158,.45)}
+.ng-n{box-shadow:inset 0 1px 1px rgba(0,0,0,.25)}
+.sidebar nav .ng-in button,.sidebar nav .ng-in a.navlink{transition:background .15s,box-shadow .15s,transform .12s}
+.sidebar nav .ng-in button:hover,.sidebar nav .ng-in a.navlink:hover{box-shadow:inset 0 1px 0 rgba(255,255,255,.06)}
+.sidebar nav .ng-in button:active,.sidebar nav .ng-in a.navlink:active{transform:translateY(1px)}
+.sidebar nav .ng-in button.active{background:linear-gradient(180deg,rgba(255,255,255,.2),rgba(255,255,255,.1));box-shadow:inset 0 1px 0 rgba(255,255,255,.2),inset 0 -1px 0 rgba(0,0,0,.15),0 2px 6px rgba(0,0,0,.28)}
+:root[data-theme="dark"] .sidebar nav .ng-h{box-shadow:inset 0 1px 0 rgba(255,255,255,.07),0 1px 2px rgba(0,0,0,.5)}
+@media (prefers-reduced-motion:reduce){.sidebar nav .ng-h,.sidebar nav .ng-in button,.sidebar nav .ng-in a.navlink{transition:none!important}.sidebar nav .ng-h:active,.sidebar nav .ng-in button:active{transform:none}}

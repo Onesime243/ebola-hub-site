@@ -1268,4 +1268,8 @@ Object.assign(window.HUB_EN_TPL, {
   "25 origines simulées (août-octobre) et 8 extractions réelles ; zones et aires ayant eu au moins un cas dans les 42 jours précédents": "25 simulated origins (August–October) and 8 real extracts; zones and areas with at least one case in the previous 42 days",
   "aires annoncées à 25-50 % : 40 % ont eu un cas ; à 50-75 % : 64-67 % ; à 75-90 % : 72-82 % (extractions réelles)": "areas forecast at 25–50%: 40% had a case; at 50–75%: 64–67%; at 75–90%: 72–82% (real extracts)",
   "« 24 h » = notifications du": "“24 h” = notifications of", "dernier jour complet ; le jour de l’extraction est encore presque vide": "last complete day; the extraction day is still almost empty",
+  /* ---- menu en blocs, laboratoires fusionnés ---- */
+  "Situation et risque": "Situation and risk", "Surveillance (Linelist lln)": "Surveillance (lln line list)", "Données et administration": "Data and administration",
+  "Activité et positivité": "Activity and positivity", "échantillons, positivité, comparaison des laboratoires": "samples, positivity, laboratory comparison",
+  "Valeurs Ct et délais": "Ct values and turnaround", "gravité, circuit de laboratoire, machines (Linelist lln)": "severity, laboratory pathway, machines (lln line list)",
 });
