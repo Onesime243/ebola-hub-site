@@ -174,3 +174,17 @@ a.btn{text-decoration:none}
 .pil-tile small{font-size:11px;color:var(--muted);overflow-wrap:anywhere}
 .pil-tile.warn b{color:var(--critical)}
 .pil-tile.txt b{font-size:15px}
+/* tableaux de la réunion (modèle DPS) */
+.tr-wrap{overflow:auto;max-height:none!important}
+.tr-table{border-collapse:collapse;width:100%;font-size:12px}
+.tr-table th{background:#1F3864;color:#fff;font-weight:600;padding:6px 8px;border:1px solid rgba(255,255,255,.35);text-align:center;vertical-align:middle!important;line-height:1.25;position:static}
+.tr-table th.g{color:#F7DC6F}
+.tr-table td{padding:4px 6px;border:1px solid var(--line);white-space:nowrap}
+.tr-table td.num{text-align:center;font-variant-numeric:tabular-nums}
+.tr-table td.b{font-weight:700}
+.tr-table tbody tr:nth-child(even) td{background-color:var(--surface-2,#F7F9FB)}
+.tr-table tr.main td{font-weight:700}
+.tr-table tr.sub td.lab{padding-left:24px;color:var(--ink-2,#46505a)}
+.tr-table tr.tot td{background:#E8EDF3;font-weight:700;color:#1B2631}
+.tr-src{margin-top:14px}
+.tr-src h3{font-size:13.5px;margin:0 0 6px}

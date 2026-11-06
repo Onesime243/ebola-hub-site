@@ -151,6 +151,7 @@
   }
   const ICON = {
     presentation: "M2 3h20v13H2zm2 2v9h16V5zm5 13h6l1 3H8zM6 12l3-4 3 2 4-4 2 1.5-6 5-3-2-1.5 1.5z",
+    reunion: "M3 3h18v18H3zm2 2v3h14V5zm0 5v3h4v-3zm6 0v3h8v-3zm-6 5v4h4v-4zm6 0v4h8v-4z",
     indicateurs: "M3 3h18v18H3zm2 2v4h4V5zm6 0v4h8V5zm-6 6v4h4v-4zm6 0v4h8v-4zm-6 6v2h4v-2zm6 0v2h8v-2z",
     pilotage: "M3 3h2v16h16v2H3zm4 12 4-5 3 3 5-7 1.6 1.2-6.4 9-3-3-2.6 3.4z", accueil: "M12 3 2 12h3v8h6v-6h2v6h6v-8h3z", situation: "M3 19h18v2H3zM5 17V9h3v8zm5 0V5h3v12zm5 0v-6h3v6z", zones: "M4 6h16v2H4zm0 5h16v2H4zm0 5h10v2H4z",
     carte: "M15 4 9 2 3 4v18l6-2 6 2 6-2V2zM9 4.4l6 2v13.2l-6-2z", contacts: "M16 11c1.7 0 3-1.3 3-3s-1.3-3-3-3-3 1.3-3 3 1.3 3 3 3zm-8 0c1.7 0 3-1.3 3-3S9.7 5 8 5 5 6.3 5 8s1.3 3 3 3zm0 2c-2.3 0-7 1.2-7 3.5V19h14v-2.5C15 14.2 10.3 13 8 13zm8 0h-1c1.2.9 2 2 2 3.5V19h6v-2.5c0-2.3-4.7-3.5-7-3.5z",
@@ -784,6 +785,36 @@
         <p><button class="btn primary" data-publier>Publier maintenant</button></p><div class="log" id="pub-log" hidden></div>`)}`;
   }
 
+
+  /* ================================================================== TABLEAUX DE LA RÉUNION (modèle de la DPS) */
+  // calculés à chaque analyse par scripts/tableaux_reunion.py ; mêmes valeurs que les diapositives de la présentation
+  function trHTML(t) {
+    const H = t.head.map(r => `<tr>${r.map(h => `<th ${h.cs > 1 ? `colspan="${h.cs}"` : ""} ${h.rs > 1 ? `rowspan="${h.rs}"` : ""} class="${h.cls === "g" ? "g" : ""}" style="${h.fill ? `background:#${h.fill};` : ""}${h.color ? `color:#${h.color};` : ""}">${esc(h.t)}</th>`).join("")}</tr>`).join("");
+    const B = t.rows.map(r => { const tot = /tot/.test(r[0].cls || ""), main = /main/.test(r[0].cls || ""), sub = /sub/.test(r[0].cls || "");
+      return `<tr class="${tot ? "tot" : ""}${main ? " main" : ""}${sub ? " sub" : ""}">${r.map((c, j) => `<td class="${j ? "num" : "lab"} ${/\bb\b/.test(c.cls || "") ? "b" : ""}" style="${c.fill ? `background:#${c.fill};` : ""}${c.color ? `color:#${c.color};` : ""}">${esc(c.v)}</td>`).join("")}</tr>`; }).join("");
+    return `<div class="table-wrap tr-wrap"><table class="tr-table"><thead>${H}</thead><tbody>${B}</tbody></table></div>${t.note ? `<p class="note">${esc(t.note)}</p>` : ""}`;
+  }
+  function trCSV(id) {
+    const t = (P.tableaux_reunion || {})[id]; if (!t) return;
+    const cols = t.rows[0].length, head = Array(cols).fill("");
+    const occ = new Set(); t.head.forEach((r, ri) => { let c = 0; r.forEach(h => { while (occ.has(ri + ":" + c)) c++; for (let a = 0; a < (h.rs || 1); a++) for (let b = 0; b < (h.cs || 1); b++) { occ.add((ri + a) + ":" + (c + b)); head[c + b] = (head[c + b] ? head[c + b] + " · " : "") + h.t; } c += h.cs || 1; }); });
+    const q = v => `"${String(v).replace(/"/g, '""')}"`;
+    const txt = "﻿" + [head.map(q).join(";"), ...t.rows.map(r => r.map(c => q(c.v)).join(";"))].join("\n");
+    const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([txt], { type: "text/csv;charset=utf-8" })); a.download = `${id}_${PROV}_${t.date}.csv`; a.click();
+  }
+  function pageReunion() {
+    const T = P.tableaux_reunion || {};
+    if (!Object.keys(T).length) return notice("Tableaux non disponibles : relancez l'analyse provinciale (liste labo et base chiffrée des alertes et des contacts).", "warn");
+    const tl = (k, extra = "") => T[k] ? panel(esc(T[k].titre), esc(T[k].sous_titre || ""), trHTML(T[k]) + extra, { png: `tableau_${k}`, tools: `<button class="btn sm" data-trcsv="${k}">⤓ CSV</button>` }) : "";
+    const src = T.alertes_3j && T.alertes_3j.sources;
+    const srcHTML = src ? `<div class="tr-src"><h3>Sources des alertes sur les 3 derniers jours</h3><div id="c-tr-src"></div></div>` : "";
+    if (src) after(() => { const el = $("#c-tr-src"); if (el) Ch.xy(el, { data: src.categories.map((c, i) => Object.assign({ c }, ...src.jours.map((j, k) => ({ ["d" + k]: src.series[k][i] })))), x: "c", height: 260,
+      series: src.jours.map((j, k) => ({ key: "d" + k, label: j, color: ["#AEB6BF", "#5D8AA8", "#1F3864"][3 - src.jours.length + k] })) }); });
+    return `${notice(`Tableaux au format de la réunion de coordination, recalculés à chaque analyse ; les mêmes tableaux figurent dans la <a href="#" data-go="presentation">présentation PowerPoint</a>.`)}
+      <h2 class="pil-q">1. Surveillance</h2>${tl("surveillance")}
+      <h2 class="pil-q">2. Alertes</h2>${tl("alertes_3j", srcHTML)}${tl("alertes_zs")}
+      <h2 class="pil-q">3. Suivi des contacts</h2>${tl("contacts_zs")}`;
+  }
   /* ------------------------------------------------------------------ navigation */
 
   /* ---- menu latéral en blocs dépliables (même présentation que l'outil national) ---- */
@@ -811,16 +842,16 @@
     try { const o = new Set(JSON.parse(localStorage.getItem(NAVB_KEY) || "[]")); on ? o.add(btn.dataset.ng) : o.delete(btn.dataset.ng); localStorage.setItem(NAVB_KEY, JSON.stringify([...o])); } catch (e) { /* stockage indisponible */ }
   }
   const PAGES = [["accueil", "Accueil", "Province"], ["pilotage", "Pilotage stratégique", "Province"], ["situation", "Situation épidémiologique", "Province"], ["zones", "Zones de santé", "Province"], ["carte", "Carte et rapports", "Province"],
-    ["alertes", "Surveillance des alertes", "Riposte"], ["presentation", "Présentation (diapositives)", "Réunions"], ["indicateurs", "Indicateurs du pilier surveillance", "Réunions"], ["donnees", PUBLIC ? "État des données" : "Données des zones", "Données"],
+    ["alertes", "Surveillance des alertes", "Riposte"], ["reunion", "Tableaux de la réunion", "Réunions"], ["presentation", "Présentation (diapositives)", "Réunions"], ["indicateurs", "Indicateurs du pilier surveillance", "Réunions"], ["donnees", PUBLIC ? "État des données" : "Données des zones", "Données"],
     ["comptes", "Comptes", "Administration", () => isProv() && !PUBLIC], ["publication", "Publication en ligne", "Administration", () => isProv() && !PUBLIC]];
   const DETAIL_PAGES = [["index", "Cas index", "M4 6h16v2H4zm0 5h16v2H4zm0 5h10v2H4z"], ["journey", "Parcours des cas", "M12 2a4 4 0 1 1 0 8 4 4 0 0 1 0-8zm-7 18c0-3.9 3.1-7 7-7s7 3.1 7 7H5zM19 3l3 3-3 3"],
     ["chains", "Chaînes de transmission", "M7 7a3 3 0 1 1-2 5.2L10 15a3 3 0 1 1-.8 1.8L4.3 14A3 3 0 0 1 7 7zm10-4a3 3 0 1 1 0 6 3 3 0 0 1 0-6z"], ["recon", "Reconstruction de la transmission", "M4 5h4v4H4zm12 0h4v4h-4zM10 15h4v4h-4zM6 9v2h4v4h2v-4h4V9h-2v2H8V9z"],
     ["dynamics", "Dynamique et Rt", "M3 19h18v2H3zM4 15l4-6 4 3 5-8 3 2-6.6 10.3-4-3L6.2 16.4z"], ["children", "Enfants (0–18 ans)", "M12 2a3 3 0 1 1 0 6 3 3 0 0 1 0-6zm-4 8h8l-1 6h-1v6h-4v-6H9z"],
     ["deces", "Décès et EDS communautaires", "M10 2h4v6h6v4h-6v10h-4V12H4V8h6z"], ["labo", "Laboratoire et positivité", "M9 2h6v2h-1v5l5 9a2 2 0 0 1-2 3H7a2 2 0 0 1-2-3l5-9V4H9z"],
 ["pec", "Prise en charge et expositions", "M19 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm-2 10h-4v4h-2v-4H7v-2h4V7h2v4h4z"]];
-  const VIEWS = { accueil: pageAccueil, pilotage: pageP, situation: pageSituation, zones: pageZones, carte: pageCarte, contacts: pageContacts, alertes: pageAlertes, donnees: pageDonnees, comptes: pageComptes, publication: pagePublication, presentation: pagePresentation, indicateurs: pageIndicateurs };
+  const VIEWS = { accueil: pageAccueil, pilotage: pageP, situation: pageSituation, zones: pageZones, carte: pageCarte, contacts: pageContacts, alertes: pageAlertes, donnees: pageDonnees, comptes: pageComptes, publication: pagePublication, presentation: pagePresentation, indicateurs: pageIndicateurs, reunion: pageReunion };
   const PERIOD_PAGES = new Set(["situation", "contacts", "alertes", "carte"]);
-  const SUBT = { accueil: () => `Situation au ${dfr(S.date)}`, pilotage: () => `Tableau de bord des décideurs · situation au ${dfr(S.date)}`, zones: () => `Bulletin au ${dfr(S.date)}`, donnees: () => `Analyse provinciale du ${esc(P.meta.genere_le)}`, indicateurs: () => `Canevas mensuel PID-MIO · situation au ${dfr(P.meta.date_rapport)}`, presentation: () => `Graphiques et diapositives prêts pour les réunions · situation au ${dfr(P.meta.date_rapport)}`, comptes: () => "Accès des zones de santé et de la province", publication: () => "Lien de partage en lecture seule" };
+  const SUBT = { accueil: () => `Situation au ${dfr(S.date)}`, pilotage: () => `Tableau de bord des décideurs · situation au ${dfr(S.date)}`, zones: () => `Bulletin au ${dfr(S.date)}`, donnees: () => `Analyse provinciale du ${esc(P.meta.genere_le)}`, indicateurs: () => `Canevas mensuel PID-MIO · situation au ${dfr(P.meta.date_rapport)}`, presentation: () => `Graphiques et diapositives prêts pour les réunions · situation au ${dfr(P.meta.date_rapport)}`, reunion: () => `Format de la réunion de coordination · situation au ${dfr(P.meta.date_rapport)}`, comptes: () => "Accès des zones de santé et de la province", publication: () => "Lien de partage en lecture seule" };
   function shell() {
     const pages = PAGES.filter(p => !p[3] || p[3]());
     if (!pages.find(p => p[0] === S.page)) S.page = "accueil";
@@ -829,7 +860,7 @@
     const zl = ZONES.filter(z => DETAIL.has(z.code));
     const DET = P.meta.detail_province;
     const PG = { accueil: "Situation et risque", pilotage: "Situation et risque", situation: "Situation et risque", zones: "Situation et risque", carte: "Situation et risque",
-      alertes: "Surveillance et riposte", presentation: "Réunions", indicateurs: "Réunions", donnees: "Données et administration", comptes: "Données et administration", publication: "Données et administration" };
+      alertes: "Surveillance et riposte", reunion: "Réunions", presentation: "Réunions", indicateurs: "Réunions", donnees: "Données et administration", comptes: "Données et administration", publication: "Données et administration" };
     const DG = { index: "Contact tracing", journey: "Contact tracing", chains: "Contact tracing", recon: "Contact tracing" };
     const ORDRE = ["Situation et risque", "Contact tracing", "Analyses", "Surveillance et riposte", "Réunions", "Données et administration"];
     const G = ORDRE.map(g => ({ g, items: [] }));
@@ -902,6 +933,7 @@
     const srt = t.closest("th[data-sort]"); if (srt) { const [id, k] = srt.dataset.sort.split("|"); const st = S.tables[id]; if (st) { st.dir = st.sort === k ? -st.dir : -1; st.sort = k; render(); } return; }
     const more = t.closest("[data-more]"); if (more) { const st = S.tables[more.dataset.more]; if (st) { st.limit += 100; render(); } return; }
     const png = t.closest("[data-png]"); if (png) { const p = png.closest(".panel"); const name = `${png.dataset.png}_${S.zone ? ZN[S.zone] : PROV}_${S.date}`; if (p.querySelector(".chart svg")) G.panelPNG(p, name, `${scope()} · ${PERIOD_PAGES.has(S.page) ? perTxt() : "au " + dfr(S.date)} · Ebola Outbreak, outil provincial`); else Ch.downloadPanelPNG(p, name); return; }
+    const trc = t.closest("[data-trcsv]"); if (trc) { trCSV(trc.dataset.trcsv); return; }
     const cv = t.closest("[data-csv]"); if (cv) { csvT(cv.dataset.csv); return; }
     const rn = t.closest("[data-run]"); if (rn) { runJob(rn.dataset.run); return; }
     const rt = t.closest("[data-retirer]"); if (rt) { if (!confirm(`Retirer « ${rt.dataset.retirer} » des analyses ? Le fichier est déplacé dans le sous-dossier _retires (il n'est pas supprimé).`)) return;
