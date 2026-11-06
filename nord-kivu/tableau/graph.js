@@ -67,10 +67,10 @@
      opt = {labels:[{wk, an, debut}], dec:[], viv:[], h} */
   function tendance(box, opt) {
     box.innerHTML = ""; box.classList.add("chart", "tend");
-    const W = Math.max(360, box.clientWidth || 760), H = opt.h || 360, m = { l: 58, r: 58, t: 34, b: 62 };
+    const W = Math.max(360, box.clientWidth || 760), H = opt.h || 360, m = { l: 58, r: 64, t: 34, b: 62 };
     const n = opt.labels.length, pw = W - m.l - m.r, ph = H - m.t - m.b;
     const tot = opt.labels.map((_, i) => (opt.dec[i] || 0) + (opt.viv[i] || 0));
-    const mx = niceMax(Math.max(1, ...tot) * 1.08);
+    const q4 = Math.max(1, ...tot) * 1.08 / 4, mx = 4 * (q4 < 10 ? Math.max(1, Math.ceil(q4)) : (p => [1, 1.5, 2, 2.5, 3, 4, 5, 6, 8, 10].find(k => q4 / p <= k) * p)(Math.pow(10, Math.floor(Math.log10(q4)))));   // 4 intervalles de valeur entière
     const K = { v: css("--td-v"), d: css("--td-d"), l: css("--td-l"), ax: css("--td-ax"), e: css("--td-edge") };
     const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": opt.title || "Tendances des cas confirmés et décès" }, box);
     const g = el("g", { class: "ax" }, svg);
@@ -107,7 +107,7 @@
       el("path", { d: `M${x} ${y - 4}L${x + 4} ${y}L${x} ${y + 4}L${x - 4} ${y}Z`, fill: K.l, "pointer-events": "none" }, svg); });
     // titres d'axes et légende
     el("text", { x: 14, y: m.t + ph / 2, transform: `rotate(-90 14 ${m.t + ph / 2})`, "text-anchor": "middle", class: "t-tit" }, svg).textContent = "Nombre des confirmés et décès";
-    el("text", { x: W - 10, y: m.t + ph / 2, transform: `rotate(90 ${W - 10} ${m.t + ph / 2})`, "text-anchor": "middle", class: "t-tit t-ax2" }, svg).textContent = "Létalité";
+    el("text", { x: W - 18, y: m.t + ph / 2, transform: `rotate(90 ${W - 18} ${m.t + ph / 2})`, "text-anchor": "middle", class: "t-tit t-ax2" }, svg).textContent = "Létalité";
     el("text", { x: m.l + pw / 2, y: H - 8, "text-anchor": "middle", class: "t-tit" }, svg).textContent = opt.xTitle || "Semaine de confirmation";
     const lg = el("g", {}, svg), lx = m.l + pw / 2;
     [[K.v, "Vivant", -92], [K.d, "Décédé", 12]].forEach(([c, t, dx]) => {

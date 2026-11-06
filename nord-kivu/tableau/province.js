@@ -377,7 +377,7 @@
     const tLieu = A ? `AS ${A} (ZS ${ZN[z]})` : z ? `ZS ${ZN[z]}` : `DPS ${PROV}`;
     const tendPanel = tN ? panel(`Tendances cas confirmés et décès ${esc(tLieu)} MVB, RDC`,
       `${esc(A ? "Aire de santé " + A : z ? "ZS " + ZN[z] : PROV)}, ${nf(tN)} cas confirmés dont ${nf(tD)} décédés et ${nf(tN - tD)} vivants depuis le début de l'épidémie · liste linéaire au ${dfr(S.date)}`,
-      `<div id="c-pil-tend"></div><div class="tend-res"><b>Résultats.</b>${nf(tN)} cas confirmés dont ${nf(tD)} décédés (${pc(ratio(tD, tN), 0)}) ; dernier cas : semaine ${isoWk(lastW)[1]} ${lastW + 6 > t ? `(semaine en cours, données jusqu'au ${dfr(S.date)})` : `(du ${dfr(iso(lastW))} au ${dfr(iso(lastW + 6))})`}. Semaines de confirmation (date du résultat du laboratoire) ; létalité hebdomadaire sur l'axe de droite. <span class="muted">SGI-MVE17 ©2026</span></div>`,
+      `<div id="c-pil-tend"></div><div class="tend-res"><b>Résultats.</b> ${nf(tN)} cas confirmés dont ${nf(tD)} décédés (${pc(ratio(tD, tN), 0)}) ; dernier cas : semaine ${isoWk(lastW)[1]} ${lastW + 6 > t ? `(semaine en cours, données jusqu'au ${dfr(S.date)})` : `(du ${dfr(iso(lastW))} au ${dfr(iso(lastW + 6))})`}. Semaines de confirmation (date du résultat du laboratoire) ; létalité hebdomadaire sur l'axe de droite. <span class="muted">SGI-MVE17 ©2026</span></div>`,
       { png: "pilotage_tendances", csv: "c-pil-tend", cls: "tend-head" }) : "";
     const proj = rt && rt.variation_hebdo !== null && rt.variation_hebdo !== undefined ? Math.max(0, Math.round(c7.length * (1 + rt.variation_hebdo / 100))) : null;
     const where = [z ? `Zone de santé de ${esc(ZN[z])}` : `Province du ${esc(PROV)}`, A ? `aire de santé ${esc(A)}` : ""].filter(Boolean).join(" › ");
