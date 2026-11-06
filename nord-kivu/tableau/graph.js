@@ -62,6 +62,62 @@
     box.__data = { cols: ["", ...opt.series.map(s => s.label)], rows: opt.labels.map((l, i) => [opt.fmtX ? opt.fmtX(l, true) : l, ...opt.series.map(s => s.values[i])]) };
   }
 
+  /* ---- tendances des cas confirmés et décès (format SGI-MVE17) : barres empilées jointives (décès en bas, vivants au-dessus,
+     contour noir) + létalité hebdomadaire en pointillés sur un second axe (0–100 %).
+     opt = {labels:[{wk, an, debut}], dec:[], viv:[], h} */
+  function tendance(box, opt) {
+    box.innerHTML = ""; box.classList.add("chart", "tend");
+    const W = Math.max(360, box.clientWidth || 760), H = opt.h || 360, m = { l: 58, r: 58, t: 34, b: 62 };
+    const n = opt.labels.length, pw = W - m.l - m.r, ph = H - m.t - m.b;
+    const tot = opt.labels.map((_, i) => (opt.dec[i] || 0) + (opt.viv[i] || 0));
+    const mx = niceMax(Math.max(1, ...tot) * 1.08);
+    const K = { v: css("--td-v"), d: css("--td-d"), l: css("--td-l"), ax: css("--td-ax"), e: css("--td-edge") };
+    const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": opt.title || "Tendances des cas confirmés et décès" }, box);
+    const g = el("g", { class: "ax" }, svg);
+    const Y = v => m.t + ph - ph * v / mx, Y2 = p => m.t + ph - ph * p / 100;
+    const slot = pw / n, X = i => m.l + i * slot;
+    const step = Math.max(1, Math.ceil(n / Math.floor(pw / 44)));
+    for (let k = 0; k <= 4; k++) {
+      el("line", { x1: m.l, x2: W - m.r, y1: Y(mx * k / 4), y2: Y(mx * k / 4), class: "gridl", "stroke-dasharray": "5 4" }, g);
+      el("text", { x: m.l - 7, y: Y(mx * k / 4) + 4, "text-anchor": "end", class: "t-n" }, g).textContent = nf(mx * k / 4);
+      el("text", { x: W - m.r + 9, y: Y2(25 * k) + 4, "text-anchor": "start", class: "t-ax2" }, g).textContent = 25 * k + "%";
+    }
+    opt.labels.forEach((lb, i) => { if (i % step === 0) {
+      const cx = X(i) + slot / 2;
+      el("line", { x1: cx, x2: cx, y1: m.t, y2: m.t + ph, class: "gridl", "stroke-dasharray": "5 4" }, g);
+      el("text", { x: cx, y: m.t + ph + 15, "text-anchor": "middle", class: "t-n" }, g).textContent = lb.wk;
+      el("text", { x: cx, y: m.t + ph + 28, "text-anchor": "middle", class: "t-n" }, g).textContent = lb.an;
+    } });
+    const tipH = i => { const lb = opt.labels[i], t = tot[i]; return `<b>Semaine ${lb.wk} (${lb.an})</b>du ${esc(lb.debut)}<br>Vivants : ${nf(opt.viv[i])}<br>Décédés : ${nf(opt.dec[i])}<br>Total : ${nf(t)}<br>Létalité : ${t ? nf(100 * opt.dec[i] / t, 0) + " %" : "—"}`; };
+    opt.labels.forEach((lb, i) => {
+      const x = X(i), d = opt.dec[i] || 0, v = opt.viv[i] || 0;
+      const hit = el("rect", { x, y: m.t, width: slot, height: ph, fill: "transparent" }, svg);
+      if (d) el("rect", { x, y: Y(d), width: slot, height: Y(0) - Y(d), fill: K.d, stroke: K.e, "stroke-width": 1, "pointer-events": "none" }, svg);
+      if (v) el("rect", { x, y: Y(d + v), width: slot, height: Y(d) - Y(d + v), fill: K.v, stroke: K.e, "stroke-width": 1, "pointer-events": "none" }, svg);
+      hit.addEventListener("mousemove", ev => tip(tipH(i), ev)); hit.addEventListener("mouseleave", hideTip);
+    });
+    el("line", { x1: m.l, x2: m.l, y1: m.t, y2: m.t + ph, stroke: css("--line-2") }, g);
+    el("line", { x1: m.l, x2: W - m.r, y1: m.t + ph, y2: m.t + ph, stroke: css("--line-2") }, g);
+    el("line", { x1: W - m.r, x2: W - m.r, y1: m.t, y2: m.t + ph, stroke: K.ax }, g);
+    // létalité : segments entre semaines ayant des cas
+    let path = "", pen = false;
+    opt.labels.forEach((_, i) => { const t = tot[i]; if (!t) { pen = false; return; } const x = X(i) + slot / 2, y = Y2(100 * opt.dec[i] / t); path += (pen ? "L" : "M") + x.toFixed(1) + " " + y.toFixed(1); pen = true; });
+    el("path", { d: path, fill: "none", stroke: K.l, "stroke-width": 2.6, "stroke-dasharray": "8 5", "pointer-events": "none" }, svg);
+    opt.labels.forEach((_, i) => { const t = tot[i]; if (!t) return; const x = X(i) + slot / 2, y = Y2(100 * opt.dec[i] / t);
+      el("path", { d: `M${x} ${y - 4}L${x + 4} ${y}L${x} ${y + 4}L${x - 4} ${y}Z`, fill: K.l, "pointer-events": "none" }, svg); });
+    // titres d'axes et légende
+    el("text", { x: 14, y: m.t + ph / 2, transform: `rotate(-90 14 ${m.t + ph / 2})`, "text-anchor": "middle", class: "t-tit" }, svg).textContent = "Nombre des confirmés et décès";
+    el("text", { x: W - 10, y: m.t + ph / 2, transform: `rotate(90 ${W - 10} ${m.t + ph / 2})`, "text-anchor": "middle", class: "t-tit t-ax2" }, svg).textContent = "Létalité";
+    el("text", { x: m.l + pw / 2, y: H - 8, "text-anchor": "middle", class: "t-tit" }, svg).textContent = opt.xTitle || "Semaine de confirmation";
+    const lg = el("g", {}, svg), lx = m.l + pw / 2;
+    [[K.v, "Vivant", -92], [K.d, "Décédé", 12]].forEach(([c, t, dx]) => {
+      el("rect", { x: lx + dx, y: 9, width: 26, height: 13, fill: c, stroke: K.e, "stroke-width": 1 }, lg);
+      el("text", { x: lx + dx + 33, y: 20, class: "t-lg" }, lg).textContent = t;
+    });
+    box.__data = { cols: ["Semaine", "Année", "Début de la semaine", "Vivants", "Décédés", "Total", "Létalité (%)"],
+      rows: opt.labels.map((lb, i) => [lb.wk, lb.an, lb.debut, opt.viv[i], opt.dec[i], tot[i], tot[i] ? Math.round(1000 * opt.dec[i] / tot[i]) / 10 : null]) };
+  }
+
   /* ---- courbes ; opt = {labels, series:[{label,color,values,dash}], h, max, pct, target, fmtX} */
   function lines(box, opt) {
     box.innerHTML = ""; box.classList.add("chart");
@@ -260,7 +316,10 @@
     const clone = svg.cloneNode(true);
     const vb = svg.viewBox.baseVal, w = vb.width, h = vb.height;
     clone.setAttribute("width", w); clone.setAttribute("height", h);
-    clone.querySelectorAll("text").forEach(t => { t.style.fontFamily = getComputedStyle(document.body).fontFamily; if (!t.getAttribute("fill")) t.setAttribute("fill", css("--muted")); });
+    const orig = [...svg.querySelectorAll("text")];
+    clone.querySelectorAll("text").forEach((t, i) => { t.style.fontFamily = getComputedStyle(document.body).fontFamily;
+      if (svg.closest(".tend") && orig[i]) { const cs = getComputedStyle(orig[i]); t.setAttribute("fill", cs.fill); t.setAttribute("font-weight", cs.fontWeight); t.setAttribute("font-size", cs.fontSize); }   // styles CSS du graphique des tendances
+      else if (!t.getAttribute("fill")) t.setAttribute("fill", css("--muted")); });
     clone.querySelectorAll(".gridl").forEach(l => l.setAttribute("stroke", css("--line-2")));
     const title = panel.querySelector(".panel-head h2, .box-h h2")?.textContent || name;
     const sub = panel.querySelector(".panel-head p, .box-h p")?.textContent || "";
@@ -291,5 +350,5 @@
     a.download = name.replace(/[^\w\-]+/g, "_") + ".csv"; document.body.appendChild(a); a.click(); a.remove();
   }
 
-  window.G = { bars, lines, hbars, matrix, map, panelPNG, csv, tip, hideTip, nf, esc, css };
+  window.G = { bars, tendance, lines, hbars, matrix, map, panelPNG, csv, tip, hideTip, nf, esc, css };
 })();

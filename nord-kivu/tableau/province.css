@@ -188,3 +188,16 @@ a.btn{text-decoration:none}
 .tr-table tr.tot td{background:#E8EDF3;font-weight:700;color:#1B2631}
 .tr-src{margin-top:14px}
 .tr-src h3{font-size:13.5px;margin:0 0 6px}
+
+/* graphique « Tendances des cas confirmés et décès » (format SGI-MVE17) */
+:root{--td-v:#1F4E89;--td-d:#D7352B;--td-l:#3A0B0B;--td-ax:#5A1010;--td-edge:#111}
+:root[data-theme="dark"]{--td-v:#3D74BF;--td-d:#E0473C;--td-l:#F4C7B8;--td-ax:#F4C7B8;--td-edge:#05070a}
+.tend-head h2{color:#22508A;font-size:19px}
+:root[data-theme="dark"] .tend-head h2{color:#8DB6EA}
+.tend-res{border:1.5px solid var(--ink);border-radius:2px;padding:8px 12px;margin-top:10px;font-size:13px}
+.tend-res b{margin-right:8px}
+.chart.tend text.t-n{fill:var(--ink-2);font-weight:700;font-size:11.5px}
+.chart.tend text.t-ax2{fill:var(--td-ax);font-weight:700;font-size:11.5px}
+.chart.tend text.t-tit{fill:var(--ink);font-weight:700;font-size:13px}
+.chart.tend text.t-tit.t-ax2{fill:var(--td-ax);font-size:14px}
+.chart.tend text.t-lg{fill:var(--ink);font-size:12.5px}

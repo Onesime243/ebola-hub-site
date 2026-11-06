@@ -136,7 +136,8 @@
     return `<div class="table-wrap" style="${o.maxh ? `max-height:${o.maxh}px` : ""}"><table><thead><tr>${head}</tr></thead><tbody>${body || `<tr><td colspan="${cols.length}" class="muted">Aucune ligne</td></tr>`}${foot}</tbody></table></div>${r.length > shown.length ? `<button class="btn sm more" data-more="${id}">Afficher plus (${nf(r.length - shown.length)})</button>` : ""}`;
   }
   function csvT(id) {
-    const t = TABLES[id]; if (!t) return;
+    const t = TABLES[id];
+    if (!t) { const b = document.getElementById(id); if (b && b.__data) G.csv(`${id}_${S.zone ? ZN[S.zone] : PROV}_${S.date}`, b.__data.cols, b.__data.rows); return; }   // données d'un graphique
     const strip = h => String(h ?? "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
     G.csv(`${id}_${PROV}_${S.date}`, t.cols.map(c => c.t), t.rows.map(x => t.cols.map(c => strip(c.csv ? c.csv(x) : c.v ? c.v(x) : x[c.k]))));
   }
@@ -360,6 +361,7 @@
       G.bars($("#c-pil-iss"), { labels: ws.map(iso), h: 260, fmtX: (d, l) => l ? "Semaine du " + dfr(d) : dshort(d),
         series: [["Décédés", "--rc-rt", c => c.deces], ["En traitement", "--s3", c => !c.deces && c.issue === "En traitement"], ["Guéris", "--good", c => !c.deces && c.issue === "Guéri"], ["Autre / non précisé", "--rc-grey", c => !c.deces && !["En traitement", "Guéri"].includes(c.issue)]]
           .map(([lab, cl, f]) => ({ label: lab, color: col(cl), values: ws.map(w => L.filter(c => inW(c._d, w) && f(c)).length) })) });
+      G.tendance($("#c-pil-tend"), { labels: TW.map(w => ({ wk: isoWk(w)[1], an: isoWk(w)[0], debut: dfr(iso(w)) })), dec: TW.map(w => L.filter(c => c.deces && inW(c._d, w)).length), viv: TW.map(w => L.filter(c => !c.deces && inW(c._d, w)).length), h: 380 });
       drawMap($("#c-pil-map"), "categorie", t);
       G.lines($("#c-pil-del"), { labels: ws.map(iso), h: 240, digits: 1, target: 3, fmtX: (d, l) => l ? "Semaine du " + dfr(d) : dshort(d),
         series: [{ label: "Délai médian symptômes → confirmation (j)", color: col("--warn"), values: ws.map(w => med(L.filter(c => inW(c._d, w) && okd(c)).map(dl))) }] });
@@ -367,6 +369,16 @@
       G.lines($("#c-pil-suivi"), { labels: days.map(iso), h: 240, pct: 1, max: 100, target: C.taux_suivi_pct, digits: 1, fmtX: (d, l) => l ? dfr(d) : dshort(d),
         series: [{ label: "Contacts vus (%)", color: col("--s1"), values: days.map(d => { const o = z ? suiviAt(z, d, 0) : suiviProv(d); return o && o.a_suivre ? o.taux : null; }) }] });
     });
+    // tendances des cas confirmés et décès depuis le début de l'épidémie (semaine ISO de confirmation)
+    const isoWk = n => { const d = new Date(n * 864e5), th = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate() + 3 - (d.getUTCDay() + 6) % 7)), y = th.getUTCFullYear();
+      return [y, Math.ceil(((th - Date.UTC(y, 0, 1)) / 864e5 + 1) / 7)]; };
+    const TW = []; if (L.length) for (let w = wk(Math.min(...L.map(c => c._d))); w <= wk(t); w += 7) TW.push(w);
+    const tN = L.length, tD = dec(L), lastW = L.length ? wk(Math.max(...L.map(c => c._d))) : null;
+    const tLieu = A ? `AS ${A} (ZS ${ZN[z]})` : z ? `ZS ${ZN[z]}` : `DPS ${PROV}`;
+    const tendPanel = tN ? panel(`Tendances cas confirmés et décès ${esc(tLieu)} MVB, RDC`,
+      `${esc(A ? "Aire de santé " + A : z ? "ZS " + ZN[z] : PROV)}, ${nf(tN)} cas confirmés dont ${nf(tD)} décédés et ${nf(tN - tD)} vivants depuis le début de l'épidémie · liste linéaire au ${dfr(S.date)}`,
+      `<div id="c-pil-tend"></div><div class="tend-res"><b>Résultats.</b>${nf(tN)} cas confirmés dont ${nf(tD)} décédés (${pc(ratio(tD, tN), 0)}) ; dernier cas : semaine ${isoWk(lastW)[1]} ${lastW + 6 > t ? `(semaine en cours, données jusqu'au ${dfr(S.date)})` : `(du ${dfr(iso(lastW))} au ${dfr(iso(lastW + 6))})`}. Semaines de confirmation (date du résultat du laboratoire) ; létalité hebdomadaire sur l'axe de droite. <span class="muted">SGI-MVE17 ©2026</span></div>`,
+      { png: "pilotage_tendances", csv: "c-pil-tend", cls: "tend-head" }) : "";
     const proj = rt && rt.variation_hebdo !== null && rt.variation_hebdo !== undefined ? Math.max(0, Math.round(c7.length * (1 + rt.variation_hebdo / 100))) : null;
     const where = [z ? `Zone de santé de ${esc(ZN[z])}` : `Province du ${esc(PROV)}`, A ? `aire de santé ${esc(A)}` : ""].filter(Boolean).join(" › ");
     return `
@@ -380,6 +392,7 @@
     <h2 class="pil-q">Indicateurs du jour</h2>
     <div class="pil-tiles">${tiles}</div>
     <h2 class="pil-q">Évolution de l'épidémie</h2>
+    ${tendPanel}
     <div class="grid g2">
       ${panel("Courbe épidémique : cas confirmés par semaine de début des symptômes", "Les deux dernières semaines (gris) sont provisoires : délai entre les symptômes et la confirmation", `<div id="c-pil-epi"></div>`, { png: "pilotage_courbe" })}
       ${panel("Issue des cas confirmés par semaine de confirmation", "Décédés, en traitement, guéris (liste labo)", `<div id="c-pil-iss"></div>`, { png: "pilotage_issues" })}
