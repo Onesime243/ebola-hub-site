@@ -1,0 +1,132 @@
+{
+ "Nord-Ubangi": {
+  "fichier": "nord-ubangi.js",
+  "aires": 177,
+  "zones": 11
+ },
+ "Equateur": {
+  "fichier": "equateur.js",
+  "aires": 284,
+  "zones": 18
+ },
+ "Tshuapa": {
+  "fichier": "tshuapa.js",
+  "aires": 278,
+  "zones": 12
+ },
+ "Sud-Ubangi": {
+  "fichier": "sud-ubangi.js",
+  "aires": 325,
+  "zones": 16
+ },
+ "Kongo-Central": {
+  "fichier": "kongo-central.js",
+  "aires": 408,
+  "zones": 31
+ },
+ "Haut-Lomami": {
+  "fichier": "haut-lomami.js",
+  "aires": 384,
+  "zones": 16
+ },
+ "Kasaï": {
+  "fichier": "kasai.js",
+  "aires": 409,
+  "zones": 18
+ },
+ "Kasaï-Oriental": {
+  "fichier": "kasai-oriental.js",
+  "aires": 320,
+  "zones": 19
+ },
+ "Haut-Katanga": {
+  "fichier": "haut-katanga.js",
+  "aires": 482,
+  "zones": 27
+ },
+ "Sankuru": {
+  "fichier": "sankuru.js",
+  "aires": 248,
+  "zones": 16
+ },
+ "Kinshasa": {
+  "fichier": "kinshasa.js",
+  "aires": 420,
+  "zones": 35
+ },
+ "Lomami": {
+  "fichier": "lomami.js",
+  "aires": 316,
+  "zones": 16
+ },
+ "Kwilu": {
+  "fichier": "kwilu.js",
+  "aires": 653,
+  "zones": 24
+ },
+ "Ituri": {
+  "fichier": "ituri.js",
+  "aires": 597,
+  "zones": 36
+ },
+ "Maniema": {
+  "fichier": "maniema.js",
+  "aires": 283,
+  "zones": 18
+ },
+ "Kasaï-Central": {
+  "fichier": "kasai-central.js",
+  "aires": 466,
+  "zones": 26
+ },
+ "Mongala": {
+  "fichier": "mongala.js",
+  "aires": 295,
+  "zones": 12
+ },
+ "Tshopo": {
+  "fichier": "tshopo.js",
+  "aires": 432,
+  "zones": 23
+ },
+ "Mai-Ndombe": {
+  "fichier": "mai-ndombe.js",
+  "aires": 310,
+  "zones": 14
+ },
+ "Lualaba": {
+  "fichier": "lualaba.js",
+  "aires": 275,
+  "zones": 14
+ },
+ "Sud-Kivu": {
+  "fichier": "sud-kivu.js",
+  "aires": 663,
+  "zones": 34
+ },
+ "Nord-Kivu": {
+  "fichier": "nord-kivu.js",
+  "aires": 661,
+  "zones": 34
+ },
+ "Kwango": {
+  "fichier": "kwango.js",
+  "aires": 308,
+  "zones": 14
+ },
+ "Haut-Uele": {
+  "fichier": "haut-uele.js",
+  "aires": 214,
+  "zones": 13
+ },
+ "Bas-Uele": {
+  "fichier": "bas-uele.js",
+  "aires": 180,
+  "zones": 11
+ },
+ "Tanganyika": {
+  "fichier": "tanganyika.js",
+  "aires": 270,
+  "zones": 11
+ }
+}
