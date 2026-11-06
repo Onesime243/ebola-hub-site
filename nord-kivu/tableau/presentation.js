@@ -4,7 +4,7 @@
 (function () {
   "use strict";
   const PRES = [
-    ["1. Surveillance, situation cumulée", [["01_indicateurs_cumul", "Indicateurs cumulés"], ["02_courbe_hebdomadaire", "Évolution hebdomadaire : vivants, décès et létalité"]]],
+    ["1. Surveillance, situation cumulée", [["01_indicateurs_cumul", "Indicateurs cumulés"], ["02_courbe_hebdomadaire", "Évolution hebdomadaire : vivants, décès et létalité"], ["02b_tendances", "Tendances des cas confirmés et décès (semaine de confirmation)"]]],
     ["1. Surveillance, situation du jour", [["03_indicateurs_jour", "Indicateurs du jour"], ["04_cas_du_jour", "Répartition des nouveaux cas"]]],
     ["1. Surveillance, jours sans nouveau cas", [["05_jours_sans_cas", "Jours sans nouveau cas confirmé"]]],
     ["1. Surveillance, carte", [["06_carte", "Carte de catégorisation"]]],
@@ -27,7 +27,7 @@
         <a class="btn primary pres-btn" href="${base}${encodeURIComponent(pptx)}" download="${esc(pptx)}">⤓ Télécharger le PowerPoint</a></div>
         <p class="note">Chaque graphique ci-dessous se télécharge aussi en image (PNG haute définition) pour être collé dans une diapositive existante. Tout est mis à jour à chaque analyse.</p></section>
       ${PRES.map(([sec, items], si) => `<section class="panel pres-sec" data-sec="${si}"><div class="panel-head"><div><h2>${esc(sec)}</h2></div></div>
-        <div class="pres-grid">${items.map(([k, lab]) => `<figure class="pres-card${/indicateurs|tableau|carte|comparatif|sources_zs|surveillance_zs|alertes_zs/.test(k) ? " wide" : ""}" data-k="${k}">
+        <div class="pres-grid">${items.map(([k, lab]) => `<figure class="pres-card${/indicateurs|tableau|carte|comparatif|sources_zs|surveillance_zs|alertes_zs|tendances/.test(k) ? " wide" : ""}" data-k="${k}">
           <a href="${base}${k}.png" target="_blank" rel="noopener" title="Agrandir"><img loading="lazy" src="${base}${k}.png?v=${v}" alt="${esc(lab)}" data-pres></a>
           <figcaption><span>${esc(lab)}</span><a class="btn sm" href="${base}${k}.png" download="${esc((titre + " " + lab).replace(/[^\wÀ-ÿ -]+/g, "").replace(/\s+/g, "_"))}.png">⤓ PNG</a></figcaption></figure>`).join("")}</div></section>`).join("")}
       <p class="note pres-empty" hidden>Aucune présentation n'a encore été produite : lancez l'analyse (la présentation est produite à la fin de l'analyse provinciale).</p>`;
