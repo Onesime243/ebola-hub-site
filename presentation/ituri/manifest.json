@@ -3,16 +3,50 @@
  "niveau": "province",
  "nom": "Province : Ituri",
  "court": "Ituri",
- "date": "2026-11-04",
- "genere_le": "2026-11-06 12:54",
- "pptx": "Presentation_Reunion_Ituri_20261104.pptx",
- "diapositives": 10,
+ "date": "2026-11-07",
+ "genere_le": "2026-11-08 22:30",
+ "pptx": "Presentation_Reunion_Ituri_20261107.pptx",
+ "diapositives": 39,
  "slides": [
   {
    "titre": "Situation cumulée",
    "images": [
     "01_indicateurs_cumul",
     "02_courbe_hebdomadaire"
+   ]
+  },
+  {
+   "titre": "Tendances des cas confirmés et décès",
+   "images": [
+    "02b_tendances",
+    "02c_tendances_BUNIA",
+    "02c_tendances_RWAMPARA",
+    "02c_tendances_NIZI",
+    "02c_tendances_MONGBWALU",
+    "02c_tendances_MANGALA",
+    "02c_tendances_MANDIMA",
+    "02c_tendances_NIANIA",
+    "02c_tendances_LITA",
+    "02c_tendances_BAMBU",
+    "02c_tendances_KOMANDA",
+    "02c_tendances_NYANKUNDE",
+    "02c_tendances_MAMBASA",
+    "02c_tendances_TCHOMIA",
+    "02c_tendances_FATAKI",
+    "02c_tendances_LOLWA",
+    "02c_tendances_DAMAS",
+    "02c_tendances_KILO",
+    "02c_tendances_RIMBA",
+    "02c_tendances_ARU",
+    "02c_tendances_DRODRO",
+    "02c_tendances_LOGO",
+    "02c_tendances_AUNGBA",
+    "02c_tendances_ADJA",
+    "02c_tendances_ARIWARA",
+    "02c_tendances_GETY",
+    "02c_tendances_MAHAGI",
+    "02c_tendances_KAMBALA",
+    "02c_tendances_BOGA"
    ]
   },
   {
@@ -30,7 +64,7 @@
   },
   {
    "titre": "Alertes",
-   "date": "2026-11-04",
+   "date": "2026-11-07",
    "images": [
     "07_indicateurs_alertes",
     "07b_alertes_comparatif_3j",
@@ -50,25 +84,141 @@
     "13_contacts_suivre_vus",
     "14_tableau_contacts"
    ],
-   "date": "2026-11-04"
+   "date": "2026-11-07"
   }
  ],
  "images": {
   "01_indicateurs_cumul": {
    "fichier": "01_indicateurs_cumul.png",
-   "titre": "Situation de la MVE au 4 novembre 2026, Province : Ituri"
+   "titre": "Situation de la MVE au 7 novembre 2026, Province : Ituri"
   },
   "02_courbe_hebdomadaire": {
    "fichier": "02_courbe_hebdomadaire.png",
    "titre": "Évolution hebdomadaire des cas confirmés"
   },
+  "02b_tendances": {
+   "fichier": "02b_tendances.png",
+   "titre": "Tendances des cas confirmés et décès"
+  },
+  "02c_tendances_BUNIA": {
+   "fichier": "02c_tendances_BUNIA.png",
+   "titre": "Tendances, ZS Bunia"
+  },
+  "02c_tendances_RWAMPARA": {
+   "fichier": "02c_tendances_RWAMPARA.png",
+   "titre": "Tendances, ZS Rwampara"
+  },
+  "02c_tendances_NIZI": {
+   "fichier": "02c_tendances_NIZI.png",
+   "titre": "Tendances, ZS Nizi"
+  },
+  "02c_tendances_MONGBWALU": {
+   "fichier": "02c_tendances_MONGBWALU.png",
+   "titre": "Tendances, ZS Mongbwalu"
+  },
+  "02c_tendances_MANGALA": {
+   "fichier": "02c_tendances_MANGALA.png",
+   "titre": "Tendances, ZS Mangala"
+  },
+  "02c_tendances_MANDIMA": {
+   "fichier": "02c_tendances_MANDIMA.png",
+   "titre": "Tendances, ZS Mandima"
+  },
+  "02c_tendances_NIANIA": {
+   "fichier": "02c_tendances_NIANIA.png",
+   "titre": "Tendances, ZS Nia Nia"
+  },
+  "02c_tendances_LITA": {
+   "fichier": "02c_tendances_LITA.png",
+   "titre": "Tendances, ZS Lita"
+  },
+  "02c_tendances_BAMBU": {
+   "fichier": "02c_tendances_BAMBU.png",
+   "titre": "Tendances, ZS Bambu"
+  },
+  "02c_tendances_KOMANDA": {
+   "fichier": "02c_tendances_KOMANDA.png",
+   "titre": "Tendances, ZS Komanda"
+  },
+  "02c_tendances_NYANKUNDE": {
+   "fichier": "02c_tendances_NYANKUNDE.png",
+   "titre": "Tendances, ZS Nyankunde"
+  },
+  "02c_tendances_MAMBASA": {
+   "fichier": "02c_tendances_MAMBASA.png",
+   "titre": "Tendances, ZS Mambasa"
+  },
+  "02c_tendances_TCHOMIA": {
+   "fichier": "02c_tendances_TCHOMIA.png",
+   "titre": "Tendances, ZS Tchomia"
+  },
+  "02c_tendances_FATAKI": {
+   "fichier": "02c_tendances_FATAKI.png",
+   "titre": "Tendances, ZS Fataki"
+  },
+  "02c_tendances_LOLWA": {
+   "fichier": "02c_tendances_LOLWA.png",
+   "titre": "Tendances, ZS Lolwa"
+  },
+  "02c_tendances_DAMAS": {
+   "fichier": "02c_tendances_DAMAS.png",
+   "titre": "Tendances, ZS Damas"
+  },
+  "02c_tendances_KILO": {
+   "fichier": "02c_tendances_KILO.png",
+   "titre": "Tendances, ZS Kilo"
+  },
+  "02c_tendances_RIMBA": {
+   "fichier": "02c_tendances_RIMBA.png",
+   "titre": "Tendances, ZS Rimba"
+  },
+  "02c_tendances_ARU": {
+   "fichier": "02c_tendances_ARU.png",
+   "titre": "Tendances, ZS Aru"
+  },
+  "02c_tendances_DRODRO": {
+   "fichier": "02c_tendances_DRODRO.png",
+   "titre": "Tendances, ZS Drodro"
+  },
+  "02c_tendances_LOGO": {
+   "fichier": "02c_tendances_LOGO.png",
+   "titre": "Tendances, ZS Logo"
+  },
+  "02c_tendances_AUNGBA": {
+   "fichier": "02c_tendances_AUNGBA.png",
+   "titre": "Tendances, ZS Aungba"
+  },
+  "02c_tendances_ADJA": {
+   "fichier": "02c_tendances_ADJA.png",
+   "titre": "Tendances, ZS Adja"
+  },
+  "02c_tendances_ARIWARA": {
+   "fichier": "02c_tendances_ARIWARA.png",
+   "titre": "Tendances, ZS Ariwara"
+  },
+  "02c_tendances_GETY": {
+   "fichier": "02c_tendances_GETY.png",
+   "titre": "Tendances, ZS Gety"
+  },
+  "02c_tendances_MAHAGI": {
+   "fichier": "02c_tendances_MAHAGI.png",
+   "titre": "Tendances, ZS Mahagi"
+  },
+  "02c_tendances_KAMBALA": {
+   "fichier": "02c_tendances_KAMBALA.png",
+   "titre": "Tendances, ZS Kambala"
+  },
+  "02c_tendances_BOGA": {
+   "fichier": "02c_tendances_BOGA.png",
+   "titre": "Tendances, ZS Boga"
+  },
   "03_indicateurs_jour": {
    "fichier": "03_indicateurs_jour.png",
-   "titre": "Situation épidémiologique du jour, 4 novembre 2026"
+   "titre": "Situation épidémiologique du jour, 7 novembre 2026"
   },
   "04_cas_du_jour": {
    "fichier": "04_cas_du_jour.png",
-   "titre": "Répartition des 23 nouveaux cas par zone de santé"
+   "titre": "Répartition des 10 nouveaux cas par zone de santé"
   },
   "05_jours_sans_cas": {
    "fichier": "05_jours_sans_cas.png",
@@ -76,11 +226,11 @@
   },
   "07_indicateurs_alertes": {
    "fichier": "07_indicateurs_alertes.png",
-   "titre": "Situation des alertes au 4 novembre 2026"
+   "titre": "Situation des alertes au 7 novembre 2026"
   },
   "08_alertes_sources": {
    "fichier": "08_alertes_sources.png",
-   "titre": "Sources des alertes du jour, 505 alertes"
+   "titre": "Sources des alertes du jour, 313 alertes"
   },
   "07b_alertes_comparatif_3j": {
    "fichier": "07b_alertes_comparatif_3j.png",
@@ -104,7 +254,7 @@
   },
   "10_indicateurs_contacts": {
    "fichier": "10_indicateurs_contacts.png",
-   "titre": "Situation du suivi des contacts au 4 novembre 2026"
+   "titre": "Situation du suivi des contacts au 7 novembre 2026"
   },
   "12_contacts_tendance": {
    "fichier": "12_contacts_tendance.png",

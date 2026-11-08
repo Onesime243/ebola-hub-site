@@ -3,10 +3,10 @@
  "niveau": "province",
  "nom": "Province : Tshopo",
  "court": "Tshopo",
- "date": "2026-11-04",
- "genere_le": "2026-11-06 12:55",
- "pptx": "Presentation_Reunion_Tshopo_20261104.pptx",
- "diapositives": 10,
+ "date": "2026-11-07",
+ "genere_le": "2026-11-08 22:30",
+ "pptx": "Presentation_Reunion_Tshopo_20261107.pptx",
+ "diapositives": 18,
  "slides": [
   {
    "titre": "Situation cumulée",
@@ -16,10 +16,22 @@
    ]
   },
   {
+   "titre": "Tendances des cas confirmés et décès",
+   "images": [
+    "02b_tendances",
+    "02c_tendances_MAKISOKISANGANI",
+    "02c_tendances_KABONDO",
+    "02c_tendances_BAFWASENDE",
+    "02c_tendances_MANGOBO",
+    "02c_tendances_TSHOPO",
+    "02c_tendances_WANIERUKULA",
+    "02c_tendances_LUBUNGA"
+   ]
+  },
+  {
    "titre": "Situation du jour",
    "images": [
-    "03_indicateurs_jour",
-    "04_cas_du_jour"
+    "03_indicateurs_jour"
    ]
   },
   {
@@ -30,7 +42,7 @@
   },
   {
    "titre": "Alertes",
-   "date": "2026-11-04",
+   "date": "2026-11-07",
    "images": [
     "07_indicateurs_alertes",
     "07b_alertes_comparatif_3j",
@@ -50,25 +62,53 @@
     "13_contacts_suivre_vus",
     "14_tableau_contacts"
    ],
-   "date": "2026-11-04"
+   "date": "2026-11-07"
   }
  ],
  "images": {
   "01_indicateurs_cumul": {
    "fichier": "01_indicateurs_cumul.png",
-   "titre": "Situation de la MVE au 4 novembre 2026, Province : Tshopo"
+   "titre": "Situation de la MVE au 7 novembre 2026, Province : Tshopo"
   },
   "02_courbe_hebdomadaire": {
    "fichier": "02_courbe_hebdomadaire.png",
    "titre": "Évolution hebdomadaire des cas confirmés"
   },
+  "02b_tendances": {
+   "fichier": "02b_tendances.png",
+   "titre": "Tendances des cas confirmés et décès"
+  },
+  "02c_tendances_MAKISOKISANGANI": {
+   "fichier": "02c_tendances_MAKISOKISANGANI.png",
+   "titre": "Tendances, ZS Makiso Kisangani"
+  },
+  "02c_tendances_KABONDO": {
+   "fichier": "02c_tendances_KABONDO.png",
+   "titre": "Tendances, ZS Kabondo"
+  },
+  "02c_tendances_BAFWASENDE": {
+   "fichier": "02c_tendances_BAFWASENDE.png",
+   "titre": "Tendances, ZS Bafwasende"
+  },
+  "02c_tendances_MANGOBO": {
+   "fichier": "02c_tendances_MANGOBO.png",
+   "titre": "Tendances, ZS Mangobo"
+  },
+  "02c_tendances_TSHOPO": {
+   "fichier": "02c_tendances_TSHOPO.png",
+   "titre": "Tendances, ZS Tshopo"
+  },
+  "02c_tendances_WANIERUKULA": {
+   "fichier": "02c_tendances_WANIERUKULA.png",
+   "titre": "Tendances, ZS Wanierukula"
+  },
+  "02c_tendances_LUBUNGA": {
+   "fichier": "02c_tendances_LUBUNGA.png",
+   "titre": "Tendances, ZS Lubunga"
+  },
   "03_indicateurs_jour": {
    "fichier": "03_indicateurs_jour.png",
-   "titre": "Situation épidémiologique du jour, 4 novembre 2026"
-  },
-  "04_cas_du_jour": {
-   "fichier": "04_cas_du_jour.png",
-   "titre": "Répartition des 1 nouveaux cas par zone de santé"
+   "titre": "Situation épidémiologique du jour, 7 novembre 2026"
   },
   "05_jours_sans_cas": {
    "fichier": "05_jours_sans_cas.png",
@@ -76,11 +116,11 @@
   },
   "07_indicateurs_alertes": {
    "fichier": "07_indicateurs_alertes.png",
-   "titre": "Situation des alertes au 4 novembre 2026"
+   "titre": "Situation des alertes au 7 novembre 2026"
   },
   "08_alertes_sources": {
    "fichier": "08_alertes_sources.png",
-   "titre": "Sources des alertes du jour, 51 alertes"
+   "titre": "Sources des alertes du jour, 31 alertes"
   },
   "07b_alertes_comparatif_3j": {
    "fichier": "07b_alertes_comparatif_3j.png",
@@ -104,7 +144,7 @@
   },
   "10_indicateurs_contacts": {
    "fichier": "10_indicateurs_contacts.png",
-   "titre": "Situation du suivi des contacts au 4 novembre 2026"
+   "titre": "Situation du suivi des contacts au 7 novembre 2026"
   },
   "12_contacts_tendance": {
    "fichier": "12_contacts_tendance.png",

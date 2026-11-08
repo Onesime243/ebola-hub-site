@@ -3,16 +3,23 @@
  "niveau": "province",
  "nom": "Province : Sud Kivu",
  "court": "Sud Kivu",
- "date": "2026-11-04",
- "genere_le": "2026-11-06 12:55",
- "pptx": "Presentation_Reunion_Sud_Kivu_20261104.pptx",
- "diapositives": 7,
+ "date": "2026-11-07",
+ "genere_le": "2026-11-08 22:30",
+ "pptx": "Presentation_Reunion_Sud_Kivu_20261107.pptx",
+ "diapositives": 9,
  "slides": [
   {
    "titre": "Situation cumulée",
    "images": [
     "01_indicateurs_cumul",
     "02_courbe_hebdomadaire"
+   ]
+  },
+  {
+   "titre": "Tendances des cas confirmés et décès",
+   "images": [
+    "02b_tendances",
+    "02c_tendances_MITIMURHESA"
    ]
   },
   {
@@ -42,15 +49,23 @@
  "images": {
   "01_indicateurs_cumul": {
    "fichier": "01_indicateurs_cumul.png",
-   "titre": "Situation de la MVE au 4 novembre 2026, Province : Sud Kivu"
+   "titre": "Situation de la MVE au 7 novembre 2026, Province : Sud Kivu"
   },
   "02_courbe_hebdomadaire": {
    "fichier": "02_courbe_hebdomadaire.png",
    "titre": "Évolution hebdomadaire des cas confirmés"
   },
+  "02b_tendances": {
+   "fichier": "02b_tendances.png",
+   "titre": "Tendances des cas confirmés et décès"
+  },
+  "02c_tendances_MITIMURHESA": {
+   "fichier": "02c_tendances_MITIMURHESA.png",
+   "titre": "Tendances, ZS Miti Murhesa"
+  },
   "03_indicateurs_jour": {
    "fichier": "03_indicateurs_jour.png",
-   "titre": "Situation épidémiologique du jour, 4 novembre 2026"
+   "titre": "Situation épidémiologique du jour, 7 novembre 2026"
   },
   "05_jours_sans_cas": {
    "fichier": "05_jours_sans_cas.png",

@@ -612,3 +612,26 @@ table.pil-20 td{white-space:normal}
 .im-prose h3{font-size:13.5px;margin:12px 0 6px}
 @media (max-width:900px){.im-fr{grid-template-columns:110px 1fr}.im-fv{grid-column:1/-1}}
 @media print{.im-head{-webkit-print-color-adjust:exact;print-color-adjust:exact}.im-actions{display:none}}
+
+/* graphique « Tendances des cas confirmés et décès » (format SGI-MVE17), menu Pilotage stratégique */
+:root{--td-v:#1F4E89;--td-d:#D7352B;--td-l:#3A0B0B;--td-ax:#5A1010;--td-edge:#111}
+:root[data-theme="dark"]{--td-v:#3D74BF;--td-d:#E0473C;--td-l:#F4C7B8;--td-ax:#F4C7B8;--td-edge:#05070a}
+.tend-head .panel-head h2{color:#22508A;font-size:19px}
+:root[data-theme="dark"] .tend-head .panel-head h2{color:#8DB6EA}
+.chart.tend svg{display:block;width:100%;height:auto}
+.chart.tend .td-v{fill:var(--td-v);stroke:var(--td-edge);stroke-width:1}
+.chart.tend .td-d{fill:var(--td-d);stroke:var(--td-edge);stroke-width:1}
+.chart.tend .td-line{fill:none;stroke:var(--td-l);stroke-width:2.6;stroke-dasharray:8 5;pointer-events:none}
+.chart.tend .td-pt{fill:var(--td-l);pointer-events:none}
+.chart.tend .td-grid{stroke:var(--line);stroke-dasharray:5 4}
+.chart.tend .td-axis{stroke:var(--line-2)}
+.chart.tend .td-axis2{stroke:var(--td-ax)}
+.chart.tend text{font-family:inherit}
+.chart.tend text.td-n{fill:var(--ink-2);font-weight:700;font-size:11.5px}
+.chart.tend text.td-ax2{fill:var(--td-ax);font-weight:700;font-size:11.5px}
+.chart.tend text.td-tit{fill:var(--ink);font-weight:700;font-size:13px}
+.chart.tend text.td-tit.td-ax2{fill:var(--td-ax);font-size:14px}
+.chart.tend text.td-lg{fill:var(--ink);font-size:12.5px}
+.method-box.tend-res{border:1.5px solid var(--ink);border-radius:2px;padding:8px 12px;margin-top:10px;font-size:13px;line-height:1.5;background:none;color:var(--ink)}
+.method-box.tend-res p{margin:0}
+.tend-res b{margin-right:8px}

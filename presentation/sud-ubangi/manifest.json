@@ -3,16 +3,23 @@
  "niveau": "province",
  "nom": "Province : Sud Ubangi",
  "court": "Sud Ubangi",
- "date": "2026-11-04",
- "genere_le": "2026-11-06 12:55",
- "pptx": "Presentation_Reunion_Sud_Ubangi_20261104.pptx",
- "diapositives": 7,
+ "date": "2026-11-07",
+ "genere_le": "2026-11-08 22:30",
+ "pptx": "Presentation_Reunion_Sud_Ubangi_20261107.pptx",
+ "diapositives": 9,
  "slides": [
   {
    "titre": "Situation cumulée",
    "images": [
     "01_indicateurs_cumul",
     "02_courbe_hebdomadaire"
+   ]
+  },
+  {
+   "titre": "Tendances des cas confirmés et décès",
+   "images": [
+    "02b_tendances",
+    "02c_tendances_BULU"
    ]
   },
   {
@@ -29,7 +36,7 @@
   },
   {
    "titre": "Alertes",
-   "date": "2026-10-27",
+   "date": "2026-11-05",
    "images": [
     "07_indicateurs_alertes",
     "07b_alertes_comparatif_3j",
@@ -42,15 +49,23 @@
  "images": {
   "01_indicateurs_cumul": {
    "fichier": "01_indicateurs_cumul.png",
-   "titre": "Situation de la MVE au 4 novembre 2026, Province : Sud Ubangi"
+   "titre": "Situation de la MVE au 7 novembre 2026, Province : Sud Ubangi"
   },
   "02_courbe_hebdomadaire": {
    "fichier": "02_courbe_hebdomadaire.png",
    "titre": "Évolution hebdomadaire des cas confirmés"
   },
+  "02b_tendances": {
+   "fichier": "02b_tendances.png",
+   "titre": "Tendances des cas confirmés et décès"
+  },
+  "02c_tendances_BULU": {
+   "fichier": "02c_tendances_BULU.png",
+   "titre": "Tendances, ZS Bulu"
+  },
   "03_indicateurs_jour": {
    "fichier": "03_indicateurs_jour.png",
-   "titre": "Situation épidémiologique du jour, 4 novembre 2026"
+   "titre": "Situation épidémiologique du jour, 7 novembre 2026"
   },
   "05_jours_sans_cas": {
    "fichier": "05_jours_sans_cas.png",
@@ -58,11 +73,11 @@
   },
   "07_indicateurs_alertes": {
    "fichier": "07_indicateurs_alertes.png",
-   "titre": "Situation des alertes au 27 octobre 2026"
+   "titre": "Situation des alertes au 5 novembre 2026"
   },
   "08_alertes_sources": {
    "fichier": "08_alertes_sources.png",
-   "titre": "Sources des alertes du jour, 1 alertes"
+   "titre": "Sources des alertes du jour, 14 alertes"
   },
   "07b_alertes_comparatif_3j": {
    "fichier": "07b_alertes_comparatif_3j.png",

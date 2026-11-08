@@ -3480,6 +3480,68 @@
     const key = S.pilA ? `A:${S.pilT}|${S.pilZ}|${S.pilA}` : S.pilZ ? `Z:${S.pilT}|${S.pilZ}` : S.pilT;
     return { key: P.territoires[key] ? key : S.pilT, zs, as };
   }
+
+  /* ---- Tendances des cas confirmés et décès (format SGI-MVE17) : barres empilées jointives (décès en bas, vivants au-dessus,
+     contour noir) et létalité hebdomadaire en pointillés sur un second axe (0–100 %) ; tend = {w0, v[], d[]} (semaines du lundi) */
+  const isoWk = s => { const d = new Date(s + "T00:00:00Z"), th = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate() + 3 - (d.getUTCDay() + 6) % 7)), y = th.getUTCFullYear();
+    return [y, Math.ceil(((th - Date.UTC(y, 0, 1)) / 864e5 + 1) / 7)]; };
+  function tendChart(box, tend) {
+    const NS = "http://www.w3.org/2000/svg";
+    const el = (tag, a, par) => { const e = document.createElementNS(NS, tag); for (const k in a) if (a[k] !== null && a[k] !== undefined) e.setAttribute(k, a[k]); if (par) par.appendChild(e); return e; };
+    const draw = () => {
+      box.innerHTML = "";
+      const n = tend.v.length, weeks = tend.v.map((_, i) => addDays(tend.w0, 7 * i)), tot = tend.v.map((v, i) => v + tend.d[i]);
+      const W = Math.max(360, box.clientWidth || 900), H = 380, m = { l: 58, r: 64, t: 34, b: 62 }, pw = W - m.l - m.r, ph = H - m.t - m.b;
+      const nice = v => { if (v < 10) return Math.max(1, Math.ceil(v)); const p = Math.pow(10, Math.floor(Math.log10(v))), q = v / p; return [1, 1.5, 2, 2.5, 3, 4, 5, 6, 8, 10].find(k => q <= k) * p; };
+      const mx = 4 * nice(Math.max(1, ...tot) * 1.08 / 4);   // 4 intervalles de valeur entière
+      const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": T("Tendances des cas confirmés et décès") }, box);
+      const Y = v => m.t + ph - ph * v / mx, Y2 = p => m.t + ph - ph * p / 100, slot = pw / n, X = i => m.l + i * slot;
+      const step = Math.max(1, Math.ceil(n / Math.floor(pw / 44)));
+      for (let k = 0; k <= 4; k++) {
+        el("line", { x1: m.l, x2: W - m.r, y1: Y(mx * k / 4), y2: Y(mx * k / 4), class: "td-grid" }, svg);
+        el("text", { x: m.l - 7, y: Y(mx * k / 4) + 4, "text-anchor": "end", class: "td-n" }, svg).textContent = nf(mx * k / 4);
+        el("text", { x: W - m.r + 9, y: Y2(25 * k) + 4, class: "td-ax2" }, svg).textContent = 25 * k + "%";
+      }
+      weeks.forEach((w, i) => { if (i % step) return; const cx = X(i) + slot / 2, [y, k] = isoWk(w);
+        el("line", { x1: cx, x2: cx, y1: m.t, y2: m.t + ph, class: "td-grid" }, svg);
+        el("text", { x: cx, y: m.t + ph + 15, "text-anchor": "middle", class: "td-n" }, svg).textContent = k;
+        el("text", { x: cx, y: m.t + ph + 28, "text-anchor": "middle", class: "td-n" }, svg).textContent = y; });
+      weeks.forEach((w, i) => {
+        const d = tend.d[i], v = tend.v[i], t = tot[i], [y, k] = isoWk(w);
+        const hit = el("rect", { x: X(i), y: m.t, width: slot, height: ph, fill: "transparent" }, svg);
+        if (d) el("rect", { x: X(i), y: Y(d), width: slot, height: Y(0) - Y(d), class: "td-d" }, svg);
+        if (v) el("rect", { x: X(i), y: Y(d + v), width: slot, height: Y(d) - Y(d + v), class: "td-v" }, svg);
+        hit.addEventListener("mousemove", ev => Ch.showTip(`<b>${T("Semaine")} ${k} (${y})</b><br>${T("du")} ${dfmt(w)} ${T("au")} ${dfmt(addDays(w, 6))}<br>${T("Vivants")} : ${nf(v)}<br>${T("Décédés")} : ${nf(d)}<br>${T("Total")} : ${nf(t)}<br>${T("Létalité")} : ${t ? nf(100 * d / t) + " %" : "—"}`, ev));
+        hit.addEventListener("mouseleave", Ch.hideTip);
+      });
+      el("line", { x1: m.l, x2: m.l, y1: m.t, y2: m.t + ph, class: "td-axis" }, svg);
+      el("line", { x1: m.l, x2: W - m.r, y1: m.t + ph, y2: m.t + ph, class: "td-axis" }, svg);
+      el("line", { x1: W - m.r, x2: W - m.r, y1: m.t, y2: m.t + ph, class: "td-axis2" }, svg);
+      let path = "", pen = false;
+      weeks.forEach((_, i) => { if (!tot[i]) { pen = false; return; } path += (pen ? "L" : "M") + (X(i) + slot / 2).toFixed(1) + " " + Y2(100 * tend.d[i] / tot[i]).toFixed(1); pen = true; });
+      el("path", { d: path, class: "td-line" }, svg);
+      weeks.forEach((_, i) => { if (!tot[i]) return; const x = X(i) + slot / 2, y = Y2(100 * tend.d[i] / tot[i]); el("path", { d: `M${x} ${y - 4}L${x + 4} ${y}L${x} ${y + 4}L${x - 4} ${y}Z`, class: "td-pt" }, svg); });
+      el("text", { x: 14, y: m.t + ph / 2, transform: `rotate(-90 14 ${m.t + ph / 2})`, "text-anchor": "middle", class: "td-tit" }, svg).textContent = T("Nombre des confirmés et décès");
+      el("text", { x: W - 18, y: m.t + ph / 2, transform: `rotate(90 ${W - 18} ${m.t + ph / 2})`, "text-anchor": "middle", class: "td-tit td-ax2" }, svg).textContent = T("Létalité");
+      el("text", { x: m.l + pw / 2, y: H - 8, "text-anchor": "middle", class: "td-tit" }, svg).textContent = T("Semaine de notification");
+      const lx = m.l + pw / 2;
+      [["td-v", T("Vivant"), -92], ["td-d", T("Décédé"), 12]].forEach(([c, t, dx]) => { el("rect", { x: lx + dx, y: 9, width: 26, height: 13, class: c }, svg); el("text", { x: lx + dx + 33, y: 20, class: "td-lg" }, svg).textContent = t; });
+      box.__tbl = { cols: [T("Semaine"), T("Année"), T("Début de la semaine"), T("Vivants"), T("Décédés"), T("Total"), T("Létalité (%)")],
+        rows: weeks.map((w, i) => { const [y, k] = isoWk(w); return [k, y, w, tend.v[i], tend.d[i], tot[i], tot[i] ? Math.round(1000 * tend.d[i] / tot[i]) / 10 : null]; }) };
+    };
+    box.classList.add("chart", "tend");
+    if (Ch.register) Ch.register(box, draw); else draw();
+  }
+  function tendPanel(X, lieuT, lieu, date) {
+    const td = X && X.tendance; if (!td || !td.v.length) return "";
+    const N = td.v.reduce((a, b) => a + b, 0) + td.d.reduce((a, b) => a + b, 0), Dd = td.d.reduce((a, b) => a + b, 0);
+    let li = -1; td.v.forEach((v, i) => { if (v + td.d[i]) li = i; });
+    const lw = addDays(td.w0, 7 * li), enCours = addDays(lw, 6) > date;
+    return panel(`${T("Tendances cas confirmés et décès")} ${esc(lieuT)}${lieuT ? " " : ""}MVB, RDC`,
+      `${esc(lieu)}, ${nf(N)} ${T("cas confirmés dont")} ${nf(Dd)} ${T("décédés et")} ${nf(N - Dd)} ${T("vivants depuis le début de l'épidémie")} · ${T("liste linéaire au")} ${dfmt(date)}`,
+      `<div id="c-pil-tend"></div><div class="method-box tend-res"><p><b>${T("Résultats.")}</b> ${nf(N)} ${T("cas confirmés dont")} ${nf(Dd)} ${T("décédés")} (${pc(N ? 100 * Dd / N : null, 0)}) ; ${T("dernier cas : semaine")} ${isoWk(lw)[1]} ${enCours ? `(${T("semaine en cours, données jusqu'au")} ${dfmt(date)})` : `(${T("du")} ${dfmt(lw)} ${T("au")} ${dfmt(addDays(lw, 6))})`}. ${T("Semaines de notification (date de rapportage de la Linelist) ; létalité hebdomadaire sur l'axe de droite.")} <span class="muted">SGI-MVE17 ©2026</span></p></div>`,
+      { png: "tendances_cas_deces", cls: "tend-head" });
+  }
   function pilotageView() {
     const P = PIL();
     if (!P) return `<div class="empty">${T("Pilotage stratégique indisponible : relancez l’analyse complète.")}</div>`;
@@ -3554,6 +3616,7 @@
     <h2 class="pil-q">${T("Indicateurs du jour")}${P.jour_24h ? ` <span class="small muted" style="font-weight:400">· ${T("« 24 h » = notifications du")} ${dfmt(P.jour_24h)}${P.jour_24h_complet === false ? ` (${T("dernier jour complet ; le jour de l’extraction est encore presque vide")})` : ""}</span>` : ""}</h2>
     <div class="pil-tiles">${daily}</div>
     <h2 class="pil-q">${T("Évolution de l’épidémie")}</h2>
+    ${tendPanel(X, S.pilA ? `AS ${S.pilA}` : S.pilZ ? `ZS ${S.pilZ}` : nat ? "" : `DPS ${S.pilT}`, S.pilA ? `${T("Aire de santé")} ${S.pilA} (ZS ${S.pilZ})` : S.pilZ ? `ZS ${S.pilZ}` : nat ? "RDC" : S.pilT, P.date)}
     <div class="grid g2">
       ${panel("Courbe épidémique : cas confirmés par semaine de début des symptômes", T("Zone grisée : semaines provisoires (cas pas encore notifiés) et projection ; pointillés : estimation corrigée du délai de notification puis projection à 4 semaines, avec intervalle à 90 %"), `<div id="c-pil-epi"></div>${pilProj(X)}`, { png: "courbe_dds_pilotage" })}
       ${panel("Décès confirmés par semaine, au CTE et hors CTE", T("Semaine du décès ; une part élevée hors CTE signale des cas non isolés à temps"), `<div id="c-pil-dec"></div>`, { png: "deces_cte_hors_cte_hebdo" })}
@@ -3680,6 +3743,7 @@
     const xl = (v, r, tip) => tip ? `${T("semaine du")} ${dfmt(v)}` : dshort(v);
     const i0 = X.serie.findIndex(r => r.provisoire);
     const hasEst = X.serie.some(r => r.estim !== undefined && r.estim !== null);
+    if ($("#c-pil-tend") && X.tendance) tendChart($("#c-pil-tend"), X.tendance);
     if ($("#c-pil-epi")) Ch.xy($("#c-pil-epi"), { data: X.serie, x: "semaine", xLabel: xl, height: 280, tipSkipNull: true,
       shade: i0 >= 0 ? { from: i0, label: hasEst ? T("provisoire · projection") : T("provisoire") } : null,
       band: hasEst ? { lo: "estim_lo", hi: "estim_hi", color: "--critical", label: T("Intervalle à 90 %") } : null,

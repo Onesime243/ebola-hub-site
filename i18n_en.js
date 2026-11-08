@@ -1435,4 +1435,12 @@ Object.assign(window.HUB_EN_TPL, {
   "Suspects isolés": "Suspects isolated",
   "Cas confirmés notifiés": "Confirmed cases notified",
   "Létalité": "Case fatality",
+  /* ---- tendances des cas confirmés et décès (Pilotage stratégique) ---- */
+  "Tendances cas confirmés et décès": "Confirmed cases and deaths trends", "Tendances des cas confirmés et décès": "Confirmed cases and deaths trends",
+  "Nombre des confirmés et décès": "Number of confirmed cases and deaths", "Semaine de notification": "Week of notification",
+  "Vivant": "Alive", "Décédé": "Deceased", "Vivants": "Alive", "Semaine": "Week", "Année": "Year", "Début de la semaine": "Week starting", "Létalité (%)": "Case fatality (%)",
+  "cas confirmés dont": "confirmed cases, of whom", "décédés et": "died and", "vivants depuis le début de l'épidémie": "are alive since the start of the outbreak",
+  "liste linéaire au": "line list as of", "Résultats.": "Results.", "décédés": "died", "dernier cas : semaine": "last case: week",
+  "semaine en cours, données jusqu'au": "current week, data up to",
+  "Semaines de notification (date de rapportage de la Linelist) ; létalité hebdomadaire sur l'axe de droite.": "Weeks of notification (Linelist reporting date); weekly case fatality on the right axis.",
 });
