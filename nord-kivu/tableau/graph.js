@@ -106,7 +106,7 @@
     opt.labels.forEach((_, i) => { const t = tot[i]; if (!t) return; const x = X(i) + slot / 2, y = Y2(100 * opt.dec[i] / t);
       el("path", { d: `M${x} ${y - 4}L${x + 4} ${y}L${x} ${y + 4}L${x - 4} ${y}Z`, fill: K.l, "pointer-events": "none" }, svg); });
     // titres d'axes et légende
-    el("text", { x: 14, y: m.t + ph / 2, transform: `rotate(-90 14 ${m.t + ph / 2})`, "text-anchor": "middle", class: "t-tit" }, svg).textContent = "Nombre des confirmés et décès";
+    el("text", { x: 14, y: m.t + ph / 2, transform: `rotate(-90 14 ${m.t + ph / 2})`, "text-anchor": "middle", class: "t-tit" }, svg).textContent = opt.yTitle || "Nombre des confirmés et décès";
     el("text", { x: W - 18, y: m.t + ph / 2, transform: `rotate(90 ${W - 18} ${m.t + ph / 2})`, "text-anchor": "middle", class: "t-tit t-ax2" }, svg).textContent = "Létalité";
     el("text", { x: m.l + pw / 2, y: H - 8, "text-anchor": "middle", class: "t-tit" }, svg).textContent = opt.xTitle || "Semaine de confirmation";
     const lg = el("g", {}, svg), lx = m.l + pw / 2;

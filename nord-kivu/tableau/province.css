@@ -201,3 +201,6 @@ a.btn{text-decoration:none}
 .chart.tend text.t-tit{fill:var(--ink);font-weight:700;font-size:13px}
 .chart.tend text.t-tit.t-ax2{fill:var(--td-ax);font-size:14px}
 .chart.tend text.t-lg{fill:var(--ink);font-size:12.5px}
+.chart.tend text.t-vd{font-weight:800;font-size:11px;paint-order:stroke;stroke:var(--surface);stroke-width:3px}
+.chart.tend text.t-vd.v{fill:var(--td-v)}
+.chart.tend text.t-vd.d{fill:var(--td-d)}

@@ -14,7 +14,10 @@
     ["3. Suivi des contacts", [["10_indicateurs_contacts", "Indicateurs du suivi"], ["11_contacts_non_vus", "Raisons de non-suivi"], ["12_contacts_tendance", "Taux de suivi sur 21 jours"],
       ["12_contacts_taux", "Taux de suivi par zone de santé"], ["13_contacts_suivre_vus", "Contacts à suivre et vus par zone"], ["14_tableau_contacts", "Tableau détaillé par zone de santé"]]],
     ["5. Laboratoire", [["15_indicateurs_labo", "Indicateurs du laboratoire"], ["16_labo_resultats", "Résultats positifs et négatifs"], ["17_labo_positivite", "Positivité hebdomadaire"]]],
-    ["9. Enterrements dignes et sécurisés", [["18_eds", "Alertes de décès, EDS et swabs"]]]
+    ["9. Enterrements dignes et sécurisés", [["18_eds", "Alertes de décès, EDS et swabs"]]],
+    ["Analyse scolaire", [["30_scolaire_indicateurs", "Élèves et personnel des écoles touchés"], ["31_scolaire_fonction_sexe", "Fonction et sexe"], ["32_scolaire_age_sexe", "Âge et sexe"],
+      ["33_scolaire_statut", "Statut actuel"], ["34_scolaire_niveau", "Niveau scolaire"], ["35_scolaire_semaines", "Personnes touchées par semaine"], ["36_scolaire_ecoles", "Tableau des écoles touchées"],
+      ["37_scolaire_aires", "Tableau par aire de santé"], ["38_scolaire_carte_ecoles", "Carte des écoles touchées par aire"], ["39_scolaire_carte_eleves", "Carte des élèves touchés (vivants / décédés)"]]]
   ];
   const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 
@@ -26,8 +29,8 @@
           <p>Diapositives au format des présentations de la DPS, ${esc(dateTxt)} : indicateurs, courbes et tableaux, avec des graphiques <b>modifiables</b> dans PowerPoint (clic droit sur un graphique › Modifier les données). Seuls les piliers dont l'outil reçoit les données sont produits.</p></div>
         <a class="btn primary pres-btn" href="${base}${encodeURIComponent(pptx)}" download="${esc(pptx)}">⤓ Télécharger le PowerPoint</a></div>
         <p class="note">Chaque graphique ci-dessous se télécharge aussi en image (PNG haute définition) pour être collé dans une diapositive existante. Tout est mis à jour à chaque analyse.</p></section>
-      ${PRES.map(([sec, items], si) => `<section class="panel pres-sec" data-sec="${si}"><div class="panel-head"><div><h2>${esc(sec)}</h2></div></div>
-        <div class="pres-grid">${items.map(([k, lab]) => `<figure class="pres-card${/indicateurs|tableau|carte|comparatif|sources_zs|surveillance_zs|alertes_zs|tendances/.test(k) ? " wide" : ""}" data-k="${k}">
+      ${PRES.map(([sec, items], si) => `<section class="panel pres-sec" data-sec="${si}"><div class="panel-head"><div><h2>${esc(sec)}</h2>${sec === "Analyse scolaire" ? `<p>Liste des élèves et du personnel des écoles touchés (sans nom ni téléphone) : aussi dans un PowerPoint dédié.</p>` : ""}</div>${sec === "Analyse scolaire" ? (n => `<div class="panel-tools"><a class="btn sm primary" href="${base}${encodeURIComponent(n)}" download="${esc(n)}">⤓ PowerPoint « Analyse scolaire »</a></div>`)(pptx.replace(/^Presentation_(Province|ZS)_/, "Analyse_scolaire_")) : ""}</div>
+        <div class="pres-grid">${items.map(([k, lab]) => `<figure class="pres-card${/indicateurs|tableau|carte|comparatif|sources_zs|surveillance_zs|alertes_zs|tendances|scolaire_(ecoles|aires|semaines)/.test(k) ? " wide" : ""}" data-k="${k}">
           <a href="${base}${k}.png" target="_blank" rel="noopener" title="Agrandir"><img loading="lazy" src="${base}${k}.png?v=${v}" alt="${esc(lab)}" data-pres></a>
           <figcaption><span>${esc(lab)}</span><a class="btn sm" href="${base}${k}.png" download="${esc((titre + " " + lab).replace(/[^\wÀ-ÿ -]+/g, "").replace(/\s+/g, "_"))}.png">⤓ PNG</a></figcaption></figure>`).join("")}</div></section>`).join("")}
       <p class="note pres-empty" hidden>Aucune présentation n'a encore été produite : lancez l'analyse (la présentation est produite à la fin de l'analyse provinciale).</p>`;
