@@ -398,6 +398,7 @@
       ${panel("Courbe épidémique : cas confirmés par semaine de début des symptômes", "Les deux dernières semaines (gris) sont provisoires : délai entre les symptômes et la confirmation", `<div id="c-pil-epi"></div>`, { png: "pilotage_courbe" })}
       ${panel("Issue des cas confirmés par semaine de confirmation", "Décédés, en traitement, guéris (liste labo)", `<div id="c-pil-iss"></div>`, { png: "pilotage_issues" })}
     </div>
+    ${pilEcoles(z, A, t)}
     <h2 class="pil-q">Foyers actifs et risque de propagation</h2>
     ${panel("Catégorie des zones de santé", "Rouge : cas dans les 7 derniers jours ; orange : 8 à 21 jours ; jaune : 22 à 42 jours ; vert : plus de 42 jours · cliquez une zone pour l'afficher", `<div id="c-pil-map"></div>`, { png: "pilotage_carte" })}
     <h2 class="pil-q">Détection, isolement et suivi des contacts</h2>
@@ -421,13 +422,12 @@
      une ligne par personne, sans nom ni téléphone (sexe, âge, statut, fonction, niveau, école, aire, zone, date). */
   const EC = P.ecoles ? rowsToObj(P.ecoles) : [];
   EC.forEach(r => { r._d = day(r.date); r.deces = r.statut === "Décédé"; r.eleve = r.fonction === "Élève"; r.ens = r.fonction === "Enseignant"; r.ident = r.ecole !== "Non identifiée"; });
-  const EC_AGES = [["< 5 ans", 0, 4.99], ["5–9 ans", 5, 9.99], ["10–14 ans", 10, 14.99], ["15–19 ans", 15, 19.99], ["20 ans et +", 20, 200]];
+  const EC_AGES = [["< 6 ans", 0, 5.99], ["6 à < 12 ans", 6, 11.99], ["12 à < 18 ans", 12, 17.99], ["≥ 18 ans", 18, 200]];
   const ecTranche = a => a === null || a === undefined ? "Non précisé" : (EC_AGES.find(([, lo, hi]) => a >= lo && a <= hi) || ["Non précisé"])[0];
   const EC_ST = [["Décédé", "--rc-rt"], ["En traitement (CTE)", "--warn"], ["Guéri", "--good"], ["Vivant", "--s1"], ["Non précisé", "--rc-grey"]];
-  const SEQ = { bleu: ["#DCE8F4", "#A8C6E6", "#6E9FD0", "#3A72B0", "#1F4E89"], rouge: ["#F6DCD8", "#EDAFA6", "#E07B6E", "#C94A3E", "#9B2A22"] };
-  function ecBins(mx) {   // classes de couleur adaptées au maximum observé
-    if (mx <= 5) return Array.from({ length: Math.max(1, mx) }, (_, i) => [i + 1, i + 1]);
-    const q = [1, Math.ceil(mx * .2), Math.ceil(mx * .4), Math.ceil(mx * .6), Math.ceil(mx * .8)].filter((v, i, a) => i === 0 || v > a[i - 1]);
+  function ecBins(mx) {   // 4 classes au plus, adaptées au maximum observé (couleurs des autres cartes : jaune → rouge)
+    if (mx <= 4) return Array.from({ length: Math.max(1, mx) }, (_, i) => [i + 1, i + 1]);
+    const q = [1, Math.ceil(mx * .25) + 1, Math.ceil(mx * .5) + 1, Math.ceil(mx * .75) + 1].filter((v, i, a) => i === 0 || v > a[i - 1]);
     return q.map((lo, i) => [lo, i + 1 < q.length ? q[i + 1] - 1 : mx]);
   }
   function ecAgg(L, key) {
@@ -436,6 +436,37 @@
       x.n++; if (r.eleve) { x.eleves++; r.deces ? x.eldec++ : x.elviv++; } if (r.ens) x.ens++; if (r.deces) x.dec++; if (r.sexe === "F") x.F++; if (r.sexe === "M") x.M++;
       if (r.ident) x.ecoles.add(r.ecole); if (r._d !== null && (x.last === null || r._d > x.last)) x.last = r._d; });
     return Object.values(o).map(x => ({ ...x, nEcoles: x.ecoles.size, let: ratio(x.dec, x.n) }));
+  }
+
+  /* Pilotage : milieu scolaire (élèves et personnel des écoles touchés), même filtre zone / aire et même date que la page */
+  function pilEcoles(z, A, t) {
+    if (!EC.length) return "";
+    const L = EC.filter(r => (!z || r.zone === z) && (!A || r.aire === A) && (r._d === null || r._d <= t));
+    if (!L.length) return "";
+    const el = L.filter(r => r.eleve), ens = L.filter(r => r.ens), dec = L.filter(r => r.deces);
+    const r7 = L.filter(r => r._d !== null && r._d > t - 7), r7p = L.filter(r => r._d !== null && r._d > t - 14 && r._d <= t - 7);
+    const ecs = new Set(L.filter(r => r.ident).map(r => r.ecole));
+    const first = {}; L.filter(r => r.ident && r._d !== null).forEach(r => { if (first[r.ecole] === undefined || r._d < first[r.ecole]) first[r.ecole] = r._d; });
+    const nouv = Object.keys(first).filter(e => first[e] > t - 7);
+    const card = (label, value, note, o = {}) => `<div class="kpi pil-kpi ${o.cls || ""}"><div class="label">${o.color ? `<i class="dot" style="background:${col(o.color)}"></i>` : ""}${label}</div><div class="value">${value}</div><div class="note">${note || ""}</div></div>`;
+    const top = ecAgg(L.filter(r => r.ident), r => r.ecole).sort((a, b) => b.n - a.n || b.dec - a.dec).slice(0, 8)
+      .map(x => ({ ...x, aire: (L.find(r => r.ecole === x.k) || {}).aire }));
+    const Ld = L.filter(r => r._d !== null), TW = [];
+    if (Ld.length) for (let w = wk(Math.min(...Ld.map(r => r._d))); w <= wk(t); w += 7) TW.push(w);
+    const isoW = n => { const d = new Date(n * 864e5), th = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate() + 3 - (d.getUTCDay() + 6) % 7)), y = th.getUTCFullYear(); return [y, Math.ceil(((th - Date.UTC(y, 0, 1)) / 864e5 + 1) / 7)]; };
+    after(() => { if (TW.length && $("#c-pil-ec")) G.tendance($("#c-pil-ec"), { labels: TW.map(w => ({ wk: isoW(w)[1], an: isoW(w)[0], debut: dfr(iso(w)) })), dec: TW.map(w => Ld.filter(r => r.deces && r._d >= w && r._d < w + 7).length),
+      viv: TW.map(w => Ld.filter(r => !r.deces && r._d >= w && r._d < w + 7).length), h: 320, vd: 1, xTitle: "Semaine (date rapportée dans la liste scolaire)", yTitle: "Personnes touchées" }); });
+    return `<h2 class="pil-q">Milieu scolaire <button class="btn sm" data-page="ecoles" style="margin-left:8px;vertical-align:middle">Analyse scolaire complète</button></h2>
+    <div class="grid g4 pil-cards">
+      ${card("Élèves touchés", nf(el.length), `${nf(el.filter(r => r.sexe === "F").length)} filles, ${nf(el.filter(r => r.sexe === "M").length)} garçons · ${nf(r7.filter(r => r.eleve).length)} en 7 jours`, { color: "--s1" })}
+      ${card("Écoles touchées", nf(ecs.size), nouv.length ? `<b>${nf(nouv.length)} nouvelle${nouv.length > 1 ? "s" : ""} en 7 jours</b> : ${esc(nouv.slice(0, 4).join(", "))}${nouv.length > 4 ? "…" : ""}` : "aucune nouvelle école en 7 jours", { color: "--s3", cls: nouv.length ? "alert" : "" })}
+      ${card("Décès en milieu scolaire", nf(dec.length), `${nf(el.filter(r => r.deces).length)} élèves, ${nf(ens.filter(r => r.deces).length)} enseignants · létalité ${pc(ratio(dec.length, L.length), 0)}`, { color: "--rc-rt", cls: dec.length ? "alert" : "" })}
+      ${card("Personnes touchées (7 j)", nf(r7.length), `${nf(r7p.length)} les 7 jours précédents · ${nf(ens.length)} enseignants touchés au total`, { color: "--warn", cls: r7.length > r7p.length ? "alert" : "" })}
+    </div>
+    <div>
+      ${TW.length ? panel("Élèves et personnel touchés par semaine", "Au-dessus de chaque barre : V = vivants, D = décédés", `<div id="c-pil-ec"></div>`, { png: "pilotage_scolaire_semaines" }) : ""}
+      ${panel("Écoles les plus touchées", `${nf(ecs.size)} écoles · ${nf(L.filter(r => !r.ident).length)} personnes sans école identifiée`, `<div class="table-wrap"><table><thead><tr><th>École</th><th>Aire de santé</th><th class="num">Personnes</th><th class="num">Élèves</th><th class="num">Décès</th></tr></thead><tbody>${top.map(x => `<tr><td>${esc(x.k)}</td><td>${esc(x.aire || "")}</td><td class="num">${nf(x.n)}</td><td class="num">${nf(x.eleves)}</td><td class="num">${nf(x.dec)}</td></tr>`).join("")}</tbody></table></div>`)}
+    </div>`;
   }
   function pageEcoles() {
     const M = (P.ecoles || {}).meta;
@@ -470,7 +501,7 @@
       G.bars($("#c-ec-age"), { labels: AG, h: 240, totals: 1, allLabels: 1, maxBw: 80, series: [["Féminin", "--sex-f", "F"], ["Masculin", "--sex-m", "M"], ["Sexe non précisé", "--rc-grey", "?"]].map(([lab, c, k]) => ({ label: lab, color: col(c), values: AG.map(a => L.filter(r => r.sexe === k && ecTranche(r.age) === a).length) })).filter(se => se.values.some(v => v)) });
       G.hbars($("#c-ec-st"), { items: EC_ST.map(([s_, c]) => ({ label: `${s_} (${pc(ratio(L.filter(r => r.statut === s_).length, L.length), 0)})`, value: L.filter(r => r.statut === s_).length, color: col(c) })).filter(i => i.value) });
       G.bars($("#c-ec-niv"), { labels: nivR.map(x => x.n), h: 240, totals: 1, allLabels: 1, maxBw: 90, series: [{ label: "Décédés", color: col("--rc-rt"), values: nivR.map(x => x.L.filter(r => r.deces).length) }, { label: "Vivants (guéris, en traitement, vivants)", color: col("--s1"), values: nivR.map(x => x.L.filter(r => !r.deces).length) }] });
-      if (TW.length) G.tendance($("#c-ec-sem"), { labels: TW.map(w => ({ wk: isoW(w)[1], an: isoW(w)[0], debut: dfr(iso(w)) })), dec: TW.map(w => Ld.filter(r => r.deces && r._d >= w && r._d < w + 7).length), viv: TW.map(w => Ld.filter(r => !r.deces && r._d >= w && r._d < w + 7).length), h: 340, xTitle: "Semaine de la date rapportée dans la liste", yTitle: "Personnes touchées" });
+      if (TW.length) G.tendance($("#c-ec-sem"), { labels: TW.map(w => ({ wk: isoW(w)[1], an: isoW(w)[0], debut: dfr(iso(w)) })), dec: TW.map(w => Ld.filter(r => r.deces && r._d >= w && r._d < w + 7).length), viv: TW.map(w => Ld.filter(r => !r.deces && r._d >= w && r._d < w + 7).length), h: 360, vd: 1, xTitle: "Semaine de la date rapportée dans la liste", yTitle: "Personnes touchées" });
       ecMap($("#c-ec-map1"), "ecoles", mapNiv, mapZone);
       ecMap($("#c-ec-map2"), S.ecMapInd || "eleves", mapNiv, mapZone);
     });
@@ -495,16 +526,16 @@
         ${kpi("Élèves vivants", nf(el.filter(r => !r.deces).length), `${nf(el.filter(r => r.statut === "Guéri").length)} guéris, ${nf(el.filter(r => r.statut === "En traitement (CTE)").length)} en traitement au CTE`, { color: "--good" })}
         ${kpi("Enseignants et personnel", nf(ens.length + L.filter(r => r.fonction === "Autre personnel").length), `${nf(ens.filter(r => r.deces).length)} décès`, { color: "--s7" })}
         ${kpi("Aires de santé touchées", nf(new Set(L.map(r => r.aire)).size), `${nf(new Set(L.map(r => r.zone).filter(Boolean)).size)} zone${new Set(L.map(r => r.zone).filter(Boolean)).size > 1 ? "s" : ""} de santé`, { color: "--warn" })}
-        ${kpi("Enfants de moins de 15 ans", nf(L.filter(r => r.age !== null && r.age < 15).length), `${pc(ratio(L.filter(r => r.age !== null && r.age < 15).length, L.length), 0)} des personnes touchées`, { color: "--sex-f" })}
+        ${kpi("Enfants de moins de 18 ans", nf(L.filter(r => r.age !== null && r.age < 18).length), `${pc(ratio(L.filter(r => r.age !== null && r.age < 18).length, L.length), 0)} des personnes touchées · ${nf(L.filter(r => r.age !== null && r.age < 6).length)} de moins de 6 ans`, { color: "--sex-f" })}
       </div>
       ${dq.length ? notice("Qualité des données : " + dq.join(" ; ") + ".", "warn") : ""}
       <div class="grid g2">
         ${panel("Personnes touchées par fonction et sexe", "Élèves, enseignants et autre personnel des écoles", `<div id="c-ec-fs"></div>`, { png: "scolaire_fonction_sexe" })}
-        ${panel("Âge et sexe", "Toutes les personnes touchées, par tranche d'âge", `<div id="c-ec-age"></div>`, { png: "scolaire_age_sexe" })}
+        ${panel("Âge et sexe", "Toutes les personnes touchées : moins de 6 ans, 6 à moins de 12 ans, 12 à moins de 18 ans, 18 ans et plus", `<div id="c-ec-age"></div>`, { png: "scolaire_age_sexe" })}
         ${panel("Statut actuel", "Selon la liste (DCD = décédé ; CTE = en traitement)", `<div id="c-ec-st"></div>`, { png: "scolaire_statut" })}
         ${panel("Niveau scolaire", "Maternelle (EM), primaire (EP), secondaire (instituts) ; décédés et vivants", `<div id="c-ec-niv"></div>`, { png: "scolaire_niveau" })}
       </div>
-      ${TW.length ? panel("Personnes touchées par semaine", `Décédés (rouge) et vivants (bleu) selon la date rapportée dans la liste ; létalité hebdomadaire sur l'axe de droite · ${nf(L.length - Ld.length)} sans date utilisable`, `<div id="c-ec-sem"></div>`, { png: "scolaire_semaines", csv: "c-ec-sem" }) : ""}
+      ${TW.length ? panel("Personnes touchées par semaine", `Au-dessus de chaque barre : V = vivants (bleu), D = décédés (rouge) · date rapportée dans la liste ; létalité hebdomadaire sur l'axe de droite · ${nf(L.length - Ld.length)} sans date utilisable`, `<div id="c-ec-sem"></div>`, { png: "scolaire_semaines", csv: "c-ec-sem" }) : ""}
       <div class="grid g2">
         ${panel(`Écoles touchées par ${mapNiv === "zone" ? "zone" : "aire"} de santé`, mapNiv === "zone" ? "Nombre d'écoles ayant au moins une personne touchée" : `Zone de santé de ${esc(ZN[mapZone] || mapZone)} · nombre d'écoles touchées par aire`, `${zs.length > 1 || S.ecZone ? `<div class="filters"><label>Niveau <select data-state="ecMapNiv">${opt("aire", mapNiv, "Aires de santé")}${opt("zone", mapNiv, "Zones de santé")}</select></label></div>` : ""}<div id="c-ec-map1"></div>`, { png: "scolaire_carte_ecoles" })}
         ${panel(`Élèves touchés par ${mapNiv === "zone" ? "zone" : "aire"} de santé`, "Chiffre dans le cercle : nombre d'élèves", `<div class="filters"><label>Élèves <select data-state="ecMapInd">${opt("eleves", S.ecMapInd || "eleves", "Tous les élèves")}${opt("elviv", S.ecMapInd, "Élèves vivants")}${opt("eldec", S.ecMapInd, "Élèves décédés")}</select></label></div><div id="c-ec-map2"></div>`, { png: "scolaire_carte_eleves" })}
@@ -520,14 +551,14 @@
     const key = niv === "zone" ? (r => r.zone) : (r => r.zone === zone ? r.aire : null);
     const A = Object.fromEntries(ecAgg(L, key).map(x => [x.k, x]));
     const val = k => { const x = A[k]; if (!x) return 0; return ind === "ecoles" ? x.nEcoles : ind === "elviv" ? x.elviv : ind === "eldec" ? x.eldec : x.eleves; };
-    const pal = ind === "eldec" ? SEQ.rouge : SEQ.bleu;
+    const pal = [TL[1], TL[2], TL[3], TL[4]];   // mêmes couleurs que la carte des catégories des zones
     let geo, areas;
     if (niv === "zone") { geo = { features: (P.geo.features || []).map(f => ({ aire: f.zone, nom: f.nom, geometry: f.geometry })) }; areas = ZONES.map(z => ({ key: z.code, name: z.nom })); }
     else { const gz = (P.ecoles.geo || {})[zone] || {}, fs = Array.isArray(gz) ? gz : (gz.features || []);
       geo = { features: fs.map(f => ({ aire: f.aire, nom: f.aire, geometry: f.geometry, lab: f.lab, petite: f.petite })), zoom: gz.zoom || null };
       areas = [...new Set([...fs.map(f => f.aire), ...Object.keys(A)])].map(a => ({ key: a, name: a })); }
     const mx = Math.max(0, ...areas.map(a => val(a.key))), B = ecBins(mx), cls = v => v ? B.findIndex(([lo, hi]) => v >= lo && v <= hi) : -1;
-    const pc_ = i => pal[B.length === 1 ? 4 : Math.round(i * 4 / Math.max(1, B.length - 1))];
+    const pc_ = i => pal[B.length === 1 ? 3 : B.length === 2 ? [1, 3][i] : Math.round(i * 3 / Math.max(1, B.length - 1))];
     const lab = { ecoles: "Écoles touchées", eleves: "Élèves touchés", elviv: "Élèves vivants", eldec: "Élèves décédés" }[ind];
     const leg = [...B.map(([lo, hi], i) => ({ label: lo === hi ? `${lo}` : `${lo} à ${hi}`, color: pc_(i) })), { label: "aucun", color: TL_NA }]; leg.title = lab;
     G.map(box, { areas, geo, value: val, color: v => v ? pc_(cls(v)) : TL_NA, selected: niv === "aire" ? S.ecAire : S.ecZone,

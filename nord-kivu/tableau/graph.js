@@ -70,7 +70,7 @@
     const W = Math.max(360, box.clientWidth || 760), H = opt.h || 360, m = { l: 58, r: 64, t: 34, b: 62 };
     const n = opt.labels.length, pw = W - m.l - m.r, ph = H - m.t - m.b;
     const tot = opt.labels.map((_, i) => (opt.dec[i] || 0) + (opt.viv[i] || 0));
-    const q4 = Math.max(1, ...tot) * 1.08 / 4, mx = 4 * (q4 < 10 ? Math.max(1, Math.ceil(q4)) : (p => [1, 1.5, 2, 2.5, 3, 4, 5, 6, 8, 10].find(k => q4 / p <= k) * p)(Math.pow(10, Math.floor(Math.log10(q4)))));   // 4 intervalles de valeur entière
+    const q4 = Math.max(1, ...tot) * (opt.vd ? 1.3 : 1.08) / 4, mx = 4 * (q4 < 10 ? Math.max(1, Math.ceil(q4)) : (p => [1, 1.5, 2, 2.5, 3, 4, 5, 6, 8, 10].find(k => q4 / p <= k) * p)(Math.pow(10, Math.floor(Math.log10(q4)))));   // 4 intervalles de valeur entière
     const K = { v: css("--td-v"), d: css("--td-d"), l: css("--td-l"), ax: css("--td-ax"), e: css("--td-edge") };
     const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": opt.title || "Tendances des cas confirmés et décès" }, box);
     const g = el("g", { class: "ax" }, svg);
@@ -89,12 +89,18 @@
       el("text", { x: cx, y: m.t + ph + 28, "text-anchor": "middle", class: "t-n" }, g).textContent = lb.an;
     } });
     const tipH = i => { const lb = opt.labels[i], t = tot[i]; return `<b>Semaine ${lb.wk} (${lb.an})</b>du ${esc(lb.debut)}<br>Vivants : ${nf(opt.viv[i])}<br>Décédés : ${nf(opt.dec[i])}<br>Total : ${nf(t)}<br>Létalité : ${t ? nf(100 * opt.dec[i] / t, 0) + " %" : "—"}`; };
+    const vdl = [];
     opt.labels.forEach((lb, i) => {
       const x = X(i), d = opt.dec[i] || 0, v = opt.viv[i] || 0;
       const hit = el("rect", { x, y: m.t, width: slot, height: ph, fill: "transparent" }, svg);
       if (d) el("rect", { x, y: Y(d), width: slot, height: Y(0) - Y(d), fill: K.d, stroke: K.e, "stroke-width": 1, "pointer-events": "none" }, svg);
       if (v) el("rect", { x, y: Y(d + v), width: slot, height: Y(d) - Y(d + v), fill: K.v, stroke: K.e, "stroke-width": 1, "pointer-events": "none" }, svg);
       hit.addEventListener("mousemove", ev => tip(tipH(i), ev)); hit.addEventListener("mouseleave", hideTip);
+      if (opt.vd && d + v) {   // au-dessus de la barre : vivants (bleu) et décédés (rouge), placés au premier plan plus bas
+        vdl.push(el("text", { x: x + slot / 2, y: Y(d + v) - 5, "text-anchor": "middle", class: "t-vd v" }));
+        vdl.push(el("text", { x: x + slot / 2, y: Y(d + v) - 18, "text-anchor": "middle", class: "t-vd d" }));
+        vdl[vdl.length - 2].textContent = `${v} V`; vdl[vdl.length - 1].textContent = `${d} D`;
+      }
     });
     el("line", { x1: m.l, x2: m.l, y1: m.t, y2: m.t + ph, stroke: css("--line-2") }, g);
     el("line", { x1: m.l, x2: W - m.r, y1: m.t + ph, y2: m.t + ph, stroke: css("--line-2") }, g);
@@ -105,6 +111,7 @@
     el("path", { d: path, fill: "none", stroke: K.l, "stroke-width": 2.6, "stroke-dasharray": "8 5", "pointer-events": "none" }, svg);
     opt.labels.forEach((_, i) => { const t = tot[i]; if (!t) return; const x = X(i) + slot / 2, y = Y2(100 * opt.dec[i] / t);
       el("path", { d: `M${x} ${y - 4}L${x + 4} ${y}L${x} ${y + 4}L${x - 4} ${y}Z`, fill: K.l, "pointer-events": "none" }, svg); });
+    vdl.forEach(t => svg.appendChild(t));
     // titres d'axes et légende
     el("text", { x: 14, y: m.t + ph / 2, transform: `rotate(-90 14 ${m.t + ph / 2})`, "text-anchor": "middle", class: "t-tit" }, svg).textContent = opt.yTitle || "Nombre des confirmés et décès";
     el("text", { x: W - 18, y: m.t + ph / 2, transform: `rotate(90 ${W - 18} ${m.t + ph / 2})`, "text-anchor": "middle", class: "t-tit t-ax2" }, svg).textContent = "Létalité";
