@@ -3,10 +3,10 @@
  "niveau": "province",
  "nom": "Province : Nord Ubangi",
  "court": "Nord Ubangi",
- "date": "2026-11-07",
- "genere_le": "2026-11-09 08:32",
- "pptx": "Presentation_Reunion_Nord_Ubangi_20261107.pptx",
- "diapositives": 9,
+ "date": "2026-11-11",
+ "genere_le": "2026-11-11 20:47",
+ "pptx": "Presentation_Reunion_Nord_Ubangi_20261111.pptx",
+ "diapositives": 10,
  "slides": [
   {
    "titre": "Situation cumulée",
@@ -19,7 +19,8 @@
    "titre": "Tendances des cas confirmés et décès",
    "images": [
     "02b_tendances",
-    "02c_tendances_WAPINDA"
+    "02c_tendances_WAPINDA",
+    "02c_tendances_YAKOMA"
    ]
   },
   {
@@ -36,7 +37,7 @@
   },
   {
    "titre": "Alertes",
-   "date": "2026-11-07",
+   "date": "2026-11-10",
    "images": [
     "07_indicateurs_alertes",
     "07b_alertes_comparatif_3j",
@@ -51,7 +52,7 @@
  "images": {
   "01_indicateurs_cumul": {
    "fichier": "01_indicateurs_cumul.png",
-   "titre": "Situation de la MVE au 7 novembre 2026, Province : Nord Ubangi"
+   "titre": "Situation de la MVE au 11 novembre 2026, Province : Nord Ubangi"
   },
   "02_courbe_hebdomadaire": {
    "fichier": "02_courbe_hebdomadaire.png",
@@ -65,9 +66,13 @@
    "fichier": "02c_tendances_WAPINDA.png",
    "titre": "Tendances, ZS Wapinda"
   },
+  "02c_tendances_YAKOMA": {
+   "fichier": "02c_tendances_YAKOMA.png",
+   "titre": "Tendances, ZS Yakoma"
+  },
   "03_indicateurs_jour": {
    "fichier": "03_indicateurs_jour.png",
-   "titre": "Situation épidémiologique du jour, 7 novembre 2026"
+   "titre": "Situation épidémiologique du jour, 11 novembre 2026"
   },
   "05_jours_sans_cas": {
    "fichier": "05_jours_sans_cas.png",
@@ -75,11 +80,11 @@
   },
   "07_indicateurs_alertes": {
    "fichier": "07_indicateurs_alertes.png",
-   "titre": "Situation des alertes au 7 novembre 2026"
+   "titre": "Situation des alertes au 10 novembre 2026"
   },
   "08_alertes_sources": {
    "fichier": "08_alertes_sources.png",
-   "titre": "Sources des alertes du jour, 9 alertes"
+   "titre": "Sources des alertes du jour, 7 alertes"
   },
   "07b_alertes_comparatif_3j": {
    "fichier": "07b_alertes_comparatif_3j.png",

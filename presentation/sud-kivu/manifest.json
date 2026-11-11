@@ -3,9 +3,9 @@
  "niveau": "province",
  "nom": "Province : Sud Kivu",
  "court": "Sud Kivu",
- "date": "2026-11-07",
- "genere_le": "2026-11-09 08:32",
- "pptx": "Presentation_Reunion_Sud_Kivu_20261107.pptx",
+ "date": "2026-11-11",
+ "genere_le": "2026-11-11 20:47",
+ "pptx": "Presentation_Reunion_Sud_Kivu_20261111.pptx",
  "diapositives": 9,
  "slides": [
   {
@@ -49,7 +49,7 @@
  "images": {
   "01_indicateurs_cumul": {
    "fichier": "01_indicateurs_cumul.png",
-   "titre": "Situation de la MVE au 7 novembre 2026, Province : Sud Kivu"
+   "titre": "Situation de la MVE au 11 novembre 2026, Province : Sud Kivu"
   },
   "02_courbe_hebdomadaire": {
    "fichier": "02_courbe_hebdomadaire.png",
@@ -65,7 +65,7 @@
   },
   "03_indicateurs_jour": {
    "fichier": "03_indicateurs_jour.png",
-   "titre": "Situation épidémiologique du jour, 7 novembre 2026"
+   "titre": "Situation épidémiologique du jour, 11 novembre 2026"
   },
   "05_jours_sans_cas": {
    "fichier": "05_jours_sans_cas.png",
