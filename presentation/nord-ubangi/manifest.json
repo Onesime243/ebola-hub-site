@@ -3,9 +3,9 @@
  "niveau": "province",
  "nom": "Province : Nord Ubangi",
  "court": "Nord Ubangi",
- "date": "2026-11-11",
- "genere_le": "2026-11-11 20:47",
- "pptx": "Presentation_Reunion_Nord_Ubangi_20261111.pptx",
+ "date": "2026-11-12",
+ "genere_le": "2026-11-13 09:48",
+ "pptx": "Presentation_Reunion_Nord_Ubangi_20261112.pptx",
  "diapositives": 10,
  "slides": [
   {
@@ -26,7 +26,8 @@
   {
    "titre": "Situation du jour",
    "images": [
-    "03_indicateurs_jour"
+    "03_indicateurs_jour",
+    "04_cas_du_jour"
    ]
   },
   {
@@ -37,7 +38,7 @@
   },
   {
    "titre": "Alertes",
-   "date": "2026-11-10",
+   "date": "2026-11-12",
    "images": [
     "07_indicateurs_alertes",
     "07b_alertes_comparatif_3j",
@@ -52,7 +53,7 @@
  "images": {
   "01_indicateurs_cumul": {
    "fichier": "01_indicateurs_cumul.png",
-   "titre": "Situation de la MVE au 11 novembre 2026, Province : Nord Ubangi"
+   "titre": "Situation de la MVE au 12 novembre 2026, Province : Nord Ubangi"
   },
   "02_courbe_hebdomadaire": {
    "fichier": "02_courbe_hebdomadaire.png",
@@ -72,7 +73,11 @@
   },
   "03_indicateurs_jour": {
    "fichier": "03_indicateurs_jour.png",
-   "titre": "Situation épidémiologique du jour, 11 novembre 2026"
+   "titre": "Situation épidémiologique du jour, 12 novembre 2026"
+  },
+  "04_cas_du_jour": {
+   "fichier": "04_cas_du_jour.png",
+   "titre": "Répartition des 1 nouveaux cas par zone de santé"
   },
   "05_jours_sans_cas": {
    "fichier": "05_jours_sans_cas.png",
@@ -80,11 +85,11 @@
   },
   "07_indicateurs_alertes": {
    "fichier": "07_indicateurs_alertes.png",
-   "titre": "Situation des alertes au 10 novembre 2026"
+   "titre": "Situation des alertes au 12 novembre 2026"
   },
   "08_alertes_sources": {
    "fichier": "08_alertes_sources.png",
-   "titre": "Sources des alertes du jour, 7 alertes"
+   "titre": "Sources des alertes du jour, 2 alertes"
   },
   "07b_alertes_comparatif_3j": {
    "fichier": "07b_alertes_comparatif_3j.png",
