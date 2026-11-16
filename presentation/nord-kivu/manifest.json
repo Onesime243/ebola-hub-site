@@ -3,9 +3,9 @@
  "niveau": "province",
  "nom": "Province : Nord Kivu",
  "court": "Nord Kivu",
- "date": "2026-11-12",
- "genere_le": "2026-11-13 09:48",
- "pptx": "Presentation_Reunion_Nord_Kivu_20261112.pptx",
+ "date": "2026-11-15",
+ "genere_le": "2026-11-16 17:20",
+ "pptx": "Presentation_Reunion_Nord_Kivu_20261115.pptx",
  "diapositives": 27,
  "slides": [
   {
@@ -29,8 +29,8 @@
     "02c_tendances_VUHOVI",
     "02c_tendances_KALUNGUTA",
     "02c_tendances_LUBERO",
-    "02c_tendances_MASEREKA",
     "02c_tendances_KYONDO",
+    "02c_tendances_MASEREKA",
     "02c_tendances_BIENA",
     "02c_tendances_MANGUREDJIPA",
     "02c_tendances_KAYNA",
@@ -52,7 +52,7 @@
   },
   {
    "titre": "Alertes",
-   "date": "2026-11-12",
+   "date": "2026-11-15",
    "images": [
     "07_indicateurs_alertes",
     "07b_alertes_comparatif_3j",
@@ -72,13 +72,13 @@
     "13_contacts_suivre_vus",
     "14_tableau_contacts"
    ],
-   "date": "2026-11-12"
+   "date": "2026-11-15"
   }
  ],
  "images": {
   "01_indicateurs_cumul": {
    "fichier": "01_indicateurs_cumul.png",
-   "titre": "Situation de la MVE au 12 novembre 2026, Province : Nord Kivu"
+   "titre": "Situation de la MVE au 15 novembre 2026, Province : Nord Kivu"
   },
   "02_courbe_hebdomadaire": {
    "fichier": "02_courbe_hebdomadaire.png",
@@ -128,13 +128,13 @@
    "fichier": "02c_tendances_LUBERO.png",
    "titre": "Tendances, ZS Lubero"
   },
-  "02c_tendances_MASEREKA": {
-   "fichier": "02c_tendances_MASEREKA.png",
-   "titre": "Tendances, ZS Masereka"
-  },
   "02c_tendances_KYONDO": {
    "fichier": "02c_tendances_KYONDO.png",
    "titre": "Tendances, ZS Kyondo"
+  },
+  "02c_tendances_MASEREKA": {
+   "fichier": "02c_tendances_MASEREKA.png",
+   "titre": "Tendances, ZS Masereka"
   },
   "02c_tendances_BIENA": {
    "fichier": "02c_tendances_BIENA.png",
@@ -154,11 +154,11 @@
   },
   "03_indicateurs_jour": {
    "fichier": "03_indicateurs_jour.png",
-   "titre": "Situation épidémiologique du jour, 12 novembre 2026"
+   "titre": "Situation épidémiologique du jour, 15 novembre 2026"
   },
   "04_cas_du_jour": {
    "fichier": "04_cas_du_jour.png",
-   "titre": "Répartition des 9 nouveaux cas par zone de santé"
+   "titre": "Répartition des 4 nouveaux cas par zone de santé"
   },
   "05_jours_sans_cas": {
    "fichier": "05_jours_sans_cas.png",
@@ -166,11 +166,11 @@
   },
   "07_indicateurs_alertes": {
    "fichier": "07_indicateurs_alertes.png",
-   "titre": "Situation des alertes au 12 novembre 2026"
+   "titre": "Situation des alertes au 15 novembre 2026"
   },
   "08_alertes_sources": {
    "fichier": "08_alertes_sources.png",
-   "titre": "Sources des alertes du jour, 252 alertes"
+   "titre": "Sources des alertes du jour, 179 alertes"
   },
   "07b_alertes_comparatif_3j": {
    "fichier": "07b_alertes_comparatif_3j.png",
@@ -194,7 +194,7 @@
   },
   "10_indicateurs_contacts": {
    "fichier": "10_indicateurs_contacts.png",
-   "titre": "Situation du suivi des contacts au 12 novembre 2026"
+   "titre": "Situation du suivi des contacts au 15 novembre 2026"
   },
   "12_contacts_tendance": {
    "fichier": "12_contacts_tendance.png",
