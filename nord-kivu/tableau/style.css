@@ -1,4 +1,5 @@
-/* Ebola Outbreak — outil de la zone de santé : identité de l’outil national (menu bleu marine, mêmes couleurs, mode clair / sombre) */
+/* Ebola Outbreak — outil provincial du Nord-Kivu : même identité que l’outil national (en-tête institutionnel, bande tricolore, barre de menus, mode clair / sombre).
+   Couleurs sémantiques : --st-conf (confirmé) = rouge ; --st-susp (suspect) = saumon ; --critical = rouge sombre des alertes. */
 :root{
   color-scheme:light;
   --page:#f4f5f2;--surface:#fcfcfb;--surface-2:#f1f2ee;--surface-3:#e8e9e4;
@@ -6,7 +7,7 @@
   --brand:#16324f;--brand-2:#0f8b8d;--accent:#2a78d6;
   --s1:#2a78d6;--s2:#eb6834;--s3:#1baf7a;--s4:#eda100;--s5:#e87ba4;--s6:#008300;--s7:#4a3aa7;--s8:#e34948;
   --good:#0ca30c;--warn:#fab219;--serious:#ec835a;--critical:#d03b3b;
-  --st-conf:#d03b3b;--st-susp:#ec835a;--st-nv:#e0a100;--st-v48:#86b6ef;--st-v24:#0ca30c;--st-done:#7a8a99;--st-inc:#c3c2b7;--st-dup:#e1e0d9;
+  --st-conf:#d7263d;--st-susp:#ec835a;--st-nv:#e0a100;--st-v48:#86b6ef;--st-v24:#0ca30c;--st-done:#7a8a99;--st-inc:#c3c2b7;--st-dup:#e1e0d9;
   --seq-0:#e9eef3;--seq-1:#cde2fb;--seq-2:#9ec5f4;--seq-3:#6da7ec;--seq-4:#3987e5;--seq-5:#256abf;--seq-6:#184f95;--seq-7:#0d366b;
   --sex-m:#2a78d6;--sex-f:#c2417d;--sex-i:#9aa1a7;--map-stroke:#ffffff;--map-na:#eceae4;
   --rc-salmon:#f08a7c;--rc-purple:#9933ff;--rc-rt:#c65353;--rc-r1:#ac3973;--rc-bar:#5f6b78;--rc-grey:#9a9a9a;
@@ -20,7 +21,7 @@
   --ink:#f3f4f2;--ink-2:#c3c2b7;--muted:#8d9399;--line:#2c2e2f;--line-2:#3a3d3f;
   --brand:#9cc3ea;--brand-2:#3ec4c6;--accent:#3987e5;
   --s1:#3987e5;--s2:#d95926;--s3:#199e70;--s4:#c98500;--s5:#d55181;--s6:#008300;--s7:#9085e9;--s8:#e66767;
-  --st-conf:#e05555;--st-susp:#ec835a;--st-nv:#fab219;--st-v48:#5598e7;--st-v24:#0ca30c;--st-done:#7d8b98;--st-inc:#55595c;--st-dup:#3a3d3f;
+  --st-conf:#ff5c6c;--st-susp:#ec835a;--st-nv:#fab219;--st-v48:#5598e7;--st-v24:#0ca30c;--st-done:#7d8b98;--st-inc:#55595c;--st-dup:#3a3d3f;
   --seq-0:#23282d;--seq-1:#1d3553;--seq-2:#184f95;--seq-3:#1c5cab;--seq-4:#2a78d6;--seq-5:#5598e7;--seq-6:#86b6ef;--seq-7:#cde2fb;
   --sex-m:#5598e7;--sex-f:#e06aa3;--sex-i:#6f767c;--map-stroke:#17191b;--map-na:#2a2d30;
   --rc-salmon:#e27b6e;--rc-purple:#b980ff;--rc-rt:#e07070;--rc-r1:#d06a9f;--rc-bar:#8d99a6;--rc-grey:#7d7d7d;
@@ -142,7 +143,7 @@ tbody tr.selected{background:color-mix(in srgb,var(--accent) 12%,transparent)}
 .map svg path.zone{stroke:var(--map-stroke);stroke-width:1.4;stroke-linejoin:round;cursor:pointer}
 .map svg path.zone:hover{stroke:var(--ink-2);stroke-width:1.8;filter:brightness(.96)}
 .map svg path.zone.sel{stroke:var(--ink);stroke-width:2.2}
-.map .lbl{font-size:9.5px;fill:#3a3f44;paint-order:stroke;stroke:rgba(255,255,255,.85);stroke-width:2.6px;pointer-events:none;font-weight:600}
+.map .lbl{font-size:11px;fill:#3a3f44;paint-order:stroke;stroke:rgba(255,255,255,.85);stroke-width:2.6px;pointer-events:none;font-weight:600}
 .scale{display:flex;align-items:center;gap:8px;font-size:11.5px;color:var(--muted);margin-top:6px}
 .scale .ramp{display:flex;height:10px;flex:1;max-width:260px;border-radius:3px;overflow:hidden}.scale .ramp i{flex:1}
 /* Case journey */
@@ -171,8 +172,8 @@ tbody tr.selected{background:color-mix(in srgb,var(--accent) 12%,transparent)}
 .net-tools .btn{background:var(--surface)}
 .net-info{position:static;font-size:11.5px;color:var(--muted);background:var(--surface);padding:5px 10px;border-top:1px solid var(--line)}
 .node{cursor:pointer}
-.node text{font:600 10px var(--sans);fill:var(--ink);pointer-events:none}
-.node .lbl2{font-weight:400;font-size:9px;fill:var(--muted)}
+.node text{font:600 11px var(--sans);fill:var(--ink);pointer-events:none}
+.node .lbl2{font-weight:400;font-size:10.5px;fill:var(--muted)}
 .node.dim{opacity:.18}.link.dim{opacity:.06}
 .link{fill:none;stroke:var(--line-2);stroke-width:1.2}
 .link.strong{stroke:var(--st-conf);stroke-width:2.4}
@@ -478,3 +479,62 @@ tr.sel td{background:color-mix(in srgb,var(--accent) 12%,transparent)}
 .sidebar nav .ng-in button.active{background:linear-gradient(180deg,rgba(255,255,255,.2),rgba(255,255,255,.1));box-shadow:inset 0 1px 0 rgba(255,255,255,.2),inset 0 -1px 0 rgba(0,0,0,.15),0 2px 6px rgba(0,0,0,.28)}
 :root[data-theme="dark"] .sidebar nav .ng-h{box-shadow:inset 0 1px 0 rgba(255,255,255,.07),0 1px 2px rgba(0,0,0,.5)}
 @media (prefers-reduced-motion:reduce){.sidebar nav .ng-h,.sidebar nav .ng-in button,.sidebar nav .ng-in a.navlink{transition:none!important}.sidebar nav .ng-h:active,.sidebar nav .ng-in button:active{transform:none}}
+
+/* ---- En-tête institutionnel (sceau, titres, compte), bande tricolore et barre de menus horizontale : même présentation que l'outil national ---- */
+:root{--sur:#0b4ea2;--titre:#8a2c0d;--rdc-bleu:#007fff;--rdc-rouge:#ce1021;--rdc-jaune:#f7d618;--hover:rgba(15,23,32,.06)}
+:root[data-theme="dark"]{--sur:#7db3f0;--titre:#f0a383;--hover:rgba(255,255,255,.08)}
+.bandeau{background:var(--surface);display:flex;align-items:center;gap:18px;padding:12px 28px;flex-wrap:wrap}
+.bandeau-id{display:flex;align-items:center;gap:16px;text-decoration:none;color:inherit;min-width:0}
+.bandeau-id img{height:64px;width:auto;flex:none}
+.bandeau-titres{display:flex;flex-direction:column;min-width:0}
+.bandeau-sur{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--sur)}
+.bandeau-titre{font-size:21px;font-weight:700;color:var(--titre);line-height:1.25;margin:1px 0}
+.bandeau-sous{font-size:13.5px;color:var(--muted)}
+.bandeau-compte{margin-left:auto;display:flex;align-items:center;gap:12px;position:relative}
+.bandeau-compte .rel{display:flex;align-items:center;gap:12px}
+.bandeau-compte .avatar{width:40px;height:40px;border-radius:50%;background:var(--sur);color:#fff;display:grid;place-items:center;font-weight:800;font-size:17px}
+:root[data-theme="dark"] .bandeau-compte .avatar{color:#0f1a2a}
+.bandeau-qui{display:inline-flex;flex-direction:column;line-height:1.3;border:0;background:transparent;padding:0;cursor:pointer;text-align:left;color:inherit}
+.bandeau-qui b{font-size:14.5px}.bandeau-qui small{color:var(--muted);font-size:12.5px}
+.bandeau-compte .btn.deco{color:var(--sur);font-weight:600}
+.bandeau-compte .menu-pop{top:calc(100% + 8px)}
+.tricolore{height:5px;background:linear-gradient(90deg,var(--rdc-bleu) 0 33.33%,var(--rdc-rouge) 33.33% 66.66%,var(--rdc-jaune) 66.66%)}
+.menubar{position:sticky;top:0;z-index:30;background:var(--surface);display:flex;align-items:center;gap:8px;padding:0 20px;border-bottom:1px solid var(--line);box-shadow:0 1px 2px rgba(0,0,0,.04)}
+.menubar nav{display:flex;align-items:center;gap:2px;flex-wrap:wrap;min-width:0;flex:1}
+.menu-right{display:flex;align-items:center;gap:2px;margin-left:auto}
+.menubar .nav-link,.menubar .menu-btn{border:0;background:transparent;color:var(--ink);padding:12px 10px 10px;font-size:13.5px;font-weight:600;cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;border-radius:0;text-decoration:none;display:inline-block}
+.menubar .nav-link:hover,.menubar .menu-btn:hover,.menubar .menu.open>.menu-btn{background:var(--hover)}
+.menubar .nav-link.on,.menubar .menu.on>.menu-btn{color:var(--sur);border-bottom-color:var(--sur)}
+.menubar .zs-switch{margin:0 6px}
+.menubar .zs-switch select{width:auto;min-width:170px;background:var(--surface);color:var(--ink);border:1px solid var(--line-2);padding:5px 8px;font-size:13px}
+.menu{position:relative}
+.menu-list{display:none;position:absolute;left:0;top:100%;min-width:250px;background:var(--surface);border:1px solid var(--line-2);border-radius:0 0 10px 10px;box-shadow:var(--shadow);padding:6px 0;z-index:40}
+.menu-right .menu-list{left:auto;right:0}
+.menu:hover>.menu-list,.menu:focus-within>.menu-list,.menu.open>.menu-list{display:block}
+.menu-list button,.menu-list a.navlink{display:flex;align-items:center;gap:9px;width:100%;border:0;background:transparent;color:var(--ink);padding:9px 14px;font-size:13.5px;text-align:left;cursor:pointer;text-decoration:none;white-space:nowrap}
+.menu-list button:hover,.menu-list a.navlink:hover{background:var(--hover)}
+.menu-list button.active{color:var(--sur);font-weight:700;background:color-mix(in srgb,var(--sur) 8%,transparent)}
+.menu-list button svg,.menu-list a.navlink svg{width:16px;height:16px;flex:none;opacity:.8}
+.menu-list button .ct{margin-left:auto;font-size:11px;opacity:.7;font-variant-numeric:tabular-nums}
+.menu-list .zs-switch{margin:4px 12px 6px}
+.menu-list .zs-switch select{width:100%;background:var(--surface);color:var(--ink);border:1px solid var(--line-2)}
+.shell{display:block}
+.sidebar{display:none}
+.workspace{max-width:1700px;margin:0 auto}
+.topbar{position:static;background:transparent;backdrop-filter:none}
+.foot .side-status{display:inline-flex;flex-wrap:wrap;gap:4px 14px;align-items:center;background:transparent;padding:0;margin:0;font-size:11.5px}
+.foot .side-status b,.foot .side-status>span{display:inline;font-size:11.5px}
+.foot .side-status .row{display:inline-flex;gap:4px}.foot .side-status .row b{font-weight:700;color:var(--ink)}
+.brand .logo-img{height:46px;width:auto;background:#fff;border-radius:10px;padding:3px;flex:none}
+@media (max-width:860px){
+  .bandeau{padding:10px 14px;gap:10px}.bandeau-id img{height:46px}.bandeau-titre{font-size:17px}.bandeau-sous{display:none}
+  .bandeau-compte{margin-left:0;width:100%;justify-content:space-between}
+  .menubar{flex-wrap:wrap;padding:6px 10px;position:static}
+  .menu-toggle{display:inline-flex;margin:4px 0}
+  .menubar nav,.menu-right{display:none;width:100%;flex:none;flex-direction:column;align-items:stretch;margin:0}
+  .menubar.open nav,.menubar.open .menu-right{display:flex}
+  .menubar .nav-link,.menubar .menu-btn{text-align:left;width:100%}
+  .menubar .zs-switch{margin:4px 0}.menubar .zs-switch select{width:100%}
+  .menu-list{position:static;display:block;box-shadow:none;border:0;border-radius:0;background:transparent;padding:0 0 4px 14px;min-width:0}
+}
+@media print{.bandeau-compte,.menubar{display:none!important}.bandeau{padding:0 0 8px}.tricolore{height:3px;margin-bottom:10px}}

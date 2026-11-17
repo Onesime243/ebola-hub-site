@@ -667,17 +667,16 @@
     "Données et administration": "M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8zm9.4 5.5-1.9-1.1v-.8l1.9-1.1-2-3.5-2 1.1-.7-.4V5.5h-4v2.2l-.7.4-2-1.1-2 3.5 1.9 1.1v.8l-1.9 1.1 2 3.5 2-1.1.7.4v2.2h4v-2.2l.7-.4 2 1.1z",
     "Zones de santé": "M12 2C8 2 5 5 5 9c0 5 7 13 7 13s7-8 7-13c0-4-3-7-7-7zm0 9.5A2.5 2.5 0 1 1 12 6a2.5 2.5 0 0 1 0 5.5z",
   };
-  function navBlocs(groups) {   // groups : [{ g, items: [{ html, active }], ouvert }]
-    let open; try { open = new Set(JSON.parse(localStorage.getItem(NAVB_KEY) || "[]")); } catch (e) { open = new Set(); }
+  function navBlocs(groups) {   // barre de menus horizontale : un menu déroulant par groupe, pages dans la liste (même présentation que l'outil national)
     return groups.filter(x => x.items.length).map((x, i) => {
-      const act = x.items.some(it => it.active), on = act || x.ouvert || open.has(x.g), id = `ng-${i}`, n = x.compte ?? x.items.length;
-      return `<section class="ng ${on ? "open" : ""} ${act ? "has-active" : ""}"><button class="ng-h" data-ng="${esc(x.g)}" aria-expanded="${on}" aria-controls="${id}"><i class="ng-ic"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="${NAVB_IC[x.g] || NAVB_IC.Analyses}"/></svg></i><span class="ng-t">${x.g}</span>${n ? `<span class="ng-n">${n}</span>` : ""}<svg class="ng-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><div class="ng-b" id="${id}"><div class="ng-in">${x.items.map(it => it.html).join("")}</div></div></section>`;
+      const act = x.items.some(it => it.active), id = `nm-${i}`;
+      return `<div class="menu ${act ? "on" : ""}"><button class="menu-btn" type="button" data-ng="${esc(x.g)}" aria-haspopup="true" aria-expanded="false" aria-controls="${id}">${x.g} ▾</button><div class="menu-list" id="${id}">${x.items.map(it => it.html).join("")}</div></div>`;
     }).join("");
   }
-  function navBlocToggle(btn) {
-    const sec = btn.closest(".ng"), on = !sec.classList.contains("open");
-    sec.classList.toggle("open", on); btn.setAttribute("aria-expanded", on);
-    try { const o = new Set(JSON.parse(localStorage.getItem(NAVB_KEY) || "[]")); on ? o.add(btn.dataset.ng) : o.delete(btn.dataset.ng); localStorage.setItem(NAVB_KEY, JSON.stringify([...o])); } catch (e) { /* stockage indisponible */ }
+  function closeMenus() { document.querySelectorAll(".menu.open").forEach(m => { m.classList.remove("open"); const b = m.querySelector(".menu-btn"); if (b) b.setAttribute("aria-expanded", "false"); }); }
+  function navBlocToggle(btn) {   // un seul menu ouvert à la fois (clic ou toucher ; le survol est géré en CSS)
+    const sec = btn.closest(".menu"), on = !sec.classList.contains("open");
+    closeMenus(); sec.classList.toggle("open", on); btn.setAttribute("aria-expanded", on);
   }
   const NAVP = () => PAGES.filter(p => HASDATA[p[0]] !== false).map(p => p[0] === "fichiers" ? [p[0], PUBLIC || !canUp() ? "État des données" : "Charger les données", p[2]] : p);
   const SUBT = { jour: () => `Situation au ${dfr(S.date)} · ${scope()} · données extraites le ${dfr(D.meta.donnees_jusqu_au)}`, aires: () => `Bulletin au ${dfr(S.date)}`,
@@ -692,14 +691,15 @@
     const zl = PROV ? PROV.zones.filter(z => (PROV.meta.zones_detail || []).includes(z.nom)) : [];
     const pv = D.meta.province || (PROV && PROV.meta.province) || "Nord-Kivu";
     const isProvUser = !USER || USER.role === "province";
-    const top = !isProvUser ? "" : `<a class="back-prov" href="index.html">← Accueil de la province</a>`
-      + `<div class="zs-switch"><select data-openzs aria-label="Changer de zone de santé"><option value="${encodeURIComponent("province-du-" + pv.toLowerCase().replace(/\s+/g, "-"))}" ${NIV_PROV ? "selected" : ""}>Province du ${esc(pv)} (analyses détaillées)</option>${zl.map(z => `<option value="${z.code}" ${z.nom === D.meta.zone_de_sante ? "selected" : ""}>ZS ${esc(z.nom)}</option>`).join("")}</select></div>`;
-    $("#user").innerHTML = USER ? `<button class="userchip" id="userchip" aria-haspopup="true"><span class="av">${esc((USER.nom || USER.identifiant).slice(0, 1).toUpperCase())}</span><span>${esc(USER.nom)}<small>${USER.role === "province" ? "Coordination provinciale" : "Zone de santé de " + esc(USER.zone)}</small></span></button>
+    const top = `<button class="nav-link ${S.page === "jour" ? "on" : ""}" data-page="jour" type="button">Vue générale</button>` + (!isProvUser ? "" : `<a class="nav-link back-prov" href="index.html">← Province</a>`
+      + `<div class="zs-switch"><select data-openzs aria-label="Changer de zone de santé"><option value="${encodeURIComponent("province-du-" + pv.toLowerCase().replace(/\s+/g, "-"))}" ${NIV_PROV ? "selected" : ""}>Province du ${esc(pv)} (analyses détaillées)</option>${zl.map(z => `<option value="${z.code}" ${z.nom === D.meta.zone_de_sante ? "selected" : ""}>ZS ${esc(z.nom)}</option>`).join("")}</select></div>`);
+    $("#user").innerHTML = USER ? `<span class="avatar" aria-hidden="true">${esc((USER.nom || USER.identifiant).slice(0, 1).toUpperCase())}</span><button class="bandeau-qui" id="userchip" type="button" aria-haspopup="true"><b>${esc(USER.nom || USER.identifiant)}</b><small>${USER.role === "province" ? "Coordination provinciale" : "Zone de santé de " + esc(USER.zone)}${PUBLIC ? " · version en ligne" : ""}</small></button><button class="btn sm deco" type="button" data-logout>Déconnexion</button>
       ${S.menu ? `<div class="menu-pop"><div class="who">Connecté : <b>${esc(USER.identifiant)}</b></div>${PUBLIC ? `<div class="who">Version en ligne, lecture seule. Le mot de passe se change dans l'outil local.</div>` : `<button data-mdp>Changer mon mot de passe</button>`}<button data-logout>Se déconnecter</button></div>` : ""}` : "";
     const GN = { Situation: "Situation et risque", Riposte: "Surveillance et riposte", "Données": "Données et administration" }, G = [];
-    NAVP().forEach(([k, l, g]) => { g = GN[g] || g; let x = G.find(y => y.g === g); if (!x) G.push(x = { g, items: [] });
+    NAVP().forEach(([k, l, g]) => { if (k === "jour") return; g = GN[g] || g; let x = G.find(y => y.g === g); if (!x) G.push(x = { g, items: [] });
       x.items.push({ active: S.page === k, html: `<button data-page="${k}" class="${S.page === k ? "active" : ""}" ${S.page === k ? 'aria-current="page"' : ""}><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="${I[k]}"/></svg><span>${l}</span></button>` }); });
     $("#nav").innerHTML = top + navBlocs(G);
+    const tb = $("#theme"); if (tb) tb.textContent = `${document.documentElement.dataset.theme === "dark" ? "☀" : "◐"} Thème`;
     const p = NAVP().find(x => x[0] === S.page) || PAGES[0];
     $("#title").textContent = p[1];
     $("#subtitle").innerHTML = (SUBT[S.page] || (() => `${scope()} · ${perTxt()}`))();
@@ -741,10 +741,10 @@
     $("#main").innerHTML = html;
     POST.forEach(fn => { try { fn(); } catch (e) { console.error(e); } });
     if (v && v.charts) { try { v.charts(); } catch (e) { console.error(e); } }
-    if (NIV_PROV) { relabel($("#main")); relabel($("#sidebar")); relabel(document.querySelector(".topbar")); relabel($("#periodbar")); setTimeout(() => relabel($("#main")), 400); }
+    if (NIV_PROV) { relabel($("#main")); relabel($("#menubar")); relabel(document.querySelector(".topbar")); relabel($("#periodbar")); setTimeout(() => relabel($("#main")), 400); }
     const h = new URLSearchParams({ p: S.page, d: S.date, per: S.preset, du: S.from }); if (S.aire) h.set("a", S.aire); if (S.cas) h.set("c", S.cas);
     history.replaceState(null, "", "#" + h.toString());
-    $("#sidebar").classList.remove("open");
+    closeMenus(); $("#menubar").classList.remove("open");
   }
   function setTheme(t) { document.documentElement.dataset.theme = t; localSet("zs-theme", t); render(); }
   document.addEventListener("click", e => {
@@ -755,8 +755,9 @@
     if (t.closest("[data-logout]")) { fetch("/api/deconnexion", { method: "POST", credentials: "same-origin" }).then(() => { location.href = "connexion.html"; }); return; }
     if (t.closest("[data-mdp]")) { S.menu = false; shell(); modalMdp(); return; }
     if (t.closest("#theme")) { setTheme(document.documentElement.dataset.theme === "dark" ? "light" : "dark"); return; }
-    if (t.closest("#menu")) { $("#sidebar").classList.toggle("open"); return; }
-    const ngh = t.closest(".ng-h"); if (ngh) { navBlocToggle(ngh); return; }
+    if (t.closest("#menu")) { $("#menubar").classList.toggle("open"); return; }
+    const ngh = t.closest(".menu > .menu-btn"); if (ngh) { navBlocToggle(ngh); return; }
+    if (!t.closest(".menu")) closeMenus();
     const nav = t.closest("[data-page]"); if (nav) { go(nav.dataset.page); return; }
     const gg = t.closest("[data-go]"); if (gg) { go(gg.dataset.go); return; }
     const pr = t.closest("[data-preset]"); if (pr) { S.preset = pr.dataset.preset; applyPreset(); render(); return; }

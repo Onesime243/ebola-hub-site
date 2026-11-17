@@ -9,29 +9,34 @@
 <link rel="stylesheet" href="province.css">
 </head>
 <body>
-<div class="shell">
-  <aside class="sidebar" id="sidebar">
-    <div class="brand"><div class="logo">EO</div><div><b>Ebola Outbreak</b><small id="brand-sub">Outil de la zone de santé</small></div></div>
-    <nav id="nav"></nav>
-    <div class="side-status" id="side-status"></div>
-  </aside>
-  <div class="workspace">
+<header class="bandeau">
+  <a class="bandeau-id" href="index.html">
+    <img src="sceau_presidence.png" alt="Sceau de la Présidence de la République démocratique du Congo" width="65" height="64">
+    <span class="bandeau-titres">
+      <span class="bandeau-sur">Task Force Présidentielle Ebola 17</span>
+      <span class="bandeau-titre">Système de Gestion de l’Incident MVE 17 : EBOLA OUTBREAK</span>
+      <span class="bandeau-sous" id="brand-sub">Outil de la zone de santé</span>
+    </span>
+  </a>
+  <div class="bandeau-compte"><div class="rel" id="user"></div></div>
+</header>
+<div class="tricolore" aria-hidden="true"></div>
+<header class="menubar" id="menubar">
+  <button class="btn menu-toggle" id="menu" type="button" aria-label="Menu" aria-controls="nav">☰ Menu</button>
+  <nav id="nav" aria-label="Navigation"></nav>
+  <div class="menu-right"><button class="nav-link" id="theme" type="button" title="Mode clair / sombre">◐ Thème</button></div>
+</header>
+<div class="workspace">
     <header class="topbar">
-      <div class="flex" style="gap:12px;flex-wrap:nowrap">
-        <button class="btn menu-toggle" id="menu" aria-label="Menu">☰</button>
-        <div><h1 id="title">Vue générale</h1><div class="sub" id="subtitle"></div></div>
-      </div>
+      <div><h1 id="title">Vue générale</h1><div class="sub" id="subtitle"></div></div>
       <div class="controls">
         <button class="btn primary" data-go="fichiers">⤒ Charger les données</button>
         <label class="field">Aire de santé<select id="aire-select" aria-label="Aire de santé"></select></label>
-        <button class="btn" id="theme" title="Mode clair / sombre" aria-label="Mode clair ou sombre">◐</button>
-        <div class="rel" id="user"></div>
       </div>
     </header>
     <section class="periodbar" id="periodbar"></section>
     <main id="main"></main>
-    <footer class="foot"><span id="foot-l"></span><span>Pseudonymisé : identifiants et initiales uniquement · listes nominatives réservées à la province et à la zone</span></footer>
-  </div>
+    <footer class="foot"><span id="foot-l"></span><span class="side-status" id="side-status"></span><span>Pseudonymisé : identifiants et initiales uniquement · listes nominatives réservées à la province et à la zone</span></footer>
 </div>
 <script src="presentation.js"></script>
 <script src="en_ligne.js" data-page="zs"></script>

@@ -996,17 +996,16 @@
     "Données et administration": "M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8zm9.4 5.5-1.9-1.1v-.8l1.9-1.1-2-3.5-2 1.1-.7-.4V5.5h-4v2.2l-.7.4-2-1.1-2 3.5 1.9 1.1v.8l-1.9 1.1 2 3.5 2-1.1.7.4v2.2h4v-2.2l.7-.4 2 1.1z",
     "Zones de santé": "M12 2C8 2 5 5 5 9c0 5 7 13 7 13s7-8 7-13c0-4-3-7-7-7zm0 9.5A2.5 2.5 0 1 1 12 6a2.5 2.5 0 0 1 0 5.5z",
   };
-  function navBlocs(groups) {   // groups : [{ g, items: [{ html, active }], ouvert }]
-    let open; try { open = new Set(JSON.parse(localStorage.getItem(NAVB_KEY) || "[]")); } catch (e) { open = new Set(); }
+  function navBlocs(groups) {   // barre de menus horizontale : un menu déroulant par groupe, pages dans la liste (même présentation que l'outil national)
     return groups.filter(x => x.items.length).map((x, i) => {
-      const act = x.items.some(it => it.active), on = act || x.ouvert || open.has(x.g), id = `ng-${i}`, n = x.compte ?? x.items.length;
-      return `<section class="ng ${on ? "open" : ""} ${act ? "has-active" : ""}"><button class="ng-h" data-ng="${esc(x.g)}" aria-expanded="${on}" aria-controls="${id}"><i class="ng-ic"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="${NAVB_IC[x.g] || NAVB_IC.Analyses}"/></svg></i><span class="ng-t">${x.g}</span>${n ? `<span class="ng-n">${n}</span>` : ""}<svg class="ng-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><div class="ng-b" id="${id}"><div class="ng-in">${x.items.map(it => it.html).join("")}</div></div></section>`;
+      const act = x.items.some(it => it.active), id = `nm-${i}`;
+      return `<div class="menu ${act ? "on" : ""}"><button class="menu-btn" type="button" data-ng="${esc(x.g)}" aria-haspopup="true" aria-expanded="false" aria-controls="${id}">${x.g} ▾</button><div class="menu-list" id="${id}">${x.items.map(it => it.html).join("")}</div></div>`;
     }).join("");
   }
-  function navBlocToggle(btn) {
-    const sec = btn.closest(".ng"), on = !sec.classList.contains("open");
-    sec.classList.toggle("open", on); btn.setAttribute("aria-expanded", on);
-    try { const o = new Set(JSON.parse(localStorage.getItem(NAVB_KEY) || "[]")); on ? o.add(btn.dataset.ng) : o.delete(btn.dataset.ng); localStorage.setItem(NAVB_KEY, JSON.stringify([...o])); } catch (e) { /* stockage indisponible */ }
+  function closeMenus() { document.querySelectorAll(".menu.open").forEach(m => { m.classList.remove("open"); const b = m.querySelector(".menu-btn"); if (b) b.setAttribute("aria-expanded", "false"); }); }
+  function navBlocToggle(btn) {   // un seul menu ouvert à la fois (clic ou toucher ; le survol est géré en CSS)
+    const sec = btn.closest(".menu"), on = !sec.classList.contains("open");
+    closeMenus(); sec.classList.toggle("open", on); btn.setAttribute("aria-expanded", on);
   }
   const PAGES = [["accueil", "Accueil", "Province"], ["pilotage", "Pilotage stratégique", "Province"], ["situation", "Situation épidémiologique", "Province"], ["zones", "Zones de santé", "Province"], ["carte", "Carte et rapports", "Province"],
     ["alertes", "Surveillance des alertes", "Riposte"], ["ecoles", "Milieu scolaire", "Analyses"], ["reunion", "Tableaux de la réunion", "Réunions"], ["presentation", "Présentation (diapositives)", "Réunions"], ["indicateurs", "Indicateurs du pilier surveillance", "Réunions"], ["donnees", PUBLIC ? "État des données" : "Données des zones", "Données"],
@@ -1032,10 +1031,11 @@
     const ORDRE = ["Situation et risque", "Contact tracing", "Analyses", "Surveillance et riposte", "Réunions", "Données et administration"];
     const G = ORDRE.map(g => ({ g, items: [] }));
     const put = (g, it) => (G.find(x => x.g === g) || G[G.push({ g, items: [] }) - 1]).items.push(it);
-    pages.forEach(([k, l, g]) => put(PG[k] || g, { active: S.page === k, html: `<button data-page="${k}" class="${S.page === k ? "active" : ""}" ${S.page === k ? 'aria-current="page"' : ""}>${svgI(k)}<span>${l}</span></button>` }));
+    pages.forEach(([k, l, g]) => { if (k === "accueil") return; put(PG[k] || g, { active: S.page === k, html: `<button data-page="${k}" class="${S.page === k ? "active" : ""}" ${S.page === k ? 'aria-current="page"' : ""}>${svgI(k)}<span>${l}</span></button>` }); });
     if (DET) DETAIL_PAGES.forEach(([k, l, ic]) => put(DG[k] || "Analyses", { active: false, html: `<a class="navlink" href="zs.html?zone=${encodeURIComponent(DET)}#p=${k}" title="Analyse détaillée de la province"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="${ic}"/></svg><span>${l}</span></a>` }));
     if (zl.length) G.push({ g: "Zones de santé", compte: zl.length, ouvert: false, items: [{ active: false, html: `<div class="zs-switch"><select data-openzs aria-label="Ouvrir le tableau de bord d'une zone de santé"><option value="">Ouvrir une zone de santé…</option>${zl.map(z => `<option value="${z.code}">${esc(z.nom)}${myZone() && myZone().code === z.code ? " (ma zone)" : ""}</option>`).join("")}</select></div>` }] });
-    $("#nav").innerHTML = navBlocs(G);
+    $("#nav").innerHTML = `<button class="nav-link ${S.page === "accueil" ? "on" : ""}" data-page="accueil" type="button">Accueil</button>` + navBlocs(G);
+    const tb = $("#theme"); if (tb) tb.textContent = `${document.documentElement.dataset.theme === "dark" ? "☀" : "◐"} Thème`;
     const p = pages.find(x => x[0] === S.page);
     $("#title").textContent = p[1];
     $("#subtitle").innerHTML = (SUBT[S.page] || (() => `${scope()} · ${perTxt()}`))();
@@ -1045,7 +1045,7 @@
     $("#side-status").innerHTML = `<b><span class="pulse"></span>Province du ${esc(PROV)}</b><span>Situation au ${dfr(P.meta.date_rapport)}</span>
       <div class="row"><span>Cas 7 j</span><b>${nf(pr.n7)}</b></div><div class="row"><span>Zones actives</span><b>${nf(ZONES.filter(z => ["Rouge", "Orange"].includes(casZone(z.code, t).cat)).length)}</b></div><div class="row"><span>Taux de suivi</span><b>${pc(sp.taux, 0)}</b></div>`;
     $("#foot-l").textContent = `Ebola Outbreak, outil provincial du ${PROV} · analyse du ${P.meta.genere_le} · v${P.meta.version || ""}`;
-    $("#user").innerHTML = USER ? `<button class="userchip" id="userchip" aria-haspopup="true"><span class="av">${esc((USER.nom || USER.identifiant).slice(0, 1).toUpperCase())}</span><span>${esc(USER.nom)}<small>${USER.role === "province" ? "Coordination provinciale" : "Zone de santé de " + esc(USER.zone)}</small></span></button>
+    $("#user").innerHTML = USER ? `<span class="avatar" aria-hidden="true">${esc((USER.nom || USER.identifiant).slice(0, 1).toUpperCase())}</span><button class="bandeau-qui" id="userchip" type="button" aria-haspopup="true"><b>${esc(USER.nom || USER.identifiant)}</b><small>${USER.role === "province" ? "Coordination provinciale" : "Zone de santé de " + esc(USER.zone)}${PUBLIC ? " · version en ligne" : ""}</small></button><button class="btn sm deco" type="button" data-logout>Déconnexion</button>
       ${S.menu ? `<div class="menu-pop"><div class="who">Connecté : <b>${esc(USER.identifiant)}</b></div>${PUBLIC ? `<div class="who">Version en ligne, lecture seule. Le mot de passe se change dans l'outil local.</div>` : `<button data-mdp>Changer mon mot de passe</button>`}<button data-logout>Se déconnecter</button></div>` : ""}` : PUBLIC ? `<span class="badge b-info">Version en ligne · lecture seule</span>` : "";
     const PR = [["7", "7 j"], ["14", "14 j"], ["21", "21 j"], ["28", "28 j"], ["42", "42 j"], ["90", "90 j"], ["tout", "Tout"]];
     $("#periodbar").style.display = PERIOD_PAGES.has(S.page) ? "" : "none";
@@ -1066,7 +1066,7 @@
     POST.forEach(fn => { try { fn(); } catch (e) { console.error(e); } });
     const h = new URLSearchParams({ p: S.page, d: S.date, per: S.preset, du: S.from }); if (S.zone) h.set("z", S.zone);
     history.replaceState(null, "", "#" + h.toString());
-    $("#sidebar").classList.remove("open");
+    closeMenus(); $("#menubar").classList.remove("open");
   }
   function go(page) { S.page = page; S.menu = false; render(); scrollTo(0, 0); }
   function modalMdp() {
@@ -1086,13 +1086,14 @@
   document.addEventListener("click", async e => {
     const t = e.target;
     if (t.closest("#theme")) { document.documentElement.dataset.theme = document.documentElement.dataset.theme === "dark" ? "light" : "dark"; localSet("zs-theme", document.documentElement.dataset.theme); render(); return; }
-    if (t.closest("#menu")) { $("#sidebar").classList.toggle("open"); return; }
+    if (t.closest("#menu")) { $("#menubar").classList.toggle("open"); return; }
     if (t.closest("#userchip")) { S.menu = !S.menu; shell(); return; }
     if (S.menu && !t.closest(".menu-pop")) { S.menu = false; shell(); }
     if (t.closest("[data-logout]") && window.NK_DECONNEXION) { window.NK_DECONNEXION(); return; }
     if (t.closest("[data-logout]")) { await fetch("/api/deconnexion", { method: "POST", credentials: "same-origin" }); location.href = "connexion.html"; return; }
     if (t.closest("[data-mdp]")) { S.menu = false; shell(); modalMdp(); return; }
-    const ngh = t.closest(".ng-h"); if (ngh) { navBlocToggle(ngh); return; }
+    const ngh = t.closest(".menu > .menu-btn"); if (ngh) { navBlocToggle(ngh); return; }
+    if (!t.closest(".menu")) closeMenus();
     const nav = t.closest("[data-page]"); if (nav) { go(nav.dataset.page); return; }
     const gg = t.closest("[data-go]"); if (gg) { if (gg.dataset.upz) S.upZone = gg.dataset.upz; go(gg.dataset.go); return; }
     const pr = t.closest("[data-preset]"); if (pr) { S.preset = pr.dataset.preset; applyPreset(); render(); return; }
