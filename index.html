@@ -10,30 +10,42 @@
   <script>try{var t=localStorage.getItem("hub-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
 </head>
 <body>
-  <div class="shell">
-    <aside class="sidebar" id="sidebar">
-      <div class="brand"><div class="logo">EO</div><div><b>Ebola Outbreak</b><small>SGI-TASK FORCE</small></div></div>
-      <nav id="navigation" aria-label="Navigation"></nav>
-      <div class="side-status"><b><span class="pulse"></span><span data-i18n>Données opérationnelles</span></b><span id="side-date"></span></div>
-    </aside>
-    <main class="workspace">
-      <header class="topbar">
-        <div class="flex" style="flex-wrap:nowrap">
-          <button class="btn menu-toggle" id="menu-toggle" aria-label="Menu">☰</button>
-          <div><h1 id="page-title">Vue générale</h1><div class="sub" id="page-sub"></div></div>
-        </div>
-        <div class="controls">
-          <button class="btn primary" id="up-btn" type="button" title="Charger de nouveaux fichiers"><span data-i18n>⤒ Charger les données</span></button>
-          <label class="field"><span data-i18n>Province</span><select id="province-filter"></select></label>
-          <button class="btn" id="lang-toggle" type="button" title="Français / English">EN</button>
-          <button class="btn" id="theme-toggle" type="button" title="Thème clair / sombre">☾</button>
-        </div>
-      </header>
-      <div class="periodbar" id="periodbar"></div>
-      <section id="content"></section>
-      <footer class="foot"><span class="sig"><b>Système de gestion de l’incident, SGI-RDC</b>, avec l’appui de UMIE-INRB · Équipe de développement : Onesime Mbulayi et al. · Pour tout contact : <a href="mailto:mbonesime@gmail.com">mbonesime@gmail.com</a>, <a href="mailto:dav.ebengo@umie-inrb.org">dav.ebengo@umie-inrb.org</a></span><span id="privacy"></span><span id="generated"></span></footer>
-    </main>
-  </div>
+  <header class="bandeau">
+    <a class="bandeau-id" href="#/overview">
+      <img src="sceau_presidence.png" alt="Sceau de la Présidence de la République démocratique du Congo" width="65" height="64">
+      <span class="bandeau-titres">
+        <span class="bandeau-sur" data-i18n>Task Force Présidentielle Ebola 17</span>
+        <span class="bandeau-titre" data-i18n>Système de Gestion de l’Incident MVE 17 : EBOLA OUTBREAK</span>
+        <span class="bandeau-sous" data-i18n>Surveillance, suivi des contacts, parcours des cas, chaînes de transmission et qualité des données</span>
+      </span>
+    </a>
+    <div class="bandeau-compte" id="bandeau-compte"></div>
+  </header>
+  <div class="tricolore" aria-hidden="true"></div>
+  <header class="menubar" id="menubar">
+    <button class="btn menu-toggle" id="menu-toggle" type="button" aria-label="Menu" aria-controls="navigation">☰ <span data-i18n>Menu</span></button>
+    <nav id="navigation" aria-label="Navigation"></nav>
+    <div class="menu-right">
+      <button class="nav-link" id="method-link" type="button" data-i18n>Méthodologie</button>
+      <div class="menu" id="lang-menu">
+        <button class="menu-btn" id="lang-toggle" type="button" aria-haspopup="true" title="Français / English">FR ▾</button>
+        <div class="menu-list"><button type="button" data-lang="fr">Français</button><button type="button" data-lang="en">English</button></div>
+      </div>
+      <button class="nav-link" id="theme-toggle" type="button" title="Thème clair / sombre">◐ Thème</button>
+    </div>
+  </header>
+  <main class="workspace">
+    <header class="topbar">
+      <div><h1 id="page-title">Vue générale</h1><div class="sub" id="page-sub"></div></div>
+      <div class="controls">
+        <button class="btn primary" id="up-btn" type="button" title="Charger de nouveaux fichiers"><span data-i18n>⤒ Charger les données</span></button>
+        <label class="field"><span data-i18n>Province</span><select id="province-filter"></select></label>
+      </div>
+    </header>
+    <div class="periodbar" id="periodbar"></div>
+    <section id="content"></section>
+    <footer class="foot"><span class="sig"><b>Système de gestion de l’incident, SGI-RDC</b>, avec l’appui de UMIE-INRB · Équipe de développement : Onesime Mbulayi et al. · Pour tout contact : <a href="mailto:mbonesime@gmail.com">mbonesime@gmail.com</a>, <a href="mailto:dav.ebengo@umie-inrb.org">dav.ebengo@umie-inrb.org</a></span><span id="side-date"></span><span id="privacy"></span><span id="generated"></span></footer>
+  </main>
   <script src="site-config.js"></script>
   <script src="en_ligne.js" data-page="hub"></script>
   <div class="overlay hide" id="pb-overlay"><div class="overlay-card"><div class="spinner"></div><h3 id="pb-ov-title">Recalcul de la période…</h3><div class="muted small" id="pb-ov-sub"></div><pre class="logbox" id="pb-ov-log"></pre><button class="btn" id="pb-ov-close" type="button">Fermer</button></div></div>
