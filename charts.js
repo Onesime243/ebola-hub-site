@@ -117,7 +117,7 @@
     if (opt.shade && opt.shade.from !== undefined && opt.shade.from !== null && opt.shade.from < n) {
       const x0 = m.l + opt.shade.from * bw, x1 = m.l + ((opt.shade.to ?? n - 1) + 1) * bw;
       el("rect", { x: x0, y: m.t, width: Math.max(0, x1 - x0), height: ph, fill: col(opt.shade.color || "--line"), "fill-opacity": .45 }, svg);
-      if (opt.shade.label) { const t = el("text", { x: x0 + 4, y: m.t + 11, fill: col("--muted"), "font-size": 10 }, svg); t.textContent = opt.shade.label; }
+      if (opt.shade.label) { const t = el("text", { x: x0 + 4, y: m.t + 11, fill: col("--muted"), "font-size": 11 }, svg); t.textContent = opt.shade.label; }
     }
     // bandes multiples (éventail de projections)
     (opt.bands || []).forEach(b => {
@@ -166,13 +166,13 @@
     // lignes de référence horizontales (ex. R = 1) et verticales (ex. aujourd'hui, R = 1 sur l'axe X)
     (opt.hlines || []).forEach(h => {
       const y = Y(h.y); el("line", { x1: m.l, x2: W - m.r, y1: y, y2: y, stroke: col(h.color || "--ink-2"), "stroke-width": h.width || 1.4, "stroke-dasharray": h.dash ?? "5 4" }, svg);
-      if (h.label) { const t = el("text", { x: W - m.r - 4, y: y - 4, "text-anchor": "end", fill: col(h.color || "--ink-2"), "font-size": 10.5, "font-weight": 600 }, svg); t.textContent = h.label; }
+      if (h.label) { const t = el("text", { x: W - m.r - 4, y: y - 4, "text-anchor": "end", fill: col(h.color || "--ink-2"), "font-size": 11, "font-weight": 600 }, svg); t.textContent = h.label; }
     });
     (opt.vlines || []).forEach(v => {
       const i = typeof v.i === "number" ? v.i : data.findIndex(r => r[opt.x] === v.x); if (i < 0) return;
       const x = v.edge ? m.l + i * bw : X(i);
       el("line", { x1: x, x2: x, y1: m.t, y2: m.t + ph, stroke: col(v.color || "--ink-2"), "stroke-width": v.width || 1.4, "stroke-dasharray": v.dash ?? "4 3" }, svg);
-      if (v.label) { const t = el("text", { x: x + 4, y: m.t + 11 + (v.dy || 0), fill: col(v.color || "--ink-2"), "font-size": 10.5, "font-weight": 600 }, svg); t.textContent = v.label; }
+      if (v.label) { const t = el("text", { x: x + 4, y: m.t + 11 + (v.dy || 0), fill: col(v.color || "--ink-2"), "font-size": 11, "font-weight": 600 }, svg); t.textContent = v.label; }
     });
     // survol
     const hl = el("line", { y1: m.t, y2: m.t + ph, stroke: col("--ink-2"), "stroke-width": 1, "stroke-dasharray": "3 3", opacity: 0 }, svg);
@@ -324,7 +324,7 @@
     if (selF) el("path", { d: selF.d, class: "zone-sel-outline", "vector-effect": "non-scaling-stroke", fill: "none", stroke: "#111", "stroke-width": 2.8 }, geo);
     const lblG = el("g", { class: "lbls" }, svg);
     // ÉTIQUETTES : « nom » + valeur dans un cercle, posées sur la zone ou juste à côté, sans trait de rappel
-    const fs = opt.labelPx || 9.5, fsMin = Math.max(7.5, fs - 1.2);
+    const fs = opt.labelPx || 11, fsMin = Math.max(10, fs - 1);
     const centroidOf = f => {
       const rs = ringsOf(f.geometry), ring = rs.reduce((a, b) => b.length > a.length ? b : a, []);
       let A = 0, cx = 0, cy = 0;
@@ -729,7 +729,7 @@
     for (let i = 0; i <= nt; i++) {
       const t = tmin + span * i / nt, x = X(t);
       el("line", { x1: x, x2: x, y1: m.t - 6, y2: Yr(row) , stroke: col("--line"), "stroke-dasharray": "2 4" }, g);
-      [m.t - 12, Yr(row) + 16].forEach(y => { const tx = el("text", { x, y, "text-anchor": "middle", fill: col("--muted"), "font-size": 10.5 }, g); tx.textContent = new Date(t).toLocaleDateString(window.HubLang === "en" ? "en-GB" : "fr-FR", { day: "2-digit", month: "2-digit" }); });
+      [m.t - 12, Yr(row) + 16].forEach(y => { const tx = el("text", { x, y, "text-anchor": "middle", fill: col("--muted"), "font-size": 11 }, g); tx.textContent = new Date(t).toLocaleDateString(window.HubLang === "en" ? "en-GB" : "fr-FR", { day: "2-digit", month: "2-digit" }); });
     }
     const supCol = isDark() ? PAL.supportDark : PAL.support;
     const edges = [], nodeEls = [];
@@ -900,10 +900,10 @@
       hub.addEventListener("mousemove", ev => showTip(c.hub.title || "", ev)); hub.addEventListener("mouseleave", hideTip);
       const src = el("g", { class: "node", transform: `translate(0 ${sy})` }, gg);
       el("circle", { r: 9, fill: c.source.color || "#E8A598", stroke: col("--surface"), "stroke-width": 1.5 }, src);
-      const st = el("text", { y: -13, "text-anchor": "middle", "font-size": 9.5, "font-weight": 700, fill: col("--ink-2") }, src); st.textContent = c.source.label || "";
+      const st = el("text", { y: -13, "text-anchor": "middle", "font-size": 11, "font-weight": 700, fill: col("--ink-2") }, src); st.textContent = c.source.label || "";
       src.addEventListener("mousemove", ev => showTip(c.source.title || "", ev)); src.addEventListener("mouseleave", hideTip);
       if (opt.onSource) src.addEventListener("click", () => opt.onSource(c));
-      const cap = el("text", { y: l.R + 4, "text-anchor": "middle", "font-size": 10, fill: col("--muted") }, gg); cap.textContent = c.caption || "";
+      const cap = el("text", { y: l.R + 4, "text-anchor": "middle", "font-size": 11, fill: col("--muted") }, gg); cap.textContent = c.caption || "";
     });
     let drag = null;
     svg.addEventListener("wheel", ev => { ev.preventDefault(); const b = svg.getBoundingClientRect(), s = W / b.width, px = (ev.clientX - b.left) * s, py = (ev.clientY - b.top) * s; const f = ev.deltaY < 0 ? 1.15 : 1 / 1.15, nk = Math.max(.4, Math.min(8, state.k * f)); state.tx = px - (px - state.tx) * nk / state.k; state.ty = py - (py - state.ty) * nk / state.k; state.k = nk; apply(); }, { passive: false });

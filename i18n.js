@@ -2,7 +2,7 @@
 window.HUB_EN = {
   /* Navigation */
   "Situation": "Situation", "Contact tracing": "Contact tracing", "Analyses": "Analytics", "Données": "Data",
-  "Vue générale": "Overview", "Territoires": "Territories", "Suivi des contacts": "Contact follow-up", "Cas index": "Index cases",
+  "Vue générale": "Overview", "Territoires": "Territories", "Suivi des contacts": "Contact follow-up", "chiffres de la Linelist et du suivi des contacts ; les chiffres officiels du SitRep ne sont disponibles qu’au niveau national": "Linelist and contact follow-up figures; official SitRep figures are available at national level only", "Cumul · source Linelist": "Cumulative · Linelist source", "cible 95 %": "target 95%", "Cas index": "Index cases",
   "Parcours du cas": "Case journey", "Chaînes de transmission": "Transmission chains", "Laboratoires": "Laboratories", "Nowcasting": "Nowcasting",
   "Prévisions": "Forecasts", "Priorisation": "Prioritization", "Qualité & preprocessing": "Quality & preprocessing", "Méthodologie": "Methodology",
   "Conditions d’utilisation": "Terms of use", "Données opérationnelles": "Operational data", "Province": "Province", "Toutes": "All",
