@@ -1,12 +1,14 @@
-/* Ebola Outbreak Analytics Hub — interface v3 */
+/* Ebola Outbreak Analytics Hub — interface v3
+   Couleurs sémantiques (identiques sur toutes les pages) : confirmé = --st-conf (orange, = --s2) ; décès / critique = --critical (rouge sombre) ;
+   probable = --s5 ; suspect = --st-susp ; non vu = --st-nv ; vu ≤24 h = --st-v24 ; guéri / favorable = --good. */
 :root{
   color-scheme:light;
   --page:#f4f5f2;--surface:#fcfcfb;--surface-2:#f1f2ee;--surface-3:#e8e9e4;
-  --ink:#0f1720;--ink-2:#46505a;--muted:#7c848b;--line:#e1e0d9;--line-2:#c9cbc3;
+  --ink:#0f1720;--ink-2:#46505a;--muted:#646c74;--line:#e1e0d9;--line-2:#c9cbc3;
   --brand:#16324f;--brand-2:#0f8b8d;--accent:#2a78d6;
   --s1:#2a78d6;--s2:#eb6834;--s3:#1baf7a;--s4:#eda100;--s5:#e87ba4;--s6:#008300;--s7:#4a3aa7;--s8:#7f5539;
   --good:#0ca30c;--warn:#fab219;--serious:#ec835a;--critical:#9b1b30;
-  --st-conf:#9b1b30;--st-susp:#c2549d;--st-nv:#e0a100;--st-v48:#86b6ef;--st-v24:#0ca30c;--st-done:#7a8a99;--st-inc:#c3c2b7;--st-dup:#e1e0d9;
+  --st-conf:#eb6834;--st-susp:#c2549d;--st-nv:#e0a100;--st-v48:#86b6ef;--st-v24:#0ca30c;--st-done:#7a8a99;--st-inc:#c3c2b7;--st-dup:#e1e0d9;
   --seq-0:#e9eef3;--seq-1:#cde2fb;--seq-2:#9ec5f4;--seq-3:#6da7ec;--seq-4:#3987e5;--seq-5:#256abf;--seq-6:#184f95;--seq-7:#0d366b;
   --sex-m:#2a78d6;--sex-f:#c2417d;--sex-i:#9aa1a7;--map-stroke:#3a3a3a;--map-na:#eceae4;
   --rc-salmon:#f08a7c;--rc-purple:#9933ff;--rc-rt:#c65353;--rc-r1:#ac3973;--rc-bar:#5f6b78;--rc-grey:#9a9a9a;
@@ -20,7 +22,7 @@
   --ink:#f3f4f2;--ink-2:#c3c2b7;--muted:#8d9399;--line:#2c2e2f;--line-2:#3a3d3f;
   --brand:#9cc3ea;--brand-2:#3ec4c6;--accent:#3987e5;
   --s1:#3987e5;--s2:#d95926;--s3:#199e70;--s4:#c98500;--s5:#d55181;--s6:#008300;--s7:#9085e9;--s8:#b08968;--critical:#e8466c;
-  --st-conf:#e8466c;--st-susp:#d070b4;--st-nv:#fab219;--st-v48:#5598e7;--st-v24:#0ca30c;--st-done:#7d8b98;--st-inc:#55595c;--st-dup:#3a3d3f;
+  --st-conf:#d95926;--st-susp:#d070b4;--st-nv:#fab219;--st-v48:#5598e7;--st-v24:#0ca30c;--st-done:#7d8b98;--st-inc:#55595c;--st-dup:#3a3d3f;
   --seq-0:#23282d;--seq-1:#1d3553;--seq-2:#184f95;--seq-3:#1c5cab;--seq-4:#2a78d6;--seq-5:#5598e7;--seq-6:#86b6ef;--seq-7:#cde2fb;
   --sex-m:#5598e7;--sex-f:#e06aa3;--sex-i:#6f767c;--map-stroke:#17191b;--map-na:#2a2d30;
   --rc-salmon:#e27b6e;--rc-purple:#b980ff;--rc-rt:#e07070;--rc-r1:#d06a9f;--rc-bar:#8d99a6;--rc-grey:#7d7d7d;
@@ -143,7 +145,7 @@ tbody tr.selected{background:color-mix(in srgb,var(--accent) 12%,transparent)}
 .map svg path.zone{stroke:var(--map-stroke);stroke-width:.8;stroke-linejoin:round;cursor:pointer}
 .map svg path.zone:hover{stroke:var(--ink-2);stroke-width:1.8;filter:brightness(.96)}
 .map svg path.zone.sel{stroke:var(--ink);stroke-width:2.2}
-.map .lbl{font-size:9.5px;fill:#3a3f44;paint-order:stroke;stroke:rgba(255,255,255,.85);stroke-width:2.6px;pointer-events:none;font-weight:600}
+.map .lbl{font-size:11px;fill:#3a3f44;paint-order:stroke;stroke:rgba(255,255,255,.85);stroke-width:2.6px;pointer-events:none;font-weight:600}
 .scale{display:flex;align-items:center;gap:8px;font-size:11.5px;color:var(--muted);margin-top:6px}
 .scale .ramp{display:flex;height:10px;flex:1;max-width:260px;border-radius:3px;overflow:hidden}.scale .ramp i{flex:1}
 /* Case journey */
@@ -173,7 +175,7 @@ tbody tr.selected{background:color-mix(in srgb,var(--accent) 12%,transparent)}
 .net-info{position:static;font-size:11.5px;color:var(--muted);background:var(--surface);padding:5px 10px;border-top:1px solid var(--line)}
 .node{cursor:pointer}
 .node text{font:600 10px var(--sans);fill:var(--ink);pointer-events:none}
-.node .lbl2{font-weight:400;font-size:9px;fill:var(--muted)}
+.node .lbl2{font-weight:400;font-size:10.5px;fill:var(--muted)}
 .node.dim{opacity:.18}.link.dim{opacity:.06}
 .link{fill:none;stroke:var(--line-2);stroke-width:1.2}
 .link.strong{stroke:var(--st-conf);stroke-width:2.4}
