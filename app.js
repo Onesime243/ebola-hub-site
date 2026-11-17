@@ -208,7 +208,7 @@
     const provTiles = prov ? `
     <div class="notice">${T("Province")} : <b>${esc(prov.province)}</b> · ${T("chiffres de la Linelist et du suivi des contacts ; les chiffres officiels du SitRep ne sont disponibles qu’au niveau national")}</div>
     <div class="grid g6">
-      ${kpi("Cas confirmés", nf(prov.confirmes), T("Cumul · source Linelist"), { color: "--s2" })}
+      ${kpi("Cas confirmés", nf(prov.confirmes), T("Cumul · source Linelist"), { color: "--st-conf" })}
       ${kpi("Décès confirmés", nf(prov.deces_confirmes), T("Cumul · source Linelist"), { color: "--critical" })}
       ${kpi("Létalité", pc(prov.confirmes ? 100 * prov.deces_confirmes / prov.confirmes : null), T("Décès confirmés / cas confirmés"), { color: "--ink-2" })}
       ${kpi("Confirmés sur 14 jours", nf(prov.confirmes_14j), `${dshort(p.start)} → ${dshort(p.end)}`)}
@@ -218,7 +218,7 @@
     const sitTiles = fromPdf ? `
     <div class="sitrep-head"><span class="sitrep-badge">SitRep N° ${esc(String(s.numero || "—"))}</span> ${T("Chiffres officiels nationaux, rapport du")} <b>${dfmt(s.date_sitrep)}</b>${s.date_publication ? `, ${T("publié le")} ${dfmt(s.date_publication)}` : ""} · <span class="muted">${esc(s.source_pdf)}</span>${(s.avertissements || []).length ? ` · <b style="color:${col("--critical")}">⚠ ${esc(s.avertissements.join(" ; "))}</b>` : ""}</div>
     <div class="grid g6">
-      ${kpi("Cumul des cas", nf(k.confirmes), `${T("Cas confirmés")}${plus(s.nouveaux_cas_24h)}`, { color: "--s2" })}
+      ${kpi("Cumul des cas", nf(k.confirmes), `${T("Cas confirmés")}${plus(s.nouveaux_cas_24h)}`, { color: "--st-conf" })}
       ${kpi("Cumul des décès confirmés", nf(k.deces_confirmes), `${T("Décès")}${plus(s.deces_24h)}`, { color: "--critical" })}
       ${kpi("Létalité", pc(k.letalite_pct), T("Décès confirmés / cas confirmés"), { color: "--ink-2" })}
       ${kpi("Patients en isolement / CTE", k.isolement === null || k.isolement === undefined ? "N/C" : nf(k.isolement), T("Fin de journée, toutes provinces"), { color: "--s1" })}
@@ -226,7 +226,7 @@
       ${kpi("Taux de suivi des contacts", pc(k.suivi_contacts_pct), s.contacts_a_suivre ? `${nf(s.contacts_vus)} / ${nf(s.contacts_a_suivre)} ${T("vus (du jour) · cible 95 %")}` : T("Du jour · cible 95 %"), { color: "--st-v24", cls: k.suivi_contacts_pct < 95 ? "alert" : "good", meter: k.suivi_contacts_pct, meterColor: k.suivi_contacts_pct < 95 ? "--critical" : "--good" })}
     </div>` : `
     <div class="grid g4">
-      ${kpi("Cas confirmés", nf(k.confirmes), srcNote, { color: "--s2", cls: stale })}
+      ${kpi("Cas confirmés", nf(k.confirmes), srcNote, { color: "--st-conf", cls: stale })}
       ${kpi("Décès", nf(k.deces_confirmes), srcNote, { color: "--critical", cls: stale })}
       ${kpi("Guéris", k.gueris === null ? "N/C" : nf(k.gueris), srcNote, { color: "--good", cls: stale })}
       ${kpi("Létalité", pc(k.letalite_pct), stale ? srcNote : T("Décès / confirmés"), { color: "--ink-2", cls: stale })}
@@ -319,7 +319,7 @@
       Ch.xy($("#c-epi"), { data: rows, x: "week", stacked: true, height: 280, xLabel: (v, r, tip) => tip ? `${T("Semaine du")} ${dfmt(v)}` : dshort(v), series });
     } else
     Ch.xy($("#c-epi"), { data: w, x: "week", xLabel: (v, r, tip) => tip ? `${T("Semaine du")} ${dfmt(v)}` : dshort(v), height: 280,
-      series: [{ key, label: S.curveBy === "dds" ? T("Confirmés (semaine de début des symptômes)") : T("Confirmés (semaine de notification)"), color: "--s2" },
+      series: [{ key, label: S.curveBy === "dds" ? T("Confirmés (semaine de début des symptômes)") : T("Confirmés (semaine de notification)"), color: "--st-conf" },
         { key: "deces", label: T("Décès confirmés"), color: "--ink", type: "line" }] });
     Ch.xy($("#c-delays"), { data: (D.delays_weekly || []).filter(full).slice(-16), x: "week", xLabel: (v, r, tip) => tip ? `${T("Semaine du")} ${dfmt(v)}` : dshort(v), height: 230, digits: 1,
       series: [{ key: "dds_notification", label: T("DDS → notification"), color: "--s1", type: "line" }, { key: "dds_prelevement", label: T("DDS → prélèvement"), color: "--s2", type: "line" },
@@ -1598,7 +1598,7 @@
   function perfCharts() {
     const rows = (D.performance || {})[S.perfG]; if (!rows || !$("#c-pf-cum")) return;
     const xl = (v, r, tip) => tip ? `${T("Semaine du")} ${dfmt(v)}` : dshort(v);
-    Ch.xy($("#c-pf-cum"), { data: rows, x: "week", height: 200, xLabel: xl, series: [{ key: "cumul_confirmes", label: T("Confirmés cumulés"), color: "--s2", type: "area", markers: false }, { key: "cumul_deces", label: T("Décès cumulés"), color: "--critical", type: "line", markers: false }] });
+    Ch.xy($("#c-pf-cum"), { data: rows, x: "week", height: 200, xLabel: xl, series: [{ key: "cumul_confirmes", label: T("Confirmés cumulés"), color: "--st-conf", type: "area", markers: false }, { key: "cumul_deces", label: T("Décès cumulés"), color: "--critical", type: "line", markers: false }] });
     Ch.xy($("#c-pf-cfr"), { data: rows, x: "week", height: 200, percent: true, xLabel: xl, digits: 1, series: [{ key: "letalite_pct", label: T("Létalité hebdomadaire"), color: "--critical", type: "line" }] });
     Ch.xy($("#c-pf-link"), { data: rows, x: "week", height: 200, percent: true, xLabel: xl, digits: 1, series: [{ key: "pct_source_connue", label: T("Source connue"), color: "--s3", type: "line" }, { key: "pct_connus_contacts", label: T("Connus comme contacts"), color: "--good", type: "line" }, { key: "pct_avec_contacts_listes", label: T("Avec contacts listés"), color: "--s1", type: "line" }] });
     Ch.xy($("#c-pf-del"), { data: rows, x: "week", height: 200, xLabel: xl, digits: 1, series: [{ key: "delai_dds_notification", label: T("DDS → notification"), color: "--s1", type: "line" }, { key: "delai_dds_isolement", label: T("DDS → isolement"), color: "--s7", type: "line" }, { key: "contacts_par_cas", label: T("Contacts listés par cas"), color: "--s4", type: "line", dash: "4 3" }] });
@@ -2547,7 +2547,7 @@
       <div class="im-actions"><button class="btn" type="button" data-im-print>⎙ ${T("Imprimer / PDF")}</button></div>
     </div>
     <div class="grid g6 im-kpis">
-      ${kpi("Confirmés (7 j)", nf(K.nouveaux_7j.v), `${T("vs")} ${nf(K.nouveaux_7j.prec)} ${pilTrend(K.nouveaux_7j.v, K.nouveaux_7j.prec)}`, { color: "--s2" })}
+      ${kpi("Confirmés (7 j)", nf(K.nouveaux_7j.v), `${T("vs")} ${nf(K.nouveaux_7j.prec)} ${pilTrend(K.nouveaux_7j.v, K.nouveaux_7j.prec)}`, { color: "--st-conf" })}
       ${kpi("Décès confirmés (7 j)", nf(K.deces_7j.v), `${nf(K.deces_7j.hors_cte)} ${T("hors CTE")}`, { color: "--critical" })}
       ${kpi("R(t)", K.rt ? nf(K.rt.v, 2) : "—", K.rt ? `${nf(K.rt.ic[0], 2)}–${nf(K.rt.ic[1], 2)} · P(R>1) ${pc(100 * K.rt.p_sup_1, 0)}` : "", { color: "--warn" })}
       ${kpi("Létalité cumulée", pc(K.letalite.v, 1), `${nf(K.letalite.num)} / ${nf(K.letalite.den)}`, { color: "--ink-2" })}
@@ -2594,7 +2594,7 @@
         w = Object.values(g).sort((a, b) => a.week.localeCompare(b.week)).slice(-20); }
       const i0 = w.findIndex(r => addDays(r.week, 6) > D.meta.cutoff);
       Ch.xy($("#c-im-epi"), { data: w, x: "week", height: 300, xLabel: (v, r, tip) => tip ? `${T("semaine du")} ${dfmt(v)}` : dshort(v), shade: i0 >= 0 ? { from: i0, label: T("incomplète") } : null,
-        series: [{ key: "confirmes", label: T("Cas confirmés"), color: "--s2" }, { key: "deces", label: T("Décès (alertes décès)"), color: "--critical", type: "line", width: 2.2 }] });
+        series: [{ key: "confirmes", label: T("Cas confirmés"), color: "--st-conf" }, { key: "deces", label: T("Décès (alertes décès)"), color: "--critical", type: "line", width: 2.2 }] });
     }
     const provs = [...document.querySelectorAll("[id^='c-im-map-']")];
     const list = [...new Set((Z.zones || []).filter(z => ["Rouge", "Orange"].includes(z.categorie) && (!pv || norm(z.province) === norm(pv))).map(z => z.province))]
