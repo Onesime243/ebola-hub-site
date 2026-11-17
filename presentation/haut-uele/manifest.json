@@ -3,10 +3,10 @@
  "niveau": "province",
  "nom": "Province : Haut Uele",
  "court": "Haut Uele",
- "date": "2026-11-15",
- "genere_le": "2026-11-16 17:20",
- "pptx": "Presentation_Reunion_Haut_Uele_20261115.pptx",
- "diapositives": 18,
+ "date": "2026-11-16",
+ "genere_le": "2026-11-17 11:09",
+ "pptx": "Presentation_Reunion_Haut_Uele_20261116.pptx",
+ "diapositives": 19,
  "slides": [
   {
    "titre": "Situation cumulée",
@@ -23,6 +23,7 @@
     "02c_tendances_PAWA",
     "02c_tendances_ISIRO",
     "02c_tendances_BOMAMANGBETU",
+    "02c_tendances_WATSA",
     "02c_tendances_RUNGU",
     "02c_tendances_GOMBARI",
     "02c_tendances_DUNGU"
@@ -31,7 +32,8 @@
   {
    "titre": "Situation du jour",
    "images": [
-    "03_indicateurs_jour"
+    "03_indicateurs_jour",
+    "04_cas_du_jour"
    ]
   },
   {
@@ -42,7 +44,7 @@
   },
   {
    "titre": "Alertes",
-   "date": "2026-11-15",
+   "date": "2026-11-16",
    "images": [
     "07_indicateurs_alertes",
     "07b_alertes_comparatif_3j",
@@ -62,13 +64,13 @@
     "13_contacts_suivre_vus",
     "14_tableau_contacts"
    ],
-   "date": "2026-11-15"
+   "date": "2026-11-16"
   }
  ],
  "images": {
   "01_indicateurs_cumul": {
    "fichier": "01_indicateurs_cumul.png",
-   "titre": "Situation de la MVE au 15 novembre 2026, Province : Haut Uele"
+   "titre": "Situation de la MVE au 16 novembre 2026, Province : Haut Uele"
   },
   "02_courbe_hebdomadaire": {
    "fichier": "02_courbe_hebdomadaire.png",
@@ -94,6 +96,10 @@
    "fichier": "02c_tendances_BOMAMANGBETU.png",
    "titre": "Tendances, ZS Boma Mangbetu"
   },
+  "02c_tendances_WATSA": {
+   "fichier": "02c_tendances_WATSA.png",
+   "titre": "Tendances, ZS Watsa"
+  },
   "02c_tendances_RUNGU": {
    "fichier": "02c_tendances_RUNGU.png",
    "titre": "Tendances, ZS Rungu"
@@ -108,7 +114,11 @@
   },
   "03_indicateurs_jour": {
    "fichier": "03_indicateurs_jour.png",
-   "titre": "Situation épidémiologique du jour, 15 novembre 2026"
+   "titre": "Situation épidémiologique du jour, 16 novembre 2026"
+  },
+  "04_cas_du_jour": {
+   "fichier": "04_cas_du_jour.png",
+   "titre": "Répartition des 15 nouveaux cas par zone de santé"
   },
   "05_jours_sans_cas": {
    "fichier": "05_jours_sans_cas.png",
@@ -116,11 +126,11 @@
   },
   "07_indicateurs_alertes": {
    "fichier": "07_indicateurs_alertes.png",
-   "titre": "Situation des alertes au 15 novembre 2026"
+   "titre": "Situation des alertes au 16 novembre 2026"
   },
   "08_alertes_sources": {
    "fichier": "08_alertes_sources.png",
-   "titre": "Sources des alertes du jour, 33 alertes"
+   "titre": "Sources des alertes du jour, 62 alertes"
   },
   "07b_alertes_comparatif_3j": {
    "fichier": "07b_alertes_comparatif_3j.png",
@@ -144,7 +154,7 @@
   },
   "10_indicateurs_contacts": {
    "fichier": "10_indicateurs_contacts.png",
-   "titre": "Situation du suivi des contacts au 15 novembre 2026"
+   "titre": "Situation du suivi des contacts au 16 novembre 2026"
   },
   "12_contacts_tendance": {
    "fichier": "12_contacts_tendance.png",
