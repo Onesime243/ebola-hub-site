@@ -291,8 +291,11 @@ window.HubOutil = (function () {
 
   /* ================================================================ menu de l'utilisateur */
   function userChip() {
-    const u = user(), ctl = $(".topbar .controls"); if (!u || !ctl || $("#user-chip")) return;
-    ctl.insertAdjacentHTML("beforeend", `<div class="user-chip" id="user-chip"><button class="btn" type="button" data-user-menu aria-haspopup="true">👤 ${esc(u.nom || u.identifiant)}</button>
+    const u = user(), host = $("#bandeau-compte"), ctl = host || $(".topbar .controls"); if (!u || !ctl || $("#user-chip")) return;
+    const nom = u.nom || u.identifiant;
+    const tete = host ? `<span class="avatar" aria-hidden="true">${esc(nom.slice(0, 1).toUpperCase())}</span><button class="bandeau-qui" type="button" data-user-menu aria-haspopup="true"><b>${esc(nom)}</b><small>${T(ROLES[u.role] || u.role)} · ${T("Toute la RDC")}${ONLINE ? " · " + T("version en ligne") : ""}</small></button><button class="btn sm deco" type="button" data-user-out>${T("Déconnexion")}</button>`
+      : `<button class="btn" type="button" data-user-menu aria-haspopup="true">👤 ${esc(nom)}</button>`;
+    ctl.insertAdjacentHTML("beforeend", `<div class="user-chip" id="user-chip">${tete}
       <div class="user-menu" hidden><div class="small"><b>${esc(u.identifiant)}</b><br><span class="muted">${T(ROLES[u.role] || u.role)}${ONLINE ? " · " + T("version en ligne") : ""}</span></div>
       ${SERVED ? `<button class="btn sm" type="button" data-user-mdp>${T("Changer mon mot de passe")}</button>` : ""}
       ${SERVED && can("admin") ? `<button class="btn sm" type="button" onclick="this.closest('.user-menu').hidden=true;document.querySelector('#navigation button[data-tab=comptes]')?.click()">${T("Gérer les comptes (admin)")}</button>` : ""}

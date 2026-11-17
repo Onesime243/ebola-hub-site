@@ -3835,20 +3835,19 @@
   function buildNav() {
     const groups = [];
     TABS.forEach(t => { let g = groups.find(x => x.g === t.g); if (!g) groups.push(g = { g: t.g, items: [] }); g.items.push(t); });
-    const open = navOpenSet();
-    $("#navigation").innerHTML = groups.map((g, i) => {
-      const act = g.items.some(t => t.id === S.tab), isOpen = act || open.has(g.g), id = `ng-${i}`;
-      const items = g.items.map(t => `<button data-tab="${t.id}" class="${S.tab === t.id ? "active" : ""}" ${S.tab === t.id ? 'aria-current="page"' : ""}><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="${t.i}"/></svg><span>${T(t.t)}</span></button>`).join("");
-      return `<section class="ng ${isOpen ? "open" : ""} ${act ? "has-active" : ""}">
-        <button class="ng-h" data-ng="${esc(g.g)}" aria-expanded="${isOpen}" aria-controls="${id}"><i class="ng-ic"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="${NAV_G[g.g] || g.items[0].i}"/></svg></i><span class="ng-t">${T(g.g)}</span><span class="ng-n">${g.items.length}</span><svg class="ng-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-        <div class="ng-b" id="${id}"><div class="ng-in">${items}</div></div></section>`;
+    const item = t => `<button data-tab="${t.id}" class="${S.tab === t.id ? "active" : ""}" ${S.tab === t.id ? 'aria-current="page"' : ""}><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="${t.i}"/></svg><span>${T(t.t)}</span></button>`;
+    $("#navigation").innerHTML = `<button class="nav-link ${S.tab === "overview" ? "on" : ""}" data-tab="overview" type="button">${T("Accueil")}</button>` + groups.map((g, i) => {
+      const act = g.items.some(t => t.id === S.tab), id = `nm-${i}`;
+      return `<div class="menu ${act ? "on" : ""}"><button class="menu-btn" type="button" data-ng="${esc(g.g)}" aria-haspopup="true" aria-expanded="false" aria-controls="${id}">${T(g.g)} ▾</button>
+        <div class="menu-list" id="${id}">${g.items.map(item).join("")}</div></div>`;
     }).join("");
+    $("#method-link")?.classList.toggle("on", S.tab === "method");
   }
-  function toggleNavGroup(btn) {
-    const sec = btn.closest(".ng"), on = !sec.classList.contains("open");
-    sec.classList.toggle("open", on); btn.setAttribute("aria-expanded", on);
-    const o = navOpenSet(); on ? o.add(btn.dataset.ng) : o.delete(btn.dataset.ng); localSet(NAV_KEY, JSON.stringify([...o]));
+  function toggleNavGroup(btn) {   // menus déroulants : un seul ouvert à la fois (clic ou toucher ; le survol est géré en CSS)
+    const sec = btn.closest(".menu"), on = !sec.classList.contains("open");
+    closeMenus(); sec.classList.toggle("open", on); btn.setAttribute("aria-expanded", on);
   }
+  function closeMenus() { $$(".menu.open").forEach(m => { m.classList.remove("open"); m.querySelector(".menu-btn")?.setAttribute("aria-expanded", "false"); }); }
   window.__hubRender = () => render();
   function render() {
     if (!VIEWS[S.tab]) S.tab = "overview";
@@ -3865,14 +3864,17 @@
     $("#content").innerHTML = html();
     if (charts) charts();
     enhancePanels();
-    $("#sidebar").classList.remove("open");
+    closeMenus(); $("#menubar")?.classList.remove("open");
   }
   function rerenderTable(id) { render(); const el = document.querySelector(`[data-tsearch="${id}"]`); if (el) { el.focus(); el.setSelectionRange(el.value.length, el.value.length); } }
 
   /* ================= Événements (délégation) ================= */
   document.addEventListener("click", e => {
     const t = e.target;
-    const ngh = t.closest("#navigation .ng-h"); if (ngh) { toggleNavGroup(ngh); return; }
+    const ngh = t.closest(".menu > .menu-btn"); if (ngh) { toggleNavGroup(ngh); return; }
+    if (!t.closest(".menu")) closeMenus();
+    const dl = t.closest("[data-lang]"); if (dl) { setLang(dl.dataset.lang); return; }
+    if (t.closest("#method-link")) { go("method"); return; }
     const sbt = t.closest("[data-subtab]"); if (sbt && !sbt.disabled) { S[sbt.dataset.subtab] = sbt.dataset.v; render(); return; }
     const nav = t.closest("#navigation button[data-tab]"); if (nav) { go(nav.dataset.tab, nav.dataset.tab === "journey" ? S.caseKey : undefined); return; }
     const kg = t.closest(".kpi[data-go]"); if (kg) { go(kg.dataset.go); return; }
@@ -3938,13 +3940,13 @@
   const provSel = $("#province-filter");
   function fillProv() { provSel.innerHTML = ["Toutes", ...(D.provinces || []).map(x => x.province).filter(Boolean)].map(x => `<option value="${esc(x)}" ${x === S.province ? "selected" : ""}>${esc(T(x))}</option>`).join(""); }
   provSel.addEventListener("change", e => { S.province = e.target.value; S.zoneSel = ""; S.zrZone = ""; S.zrAire = ""; S.follZone = "Toutes"; S.idxZone = "Toutes"; render(); });
-  function applyTheme(th) { document.documentElement.dataset.theme = th; $("#theme-toggle").textContent = th === "dark" ? "☀" : "☾"; localSet("hub-theme", th); }
+  function applyTheme(th) { document.documentElement.dataset.theme = th; $("#theme-toggle").textContent = `${th === "dark" ? "☀" : "◐"} ${T("Thème")}`; localSet("hub-theme", th); }
   $("#theme-toggle").addEventListener("click", () => { applyTheme(document.documentElement.dataset.theme === "dark" ? "light" : "dark"); render(); });
-  $("#lang-toggle").addEventListener("click", () => { lang = lang === "fr" ? "en" : "fr"; localSet("hub-lang", lang); $("#lang-toggle").textContent = lang === "fr" ? "EN" : "FR"; fillProv(); translateStatic(); render(); });
-  $("#menu-toggle").addEventListener("click", () => $("#sidebar").classList.toggle("open"));
-  function translateStatic() { $$("[data-i18n]").forEach(el => { el.dataset.fr ??= el.textContent; el.textContent = T(el.dataset.fr); }); $("#privacy").textContent = T(D.meta.privacy || ""); $("#generated").textContent = `${T("Généré le")} ${D.meta.generated_at}`; $("#side-date").textContent = `${T("Situation au")} ${dfmt(D.meta.cutoff)}`; }
+  function setLang(l) { lang = l === "en" ? "en" : "fr"; localSet("hub-lang", lang); $("#lang-toggle").textContent = `${lang.toUpperCase()} ▾`; applyTheme(document.documentElement.dataset.theme || "light"); fillProv(); translateStatic(); $("#user-chip")?.remove(); O.userChip(); render(); }
+  $("#menu-toggle").addEventListener("click", () => $("#menubar").classList.toggle("open"));
+  function translateStatic() { $$("[data-i18n]").forEach(el => { el.dataset.fr ??= el.textContent; el.textContent = T(el.dataset.fr); }); $("#privacy").textContent = T(D.meta.privacy || ""); $("#generated").textContent = `${T("Généré le")} ${D.meta.generated_at}`; const sd = $("#side-date"); if (sd) sd.textContent = `${T("Situation au")} ${dfmt(D.meta.cutoff)}`; }
   applyTheme(localGet("hub-theme") || "light");
-  $("#lang-toggle").textContent = lang === "fr" ? "EN" : "FR";
+  $("#lang-toggle").textContent = `${lang.toUpperCase()} ▾`;
 
   /* ================= Période d’analyse (calendrier) ================= */
   const SERVED_P = location.protocol.startsWith("http") && !isPublic && !window.HUB_STATIC;
