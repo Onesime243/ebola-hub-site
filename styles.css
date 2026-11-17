@@ -246,7 +246,7 @@ footer.foot{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;c
   .bandeau-compte{margin-left:0;width:100%;justify-content:space-between}
   .menubar{flex-wrap:wrap;padding:6px 10px;position:static}
   .menu-toggle{display:inline-flex;margin:4px 0}
-  .menubar nav,.menu-right{display:none;width:100%;flex-direction:column;align-items:stretch;margin:0}
+  .menubar nav,.menu-right{display:none;width:100%;flex:none;flex-direction:column;align-items:stretch;margin:0}
   .menubar.open nav,.menubar.open .menu-right{display:flex}
   .menubar .nav-link,.menubar .menu-btn{text-align:left;width:100%}
   .menu-list{position:static;display:block;box-shadow:none;border:0;border-radius:0;background:transparent;padding:0 0 4px 14px;min-width:0}
