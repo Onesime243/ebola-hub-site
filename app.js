@@ -27,6 +27,7 @@
   const days = (a, b) => Math.round((new Date(b) - new Date(a)) / 864e5);
   /* ---- Fenêtre temporelle (3, 7, 14, 21 derniers jours) ---- */
   const REF = () => D.meta.reference_suivi || D.meta.cutoff;
+  const weekStart = str => { const d = new Date(str + "T00:00:00Z"); d.setUTCDate(d.getUTCDate() - (d.getUTCDay() + 6) % 7); return d.toISOString().slice(0, 10); };   // lundi de la semaine
   const addDays = (str, n) => { const d = new Date(str + "T00:00:00Z"); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); };
   const winStart = n => addDays(REF(), -(Number(n) - 1));
   const inWin = (dstr, n) => !Number(n) || (!!dstr && dstr >= winStart(n) && dstr <= (D.meta.cutoff > REF() ? D.meta.cutoff : REF()));
@@ -99,6 +100,7 @@
     { id: "spatialrisk", t: "Google Invasion Spatial Risque", g: "Situation et risque", i: "M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm0 2a8 8 0 0 1 7.7 6h-3.2l-2-3-3 6-2-3H4.3A8 8 0 0 1 12 4zm0 16a8 8 0 0 1-7.7-6h3.2l2 3 3-6 2 3h5.2A8 8 0 0 1 12 20z" },
     { id: "index", t: "Cas index", g: "Contact tracing", i: "M4 6h16v2H4zm0 5h16v2H4zm0 5h10v2H4z", priv: true },
     { id: "journey", t: "Parcours du cas", g: "Contact tracing", i: "M12 2a4 4 0 1 1 0 8 4 4 0 0 1 0-8zm-7 18c0-3.9 3.1-7 7-7s7 3.1 7 7H5zM19 3l3 3-3 3", priv: true },
+    { id: "followup", t: "Suivi des contacts", g: "Contact tracing", i: "M12 2a5 5 0 1 1 0 10 5 5 0 0 1 0-10zm-8 19c0-4.4 3.6-8 8-8s8 3.6 8 8H4zm12.5-7.5 2 2 4-4-1.4-1.4-2.6 2.6-.6-.6z" },
     { id: "chains", t: "Chaînes de transmission", g: "Contact tracing", i: "M7 7a3 3 0 1 1-2 5.2L10 15a3 3 0 1 1-.8 1.8L4.3 14A3 3 0 0 1 7 7zm10-4a3 3 0 1 1 0 6 3 3 0 0 1 0-6z" },
     { id: "rings", t: "Vaccination en anneau", g: "Contact tracing", i: "M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm0 3a7 7 0 1 1 0 14 7 7 0 0 1 0-14zm0 3a4 4 0 1 0 0 8 4 4 0 0 0 0-8zm-1 2h2v1.5h1.5v2H13V15h-2v-1.5H9.5v-2H11z" },
     { id: "recon", t: "Reconstruction de la transmission", g: "Contact tracing", i: "M4 5h4v4H4zm12 0h4v4h-4zM10 15h4v4h-4zM6 9v2h4v4h2v-4h4V9h-2v2H8V9z", priv: true },
@@ -200,6 +202,19 @@
     const zs = zones().filter(z => z.confirmes_14j > 0 || z.contacts_actifs > 0).sort((a, b) => b.confirmes_14j - a.confirmes_14j || b.contacts_actifs - a.contacts_actifs);
     const fromPdf = !PER && s.source_pdf;
     const plus = v => v === null || v === undefined ? "" : ` · <b>+${nf(v)}</b> ${T("en 24 h")}`;
+    /* Province choisie : les tuiles et la courbe suivent le filtre (Linelist + suivi des contacts) ; les chiffres SitRep restent nationaux */
+    const prov = S.province !== "Toutes" ? (D.provinces || []).find(x => x.province === S.province) : null;
+    const ft = prov ? (D.followup_trend || []).filter(x => x.province === prov.province && x.contacts_a_suivre > 0 && x.date <= D.meta.cutoff).slice(-1)[0] : null;   // dernier jour complet (le jour de référence est encore en cours)
+    const provTiles = prov ? `
+    <div class="notice">${T("Province")} : <b>${esc(prov.province)}</b> · ${T("chiffres de la Linelist et du suivi des contacts ; les chiffres officiels du SitRep ne sont disponibles qu’au niveau national")}</div>
+    <div class="grid g6">
+      ${kpi("Cas confirmés", nf(prov.confirmes), T("Cumul · source Linelist"), { color: "--s2" })}
+      ${kpi("Décès confirmés", nf(prov.deces_confirmes), T("Cumul · source Linelist"), { color: "--critical" })}
+      ${kpi("Létalité", pc(prov.confirmes ? 100 * prov.deces_confirmes / prov.confirmes : null), T("Décès confirmés / cas confirmés"), { color: "--ink-2" })}
+      ${kpi("Confirmés sur 14 jours", nf(prov.confirmes_14j), `${dshort(p.start)} → ${dshort(p.end)}`)}
+      ${kpi("Contacts en suivi actif", nf(prov.contacts_actifs), T("Fenêtre de 21 jours ouverte"), {})}
+      ${kpi("Contacts non vus >3 j", nf(prov.contacts_non_vus), T("À rechercher en priorité"), { cls: prov.contacts_non_vus > 0 ? "alert" : "good" })}
+    </div>` : "";
     const sitTiles = fromPdf ? `
     <div class="sitrep-head"><span class="sitrep-badge">SitRep N° ${esc(String(s.numero || "—"))}</span> ${T("Chiffres officiels nationaux, rapport du")} <b>${dfmt(s.date_sitrep)}</b>${s.date_publication ? `, ${T("publié le")} ${dfmt(s.date_publication)}` : ""} · <span class="muted">${esc(s.source_pdf)}</span>${(s.avertissements || []).length ? ` · <b style="color:${col("--critical")}">⚠ ${esc(s.avertissements.join(" ; "))}</b>` : ""}</div>
     <div class="grid g6">
@@ -216,16 +231,20 @@
       ${kpi("Guéris", k.gueris === null ? "N/C" : nf(k.gueris), srcNote, { color: "--good", cls: stale })}
       ${kpi("Létalité", pc(k.letalite_pct), stale ? srcNote : T("Décès / confirmés"), { color: "--ink-2", cls: stale })}
     </div>`;
-    return `${sitTiles}
-    <div class="grid g5">
+    return `${prov ? provTiles : sitTiles}
+    ${prov ? `<div class="grid g3">
+      ${kpi("Taux de suivi des contacts", pc(ft ? ft.taux_vus_pct : null), ft ? `${nf(ft.contacts_vus)} / ${nf(ft.contacts_a_suivre)} ${T("vus")} · ${dshort(ft.date)} · ${T("cible 95 %")}` : T("Du jour · cible 95 %"), { color: "--st-v24", cls: ft && ft.taux_vus_pct < 95 ? "alert" : "good", meter: ft ? ft.taux_vus_pct : null, meterColor: ft && ft.taux_vus_pct < 95 ? "--critical" : "--good" })}
+      ${kpi("Nouveaux cas connus comme contacts", pc(r.pct_nouveaux_cas_connus_contacts), `${T("National")} · ${T("Confirmés 14 j déjà listés comme contacts")}`, { cls: r.pct_nouveaux_cas_connus_contacts < 50 ? "alert" : "good", meter: r.pct_nouveaux_cas_connus_contacts, meterColor: r.pct_nouveaux_cas_connus_contacts < 50 ? "--critical" : "--good", go: "chains" })}
+      ${kpi("Contacts vus ≤24 h", pc(r.pct_contacts_vus_24h), `${T("National")} · ${nf(r.contacts_vus_24h)} / ${nf(r.contacts_actifs)} · ${dshort(r.date_reference_suivi)}`, { cls: r.pct_contacts_vus_24h < 80 ? "alert" : "good", meter: r.pct_contacts_vus_24h, meterColor: r.pct_contacts_vus_24h < 80 ? "--critical" : "--good" })}
+    </div>` : `<div class="grid g5">
       ${kpi("Confirmés sur 14 jours", nf(p.confirmes), `${dshort(p.start)} → ${dshort(p.end)} · ${nf(p.deces_confirmes)} ${T("décès")}`)}
       ${kpi("Nouveaux cas connus comme contacts", pc(r.pct_nouveaux_cas_connus_contacts), T("Confirmés 14 j déjà listés comme contacts"), { cls: r.pct_nouveaux_cas_connus_contacts < 50 ? "alert" : "good", meter: r.pct_nouveaux_cas_connus_contacts, meterColor: r.pct_nouveaux_cas_connus_contacts < 50 ? "--critical" : "--good", go: "chains" })}
       ${kpi("Contacts en suivi actif", nf(r.contacts_actifs), `${T("Fenêtre de 21 jours ouverte")} · ${nf(r.cas_index_suivi_en_cours)} ${T("cas index")}`, {})}
       ${kpi("Contacts vus ≤24 h", pc(r.pct_contacts_vus_24h), `${nf(r.contacts_vus_24h)} / ${nf(r.contacts_actifs)} · ${dshort(r.date_reference_suivi)}`, { cls: r.pct_contacts_vus_24h < 80 ? "alert" : "good", meter: r.pct_contacts_vus_24h, meterColor: r.pct_contacts_vus_24h < 80 ? "--critical" : "--good" })}
       ${kpi("Contacts non vus >3 j", nf(r.contacts_non_vus_48h), T("À rechercher en priorité"), { cls: r.contacts_non_vus_48h > 0 ? "alert" : "good" })}
-    </div>
+    </div>`}
     <div class="grid g21">
-      ${panel("Courbe épidémique hebdomadaire", T("Cas confirmés par semaine (lundi) et décès confirmés, semaine en cours exclue car incomplète"), `<div id="c-epi"></div>`, { png: "courbe_epidemique", tools: `<div class="seg" data-seg="curveBy"><button data-v="notification" class="${S.curveBy === "notification" ? "on" : ""}">${T("Notification")}</button><button data-v="dds" class="${S.curveBy === "dds" ? "on" : ""}">${T("Début des symptômes")}</button></div><div class="seg" data-seg="ovStack"><button data-v="aucun" class="${S.ovStack === "aucun" ? "on" : ""}">${T("Total")}</button><button data-v="sexe" class="${S.ovStack === "sexe" ? "on" : ""}">${T("Par sexe")}</button><button data-v="age" class="${S.ovStack === "age" ? "on" : ""}">${T("Par âge")}</button><button data-v="prov" class="${S.ovStack === "prov" ? "on" : ""}">${T("Par province")}</button></div>` })}
+      ${panel("Courbe épidémique hebdomadaire", T("Cas confirmés par semaine (lundi) et décès confirmés, semaine en cours exclue car incomplète") + (prov ? ` · ${T("Province")} : ${esc(prov.province)} (${T("Linelist")})` : ""), `<div id="c-epi"></div>`, { png: "courbe_epidemique", tools: `<div class="seg" data-seg="curveBy"><button data-v="notification" class="${S.curveBy === "notification" ? "on" : ""}">${T("Notification")}</button><button data-v="dds" class="${S.curveBy === "dds" ? "on" : ""}">${T("Début des symptômes")}</button></div><div class="seg" data-seg="ovStack"><button data-v="aucun" class="${S.ovStack === "aucun" ? "on" : ""}">${T("Total")}</button><button data-v="sexe" class="${S.ovStack === "sexe" ? "on" : ""}">${T("Par sexe")}</button><button data-v="age" class="${S.ovStack === "age" ? "on" : ""}">${T("Par âge")}</button><button data-v="prov" class="${S.ovStack === "prov" ? "on" : ""}">${T("Par province")}</button></div>` })}
       ${panel("Points d’attention", T("Générés automatiquement à partir des données du jour"), `<div class="alerts">${alerts.map(a => `<div class="alert-item ${a.lvl}"><span class="ic">${a.lvl === "crit" ? "!" : a.lvl === "warn" ? "!" : a.lvl === "good" ? "✓" : "i"}</span><div>${a.html}</div></div>`).join("")}</div>`)}
     </div>
     <div class="grid g21">
@@ -278,8 +297,14 @@
     sitrepCharts();
     perfCharts();
     const cut = D.meta.cutoff, full = x => addDays(x.week, 6) <= cut;
-    const w = (D.weekly || []).filter(full).slice(-24);
     const key = S.curveBy === "dds" ? "confirmes_par_dds" : "confirmes";
+    let w = (D.weekly || []).filter(full).slice(-24);
+    if (S.province !== "Toutes" && D.dynamique && D.dynamique.epicourbes) {   // province choisie : courbe de la province (Linelist) au lieu de la courbe nationale
+      const base = S.curveBy === "dds" ? "o" : "n", m = new Map(), dz = new Map(); let dMin = null;
+      D.dynamique.epicourbes.hebdo.forEach(r => { if (r[0] !== base || r[5] !== 1 || r[2] !== S.province) return; m.set(r[1], (m.get(r[1]) || 0) + r[6]); });
+      (D.zone_daily || []).forEach(r => { if (r.province !== S.province) return; const wk = weekStart(r.date); if (!dMin || wk < dMin) dMin = wk; dz.set(wk, (dz.get(wk) || 0) + (r.deces || 0)); });
+      w = [...m.keys()].sort().map(wk => ({ week: wk, [key]: m.get(wk), deces: dMin && wk >= dMin ? (dz.get(wk) || 0) : null })).filter(full).slice(-24);
+    }
     if (S.ovStack !== "aucun" && D.dynamique && D.dynamique.epicourbes) {
       const base = S.curveBy === "dds" ? "o" : "n", agg = new Map();
       const provs = [...new Set(D.dynamique.epicourbes.hebdo.filter(r => r[5] === 1).map(r => r[2]))];
@@ -1660,7 +1685,7 @@
     Ch.xy($("#c-ss-lor"), { data: L, x: "x", height: 280, percent: true, digits: 1, xLabel: (v, r, tip) => tip ? `${T("les")} ${v} ${T("cas les plus infectieux")}` : v, xLabelWidth: 40,
       vlines: [{ i: 8, color: "--muted", label: "20 %" }], hlines: [{ y: 80, color: "--muted", label: "80 %" }],
       series: [{ key: "nb", label: `${T("Binomiale négative")} (k = ${nf(set.nb.k, 2)})`, color: "--rc-purple", type: "line", markers: false, width: 2.6 }, { key: "emp", label: T("Observé"), color: "--rc-salmon", type: "line", markers: false },
-        { key: "sars", label: "SARS-1 (k = 0,16)", color: "--critical", type: "line", dash: "4 3", markers: false, width: 1.4 }, { key: "ebo", label: "Ebola (k = 5,1)", color: "--s3", type: "line", dash: "4 3", markers: false, width: 1.4 },
+        { key: "sars", label: "SARS-1 (k = 0,16)", color: "--critical", type: "line", dash: "4 3", markers: false, width: 1.4 }, { key: "ebo", label: `${sp.references?.[1]?.maladie || "Ebola"} (k = ${nf(sp.references?.[1]?.k, 2)})`, color: "--s3", type: "line", dash: "4 3", markers: false, width: 1.4 },
         { key: "homo", label: T("Transmission homogène"), color: "--line-2", type: "line", dash: "2 3", markers: false, width: 1 }] });
     const cl = ["2", "5", "10", "25"].map(c => ({ c: "≥ " + c, nb: 100 * (set.grappes[c] || 0), emp: 100 * (set.grappes_empiriques[c] || 0) }));
     Ch.xy($("#c-ss-cl"), { data: cl, x: "c", height: 220, percent: true, digits: 1, xLabel: (v, r, tip) => tip ? `${T("grappe")} ${v} ${T("cas")}` : v, series: [{ key: "nb", label: T("Modèle (binomiale négative)"), color: "--rc-purple" }, { key: "emp", label: T("Observé"), color: "--rc-salmon" }] });
@@ -3829,7 +3854,7 @@
     if (!VIEWS[S.tab]) S.tab = "overview";
     window.HubLang = lang;
     document.documentElement.lang = lang;
-    const tab = TABS.find(t => t.id === S.tab);
+    const tab = TABS.find(t => t.id === S.tab) || { t: S.tab };   // vue sans entrée de menu : ne pas planter
     $("#page-title").textContent = T(tab.t);
     $("#page-sub").textContent = PER ? `${T("Période du")} ${dfmt(PER.debut)} ${T("au")} ${dfmt(PER.fin)} · ${T("données extraites le")} ${dfmt(D.meta.donnees_jusqu_au || D.meta.extraction)}`
       : `${T("Situation au")} ${dfmt(D.meta.cutoff)} · ${T("données extraites le")} ${dfmt(D.meta.extraction)}`;
