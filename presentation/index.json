@@ -1,14 +1,14 @@
 {
- "date": "2026-11-16",
- "genere_le": "2026-11-17 12:03",
+ "date": "2026-11-17",
+ "genere_le": "2026-11-18 07:41",
  "niveaux": [
   {
    "code": "national",
    "niveau": "national",
    "nom": "Niveau national : RDC",
    "court": "RDC",
-   "date": "2026-11-16",
-   "pptx": "Presentation_Reunion_National_20261116.pptx",
+   "date": "2026-11-17",
+   "pptx": "Presentation_Reunion_National_20261117.pptx",
    "diapositives": 22,
    "images": [
     "01_indicateurs_cumul",
@@ -87,7 +87,7 @@
     },
     {
      "titre": "Alertes",
-     "date": "2026-11-16",
+     "date": "2026-11-17",
      "images": [
       "07_indicateurs_alertes",
       "07b_alertes_comparatif_3j",
@@ -107,7 +107,7 @@
       "13_contacts_suivre_vus",
       "14_tableau_contacts"
      ],
-     "date": "2026-11-16"
+     "date": "2026-11-17"
     },
     {
      "titre": "Laboratoire",
@@ -116,7 +116,7 @@
       "16_labo_resultats",
       "17_labo_positivite"
      ],
-     "date": "2026-11-16"
+     "date": "2026-11-17"
     }
    ]
   },
@@ -125,8 +125,8 @@
    "niveau": "province",
    "nom": "Province : Ituri",
    "court": "Ituri",
-   "date": "2026-11-16",
-   "pptx": "Presentation_Reunion_Ituri_20261116.pptx",
+   "date": "2026-11-17",
+   "pptx": "Presentation_Reunion_Ituri_20261117.pptx",
    "diapositives": 40,
    "images": [
     "01_indicateurs_cumul",
@@ -235,7 +235,7 @@
     },
     {
      "titre": "Alertes",
-     "date": "2026-11-16",
+     "date": "2026-11-17",
      "images": [
       "07_indicateurs_alertes",
       "07b_alertes_comparatif_3j",
@@ -255,7 +255,7 @@
       "13_contacts_suivre_vus",
       "14_tableau_contacts"
      ],
-     "date": "2026-11-16"
+     "date": "2026-11-17"
     }
    ]
   },
@@ -264,8 +264,8 @@
    "niveau": "province",
    "nom": "Province : Nord Kivu",
    "court": "Nord Kivu",
-   "date": "2026-11-16",
-   "pptx": "Presentation_Reunion_Nord_Kivu_20261116.pptx",
+   "date": "2026-11-17",
+   "pptx": "Presentation_Reunion_Nord_Kivu_20261117.pptx",
    "diapositives": 27,
    "images": [
     "01_indicateurs_cumul",
@@ -348,7 +348,7 @@
     },
     {
      "titre": "Alertes",
-     "date": "2026-11-16",
+     "date": "2026-11-17",
      "images": [
       "07_indicateurs_alertes",
       "07b_alertes_comparatif_3j",
@@ -368,7 +368,7 @@
       "13_contacts_suivre_vus",
       "14_tableau_contacts"
      ],
-     "date": "2026-11-16"
+     "date": "2026-11-17"
     }
    ]
   },
@@ -377,8 +377,8 @@
    "niveau": "province",
    "nom": "Province : Haut Uele",
    "court": "Haut Uele",
-   "date": "2026-11-16",
-   "pptx": "Presentation_Reunion_Haut_Uele_20261116.pptx",
+   "date": "2026-11-17",
+   "pptx": "Presentation_Reunion_Haut_Uele_20261117.pptx",
    "diapositives": 19,
    "images": [
     "01_indicateurs_cumul",
@@ -393,7 +393,6 @@
     "02c_tendances_GOMBARI",
     "02c_tendances_DUNGU",
     "03_indicateurs_jour",
-    "04_cas_du_jour",
     "05_jours_sans_cas",
     "07_indicateurs_alertes",
     "08_alertes_sources",
@@ -433,8 +432,7 @@
     {
      "titre": "Situation du jour",
      "images": [
-      "03_indicateurs_jour",
-      "04_cas_du_jour"
+      "03_indicateurs_jour"
      ]
     },
     {
@@ -445,7 +443,7 @@
     },
     {
      "titre": "Alertes",
-     "date": "2026-11-16",
+     "date": "2026-11-17",
      "images": [
       "07_indicateurs_alertes",
       "07b_alertes_comparatif_3j",
@@ -465,157 +463,7 @@
       "13_contacts_suivre_vus",
       "14_tableau_contacts"
      ],
-     "date": "2026-11-16"
-    }
-   ]
-  },
-  {
-   "code": "bas-uele",
-   "niveau": "province",
-   "nom": "Province : Bas Uele",
-   "court": "Bas Uele",
-   "date": "2026-11-16",
-   "pptx": "Presentation_Reunion_Bas_Uele_20261116.pptx",
-   "diapositives": 14,
-   "images": [
-    "01_indicateurs_cumul",
-    "02_courbe_hebdomadaire",
-    "02b_tendances",
-    "02c_tendances_VIADANA",
-    "02c_tendances_GANGA",
-    "02c_tendances_BUTA",
-    "02c_tendances_ANGO",
-    "03_indicateurs_jour",
-    "05_jours_sans_cas",
-    "07_indicateurs_alertes",
-    "08_alertes_sources",
-    "07b_alertes_comparatif_3j",
-    "08b_alertes_sources_3j",
-    "08_alertes_tendance",
-    "09_alertes_unites",
-    "09b_alertes_sources_unites",
-    "10_indicateurs_contacts",
-    "12_contacts_tendance",
-    "14_tableau_contacts"
-   ],
-   "slides": [
-    {
-     "titre": "Situation cumulée",
-     "images": [
-      "01_indicateurs_cumul",
-      "02_courbe_hebdomadaire"
-     ]
-    },
-    {
-     "titre": "Tendances des cas confirmés et décès",
-     "images": [
-      "02b_tendances",
-      "02c_tendances_VIADANA",
-      "02c_tendances_GANGA",
-      "02c_tendances_BUTA",
-      "02c_tendances_ANGO"
-     ]
-    },
-    {
-     "titre": "Situation du jour",
-     "images": [
-      "03_indicateurs_jour"
-     ]
-    },
-    {
-     "titre": "Jours sans nouveau cas",
-     "images": [
-      "05_jours_sans_cas"
-     ]
-    },
-    {
-     "titre": "Alertes",
-     "date": "2026-11-16",
-     "images": [
-      "07_indicateurs_alertes",
-      "07b_alertes_comparatif_3j",
-      "08_alertes_sources",
-      "08b_alertes_sources_3j",
-      "08_alertes_tendance",
-      "09_alertes_unites",
-      "09b_alertes_sources_unites"
-     ]
-    },
-    {
-     "titre": "Suivi des contacts",
-     "images": [
-      "10_indicateurs_contacts",
-      "12_contacts_tendance",
-      "14_tableau_contacts"
-     ],
-     "date": "2026-10-29"
-    }
-   ]
-  },
-  {
-   "code": "nord-ubangi",
-   "niveau": "province",
-   "nom": "Province : Nord Ubangi",
-   "court": "Nord Ubangi",
-   "date": "2026-11-16",
-   "pptx": "Presentation_Reunion_Nord_Ubangi_20261116.pptx",
-   "diapositives": 10,
-   "images": [
-    "01_indicateurs_cumul",
-    "02_courbe_hebdomadaire",
-    "02b_tendances",
-    "02c_tendances_WAPINDA",
-    "02c_tendances_YAKOMA",
-    "03_indicateurs_jour",
-    "05_jours_sans_cas",
-    "07_indicateurs_alertes",
-    "08_alertes_sources",
-    "07b_alertes_comparatif_3j",
-    "08b_alertes_sources_3j",
-    "08_alertes_tendance",
-    "09_alertes_unites",
-    "09b_alertes_sources_unites"
-   ],
-   "slides": [
-    {
-     "titre": "Situation cumulée",
-     "images": [
-      "01_indicateurs_cumul",
-      "02_courbe_hebdomadaire"
-     ]
-    },
-    {
-     "titre": "Tendances des cas confirmés et décès",
-     "images": [
-      "02b_tendances",
-      "02c_tendances_WAPINDA",
-      "02c_tendances_YAKOMA"
-     ]
-    },
-    {
-     "titre": "Situation du jour",
-     "images": [
-      "03_indicateurs_jour"
-     ]
-    },
-    {
-     "titre": "Jours sans nouveau cas",
-     "images": [
-      "05_jours_sans_cas"
-     ]
-    },
-    {
-     "titre": "Alertes",
-     "date": "2026-11-16",
-     "images": [
-      "07_indicateurs_alertes",
-      "07b_alertes_comparatif_3j",
-      "08_alertes_sources",
-      "08b_alertes_sources_3j",
-      "08_alertes_tendance",
-      "09_alertes_unites",
-      "09b_alertes_sources_unites"
-     ]
+     "date": "2026-11-17"
     }
    ]
   },
@@ -624,8 +472,8 @@
    "niveau": "province",
    "nom": "Province : Tshopo",
    "court": "Tshopo",
-   "date": "2026-11-16",
-   "pptx": "Presentation_Reunion_Tshopo_20261116.pptx",
+   "date": "2026-11-17",
+   "pptx": "Presentation_Reunion_Tshopo_20261117.pptx",
    "diapositives": 18,
    "images": [
     "01_indicateurs_cumul",
@@ -688,7 +536,7 @@
     },
     {
      "titre": "Alertes",
-     "date": "2026-11-16",
+     "date": "2026-11-17",
      "images": [
       "07_indicateurs_alertes",
       "07b_alertes_comparatif_3j",
@@ -708,7 +556,157 @@
       "13_contacts_suivre_vus",
       "14_tableau_contacts"
      ],
-     "date": "2026-11-16"
+     "date": "2026-11-17"
+    }
+   ]
+  },
+  {
+   "code": "bas-uele",
+   "niveau": "province",
+   "nom": "Province : Bas Uele",
+   "court": "Bas Uele",
+   "date": "2026-11-17",
+   "pptx": "Presentation_Reunion_Bas_Uele_20261117.pptx",
+   "diapositives": 14,
+   "images": [
+    "01_indicateurs_cumul",
+    "02_courbe_hebdomadaire",
+    "02b_tendances",
+    "02c_tendances_VIADANA",
+    "02c_tendances_GANGA",
+    "02c_tendances_BUTA",
+    "02c_tendances_ANGO",
+    "03_indicateurs_jour",
+    "05_jours_sans_cas",
+    "07_indicateurs_alertes",
+    "08_alertes_sources",
+    "07b_alertes_comparatif_3j",
+    "08b_alertes_sources_3j",
+    "08_alertes_tendance",
+    "09_alertes_unites",
+    "09b_alertes_sources_unites",
+    "10_indicateurs_contacts",
+    "12_contacts_tendance",
+    "14_tableau_contacts"
+   ],
+   "slides": [
+    {
+     "titre": "Situation cumulée",
+     "images": [
+      "01_indicateurs_cumul",
+      "02_courbe_hebdomadaire"
+     ]
+    },
+    {
+     "titre": "Tendances des cas confirmés et décès",
+     "images": [
+      "02b_tendances",
+      "02c_tendances_VIADANA",
+      "02c_tendances_GANGA",
+      "02c_tendances_BUTA",
+      "02c_tendances_ANGO"
+     ]
+    },
+    {
+     "titre": "Situation du jour",
+     "images": [
+      "03_indicateurs_jour"
+     ]
+    },
+    {
+     "titre": "Jours sans nouveau cas",
+     "images": [
+      "05_jours_sans_cas"
+     ]
+    },
+    {
+     "titre": "Alertes",
+     "date": "2026-11-17",
+     "images": [
+      "07_indicateurs_alertes",
+      "07b_alertes_comparatif_3j",
+      "08_alertes_sources",
+      "08b_alertes_sources_3j",
+      "08_alertes_tendance",
+      "09_alertes_unites",
+      "09b_alertes_sources_unites"
+     ]
+    },
+    {
+     "titre": "Suivi des contacts",
+     "images": [
+      "10_indicateurs_contacts",
+      "12_contacts_tendance",
+      "14_tableau_contacts"
+     ],
+     "date": "2026-10-29"
+    }
+   ]
+  },
+  {
+   "code": "nord-ubangi",
+   "niveau": "province",
+   "nom": "Province : Nord Ubangi",
+   "court": "Nord Ubangi",
+   "date": "2026-11-17",
+   "pptx": "Presentation_Reunion_Nord_Ubangi_20261117.pptx",
+   "diapositives": 10,
+   "images": [
+    "01_indicateurs_cumul",
+    "02_courbe_hebdomadaire",
+    "02b_tendances",
+    "02c_tendances_WAPINDA",
+    "02c_tendances_YAKOMA",
+    "03_indicateurs_jour",
+    "05_jours_sans_cas",
+    "07_indicateurs_alertes",
+    "08_alertes_sources",
+    "07b_alertes_comparatif_3j",
+    "08b_alertes_sources_3j",
+    "08_alertes_tendance",
+    "09_alertes_unites",
+    "09b_alertes_sources_unites"
+   ],
+   "slides": [
+    {
+     "titre": "Situation cumulée",
+     "images": [
+      "01_indicateurs_cumul",
+      "02_courbe_hebdomadaire"
+     ]
+    },
+    {
+     "titre": "Tendances des cas confirmés et décès",
+     "images": [
+      "02b_tendances",
+      "02c_tendances_WAPINDA",
+      "02c_tendances_YAKOMA"
+     ]
+    },
+    {
+     "titre": "Situation du jour",
+     "images": [
+      "03_indicateurs_jour"
+     ]
+    },
+    {
+     "titre": "Jours sans nouveau cas",
+     "images": [
+      "05_jours_sans_cas"
+     ]
+    },
+    {
+     "titre": "Alertes",
+     "date": "2026-11-17",
+     "images": [
+      "07_indicateurs_alertes",
+      "07b_alertes_comparatif_3j",
+      "08_alertes_sources",
+      "08b_alertes_sources_3j",
+      "08_alertes_tendance",
+      "09_alertes_unites",
+      "09b_alertes_sources_unites"
+     ]
     }
    ]
   },
@@ -717,8 +715,8 @@
    "niveau": "province",
    "nom": "Province : Sud Kivu",
    "court": "Sud Kivu",
-   "date": "2026-11-16",
-   "pptx": "Presentation_Reunion_Sud_Kivu_20261116.pptx",
+   "date": "2026-11-17",
+   "pptx": "Presentation_Reunion_Sud_Kivu_20261117.pptx",
    "diapositives": 9,
    "images": [
     "01_indicateurs_cumul",
@@ -778,8 +776,8 @@
    "niveau": "province",
    "nom": "Province : Sud Ubangi",
    "court": "Sud Ubangi",
-   "date": "2026-11-16",
-   "pptx": "Presentation_Reunion_Sud_Ubangi_20261116.pptx",
+   "date": "2026-11-17",
+   "pptx": "Presentation_Reunion_Sud_Ubangi_20261117.pptx",
    "diapositives": 9,
    "images": [
     "01_indicateurs_cumul",
