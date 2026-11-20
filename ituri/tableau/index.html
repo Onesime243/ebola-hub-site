@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ebola : Province de l'Ituri</title>
+<script>try { var t = localStorage.getItem("zs-theme"); if (t) document.documentElement.dataset.theme = t; } catch (e) {}</script>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="province.css">
+</head>
+<body class="prov">
+<header class="bandeau">
+  <a class="bandeau-id" href="index.html">
+    <img src="sceau_presidence.png" alt="Sceau de la Présidence de la République démocratique du Congo" width="65" height="64">
+    <span class="bandeau-titres">
+      <span class="bandeau-sur">Task Force Présidentielle Ebola 17</span>
+      <span class="bandeau-titre">Système de Gestion de l’Incident MVE 17 : ITURI OUTBREAK</span>
+      <span class="bandeau-sous" id="brand-sub">Outil provincial</span>
+    </span>
+  </a>
+  <div class="bandeau-compte"><div class="rel" id="user"></div></div>
+</header>
+<div class="tricolore" aria-hidden="true"></div>
+<header class="menubar" id="menubar">
+  <button class="btn menu-toggle" id="menu" type="button" aria-label="Menu" aria-controls="nav">☰ Menu</button>
+  <nav id="nav" aria-label="Navigation"></nav>
+  <div class="menu-right"><button class="nav-link" id="theme" type="button" title="Mode clair / sombre">◐ Thème</button></div>
+</header>
+<div class="workspace">
+    <header class="topbar">
+      <div><h1 id="title">Accueil</h1><div class="sub" id="subtitle"></div></div>
+      <div class="controls">
+        <label class="field" id="zone-field">Zone de santé<select id="zone-select" aria-label="Zone de santé"></select></label>
+      </div>
+    </header>
+    <section class="periodbar" id="periodbar"></section>
+    <main id="main"></main>
+    <footer class="foot"><span id="foot-l"></span><span class="side-status" id="side-status"></span><span>Pseudonymisé : aucun nom ; listes nominatives réservées à la province et à la zone concernée</span></footer>
+</div>
+<script src="presentation.js"></script>
+<script src="national.js"></script>
+<script src="en_ligne.js" data-page="province"></script>
+</body>
+</html>

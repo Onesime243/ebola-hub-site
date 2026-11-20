@@ -1,0 +1,1171 @@
+/* Ebola Outbreak, outil provincial : page d'accueil et vues provinciales
+   Données : window.NK_PROVINCE (donnees/province.js), cas confirmés de la liste labo, suivi des contacts et alertes de la base
+   chiffrée provinciale, indicateurs des analyses détaillées des zones. Filtres : période (du … au …) et zone de santé. */
+(function () {
+  "use strict";
+  const Ch = window.HubCharts;
+  const capHtml = t => Ch.esc(t || "").replace(/&lt;(\/?)b&gt;/g, "<$1b>");
+  document.addEventListener("click", e => {   // carte de rapport + commentaire dans un seul PNG
+    const mp = e.target.closest("[data-map-png]"); if (!mp) return;
+    const card = mp.closest(".map-card"), img = card && card.querySelector("img.map-img");
+    if (img) { img.loading = "eager"; Ch.mapCaptionPNG(img, card.querySelector(".map-cap"), mp.dataset.mapFile).catch(() => {}); }
+  });
+  const { nf, esc } = G;
+  const col = Ch.col;
+  const $ = s => document.querySelector(s);
+  const EMPTY = { meta: { province: "Ituri", titre: "Province de l'Ituri", date_rapport: new Date().toISOString().slice(0, 10), genere_le: "—", jusqu_au: {}, sources: {}, totaux: { cas: 0, deces: 0, n7: 0, n21: 0, zones_touchees: 0, zones_actives: 0 }, zones_detail: [], avertissements: [] },
+    cibles: { taux_suivi_pct: 90, cas_connus_contacts_pct: 80, delai_isolement_j: 3 }, zones: [], cas: { cols: [], rows: [] }, suivi: { cols: [], rows: [] }, alertes: { cols: [], rows: [] }, geo: { features: [] }, exports: {} };
+  const P = window.NK_PROVINCE || EMPTY;
+  const HAS = !!window.NK_PROVINCE;
+  const PUBLIC = !!P.meta.public;
+  const PROV = P.meta.province;
+  const C = P.cibles || {};
+  const PT = P.meta.titre || ("Province du " + PROV);
+  window.ZS_FOOT = `${PT} · Ebola Outbreak, outil provincial`;
+
+  /* ------------------------------------------------------------------ utilitaires */
+  const MOIS = ["janv.", "févr.", "mars", "avr.", "mai", "juin", "juil.", "août", "sept.", "oct.", "nov.", "déc."];
+  const day = s => s ? new Date(s + "T00:00:00Z").getTime() / 864e5 : null;
+  const iso = n => new Date(n * 864e5).toISOString().slice(0, 10);
+  const dfr = (s, y = true) => { if (!s) return "—"; const d = new Date(s + "T00:00:00Z"); return `${d.getUTCDate()} ${MOIS[d.getUTCMonth()]}${y ? " " + d.getUTCFullYear() : ""}`; };
+  const dshort = s => { if (!s) return ""; const d = new Date(s + "T00:00:00Z"); return `${d.getUTCDate()} ${MOIS[d.getUTCMonth()]}`; };
+  const pc = (v, d = 1) => v === null || v === undefined || !isFinite(v) ? "—" : nf(v, d) + " %";
+  const ratio = (a, b) => b ? 100 * a / b : null;
+  const addDays = (s, n) => iso(day(s) + n);
+  const wk = n => n - ((new Date(n * 864e5).getUTCDay() + 6) % 7);
+  const rowsToObj = blk => blk && blk.rows ? blk.rows.map(r => Object.fromEntries(blk.cols.map((c, i) => [c, r[i]]))) : [];
+  function localGet(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+  function localSet(k, v) { try { localStorage.setItem(k, v); } catch (e) { /* stockage indisponible */ } }
+  const TL = ["#2E9E4F", "#F2C218", "#F28B82", "#D93025", "#8B0000"], TL_NA = "#FFFFFF";   // blanc : pas de problème ou pas de donnée fiable
+  const CATMAP = { "Rouge": TL[4], "Orange": TL[3], "Jaune": TL[1], "Verte": TL[0], "Non touchée": TL_NA };
+  const CATDEF = { "Rouge": "cas confirmé dans les 7 derniers jours", "Orange": "dernier cas il y a 8 à 21 jours", "Jaune": "dernier cas il y a 22 à 42 jours", "Verte": "plus de 42 jours sans cas", "Non touchée": "aucun cas" };
+  const CO = ["Rouge", "Orange", "Jaune", "Verte", "Non touchée"];
+  const PAL = ["--s1", "--s2", "--s3", "--s4", "--s5", "--s7", "--s8"];
+
+  /* ------------------------------------------------------------------ données */
+  const ZONES = P.zones || [];
+  const ZB = Object.fromEntries(ZONES.map(z => [z.code, z]));
+  const ZN = Object.fromEntries(ZONES.map(z => [z.code, z.nom]));
+  const CAS = rowsToObj(P.cas); CAS.forEach(c => c._d = day(c.date));
+  const SV = rowsToObj(P.suivi); SV.forEach(r => r._d = day(r.date));
+  const AL = rowsToObj(P.alertes); AL.forEach(r => r._d = day(r.date));
+  const SVZ = {}; SV.forEach(r => (SVZ[r.zone] = SVZ[r.zone] || []).push(r)); Object.values(SVZ).forEach(a => a.sort((x, y) => x._d - y._d));
+  const DETAIL = new Set((P.meta.zones_detail || []).map(n => (ZONES.find(z => z.nom === n) || {}).code).filter(Boolean));
+
+  /* ------------------------------------------------------------------ état */
+  const lastDate = P.meta.date_rapport;
+  const firstDate = (() => { const a = CAS.map(c => c.date).filter(Boolean).sort(); return a[0] || addDays(lastDate, -90); })();
+  const S = { page: "accueil", date: lastDate, preset: "21", from: null, zone: null, aire: null, mapInd: "categorie", tables: {}, upZone: null, menu: false };
+  S.from = addDays(S.date, -20);
+  try {
+    const h = new URLSearchParams(location.hash.slice(1));
+    if (h.get("p")) S.page = h.get("p"); if (h.get("z") && ZB[h.get("z")]) S.zone = h.get("z");
+    if (h.get("per")) S.preset = h.get("per");
+    if (h.get("d") && h.get("d") <= lastDate) S.date = h.get("d");
+    if (h.get("du")) S.from = h.get("du"); else applyPreset();
+  } catch (e) { /* adresse invalide */ }
+  function applyPreset() {
+    if (S.preset === "tout") S.from = firstDate;
+    else if (/^\d+$/.test(S.preset)) S.from = addDays(S.date, -(Number(S.preset) - 1));
+    if (S.from > S.date) S.from = S.date;
+  }
+  const inPer = d => !!d && d >= S.from && d <= S.date;
+  const perTxt = () => `du ${dfr(S.from)} au ${dfr(S.date)}`;
+  const scope = () => S.zone ? `Zone de santé de ${ZN[S.zone]}` : `${PT}`;
+  let USER = window.NK_EN_LIGNE || null;   // version en ligne : compte connecté (en_ligne.js)
+  const SERVED = location.protocol.startsWith("http") && !PUBLIC;
+  const isProv = () => USER && USER.role === "province";
+  const myZone = () => USER && USER.role === "zs" ? ZONES.find(z => z.nom === USER.zone) : null;
+
+  /* ------------------------------------------------------------------ calculs */
+  function casZone(code, t) {
+    const L = CAS.filter(c => c._d !== null && c._d <= t && (!code || c.zone === code));
+    const n7 = L.filter(c => c._d > t - 7).length, n7p = L.filter(c => c._d > t - 14 && c._d <= t - 7).length, r21 = L.filter(c => c._d > t - 21);
+    const last = L.length ? Math.max(...L.map(c => c._d)) : null, jours = last === null ? null : t - last;
+    const cat = !L.length ? "Non touchée" : jours <= 7 ? "Rouge" : jours <= 21 ? "Orange" : jours <= 42 ? "Jaune" : "Verte";
+    return { n: L.length, n7, n7p, n21: r21.length, deces: L.filter(c => c.deces).length, deces21: r21.filter(c => c.deces).length, last, jours, cat };
+  }
+  function suiviAt(code, t, tol = 7) {   // tolérance 7 jours : la saisie DHIS2 du suivi des contacts a souvent 2 à 4 jours de retard
+    const a = SVZ[code]; if (!a) return null;
+    let r = null; for (const x of a) { if (x._d <= t) r = x; else break; }
+    if (!r || t - r._d > tol) return null;
+    return { ...r, taux: ratio(r.vus, r.a_suivre), retard: t - r._d };
+  }
+  function suiviProv(t, codes) {
+    const o = { a_suivre: 0, vus: 0, jmv: 0, pdv: 0, suspects: 0, nouveaux: 0, zones: 0 };
+    (codes || Object.keys(SVZ)).forEach(c => { const s = suiviAt(c, t); if (s) { o.zones++; ["a_suivre", "vus", "jmv", "pdv", "suspects", "nouveaux"].forEach(k => o[k] += s[k] || 0); } });
+    o.taux = ratio(o.vus, o.a_suivre); return o;
+  }
+  function alertesPer(code, t0, t1) {
+    const L = AL.filter(r => r._d >= t0 && r._d <= t1 && (!code || r.zone === code));
+    const s = k => L.reduce((a, r) => a + (+r[k] || 0), 0);
+    const o = { jours: new Set(L.map(r => r._d)).size }; ["total", "deces", "inv", "val", "prelev", "isolees", "src_ess", "src_ra", "src_comm", "src_contacts", "src_poe", "eds", "swab"].forEach(k => o[k] = s(k));
+    o.inv_pct = ratio(o.inv, o.total); o.dernier = L.length ? iso(Math.max(...L.map(r => r._d))) : null; return o;
+  }
+  const lastAl = AL.length ? Math.max(...AL.map(r => r._d)) : null;
+  function zoneRow(z, t) {
+    const cs = casZone(z.code, t), s = suiviAt(z.code, t), al = lastAl !== null ? alertesPer(z.code, Math.min(t, lastAl) - 6, Math.min(t, lastAl)) : null, ind = (z.detail || {}).ind || {};
+    return { z, code: z.code, nom: z.nom, cat: cs.cat, cs, s, al, ind, inc: z.population ? 1e5 * cs.n / z.population : null };
+  }
+
+  /* ------------------------------------------------------------------ composants */
+  const POST = [];
+  const after = fn => POST.push(fn);
+  function panel(title, sub, body, o = {}) {
+    const tools = (o.tools || "") + (o.png ? `<button class="btn sm" data-png="${esc(o.png)}" title="Télécharger PNG">⤓ PNG</button>` : "") + (o.csv ? `<button class="btn sm" data-csv="${esc(o.csv)}" title="Exporter CSV">⤓ CSV</button>` : "");
+    return `<section class="panel ${o.cls || ""}" ${o.id ? `id="${o.id}"` : ""}><div class="panel-head"><div><h2>${title}</h2>${sub ? `<p>${sub}</p>` : ""}</div><div class="panel-tools">${tools}</div></div>${body}</section>`;
+  }
+  function kpi(label, value, note, o = {}) {
+    return `<div class="kpi ${o.cls || ""} ${o.go ? "clickable" : ""}" ${o.go ? `data-go="${o.go}"` : ""}><div class="label">${o.color ? `<i class="dot" style="background:${col(o.color)}"></i>` : ""}${label}</div><div class="value">${value}</div>${note ? `<div class="note">${note}</div>` : ""}${o.meter !== undefined && o.meter !== null ? `<div class="meter"><i style="width:${Math.max(0, Math.min(100, o.meter))}%;background:${col(o.meterColor || "--brand-2")}"></i></div>` : ""}</div>`;
+  }
+  const badge = (text, cls = "") => `<span class="badge ${cls}">${esc(text)}</span>`;
+  const lvl = (v, ok, warn, higher = true) => v === null || v === undefined || !isFinite(v) ? "na" : higher ? (v >= ok ? "ok" : v >= warn ? "warn" : "bad") : (v <= ok ? "ok" : v <= warn ? "warn" : "bad");
+  const pill = (txt, cls) => `<span class="pill ${cls || ""}">${esc(txt)}</span>`;
+  const feu = (v, ok, warn, higher = true, fmt = x => pc(x, 0)) => v === null || v === undefined ? `<span class="muted">—</span>` : pill(fmt(v), lvl(v, ok, warn, higher));
+  const catSq = c => `<span class="cat" style="background:${CATMAP[c] || TL_NA}" title="${esc(c)}"></span>`;
+  const notice = (t, cls = "") => `<div class="notice ${cls}">${t}</div>`;
+  const TABLES = {};
+  function table(id, rows, cols, o = {}) {
+    const st = S.tables[id] || (S.tables[id] = { sort: o.sort || null, dir: o.dir || -1, limit: o.limit || 60 });
+    let r = rows;
+    if (st.sort) { const c = cols.find(c => c.k === st.sort); if (c) { const f = c.sortv || (x => x[c.k]); r = [...r].sort((a, b) => { const va = f(a), vb = f(b); if (va === vb) return 0; if (va === null || va === undefined || va === "") return 1; if (vb === null || vb === undefined || vb === "") return -1; return (typeof va === "number" && typeof vb === "number" ? va - vb : String(va).localeCompare(String(vb))) * st.dir; }); } }
+    TABLES[id] = { rows: r, cols };
+    const shown = r.slice(0, st.limit);
+    const head = cols.map(c => `<th class="${c.num ? "num" : ""}" data-sort="${id}|${c.k}">${esc(c.t)}${st.sort === c.k ? `<span class="arrow">${st.dir > 0 ? "▲" : "▼"}</span>` : ""}</th>`).join("");
+    const body = shown.map(x => `<tr class="${o.rowClick ? "clickable" : ""} ${o.selected && o.selected(x) ? "selected" : ""}" ${o.rowClick ? `data-zrow="${esc(o.rowClick(x))}"` : ""}>${cols.map(c => `<td class="${c.num ? "num" : ""} ${c.wrap ? "wrap" : ""}">${c.v ? c.v(x) : (c.num ? nf(x[c.k], c.d || 0) : esc(x[c.k] ?? "—"))}</td>`).join("")}</tr>`).join("");
+    const foot = o.total ? `<tr class="total">${cols.map(c => `<td class="${c.num ? "num" : ""}">${c.tv ? c.tv(o.total) : c.v && o.total[c.k] !== undefined && c.k !== "nom" ? c.v(o.total) : (c.num ? nf(o.total[c.k], c.d || 0) : esc(o.total[c.k] ?? ""))}</td>`).join("")}</tr>` : "";
+    return `<div class="table-wrap" style="${o.maxh ? `max-height:${o.maxh}px` : ""}"><table><thead><tr>${head}</tr></thead><tbody>${body || `<tr><td colspan="${cols.length}" class="muted">Aucune ligne</td></tr>`}${foot}</tbody></table></div>${r.length > shown.length ? `<button class="btn sm more" data-more="${id}">Afficher plus (${nf(r.length - shown.length)})</button>` : ""}`;
+  }
+  function csvT(id) {
+    const t = TABLES[id];
+    if (!t) { const b = document.getElementById(id); if (b && b.__data) G.csv(`${id}_${S.zone ? ZN[S.zone] : PROV}_${S.date}`, b.__data.cols, b.__data.rows); return; }   // données d'un graphique
+    const strip = h => String(h ?? "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+    G.csv(`${id}_${PROV}_${S.date}`, t.cols.map(c => c.t), t.rows.map(x => t.cols.map(c => strip(c.csv ? c.csv(x) : c.v ? c.v(x) : x[c.k]))));
+  }
+  const openZS = code => `zs.html?zone=${encodeURIComponent(code)}`;
+  const zsBtn = (code, txt = "Ouvrir", cls = "sm") => DETAIL.has(code) ? `<a class="btn ${cls}" href="${openZS(code)}">${txt} →</a>` : `<span class="btn ${cls}" disabled title="Aucune analyse détaillée pour cette zone">${txt}</span>`;
+  const outp = f => "../sortie/province/" + f;
+  function spark(code, t) {
+    const w1 = wk(t), ws = []; for (let k = 7; k >= 0; k--) ws.push(w1 - 7 * k);
+    const v = ws.map(w => CAS.filter(c => c.zone === code && c._d !== null && c._d >= w && c._d < w + 7 && c._d <= t).length), mx = Math.max(1, ...v);
+    const bw = 100 / ws.length;
+    return `<svg class="spark" viewBox="0 0 100 26" preserveAspectRatio="none" aria-label="Cas par semaine (8 semaines)">${v.map((x, i) => `<rect x="${i * bw + 1}" y="${26 - 24 * x / mx}" width="${bw - 2}" height="${24 * x / mx}" rx="1" fill="${i === v.length - 1 ? col("--s2") : col("--line-2")}"><title>Semaine du ${dfr(iso(ws[i]))} : ${x} cas</title></rect>`).join("")}</svg>`;
+  }
+  const ICON = { jour: "M19 3h-1V1h-2v2H8V1H6v2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm0 16H5V8h14v11zM7 10h5v5H7z", contacts: "M16 11c1.7 0 3-1.3 3-3s-1.3-3-3-3-3 1.3-3 3 1.3 3 3 3zm-8 0c1.7 0 3-1.3 3-3S9.7 5 8 5 5 6.3 5 8s1.3 3 3 3zm0 2c-2.3 0-7 1.2-7 3.5V19h14v-2.5C15 14.2 10.3 13 8 13zm8 0h-1c1.2.9 2 2 2 3.5V19h6v-2.5c0-2.3-4.7-3.5-7-3.5z", pec: "M19 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm-2 10h-4v4h-2v-4H7v-2h4V7h2v4h4z",
+    ecoles: "M12 3 1 9l11 6 9-4.9V17h2V9zM5 13.2v4L12 21l7-3.8v-4L12 17z",
+    presentation: "M2 3h20v13H2zm2 2v9h16V5zm5 13h6l1 3H8zM6 12l3-4 3 2 4-4 2 1.5-6 5-3-2-1.5 1.5z",
+    reunion: "M3 3h18v18H3zm2 2v3h14V5zm0 5v3h4v-3zm6 0v3h8v-3zm-6 5v4h4v-4zm6 0v4h8v-4z",
+    indicateurs: "M3 3h18v18H3zm2 2v4h4V5zm6 0v4h8V5zm-6 6v4h4v-4zm6 0v4h8v-4zm-6 6v2h4v-2zm6 0v2h8v-2z",
+    pilotage: "M3 3h2v16h16v2H3zm4 12 4-5 3 3 5-7 1.6 1.2-6.4 9-3-3-2.6 3.4z", accueil: "M12 3 2 12h3v8h6v-6h2v6h6v-8h3z", situation: "M3 19h18v2H3zM5 17V9h3v8zm5 0V5h3v12zm5 0v-6h3v6z", zones: "M4 6h16v2H4zm0 5h16v2H4zm0 5h10v2H4z",
+    carte: "M15 4 9 2 3 4v18l6-2 6 2 6-2V2zM9 4.4l6 2v13.2l-6-2z", contacts: "M16 11c1.7 0 3-1.3 3-3s-1.3-3-3-3-3 1.3-3 3 1.3 3 3 3zm-8 0c1.7 0 3-1.3 3-3S9.7 5 8 5 5 6.3 5 8s1.3 3 3 3zm0 2c-2.3 0-7 1.2-7 3.5V19h14v-2.5C15 14.2 10.3 13 8 13zm8 0h-1c1.2.9 2 2 2 3.5V19h6v-2.5c0-2.3-4.7-3.5-7-3.5z",
+    alertes: "M12 22a2 2 0 0 0 2-2h-4a2 2 0 0 0 2 2zm6-6V11a6 6 0 0 0-5-5.9V4h-2v1.1A6 6 0 0 0 6 11v5l-2 2v1h16v-1z", donnees: "M5 20h14v-2H5zm7-16-5 5h3v6h4V9h3z",
+    comptes: "M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zm-8 8c0-3.3 3.6-6 8-6s8 2.7 8 6z", publication: "M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm6.9 6h-3a15.7 15.7 0 0 0-1.4-3.6A8 8 0 0 1 18.9 8zM12 4c.8 1.2 1.5 2.5 1.9 4h-3.8c.4-1.5 1.1-2.8 1.9-4zM4.3 14a8.2 8.2 0 0 1 0-4h3.4a16.5 16.5 0 0 0 0 4zm.8 2h3a15.7 15.7 0 0 0 1.4 3.6A8 8 0 0 1 5.1 16zM8 8H5.1a8 8 0 0 1 4.4-3.6C9 5.5 8.5 6.7 8 8zm4 12c-.8-1.2-1.5-2.5-1.9-4h3.8c-.4 1.5-1.1 2.8-1.9 4zm2.3-6H9.7a14.7 14.7 0 0 1 0-4h4.6a14.7 14.7 0 0 1 0 4zm.3 5.6c.6-1.1 1.1-2.3 1.4-3.6h3a8 8 0 0 1-4.4 3.6zM16.3 14a16.5 16.5 0 0 0 0-4h3.4a8.2 8.2 0 0 1 0 4z",
+    zs: "M12 2C8 2 5 5 5 9c0 5 7 13 7 13s7-8 7-13c0-4-3-7-7-7zm0 9.5A2.5 2.5 0 1 1 12 6a2.5 2.5 0 0 1 0 5.5z", pdf: "M6 2h9l5 5v15H6zm8 1.5V8h4.5zM8 13h8v2H8zm0 4h8v2H8z",
+    run: "M8 5v14l11-7z" };
+  const svgI = k => `<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="${ICON[k]}"/></svg>`;
+
+  /* ================================================================== ACCUEIL */
+  function pageAccueil() {
+    const t = day(S.date);
+    const rows = ZONES.map(z => zoneRow(z, t));
+    const pr = casZone(null, t);
+    const sp = suiviProv(t);
+    const al = lastAl !== null ? alertesPer(null, Math.min(t, lastAl) - 6, Math.min(t, lastAl)) : null;
+    const act = rows.filter(r => r.cat === "Rouge" || r.cat === "Orange");
+    const trend = pr.n7 - pr.n7p;
+    const me = myZone();
+    const greet = USER ? `${esc(USER.nom)}` : PUBLIC ? "Version en ligne (lecture seule)" : "";
+    const quick = [];
+    if (me) {
+      quick.push(`<a href="${openZS(me.code)}">${svgI("zs")}<div><b>Tableau de bord de ${esc(me.nom)}</b><span>Toutes les analyses de votre zone</span></div></a>`);
+      if (SERVED) quick.push(`<button data-go="donnees" data-upz="${me.code}">${svgI("donnees")}<div><b>Charger les fichiers de ${esc(me.nom)}</b><span>Base contacts, liste linéaire, SBC, RA…</span></div></button>`);
+    }
+    if (isProv() && SERVED) {
+      quick.push(`<button data-go="donnees">${svgI("donnees")}<div><b>Charger des fichiers</b><span>Pour une zone ou pour la province</span></div></button>`);
+      quick.push(`<button data-run="tout">${svgI("run")}<div><b>Tout analyser</b><span>Toutes les zones puis la province</span></div></button>`);
+    }
+    if (P.exports && P.exports.rapport_pdf) quick.push(`<a href="${outp(P.exports.rapport_pdf)}" target="_blank" rel="noopener">${svgI("pdf")}<div><b>Rapport provincial (PDF)</b><span>Situation au ${dfr(P.meta.date_rapport)}</span></div></a>`);
+    if (P.exports && P.exports.classeur) quick.push(`<a href="${outp(P.exports.classeur)}" download>${svgI("zones")}<div><b>Classeur des tableaux</b><span>Excel, sans nom</span></div></a>`);
+    quick.push(`<button data-go="carte">${svgI("carte")}<div><b>Cartes pour rapport</b><span>A4 avec titre, légende et nord</span></div></button>`);
+    if (P.meta.detail_province) { const dz = encodeURIComponent(P.meta.detail_province);
+      quick.push(`<a href="zs.html?zone=${dz}#p=dynamics">${svgI("situation")}<div><b>Dynamique et Rt</b><span>Province et zones de 25 cas ou plus</span></div></a>`);
+      quick.push(`<a href="zs.html?zone=${dz}#p=chains">${svgI("zones")}<div><b>Cas index et chaînes</b><span>Parcours des cas, reconstruction</span></div></a>`);
+      quick.push(`<a href="zs.html?zone=${dz}#p=labo">${svgI("pdf")}<div><b>Laboratoire et positivité</b><span>Post-mortem, re-prélèvements, délais</span></div></a>`);
+      quick.push(`<a href="zs.html?zone=${dz}#p=deces">${svgI("alertes")}<div><b>Décès et EDS communautaires</b><span>Létalité, swabs, EDS par zone</span></div></a>`); }
+    const ja = P.meta.jusqu_au || {};
+    const fr = (lab, d) => { if (!d) return `<span><i class="none"></i>${lab} : non disponible</span>`; const r = t - day(d); return `<span><i class="${r > 7 ? "old" : r > 2 ? "late" : ""}"></i>${lab} : ${dfr(d)}</span>`; };
+    after(() => drawMap($("#c-map-home"), "categorie", t));
+    const watch = rows.filter(r => r.cs.n21 > 0).sort((a, b) => b.cs.n7 - a.cs.n7 || b.cs.n21 - a.cs.n21).slice(0, 10);
+    const cards = rows.filter(r => r.cs.n || r.s || DETAIL.has(r.code)).sort((a, b) => CO.indexOf(a.cat) - CO.indexOf(b.cat) || b.cs.n21 - a.cs.n21 || b.cs.n - a.cs.n);
+    const quiet = rows.filter(r => !(r.cs.n || r.s || DETAIL.has(r.code)));
+    return `<section class="hero">
+      <div class="hero-top"><div><div class="kicker">Riposte à la maladie à virus Ebola · ${greet}</div><h2>${esc(PT)}</h2>
+        <div class="when">Situation au ${dfr(S.date)} · ${nf(ZONES.length)} zones de santé · analyse du ${esc(P.meta.genere_le)}</div></div>
+        <div class="who">${me ? `<a class="btn solid" href="${openZS(me.code)}">Ma zone : ${esc(me.nom)} →</a>` : ""}${P.exports && P.exports.rapport_pdf ? `<a class="btn" href="${outp(P.exports.rapport_pdf)}" target="_blank" rel="noopener">⤓ Rapport PDF</a>` : ""}</div></div>
+      <div class="hero-kpis">
+        <div><div class="v">${nf(pr.n7)}</div><div class="k">cas confirmés en 7 jours</div><div class="s ${trend > 0 ? "up" : trend < 0 ? "down" : ""}">${trend > 0 ? "▲ +" : trend < 0 ? "▼ " : "= "}${nf(trend)} vs 7 jours précédents</div></div>
+        <div><div class="v">${P.rt ? nf(P.rt.rt, 2) : nf(pr.n21)}</div><div class="k">${P.rt ? "Rt de la province" : "cas en 21 jours"}</div><div class="s">${P.rt ? `IC 95 % ${nf(P.rt.lo, 2)}–${nf(P.rt.hi, 2)} · au ${dfr(P.rt.date, false)} · ${nf(pr.n21)} cas en 21 j` : `${nf(pr.n)} depuis le début`}</div></div>
+        <div><div class="v">${nf(pr.deces21)}</div><div class="k">décès en 21 jours</div><div class="s">létalité cumulée ${pc(ratio(pr.deces, pr.n), 1)}</div></div>
+        <div><div class="v">${nf(act.length)}<small style="font-size:15px;opacity:.75"> / ${nf(rows.filter(r => r.cs.n).length)}</small></div><div class="k">zones actives / touchées</div><div class="s">cas dans les 21 derniers jours</div></div>
+        <div><div class="v">${nf(sp.a_suivre)}</div><div class="k">contacts à suivre</div><div class="s">${nf(sp.zones)} zones rapportées</div></div>
+        <div><div class="v">${pc(sp.taux, 1)}</div><div class="k">taux de suivi</div><div class="s">cible ${nf(C.taux_suivi_pct)} % · ${nf(sp.jmv)} jamais vus</div></div>
+        <div><div class="v">${al ? pc(al.inv_pct, 0) : "—"}</div><div class="k">alertes investiguées</div><div class="s">${al ? `${nf(al.total)} alertes · 7 j au ${dfr(al.dernier)}` : "base des alertes absente"}</div></div>
+      </div></section>
+      <div class="fresh">${fr("Liste labo des confirmés", ja.labo)}${fr("Suivi des contacts (base provinciale)", ja.suivi)}${fr("Alertes (base provinciale)", ja.alertes)}<span><i></i>Analyses détaillées : ${nf(DETAIL.size)} zones</span></div>
+      ${!HAS ? notice("<b>Aucune donnée provinciale.</b> Chargez la liste labo provinciale et les fichiers des zones de santé dans « Données des zones », puis lancez l'analyse.", "warn") : ""}
+      <div class="grid g21">
+        ${panel("Catégorie des zones de santé", "Selon la date du dernier cas confirmé · cliquez une zone pour ouvrir sa fiche", `<div id="c-map-home"></div>`, { png: "carte_categories" })}
+        ${panel("Zones à surveiller", "Cas des 7 et 21 derniers jours · 8 dernières semaines", watch.length ? `<div class="watch">${watch.map(r => `<div class="row" data-zrow="${r.code}">${catSq(r.cat)}<div><div class="nm">${esc(r.nom)}</div><div class="meta">${r.s ? `suivi ${pc(r.s.taux, 0)} · ` : ""}${r.cs.jours === 0 ? "cas aujourd'hui" : `dernier cas il y a ${nf(r.cs.jours)} j`}</div>${spark(r.code, t)}</div><div class="num"><b>${nf(r.cs.n7)}</b><small>en 7 j · ${nf(r.cs.n21)} en 21 j</small></div></div>`).join("")}</div>` : `<div class="empty">Aucun cas dans les 21 derniers jours.</div>`)}
+      </div>
+      ${panel("Accès rapide", "", `<div class="quick">${quick.join("")}</div>`)}
+      ${panel("Zones de santé", `${CO.filter(c => rows.some(r => r.cat === c)).map(c => `${catSq(c)}${c} : <b>${rows.filter(r => r.cat === c).length}</b>`).join(" &nbsp; ")}`,
+        `<div class="zcards">${cards.map(r => zcard(r, t)).join("")}</div>${quiet.length ? `<p class="note" style="margin-top:12px">Sans cas ni donnée de suivi : ${quiet.map(r => esc(r.nom)).join(", ")}.</p>` : ""}`)}`;
+  }
+  function zcard(r, t) {
+    const me = myZone();
+    const ind = r.ind || {};
+    const lines = [];
+    if (r.s) lines.push(`Suivi des contacts : <span class="${r.s.taux >= C.taux_suivi_pct ? "ok" : "bad"}">${pc(r.s.taux, 0)}</span> de ${nf(r.s.a_suivre)} · ${nf(r.s.jmv)} jamais vus${r.s.retard ? ` <span class="muted">(au ${dfr(r.s.date, false)})</span>` : ""}`);
+    if (r.al && r.al.total) lines.push(`Alertes 7 j : ${nf(r.al.total)} · <span class="${r.al.inv_pct >= 90 ? "ok" : "bad"}">${pc(r.al.inv_pct, 0)}</span> investiguées`);
+    if (ind.connus_pct !== undefined && ind.connus_pct !== null) lines.push(`Cas 21 j connus comme contacts : <span class="${ind.connus_pct >= C.cas_connus_contacts_pct ? "ok" : "bad"}">${pc(ind.connus_pct, 0)}</span>`);
+    if (r.z.rt) lines.push(`Rt : <span class="${r.z.rt.rt < 1 ? "ok" : "bad"}">${nf(r.z.rt.rt, 2)}</span> <span class="muted">[${nf(r.z.rt.lo, 2)}–${nf(r.z.rt.hi, 2)}] au ${dfr(r.z.rt.date, false)}</span>`);
+    if (r.z.labo && r.z.labo.n) lines.push(`Positivité : ${pc(r.z.labo.p, 1)} de ${nf(r.z.labo.n)} échantillons · post-mortem ${nf(r.z.labo.pm_pos)} positifs / ${nf(r.z.labo.pm)}`);
+    else if (ind.positivite !== undefined && ind.positivite !== null) lines.push(`Positivité des prélèvements : ${pc(ind.positivite, 1)}`);
+    const det = r.z.detail;
+    const src = det ? (det.propres || []).length ? `Fichiers de la zone au ${dfr(det.date_rapport, false)}` : "Liste labo provinciale uniquement" : "Pas d'analyse détaillée";
+    return `<div class="zcard ${me && me.code === r.code ? "mine" : ""}"><span class="bar" style="background:${CATMAP[r.cat]}"></span>
+      <h3>${esc(r.nom)}<span class="catlab">${catSq(r.cat)}${r.cat}</span></h3>
+      <div class="nums"><div><b>${nf(r.cs.n7)}</b><span>cas 7 j</span></div><div><b>${nf(r.cs.n21)}</b><span>cas 21 j</span></div><div><b>${nf(r.cs.n)}</b><span>cumul · ${nf(r.cs.deces)} déc.</span></div></div>
+      ${spark(r.code, t)}
+      <div class="lines">${lines.join("<br>") || `<span class="muted">Aucune donnée de suivi ni d'alerte</span>`}</div>
+      <div class="foot"><span class="src">${src}</span>${zsBtn(r.code)}</div></div>`;
+  }
+
+  /* ================================================================== CARTE (fonction commune) */
+  const MAPIND = [["categorie", "Catégorie (date du dernier cas)", "cat"], ["casper", "Cas confirmés (période)", "count"], ["cas7", "Cas des 7 derniers jours", "count"], ["cas21", "Cas des 21 derniers jours", "count"],
+    ["inc", "Incidence cumulée /100 000 hab.", "count", 1], ["taux", "Taux de suivi des contacts (%)", "down"], ["as", "Contacts à suivre", "count"], ["jmv", "Contacts jamais vus", "count"], ["alinv", "Alertes investiguées 7 j (%)", "down90"]];
+  function countClasses(vals, d = 0) {
+    const v = vals.filter(x => x > 0).sort((a, b) => a - b);
+    const q = p_ => v.length ? v[Math.min(v.length - 1, Math.floor(p_ * (v.length - 1)))] : 1;
+    let b = [q(.25), q(.5), q(.75)].map(x => d ? Math.round(x * 10) / 10 : Math.round(x)); b = [...new Set(b.map(x => Math.max(d ? .1 : 1, x)))];
+    const cuts = [0, ...b], out = [{ lo: 0, hi: 0, color: TL_NA, label: "0" }], pal = [TL[1], TL[2], TL[3], TL[4]];
+    for (let i = 0; i < cuts.length; i++) { const lo = d ? cuts[i] + (i ? .1 : .01) : cuts[i] + 1, hi = i + 1 < cuts.length ? cuts[i + 1] : Infinity; if (hi < lo) continue; out.push({ lo, hi, color: pal[Math.min(3, i + (4 - cuts.length))], label: hi === Infinity ? `≥ ${nf(lo, d)}` : (lo === hi ? nf(lo, d) : `${nf(lo, d)}–${nf(hi, d)}`) }); }
+    return out;
+  }
+  function mapModel(ind, t) {
+    const rows = Object.fromEntries(ZONES.map(z => [z.code, zoneRow(z, t)]));
+    const per = {}; CAS.forEach(c => { if (inPer(c.date)) per[c.zone] = (per[c.zone] || 0) + 1; });
+    const m = MAPIND.find(x => x[0] === ind) || MAPIND[0];
+    const val = k => { const r = rows[k]; if (!r) return null; switch (ind) { case "categorie": return r.cat; case "casper": return per[k] || 0; case "cas7": return r.cs.n7; case "cas21": return r.cs.n21; case "inc": return r.inc; case "taux": return r.s ? r.s.taux : null; case "as": return r.s ? r.s.a_suivre : null; case "jmv": return r.s ? r.s.jmv : null; case "alinv": return r.al && r.al.total ? r.al.inv_pct : null; } };
+    let color, leg;
+    if (m[2] === "cat") { color = v => CATMAP[v] || TL_NA; leg = CO.map(c => ({ label: `${c}, ${CATDEF[c]} (${ZONES.filter(z => rows[z.code].cat === c).length})`, color: CATMAP[c] })); }
+    else if (m[2].startsWith("down")) {
+      const tg = m[2] === "down90" ? 90 : C.taux_suivi_pct, br = [50, 65, 80, tg];
+      const cls = [{ lo: -Infinity, hi: br[0], color: TL[4], label: `< ${br[0]} %` }, { lo: br[0], hi: br[1], color: TL[3], label: `${br[0]}–${br[1]} %` }, { lo: br[1], hi: br[2], color: TL[2], label: `${br[1]}–${br[2]} %` }, { lo: br[2], hi: br[3], color: TL[1], label: `${br[2]}–${br[3]} %` }, { lo: br[3], hi: Infinity, color: TL[0], label: `≥ ${br[3]} % (cible)` }];
+      color = v => v === null || v === undefined ? TL_NA : (cls.find(c => v >= c.lo && v < c.hi) || cls[cls.length - 1]).color;
+      leg = [...cls.map(c => ({ label: c.label, color: c.color })), { label: "aucune donnée", color: TL_NA }];
+    } else {
+      const cls = countClasses(ZONES.map(z => val(z.code)).filter(v => typeof v === "number"), m[3] || 0);
+      color = v => v === null || v === undefined ? TL_NA : (cls.find(c => v >= c.lo && v <= c.hi) || cls[cls.length - 1]).color;
+      leg = [...cls.map(c => ({ label: c.label, color: c.color })), { label: "aucune donnée", color: TL_NA }];
+    }
+    leg.title = m[1] + (ind === "categorie" ? ", chiffre dans le cercle : cas confirmés des 7 derniers jours" : "");
+    return { rows, val, color, leg, m };
+  }
+  function drawMap(el_, ind, t) {
+    if (!el_) return;
+    const { rows, val, color, leg, m } = mapModel(ind, t);
+    const geo = { features: (P.geo.features || []).map(f => ({ aire: f.zone, nom: f.nom, geometry: f.geometry })) };
+    G.map(el_, { areas: ZONES.map(z => ({ key: z.code, name: z.nom })), geo, value: val, color: v => color(v), selected: S.zone,
+      label: k => { const v = val(k), r = rows[k]; if (!r) return ""; if (ind === "categorie") return r.cs.n7 ? `${r.cs.n7}` : ""; return typeof v === "number" ? (m[2].startsWith("down") ? pc(v, 0) : nf(v, m[3] || 0)) : ""; },
+      tipHtml: k => { const r = rows[k]; if (!r) return esc(k); return `<b>${esc(r.nom)}</b>${r.cat} · ${nf(r.cs.n)} cas (${nf(r.cs.n7)} en 7 j, ${nf(r.cs.n21)} en 21 j) · ${nf(r.cs.deces)} décès${r.s ? `<br>${nf(r.s.a_suivre)} contacts à suivre · ${pc(r.s.taux, 0)} vus` : ""}${r.al && r.al.total ? `<br>${nf(r.al.total)} alertes (7 j) · ${pc(r.al.inv_pct, 0)} investiguées` : ""}<br><i>${DETAIL.has(k) ? "Cliquez pour ouvrir le tableau de bord de la zone" : "Cliquez pour filtrer sur cette zone"}</i>`; },
+      onClick: k => { if (S.page === "accueil" && DETAIL.has(k)) location.href = openZS(k); else { S.zone = S.zone === k ? null : k; S.aire = null; render(); } }, legend: leg, valueLabel: m[1] });
+  }
+
+  /* ================================================================== PILOTAGE STRATÉGIQUE (décideurs)
+     Situation au jour choisi (date « au »), pour la province, une zone de santé ou une aire de santé.
+     Cas : liste labo ; suivi des contacts et alertes : base chiffrée (par zone) ; Rt : analyse provinciale détaillée. */
+  const LB = rowsToObj(P.labo); LB.forEach(r => r._d = day(r.date));
+  const lastLab = LB.length ? Math.max(...LB.map(r => r._d)) : null;
+  function pageP() {
+    const t = day(S.date), z = S.zone, zone = z ? ZB[z] : null;
+    const airesZ = z ? [...new Set(CAS.filter(c => c.zone === z && c.aire && c._d !== null && c._d <= t).map(c => c.aire))].sort((a, b) => a.localeCompare(b)) : [];
+    if (!airesZ.includes(S.aire)) S.aire = null;
+    const A = S.aire, sub = !!z, lvl = A ? "A" : z ? "Z" : "P";
+    const inSel = c => (!z || c.zone === z) && (!A || c.aire === A);
+    const L = CAS.filter(c => c._d !== null && c._d <= t && inSel(c));
+    const win = (a, b) => L.filter(c => c._d >= a && c._d <= b);
+    const c24 = win(t, t), c7 = win(t - 6, t), c7p = win(t - 13, t - 7);
+    const dec = x => x.filter(c => c.deces).length;
+    const unitOf = c => sub ? c.aire : c.zone, unitName = u => sub ? u : (ZN[u] || u);
+    const act14 = new Set(win(t - 13, t).map(unitOf).filter(Boolean));
+    const first = {}; L.forEach(c => { const u = unitOf(c); if (u && (first[u] === undefined || c._d < first[u])) first[u] = c._d; });
+    const nouv = Object.keys(first).filter(u => first[u] >= t - 6).map(unitName).sort();
+    const trait = L.filter(c => c.issue === "En traitement" && c._d >= t - 42).length;
+    const rt = A ? null : zone ? zone.rt : P.rt;
+    const rtCol = r => !r ? "--muted" : r.lo > 1 ? "--critical" : r.hi < 1 ? "--good" : "--warn";
+    // suivi des contacts et alertes : zone ou province (pas de détail par aire dans la base chiffrée)
+    const s = z ? suiviAt(z, t) : suiviProv(t);
+    const sv7 = SV.filter(r => r._d > t - 7 && r._d <= t && (!z || r.zone === z));
+    const sus7 = sv7.reduce((a, r) => a + (+r.suspects || 0), 0);
+    const al7 = alertesPer(z, t - 6, t), al24 = alertesPer(z, t, t), al7p = alertesPer(z, t - 13, t - 7);
+    // délai début des symptômes → confirmation (médiane, cas confirmés des 28 derniers jours)
+    const med = a => { const v = a.filter(x => x !== null && isFinite(x)).sort((p, q) => p - q); return v.length ? (v.length % 2 ? v[(v.length - 1) / 2] : (v[v.length / 2 - 1] + v[v.length / 2]) / 2) : null; };
+    const dl = c => c.debut ? c._d - day(c.debut) : null, okd = c => { const d = dl(c); return d !== null && d >= 0 && d <= 60; };
+    const d28 = med(win(t - 27, t).filter(okd).map(dl)), d28p = med(win(t - 55, t - 28).filter(okd).map(dl));
+    // positivité (liste labo de tous les résultats, 7 derniers jours disponibles)
+    const tl = lastLab === null ? null : Math.min(t, lastLab);
+    const lb7 = tl === null ? [] : LB.filter(r => r._d > tl - 7 && r._d <= tl && (!z || r.zone === z));
+    const ln = lb7.reduce((a, r) => a + r.n, 0), lp = lb7.reduce((a, r) => a + r.pos, 0);
+    const labStale = tl !== null && t - tl > 7;
+    // zones silencieuses : cas sur 42 jours, aucune alerte notifiée depuis 3 jours (province seulement)
+    const zs42 = !sub ? [...new Set(L.filter(c => c._d >= t - 41).map(c => c.zone))] : [];
+    const sil = zs42.filter(k => !AL.some(r => r.zone === k && r._d >= t - 2 && r._d <= t && r.total > 0)).map(k => ZN[k] || k).sort();
+    const tr = (v, p, bad = "up") => { if (v === null || v === undefined || p === null || p === undefined) return ""; const d = v - p; if (Math.abs(d) < 1e-9) return `<span class="pil-tr flat">= stable</span>`; const up = d > 0, worse = bad === "up" ? up : !up; return `<span class="pil-tr ${worse ? "worse" : "better"}">${up ? "▲ +" : "▼ −"}${nf(Math.abs(d), Math.abs(d) < 10 && d % 1 ? 1 : 0)}</span>`; };
+    const card = (label, value, note, o = {}) => `<div class="kpi pil-kpi ${o.cls || ""}"><div class="label">${o.color ? `<i class="dot" style="background:${col(o.color)}"></i>` : ""}${label}${o.estim ? ` <span class="pil-est">Estimation</span>` : ""}</div><div class="value">${value}</div><div class="note">${note || ""}</div></div>`;
+    const tile = (label, value, sub_, cls = "") => `<div class="pil-tile ${cls}"><span>${label}</span><b>${value}</b>${sub_ ? `<small>${sub_}</small>` : ""}</div>`;
+    const zoneNote = A ? ` <span class="muted">(zone de ${esc(ZN[z])})</span>` : "";
+    const cards = [
+      card("Cas confirmés cumulés", nf(L.length), `<b>+${nf(c7.length)}</b> sur 7 jours · liste labo`, { color: "--s2" }),
+      card("Nouveaux cas confirmés (7 j)", nf(c7.length), `vs ${nf(c7p.length)} les 7 jours précédents ${tr(c7.length, c7p.length)} · ${nf(c24.length)} en 24 h`, { color: "--s2", cls: c7.length > c7p.length ? "alert" : "" }),
+      card("Nouveaux décès confirmés (7 j)", nf(dec(c7)), `vs ${nf(dec(c7p))} les 7 jours précédents ${tr(dec(c7), dec(c7p))}`, { color: "--rc-rt" }),
+      card("Létalité cumulée", pc(ratio(dec(L), L.length), 1), `décès / cas confirmés : ${nf(dec(L))} / ${nf(L.length)}`, { color: "--ink-2" }),
+      card(sub ? "Aires de santé actives (14 j)" : "Zones de santé actives (14 j)", nf(act14.size), "avec au moins un cas confirmé", { color: "--s1" }),
+      card("R(t) estimé", `<span style="color:${col(rtCol(rt))}">${rt ? nf(rt.rt, 2) : "—"}</span>`, rt ? `IC 95 % ${nf(rt.lo, 2)}–${nf(rt.hi, 2)} · P(R>1) ${pc(100 * (rt.p_sup_1 || 0), 0)} · au ${dfr(rt.date, false)}` : A ? "non estimé à l'échelle de l'aire de santé" : "trop peu de cas pour une estimation fiable", { color: rtCol(rt), estim: true }),
+      card("Contacts vus (dernier jour)", s ? pc(s.taux, 0) : "—", s ? `${nf(s.vus)} / ${nf(s.a_suivre)} contacts à suivre · cible ${nf(C.taux_suivi_pct)} %${zoneNote}` : "pas de rapport de suivi récent", { color: "--st-v24", cls: s && s.taux < C.taux_suivi_pct ? "alert" : "" }),
+      card("Contacts jamais vus / perdus de vue", s ? `${nf(s.jmv)} / ${nf(s.pdv)}` : "—", s ? `à rechercher en priorité${zoneNote}` : "", { color: "--warn", cls: s && (s.jmv + s.pdv) > 0 ? "alert" : "" }),
+      card("Alertes investiguées (7 j)", pc(al7.inv_pct, 0), `${nf(al7.inv)} / ${nf(al7.total)} alertes${zoneNote}`, { color: "--brand-2" }),
+      card("Délai symptômes → confirmation", d28 === null ? "—" : `${nf(d28, 1)} j`, `médiane, cas des 28 derniers jours ${tr(d28, d28p)}`, { color: "--warn", cls: d28 !== null && d28 > 3 ? "alert" : "" }),
+      card("Patients en traitement", nf(trait), "cas confirmés « en traitement », confirmés depuis 42 jours au plus", { color: "--s3" }),
+      card(sub ? "Aires nouvellement touchées (7 j)" : "Zones nouvellement touchées (7 j)", nf(nouv.length), nouv.length ? esc(nouv.join(", ")) : (sub ? "aucune nouvelle aire" : "aucune nouvelle zone"), { color: "--critical", cls: nouv.length ? "alert" : "" }),
+    ].join("");
+    const tiles = [
+      tile("Cas confirmés 24 h", nf(c24.length)),
+      tile("Décès confirmés 24 h", nf(dec(c24))),
+      tile("Alertes 24 h", nf(al24.total)),
+      tile("Alertes décès 24 h", nf(al24.deces), "", al24.deces ? "warn" : ""),
+      tile("Écouvillons post-mortem (7 j)", nf(al7.swab), `pour ${nf(al7.deces)} alertes décès`),
+      tile("Positivité 7 j", ln ? pc(ratio(lp, ln), 0) : "—", ln ? `${nf(lp)} / ${nf(ln)}${labStale ? ` · au ${dfr(iso(tl), false)}` : ""}` : "liste labo absente"),
+      tile("Contacts à suivre", s ? nf(s.a_suivre) : "—"),
+      tile("Nouveaux contacts (24 h)", s ? nf(s.nouveaux) : "—"),
+      tile("Contacts devenus suspects (7 j)", nf(sus7), "", sus7 ? "warn" : ""),
+      tile("Alertes validées (7 j)", pc(ratio(al7.val, al7.total), 0), `${nf(al7.val)} / ${nf(al7.total)}`),
+      tile("Alertes 7 j vs 7 j précédents", nf(al7.total), `${nf(al7p.total)} ${tr(al7.total, al7p.total, "none")}`),
+      sub ? tile("Catégorie de la zone", esc(casZone(z, t).cat), "", ["Rouge", "Orange"].includes(casZone(z, t).cat) ? "warn txt" : "txt") : tile("Zones silencieuses", nf(sil.length), sil.length ? esc(sil.join(", ")) : "cas sur 42 j, aucune alerte depuis 3 j", sil.length ? "warn" : ""),
+    ].join("");
+    // séries hebdomadaires (16 semaines)
+    const w1 = wk(t), ws = []; for (let k = 15; k >= 0; k--) ws.push(w1 - 7 * k);
+    const inW = (d, w) => d !== null && d >= w && d < w + 7;
+    after(() => {
+      const ons = ws.map(w => L.filter(c => inW(c.debut ? day(c.debut) : null, w)).length);
+      G.bars($("#c-pil-epi"), { labels: ws.map(iso), h: 260, fmtX: (d, l) => l ? "Semaine du " + dfr(d) : dshort(d),
+        series: [{ label: "Début des symptômes", color: col("--s2"), values: ons.map((v, i) => i >= ws.length - 2 ? 0 : v) }, { label: "Provisoire (2 dernières semaines)", color: col("--line-2"), values: ons.map((v, i) => i >= ws.length - 2 ? v : 0) }] });
+      G.bars($("#c-pil-iss"), { labels: ws.map(iso), h: 260, fmtX: (d, l) => l ? "Semaine du " + dfr(d) : dshort(d),
+        series: [["Décédés", "--rc-rt", c => c.deces], ["En traitement", "--s3", c => !c.deces && c.issue === "En traitement"], ["Guéris", "--good", c => !c.deces && c.issue === "Guéri"], ["Autre / non précisé", "--rc-grey", c => !c.deces && !["En traitement", "Guéri"].includes(c.issue)]]
+          .map(([lab, cl, f]) => ({ label: lab, color: col(cl), values: ws.map(w => L.filter(c => inW(c._d, w) && f(c)).length) })) });
+      G.tendance($("#c-pil-tend"), { labels: TW.map(w => ({ wk: isoWk(w)[1], an: isoWk(w)[0], debut: dfr(iso(w)) })), dec: TW.map(w => L.filter(c => c.deces && inW(c._d, w)).length), viv: TW.map(w => L.filter(c => !c.deces && inW(c._d, w)).length), h: 380 });
+      drawMap($("#c-pil-map"), "categorie", t);
+      G.lines($("#c-pil-del"), { labels: ws.map(iso), h: 240, digits: 1, target: 3, fmtX: (d, l) => l ? "Semaine du " + dfr(d) : dshort(d),
+        series: [{ label: "Délai médian symptômes → confirmation (j)", color: col("--warn"), values: ws.map(w => med(L.filter(c => inW(c._d, w) && okd(c)).map(dl))) }] });
+      const days = []; for (let d = t - 41; d <= t; d++) days.push(d);
+      G.lines($("#c-pil-suivi"), { labels: days.map(iso), h: 240, pct: 1, max: 100, target: C.taux_suivi_pct, digits: 1, fmtX: (d, l) => l ? dfr(d) : dshort(d),
+        series: [{ label: "Contacts vus (%)", color: col("--s1"), values: days.map(d => { const o = z ? suiviAt(z, d, 0) : suiviProv(d); return o && o.a_suivre ? o.taux : null; }) }] });
+    });
+    // tendances des cas confirmés et décès depuis le début de l'épidémie (semaine ISO de confirmation)
+    const isoWk = n => { const d = new Date(n * 864e5), th = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate() + 3 - (d.getUTCDay() + 6) % 7)), y = th.getUTCFullYear();
+      return [y, Math.ceil(((th - Date.UTC(y, 0, 1)) / 864e5 + 1) / 7)]; };
+    const TW = []; if (L.length) for (let w = wk(Math.min(...L.map(c => c._d))); w <= wk(t); w += 7) TW.push(w);
+    const tN = L.length, tD = dec(L), lastW = L.length ? wk(Math.max(...L.map(c => c._d))) : null;
+    const tLieu = A ? `AS ${A} (ZS ${ZN[z]})` : z ? `ZS ${ZN[z]}` : `DPS ${PROV}`;
+    const tendPanel = tN ? panel(`Tendances cas confirmés et décès ${esc(tLieu)} MVB, RDC`,
+      `${esc(A ? "Aire de santé " + A : z ? "ZS " + ZN[z] : PROV)}, ${nf(tN)} cas confirmés dont ${nf(tD)} décédés et ${nf(tN - tD)} vivants depuis le début de l'épidémie · liste linéaire au ${dfr(S.date)}`,
+      `<div id="c-pil-tend"></div><div class="tend-res"><b>Résultats.</b> ${nf(tN)} cas confirmés dont ${nf(tD)} décédés (${pc(ratio(tD, tN), 0)}) ; dernier cas : semaine ${isoWk(lastW)[1]} ${lastW + 6 > t ? `(semaine en cours, données jusqu'au ${dfr(S.date)})` : `(du ${dfr(iso(lastW))} au ${dfr(iso(lastW + 6))})`}. Semaines de confirmation (date du résultat du laboratoire) ; létalité hebdomadaire sur l'axe de droite. <span class="muted">SGI-MVE17 ©2026</span></div>`,
+      { png: "pilotage_tendances", csv: "c-pil-tend", cls: "tend-head" }) : "";
+    const proj = rt && rt.variation_hebdo !== null && rt.variation_hebdo !== undefined ? Math.max(0, Math.round(c7.length * (1 + rt.variation_hebdo / 100))) : null;
+    const where = [z ? `Zone de santé de ${esc(ZN[z])}` : `${esc(PT)}`, A ? `aire de santé ${esc(A)}` : ""].filter(Boolean).join(" › ");
+    return `
+    <div class="pil-bar">
+      <label class="field">Zone de santé<select id="pil-zone"><option value="">Toute la province</option>${ZONES.filter(x => casZone(x.code, t).n || SVZ[x.code]).map(x => `<option value="${x.code}" ${z === x.code ? "selected" : ""}>${esc(x.nom)}</option>`).join("")}</select></label>
+      ${z ? `<label class="field">Aire de santé<select id="pil-aire"><option value="">Toutes</option>${airesZ.map(a => `<option value="${esc(a)}" ${A === a ? "selected" : ""}>${esc(a)}</option>`).join("")}</select></label>` : ""}
+      <label class="field">Situation au<input type="date" id="pil-date" value="${S.date}" min="${firstDate}" max="${lastDate}"></label>
+      <span class="small muted"><b>${where}</b> · situation au <b>${dfr(S.date)}</b></span>
+    </div>
+    <div class="grid g6 pil-cards">${cards}</div>
+    <h2 class="pil-q">Indicateurs du jour</h2>
+    <div class="pil-tiles">${tiles}</div>
+    <h2 class="pil-q">Évolution de l'épidémie</h2>
+    ${tendPanel}
+    <div class="grid g2">
+      ${panel("Courbe épidémique : cas confirmés par semaine de début des symptômes", "Les deux dernières semaines (gris) sont provisoires : délai entre les symptômes et la confirmation", `<div id="c-pil-epi"></div>`, { png: "pilotage_courbe" })}
+      ${panel("Issue des cas confirmés par semaine de confirmation", "Décédés, en traitement, guéris (liste labo)", `<div id="c-pil-iss"></div>`, { png: "pilotage_issues" })}
+    </div>
+    ${pilEcoles(z, A, t)}
+    <h2 class="pil-q">Foyers actifs et risque de propagation</h2>
+    ${panel("Catégorie des zones de santé", "Rouge : cas dans les 7 derniers jours ; orange : 8 à 21 jours ; jaune : 22 à 42 jours ; vert : plus de 42 jours · cliquez une zone pour l'afficher", `<div id="c-pil-map"></div>`, { png: "pilotage_carte" })}
+    <h2 class="pil-q">Détection, isolement et suivi des contacts</h2>
+    <div class="grid g2">
+      ${panel("Délai entre symptômes et confirmation", "Médiane hebdomadaire (jours), semaine de confirmation", `<div id="c-pil-del"></div>`, { png: "pilotage_delai" })}
+      ${panel("Contacts vus chaque jour", `${z ? esc(ZN[z]) : "Province"} · 42 derniers jours`, `<div id="c-pil-suivi"></div>`, { png: "pilotage_suivi" })}
+    </div>
+    <h2 class="pil-q">Indicateurs estimés</h2>
+    <div class="grid g4">
+      ${card("R(t) de la période récente", rt ? nf(rt.rt, 2) : "—", rt ? `IC 95 % ${nf(rt.lo, 2)}–${nf(rt.hi, 2)} · ${rt.provisoire ? "provisoire" : "consolidé"} au ${dfr(rt.date, false)}` : A ? "non estimé à l'échelle de l'aire" : "données insuffisantes", { color: rtCol(rt), estim: true })}
+      ${card(rt && rt.sens === "décroissance" ? "Temps de demi-vie" : "Temps de doublement", rt && (rt.doublement || rt.demi) ? `${nf(rt.doublement || rt.demi, 0)} j` : "—", rt ? `tendance : ${esc(rt.sens || "—")} · variation ${rt.variation_hebdo !== null && rt.variation_hebdo !== undefined ? (rt.variation_hebdo > 0 ? "+" : "") + nf(rt.variation_hebdo, 0) + " % par semaine" : "—"}` : "", { color: "--s7", estim: true })}
+      ${card("Cas attendus les 7 prochains jours", proj === null ? "—" : nf(proj), proj === null ? "" : "projection simple : cas des 7 derniers jours × variation hebdomadaire récente", { color: "--s1", estim: true })}
+      ${card("Couverture du rapportage", s ? `${nf(s.zones || 1)}` : "—", z ? (s ? `rapport de suivi du ${dfr(s.date, false)}` : "pas de rapport récent") : `zones ayant rapporté le suivi des contacts (≤ 3 j) sur ${nf(ZONES.filter(x => casZone(x.code, t).n21).length)} zones actives`, { color: "--muted" })}
+    </div>
+    <p class="note">Suivi des contacts et alertes : base chiffrée provinciale, détaillée par zone de santé (pas par aire). Rt : analyse provinciale détaillée (zones de 25 cas ou plus).</p>`;
+  }
+
+
+  /* ================================================================== MILIEU SCOLAIRE
+     Liste des élèves et du personnel des écoles touchés (fichier Word/Excel déposé dans les fichiers provinciaux) :
+     une ligne par personne, sans nom ni téléphone (sexe, âge, statut, fonction, niveau, école, aire, zone, date). */
+  const EC = P.ecoles ? rowsToObj(P.ecoles) : [];
+  EC.forEach(r => { r._d = day(r.date); r.deces = r.statut === "Décédé"; r.eleve = r.fonction === "Élève"; r.ens = r.fonction === "Enseignant"; r.ident = r.ecole !== "Non identifiée"; });
+  const EC_AGES = [["< 6 ans", 0, 5.99], ["6 à < 12 ans", 6, 11.99], ["12 à < 18 ans", 12, 17.99], ["≥ 18 ans", 18, 200]];
+  const ecTranche = a => a === null || a === undefined ? "Non précisé" : (EC_AGES.find(([, lo, hi]) => a >= lo && a <= hi) || ["Non précisé"])[0];
+  const EC_ST = [["Décédé", "--rc-rt"], ["En traitement (CTE)", "--warn"], ["Guéri", "--good"], ["Vivant", "--s1"], ["Non précisé", "--rc-grey"]];
+  function ecBins(mx) {   // 4 classes au plus, adaptées au maximum observé (couleurs des autres cartes : jaune → rouge)
+    if (mx <= 4) return Array.from({ length: Math.max(1, mx) }, (_, i) => [i + 1, i + 1]);
+    const q = [1, Math.ceil(mx * .25) + 1, Math.ceil(mx * .5) + 1, Math.ceil(mx * .75) + 1].filter((v, i, a) => i === 0 || v > a[i - 1]);
+    return q.map((lo, i) => [lo, i + 1 < q.length ? q[i + 1] - 1 : mx]);
+  }
+  function ecAgg(L, key) {
+    const o = {};
+    L.forEach(r => { const k = key(r); if (k === null || k === undefined) return; const x = o[k] || (o[k] = { k, n: 0, eleves: 0, ens: 0, dec: 0, eldec: 0, elviv: 0, F: 0, M: 0, ecoles: new Set(), last: null });
+      x.n++; if (r.eleve) { x.eleves++; r.deces ? x.eldec++ : x.elviv++; } if (r.ens) x.ens++; if (r.deces) x.dec++; if (r.sexe === "F") x.F++; if (r.sexe === "M") x.M++;
+      if (r.ident) x.ecoles.add(r.ecole); if (r._d !== null && (x.last === null || r._d > x.last)) x.last = r._d; });
+    return Object.values(o).map(x => ({ ...x, nEcoles: x.ecoles.size, let: ratio(x.dec, x.n) }));
+  }
+
+  /* Pilotage : milieu scolaire (élèves et personnel des écoles touchés), même filtre zone / aire et même date que la page */
+  function pilEcoles(z, A, t) {
+    if (!EC.length) return "";
+    const L = EC.filter(r => (!z || r.zone === z) && (!A || r.aire === A) && (r._d === null || r._d <= t));
+    if (!L.length) return "";
+    const el = L.filter(r => r.eleve), ens = L.filter(r => r.ens), dec = L.filter(r => r.deces);
+    const r7 = L.filter(r => r._d !== null && r._d > t - 7), r7p = L.filter(r => r._d !== null && r._d > t - 14 && r._d <= t - 7);
+    const ecs = new Set(L.filter(r => r.ident).map(r => r.ecole));
+    const first = {}; L.filter(r => r.ident && r._d !== null).forEach(r => { if (first[r.ecole] === undefined || r._d < first[r.ecole]) first[r.ecole] = r._d; });
+    const nouv = Object.keys(first).filter(e => first[e] > t - 7);
+    const card = (label, value, note, o = {}) => `<div class="kpi pil-kpi ${o.cls || ""}"><div class="label">${o.color ? `<i class="dot" style="background:${col(o.color)}"></i>` : ""}${label}</div><div class="value">${value}</div><div class="note">${note || ""}</div></div>`;
+    const top = ecAgg(L.filter(r => r.ident), r => r.ecole).sort((a, b) => b.n - a.n || b.dec - a.dec).slice(0, 8)
+      .map(x => ({ ...x, aire: (L.find(r => r.ecole === x.k) || {}).aire }));
+    const Ld = L.filter(r => r._d !== null), TW = [];
+    if (Ld.length) for (let w = wk(Math.min(...Ld.map(r => r._d))); w <= wk(t); w += 7) TW.push(w);
+    const isoW = n => { const d = new Date(n * 864e5), th = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate() + 3 - (d.getUTCDay() + 6) % 7)), y = th.getUTCFullYear(); return [y, Math.ceil(((th - Date.UTC(y, 0, 1)) / 864e5 + 1) / 7)]; };
+    after(() => { if (TW.length && $("#c-pil-ec")) G.tendance($("#c-pil-ec"), { labels: TW.map(w => ({ wk: isoW(w)[1], an: isoW(w)[0], debut: dfr(iso(w)) })), dec: TW.map(w => Ld.filter(r => r.deces && r._d >= w && r._d < w + 7).length),
+      viv: TW.map(w => Ld.filter(r => !r.deces && r._d >= w && r._d < w + 7).length), h: 320, vd: 1, xTitle: "Semaine (date rapportée dans la liste scolaire)", yTitle: "Personnes touchées" }); });
+    return `<h2 class="pil-q">Milieu scolaire <button class="btn sm" data-page="ecoles" style="margin-left:8px;vertical-align:middle">Analyse scolaire complète</button></h2>
+    <div class="grid g4 pil-cards">
+      ${card("Élèves touchés", nf(el.length), `${nf(el.filter(r => r.sexe === "F").length)} filles, ${nf(el.filter(r => r.sexe === "M").length)} garçons · ${nf(r7.filter(r => r.eleve).length)} en 7 jours`, { color: "--s1" })}
+      ${card("Écoles touchées", nf(ecs.size), nouv.length ? `<b>${nf(nouv.length)} nouvelle${nouv.length > 1 ? "s" : ""} en 7 jours</b> : ${esc(nouv.slice(0, 4).join(", "))}${nouv.length > 4 ? "…" : ""}` : "aucune nouvelle école en 7 jours", { color: "--s3", cls: nouv.length ? "alert" : "" })}
+      ${card("Décès en milieu scolaire", nf(dec.length), `${nf(el.filter(r => r.deces).length)} élèves, ${nf(ens.filter(r => r.deces).length)} enseignants · létalité ${pc(ratio(dec.length, L.length), 0)}`, { color: "--rc-rt", cls: dec.length ? "alert" : "" })}
+      ${card("Personnes touchées (7 j)", nf(r7.length), `${nf(r7p.length)} les 7 jours précédents · ${nf(ens.length)} enseignants touchés au total`, { color: "--warn", cls: r7.length > r7p.length ? "alert" : "" })}
+    </div>
+    <div>
+      ${TW.length ? panel("Élèves et personnel touchés par semaine", "Au-dessus de chaque barre : V = vivants, D = décédés", `<div id="c-pil-ec"></div>`, { png: "pilotage_scolaire_semaines" }) : ""}
+      ${panel("Écoles les plus touchées", `${nf(ecs.size)} écoles · ${nf(L.filter(r => !r.ident).length)} personnes sans école identifiée`, `<div class="table-wrap"><table><thead><tr><th>École</th><th>Aire de santé</th><th class="num">Personnes</th><th class="num">Élèves</th><th class="num">Décès</th></tr></thead><tbody>${top.map(x => `<tr><td>${esc(x.k)}</td><td>${esc(x.aire || "")}</td><td class="num">${nf(x.n)}</td><td class="num">${nf(x.eleves)}</td><td class="num">${nf(x.dec)}</td></tr>`).join("")}</tbody></table></div>`)}
+    </div>`;
+  }
+  function pageEcoles() {
+    const M = (P.ecoles || {}).meta;
+    if (!EC.length) return notice(`Aucune liste du milieu scolaire n'a encore été chargée. Déposez la liste des élèves et enseignants touchés (Word .docx ou Excel, colonnes NOMS, SEXE, AGE, DATE, STATUT ACTUEL, FONCTION, PROVENANCE, AIRE DE SANTÉ) dans les <b>fichiers provinciaux</b> (menu Données des zones), puis lancez l'analyse. Les noms et téléphones ne sont jamais repris dans l'outil.`);
+    const zs = [...new Set(EC.map(r => r.zone).filter(Boolean))];
+    if (S.ecZone && !zs.includes(S.ecZone)) S.ecZone = "";
+    const aires = [...new Set(EC.filter(r => !S.ecZone || r.zone === S.ecZone).map(r => r.aire))].sort((a, b) => a.localeCompare(b));
+    if (S.ecAire && !aires.includes(S.ecAire)) S.ecAire = "";
+    const L = EC.filter(r => (!S.ecZone || r.zone === S.ecZone) && (!S.ecAire || r.aire === S.ecAire));
+    const el = L.filter(r => r.eleve), ens = L.filter(r => r.ens), dec = L.filter(r => r.deces);
+    const ecs = new Set(L.filter(r => r.ident).map(r => r.ecole)), nonId = L.filter(r => !r.ident).length;
+    const ages = el.map(r => r.age).filter(a => a !== null && a !== undefined).sort((a, b) => a - b);
+    const med = ages.length ? (ages.length % 2 ? ages[(ages.length - 1) / 2] : (ages[ages.length / 2 - 1] + ages[ages.length / 2]) / 2) : null;
+    const where = S.ecAire ? `aire de santé ${esc(S.ecAire)}` : S.ecZone ? `zone de santé de ${esc(ZN[S.ecZone] || S.ecZone)}` : `province du ${esc(PROV)}`;
+    const niv = ["Maternelle", "Primaire", "Secondaire", "Administration scolaire", "Non précisé"];
+    const nivR = niv.map(n => ({ n, L: L.filter(r => r.niveau === n) })).filter(x => x.L.length);
+    const byEc = ecAgg(L.filter(r => r.ident), r => r.ecole).map(x => ({ ...x, niveau: (L.find(r => r.ecole === x.k) || {}).niveau, aire: (L.find(r => r.ecole === x.k) || {}).aire, zone: ZN[(L.find(r => r.ecole === x.k) || {}).zone] || "" }));
+    const byAire = ecAgg(L, r => r.aire).map(x => ({ ...x, zone: ZN[(L.find(r => r.aire === x.k) || {}).zone] || "" }));
+    const byZone = ecAgg(L, r => r.zone || "—").map(x => ({ ...x, nom: ZN[x.k] || x.k }));
+    // semaines (date rapportée dans la liste)
+    const Ld = L.filter(r => r._d !== null);
+    const TW = []; if (Ld.length) for (let w = wk(Math.min(...Ld.map(r => r._d))); w <= wk(Math.max(...Ld.map(r => r._d))); w += 7) TW.push(w);
+    const isoW = n => { const d = new Date(n * 864e5), th = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate() + 3 - (d.getUTCDay() + 6) % 7)), y = th.getUTCFullYear(); return [y, Math.ceil(((th - Date.UTC(y, 0, 1)) / 864e5 + 1) / 7)]; };
+    const mapNiv = S.ecMapNiv === "zone" || (!S.ecZone && zs.length > 1 && S.ecMapNiv !== "aire") ? "zone" : "aire";
+    const mapZone = S.ecZone || zs.sort((a, b) => EC.filter(r => r.zone === b).length - EC.filter(r => r.zone === a).length)[0];
+    after(() => {
+      G.bars($("#c-ec-fs"), { labels: ["Élèves", "Enseignants", "Autre personnel", "Fonction non précisée"].filter(f => L.some(r => (r.fonction === "Élève" ? "Élèves" : r.fonction === "Enseignant" ? "Enseignants" : r.fonction === "Non précisée" ? "Fonction non précisée" : "Autre personnel") === f)),
+        h: 240, totals: 1, allLabels: 1, maxBw: 90, series: [["Féminin", "--sex-f", "F"], ["Masculin", "--sex-m", "M"], ["Sexe non précisé", "--rc-grey", "?"]].map(([lab, c, k]) => ({ label: lab, color: col(c),
+          values: ["Élèves", "Enseignants", "Autre personnel", "Fonction non précisée"].filter(f => L.some(r => (r.fonction === "Élève" ? "Élèves" : r.fonction === "Enseignant" ? "Enseignants" : r.fonction === "Non précisée" ? "Fonction non précisée" : "Autre personnel") === f))
+            .map(f => L.filter(r => r.sexe === k && (r.fonction === "Élève" ? "Élèves" : r.fonction === "Enseignant" ? "Enseignants" : r.fonction === "Non précisée" ? "Fonction non précisée" : "Autre personnel") === f).length) })).filter(se => se.values.some(v => v)) });
+      const AG = [...EC_AGES.map(a => a[0]), "Non précisé"].filter(a => L.some(r => ecTranche(r.age) === a));
+      G.bars($("#c-ec-age"), { labels: AG, h: 240, totals: 1, allLabels: 1, maxBw: 80, series: [["Féminin", "--sex-f", "F"], ["Masculin", "--sex-m", "M"], ["Sexe non précisé", "--rc-grey", "?"]].map(([lab, c, k]) => ({ label: lab, color: col(c), values: AG.map(a => L.filter(r => r.sexe === k && ecTranche(r.age) === a).length) })).filter(se => se.values.some(v => v)) });
+      G.hbars($("#c-ec-st"), { items: EC_ST.map(([s_, c]) => ({ label: `${s_} (${pc(ratio(L.filter(r => r.statut === s_).length, L.length), 0)})`, value: L.filter(r => r.statut === s_).length, color: col(c) })).filter(i => i.value) });
+      G.bars($("#c-ec-niv"), { labels: nivR.map(x => x.n), h: 240, totals: 1, allLabels: 1, maxBw: 90, series: [{ label: "Décédés", color: col("--rc-rt"), values: nivR.map(x => x.L.filter(r => r.deces).length) }, { label: "Vivants (guéris, en traitement, vivants)", color: col("--s1"), values: nivR.map(x => x.L.filter(r => !r.deces).length) }] });
+      if (TW.length) G.tendance($("#c-ec-sem"), { labels: TW.map(w => ({ wk: isoW(w)[1], an: isoW(w)[0], debut: dfr(iso(w)) })), dec: TW.map(w => Ld.filter(r => r.deces && r._d >= w && r._d < w + 7).length), viv: TW.map(w => Ld.filter(r => !r.deces && r._d >= w && r._d < w + 7).length), h: 360, vd: 1, xTitle: "Semaine de la date rapportée dans la liste", yTitle: "Personnes touchées" });
+      ecMap($("#c-ec-map1"), "ecoles", mapNiv, mapZone);
+      ecMap($("#c-ec-map2"), S.ecMapInd || "eleves", mapNiv, mapZone);
+    });
+    const ecCols = [{ k: "k", t: "École" }, { k: "niveau", t: "Niveau" }, { k: "aire", t: "Aire de santé" }, ...(zs.length > 1 ? [{ k: "zone", t: "Zone de santé" }] : []), { k: "n", t: "Personnes", num: 1 }, { k: "eleves", t: "Élèves", num: 1 }, { k: "ens", t: "Enseignants", num: 1 },
+      { k: "F", t: "Féminin", num: 1 }, { k: "M", t: "Masculin", num: 1 }, { k: "dec", t: "Décès", num: 1 }, { k: "last", t: "Dernière date", num: 1, v: r => r.last === null ? "—" : dfr(iso(r.last), false) }];
+    const uCols = (lab, extra = []) => [{ k: "k", t: lab, v: r => esc(r.nom || r.k) }, ...extra, { k: "nEcoles", t: "Écoles touchées", num: 1 }, { k: "n", t: "Personnes", num: 1 }, { k: "eleves", t: "Élèves", num: 1 }, { k: "elviv", t: "Élèves vivants", num: 1 }, { k: "eldec", t: "Élèves décédés", num: 1 },
+      { k: "ens", t: "Enseignants", num: 1 }, { k: "F", t: "Féminin", num: 1 }, { k: "M", t: "Masculin", num: 1 }, { k: "dec", t: "Décès (tous)", num: 1 }, { k: "let", t: "Létalité", num: 1, v: r => pc(r.let, 0) }];
+    const opt = (v, cur, lab) => `<option value="${esc(v)}" ${cur === v ? "selected" : ""}>${lab}</option>`;
+    const dq = [M.a_confirmer ? `<b>${nf(M.a_confirmer)}</b> personne${M.a_confirmer > 1 ? "s" : ""} à identification à confirmer (lignes en rouge dans la liste ou école non précisée)` : "",
+      M.dates && M.dates["année corrigée"] ? `${nf(M.dates["année corrigée"])} date${M.dates["année corrigée"] > 1 ? "s" : ""} saisie${M.dates["année corrigée"] > 1 ? "s" : ""} en 2027 ramenée${M.dates["année corrigée"] > 1 ? "s" : ""} à 2026` : "",
+      M.dates && M.dates["date incohérente"] ? `${nf(M.dates["date incohérente"])} date incohérente non utilisée` : "", (M.aires_sans_contour || []).length ? `aire${M.aires_sans_contour.length > 1 ? "s" : ""} absente${M.aires_sans_contour.length > 1 ? "s" : ""} des contours officiels : ${esc(M.aires_sans_contour.join(", "))}` : ""].filter(Boolean);
+    return `<div class="pil-bar">
+        ${zs.length > 1 ? `<label class="field">Zone de santé<select data-state="ecZone">${opt("", S.ecZone || "", "Toutes")}${zs.map(z => opt(z, S.ecZone, esc(ZN[z] || z))).join("")}</select></label>` : ""}
+        <label class="field">Aire de santé<select data-state="ecAire">${opt("", S.ecAire || "", "Toutes")}${aires.map(a => opt(a, S.ecAire, esc(a))).join("")}</select></label>
+        <span class="small muted"><b>${where}</b> · liste « ${esc(M.fichier)} » chargée le ${esc(M.maj)} · dates du ${dfr(M.date_min)} au ${dfr(M.date_max)}${M.excel && SERVED ? ` · <a href="${outp(M.excel)}" download>⤓ tableaux Excel</a>` : ""}</span>
+      </div>
+      <div class="grid g4">
+        ${kpi("Personnes touchées", nf(L.length), `${nf(el.length)} élèves, ${nf(ens.length)} enseignants, ${nf(L.length - el.length - ens.length)} autres ou non précisés`, { color: "--s2" })}
+        ${kpi("Élèves touchés", nf(el.length), `${nf(el.filter(r => r.sexe === "F").length)} filles, ${nf(el.filter(r => r.sexe === "M").length)} garçons · âge médian ${med === null ? "—" : nf(med, 0) + " ans"}`, { color: "--s1" })}
+        ${kpi("Écoles touchées", nf(ecs.size), `${nf(L.filter(r => r.ident).length)} personnes rattachées à une école ; ${nf(nonId)} sans école identifiée`, { color: "--s3" })}
+        ${kpi("Décès", nf(dec.length), `létalité ${pc(ratio(dec.length, L.length), 0)} · ${nf(el.filter(r => r.deces).length)} élèves et ${nf(ens.filter(r => r.deces).length)} enseignants décédés`, { color: "--rc-rt", cls: dec.length ? "alert" : "" })}
+        ${kpi("Élèves vivants", nf(el.filter(r => !r.deces).length), `${nf(el.filter(r => r.statut === "Guéri").length)} guéris, ${nf(el.filter(r => r.statut === "En traitement (CTE)").length)} en traitement au CTE`, { color: "--good" })}
+        ${kpi("Enseignants et personnel", nf(ens.length + L.filter(r => r.fonction === "Autre personnel").length), `${nf(ens.filter(r => r.deces).length)} décès`, { color: "--s7" })}
+        ${kpi("Aires de santé touchées", nf(new Set(L.map(r => r.aire)).size), `${nf(new Set(L.map(r => r.zone).filter(Boolean)).size)} zone${new Set(L.map(r => r.zone).filter(Boolean)).size > 1 ? "s" : ""} de santé`, { color: "--warn" })}
+        ${kpi("Enfants de moins de 18 ans", nf(L.filter(r => r.age !== null && r.age < 18).length), `${pc(ratio(L.filter(r => r.age !== null && r.age < 18).length, L.length), 0)} des personnes touchées · ${nf(L.filter(r => r.age !== null && r.age < 6).length)} de moins de 6 ans`, { color: "--sex-f" })}
+      </div>
+      ${dq.length ? notice("Qualité des données : " + dq.join(" ; ") + ".", "warn") : ""}
+      <div class="grid g2">
+        ${panel("Personnes touchées par fonction et sexe", "Élèves, enseignants et autre personnel des écoles", `<div id="c-ec-fs"></div>`, { png: "scolaire_fonction_sexe" })}
+        ${panel("Âge et sexe", "Toutes les personnes touchées : moins de 6 ans, 6 à moins de 12 ans, 12 à moins de 18 ans, 18 ans et plus", `<div id="c-ec-age"></div>`, { png: "scolaire_age_sexe" })}
+        ${panel("Statut actuel", "Selon la liste (DCD = décédé ; CTE = en traitement)", `<div id="c-ec-st"></div>`, { png: "scolaire_statut" })}
+        ${panel("Niveau scolaire", "Maternelle (EM), primaire (EP), secondaire (instituts) ; décédés et vivants", `<div id="c-ec-niv"></div>`, { png: "scolaire_niveau" })}
+      </div>
+      ${TW.length ? panel("Personnes touchées par semaine", `Au-dessus de chaque barre : V = vivants (bleu), D = décédés (rouge) · date rapportée dans la liste ; létalité hebdomadaire sur l'axe de droite · ${nf(L.length - Ld.length)} sans date utilisable`, `<div id="c-ec-sem"></div>`, { png: "scolaire_semaines", csv: "c-ec-sem" }) : ""}
+      <div class="grid g2">
+        ${panel(`Écoles touchées par ${mapNiv === "zone" ? "zone" : "aire"} de santé`, mapNiv === "zone" ? "Nombre d'écoles ayant au moins une personne touchée" : `Zone de santé de ${esc(ZN[mapZone] || mapZone)} · nombre d'écoles touchées par aire`, `${zs.length > 1 || S.ecZone ? `<div class="filters"><label>Niveau <select data-state="ecMapNiv">${opt("aire", mapNiv, "Aires de santé")}${opt("zone", mapNiv, "Zones de santé")}</select></label></div>` : ""}<div id="c-ec-map1"></div>`, { png: "scolaire_carte_ecoles" })}
+        ${panel(`Élèves touchés par ${mapNiv === "zone" ? "zone" : "aire"} de santé`, "Chiffre dans le cercle : nombre d'élèves", `<div class="filters"><label>Élèves <select data-state="ecMapInd">${opt("eleves", S.ecMapInd || "eleves", "Tous les élèves")}${opt("elviv", S.ecMapInd, "Élèves vivants")}${opt("eldec", S.ecMapInd, "Élèves décédés")}</select></label></div><div id="c-ec-map2"></div>`, { png: "scolaire_carte_eleves" })}
+      </div>
+      ${panel("Écoles touchées", `${nf(byEc.length)} écoles · ${nf(nonId)} personnes sans école identifiée ne figurent pas dans ce tableau`, table("t-ec", byEc, ecCols, { sort: "n", limit: 80 }), { csv: "t-ec" })}
+      ${panel("Par aire de santé", "Écoles, élèves vivants et décédés, enseignants", table("t-ec-aire", byAire, uCols("Aire de santé", zs.length > 1 ? [{ k: "zone", t: "Zone de santé" }] : []), { sort: "n" }), { csv: "t-ec-aire" })}
+      ${zs.length > 1 ? panel("Par zone de santé", "", table("t-ec-zone", byZone, uCols("Zone de santé")), { csv: "t-ec-zone" }) : ""}
+      <p class="note">${esc(M.confidentialite)}. Source : liste transmise des élèves et du personnel des écoles touchés, non rapprochée de la liste labo des cas confirmés.</p>`;
+  }
+  function ecMap(box, ind, niv, zone) {
+    if (!box) return;
+    const L = EC.filter(r => !S.ecAire || r.aire === S.ecAire);
+    const key = niv === "zone" ? (r => r.zone) : (r => r.zone === zone ? r.aire : null);
+    const A = Object.fromEntries(ecAgg(L, key).map(x => [x.k, x]));
+    const val = k => { const x = A[k]; if (!x) return 0; return ind === "ecoles" ? x.nEcoles : ind === "elviv" ? x.elviv : ind === "eldec" ? x.eldec : x.eleves; };
+    const pal = [TL[1], TL[2], TL[3], TL[4]];   // mêmes couleurs que la carte des catégories des zones
+    let geo, areas;
+    if (niv === "zone") { geo = { features: (P.geo.features || []).map(f => ({ aire: f.zone, nom: f.nom, geometry: f.geometry })) }; areas = ZONES.map(z => ({ key: z.code, name: z.nom })); }
+    else { const gz = (P.ecoles.geo || {})[zone] || {}, fs = Array.isArray(gz) ? gz : (gz.features || []);
+      geo = { features: fs.map(f => ({ aire: f.aire, nom: f.aire, geometry: f.geometry, lab: f.lab, petite: f.petite })), zoom: gz.zoom || null };
+      areas = [...new Set([...fs.map(f => f.aire), ...Object.keys(A)])].map(a => ({ key: a, name: a })); }
+    const mx = Math.max(0, ...areas.map(a => val(a.key))), B = ecBins(mx), cls = v => v ? B.findIndex(([lo, hi]) => v >= lo && v <= hi) : -1;
+    const pc_ = i => pal[B.length === 1 ? 3 : B.length === 2 ? [1, 3][i] : Math.round(i * 3 / Math.max(1, B.length - 1))];
+    const lab = { ecoles: "Écoles touchées", eleves: "Élèves touchés", elviv: "Élèves vivants", eldec: "Élèves décédés" }[ind];
+    const leg = [...B.map(([lo, hi], i) => ({ label: lo === hi ? `${lo}` : `${lo} à ${hi}`, color: pc_(i) })), { label: "aucun", color: TL_NA }]; leg.title = lab;
+    G.map(box, { areas, geo, value: val, color: v => v ? pc_(cls(v)) : TL_NA, selected: niv === "aire" ? S.ecAire : S.ecZone,
+      label: k => val(k) ? nf(val(k)) : "", legend: leg, valueLabel: lab,
+      tipHtml: k => { const x = A[k], nm = niv === "zone" ? (ZN[k] || k) : k; if (!x) return `<b>${esc(nm)}</b>aucune personne touchée`;
+        return `<b>${esc(nm)}</b>${nf(x.nEcoles)} école${x.nEcoles > 1 ? "s" : ""} touchée${x.nEcoles > 1 ? "s" : ""}<br>${nf(x.eleves)} élèves (${nf(x.elviv)} vivants, ${nf(x.eldec)} décédés)<br>${nf(x.ens)} enseignants · ${nf(x.n)} personnes au total`; },
+      onClick: k => { if (niv === "zone") { S.ecZone = S.ecZone === k ? "" : k; S.ecAire = ""; } else S.ecAire = S.ecAire === k ? "" : k; render(); } });
+  }
+
+  /* ================================================================== SITUATION ÉPIDÉMIOLOGIQUE */
+  function pageSituation() {
+    const t = day(S.date);
+    const L = CAS.filter(c => inPer(c.date) && (!S.zone || c.zone === S.zone));
+    const prev = CAS.filter(c => c._d !== null && c._d < day(S.from) && c._d >= day(S.from) - (t - day(S.from) + 1) && (!S.zone || c.zone === S.zone));
+    const dec = L.filter(c => c.deces).length, h = L.filter(c => c.sexe === "M").length, f = L.filter(c => c.sexe === "F").length;
+    const ages = L.map(c => c.age).filter(a => a !== null && a !== undefined).sort((a, b) => a - b);
+    const kids = L.filter(c => c.age !== null && c.age < 15).length;
+    const cs = casZone(S.zone, t);
+    const ws = []; for (let w = wk(day(S.from)); w <= wk(t); w += 7) ws.push(w);
+    const top = (() => { const n = {}; L.forEach(c => n[c.zone] = (n[c.zone] || 0) + 1); return Object.entries(n).sort((a, b) => b[1] - a[1]).map(x => x[0]); })();
+    const groups = S.zone ? [S.zone] : top.slice(0, 6);
+    after(() => {
+      const ser = groups.map((z, i) => ({ label: ZN[z] || z, color: col(PAL[i % PAL.length]), values: ws.map(w => L.filter(c => c.zone === z && c._d >= w && c._d < w + 7).length) }));
+      if (!S.zone && top.length > 6) ser.push({ label: "Autres zones", color: col("--rc-grey"), values: ws.map(w => L.filter(c => !groups.includes(c.zone) && c._d >= w && c._d < w + 7).length) });
+      G.bars($("#c-epi"), { labels: ws.map(iso), series: ser, h: 280, fmtX: (d, l) => l ? "Semaine du " + dfr(d) : dshort(d) });
+      const days = []; for (let d = day(S.from); d <= t; d++) days.push(d);
+      G.bars($("#c-epi-j"), { labels: days.map(iso), series: [{ label: "Décédés", color: col("--rc-rt"), values: days.map(d => L.filter(c => c._d === d && c.deces).length) }, { label: "Vivants", color: col("--s2"), values: days.map(d => L.filter(c => c._d === d && !c.deces).length) }], h: 200, fmtX: (d, l) => l ? dfr(d) : dshort(d) });
+      /* zones ayant notifié des cas le jour choisi (date « au ») */
+      const J = CAS.filter(c => c._d === t && (!S.zone || c.zone === S.zone));
+      const zj = Object.entries(J.reduce((o, c) => (o[c.zone] = (o[c.zone] || 0) + 1, o), {})).sort((a, b) => b[1] - a[1]).map(x => x[0]);
+      if (zj.length) G.bars($("#c-zj"), { labels: zj, totals: 1, allLabels: 1, rotate: zj.length > 8, maxBw: 70, h: zj.length > 8 ? 320 : 260, fmtX: z => ZN[z] || z,
+        series: [{ label: "Vivants", color: col("--s2"), values: zj.map(z => J.filter(c => c.zone === z && !c.deces).length) }, { label: "Décédés", color: col("--rc-rt"), values: zj.map(z => J.filter(c => c.zone === z && c.deces).length) }],
+        onClick: i => { S.zone = zj[i]; render(); } });
+      /* cas par jour, par zone de santé (période) */
+      const dz = []; for (let d = day(S.from); d <= t; d++) dz.push(d);
+      const zser = groups.map((z, i) => ({ label: ZN[z] || z, color: col(PAL[i % PAL.length]), values: dz.map(d => L.filter(c => c.zone === z && c._d === d).length) }));
+      if (!S.zone && top.length > 6) zser.push({ label: "Autres zones", color: col("--rc-grey"), values: dz.map(d => L.filter(c => !groups.includes(c.zone) && c._d === d).length) });
+      G.bars($("#c-epi-jz"), { labels: dz.map(iso), series: zser, h: 280, totals: dz.length <= 31 ? 1 : 0, fmtX: (d, l) => l ? dfr(d) : dshort(d) });
+      const AG = [["0–4", 0, 4], ["5–14", 5, 14], ["15–24", 15, 24], ["25–34", 25, 34], ["35–44", 35, 44], ["45–59", 45, 59], ["60+", 60, 200]];
+      G.bars($("#c-age"), { labels: AG.map(a => a[0]), series: [{ label: "Hommes", color: col("--sex-m"), values: AG.map(([, a, b]) => L.filter(c => c.sexe === "M" && c.age >= a && c.age <= b).length) }, { label: "Femmes", color: col("--sex-f"), values: AG.map(([, a, b]) => L.filter(c => c.sexe === "F" && c.age >= a && c.age <= b).length) }], h: 220 });
+      G.hbars($("#c-let"), { items: AG.map(([l, a, b]) => { const g = L.filter(c => c.age >= a && c.age <= b); return { label: `${l} ans (${g.length} cas)`, value: g.length ? 100 * g.filter(c => c.deces).length / g.length : 0, color: col("--rc-rt") }; }), pct: 1, max: 100 });
+    });
+    const zr = ZONES.map(z => { const l = L.filter(c => c.zone === z.code), p = prev.filter(c => c.zone === z.code), c = casZone(z.code, t); return { nom: z.nom, code: z.code, cat: c.cat, n: l.length, prev: p.length, deces: l.filter(x => x.deces).length, let: ratio(l.filter(x => x.deces).length, l.length), inc: z.population ? 1e5 * l.length / z.population : null, cum: c.n, jours: c.jours }; }).filter(r => r.n || r.prev);
+    return `<p class="lead">${scope()}, <b>${nf(L.length)} cas confirmés</b> ${perTxt()} (${nf(prev.length)} sur la période précédente de même durée), dont <b>${nf(dec)} décès</b> (${pc(ratio(dec, L.length), 1)}). ${S.zone ? `Dernier cas il y a ${nf(cs.jours)} jours.` : `${nf(zr.filter(r => r.n).length)} zones ont notifié des cas sur la période.`}</p>
+      <div class="grid g5">
+        ${kpi("Cas confirmés sur la période", nf(L.length), `${L.length >= prev.length ? "+" : ""}${nf(L.length - prev.length)} vs période précédente`, { color: "--s2", cls: L.length > prev.length ? "alert" : "" })}
+        ${kpi("Décès", nf(dec), `létalité ${pc(ratio(dec, L.length), 1)} sur la période`, { color: "--rc-rt" })}
+        ${kpi("Cas en 7 jours", nf(cs.n7), `${nf(cs.n7p)} les 7 jours précédents`, { color: "--s1", cls: cs.n7 > cs.n7p ? "alert" : "" })}
+        ${kpi("Hommes / femmes", `${nf(h)} / ${nf(f)}`, `${pc(ratio(f, h + f), 0)} de femmes`, { color: "--sex-f" })}
+        ${kpi("Âge médian", ages.length ? nf(ages[Math.floor(ages.length / 2)]) + " ans" : "—", `${nf(kids)} enfants de moins de 15 ans (${pc(ratio(kids, L.length), 0)})`, { color: "--s3" })}
+      </div>
+      ${panel("Courbe épidémique hebdomadaire", `Cas confirmés par semaine de confirmation (date d'analyse au laboratoire) · ${S.zone ? esc(ZN[S.zone]) : "6 zones les plus touchées sur la période"}`, `<div id="c-epi"></div>`, { png: "courbe_epidemique" })}
+      ${(() => { const J = CAS.filter(c => c._d === t && (!S.zone || c.zone === S.zone)), nz = new Set(J.map(c => c.zone)).size;
+        return panel(`Zones de santé ayant notifié des cas le ${dfr(S.date)}`, J.length ? `${nf(J.length)} cas confirmés dans ${nf(nz)} zone${nz > 1 ? "s" : ""}, dont ${nf(J.filter(c => c.deces).length)} décès · changez la date « au » pour voir un autre jour · cliquez une barre pour filtrer la zone` : "Changez la date « au » pour voir un autre jour",
+          J.length ? `<div id="c-zj"></div>` : notice(`Aucun cas confirmé notifié le ${dfr(S.date)}${S.zone ? " dans cette zone" : ""}.`), { png: "zones_notifiantes_jour" }); })()}
+      ${panel("Cas confirmés par jour et par zone de santé", `${perTxt()} · ${S.zone ? esc(ZN[S.zone]) : "6 zones les plus touchées sur la période"}`, `<div id="c-epi-jz"></div>`, { png: "cas_par_jour_par_zone" })}
+      ${panel("Cas confirmés par jour", perTxt(), `<div id="c-epi-j"></div>`, { png: "cas_par_jour" })}
+      <div class="grid g2">
+        ${panel("Âge et sexe des cas", perTxt(), `<div id="c-age"></div>`, { png: "age_sexe" })}
+        ${panel("Létalité par âge", "Part des cas décédés (liste labo : statut au prélèvement et issue)", `<div id="c-let"></div>`, { png: "letalite_age" })}
+      </div>
+      ${S.zone ? "" : panel("Cas par zone de santé", `${perTxt()} · cliquez une ligne pour filtrer`, table("t-sit", zr, [{ k: "nom", t: "Zone de santé", v: r => `${catSq(r.cat)}${esc(r.nom)}` }, { k: "n", t: "Cas (période)", num: 1 }, { k: "prev", t: "Période précédente", num: 1 },
+        { k: "deces", t: "Décès", num: 1 }, { k: "let", t: "Létalité", num: 1, v: r => pc(r.let, 0) }, { k: "inc", t: "Incidence /100 000", num: 1, d: 1 }, { k: "cum", t: "Cumul", num: 1 }, { k: "jours", t: "Jours depuis le dernier cas", num: 1 }],
+        { sort: "n", rowClick: r => r.code }), { csv: "t-sit" })}`;
+  }
+
+  /* ================================================================== ZONES DE SANTÉ (comparaison) */
+  function pageZones() {
+    const t = day(S.date);
+    const rows = ZONES.map(z => zoneRow(z, t)).filter(r => r.cs.n || r.s || r.al?.total || DETAIL.has(r.code)).map(r => ({
+      ...r, cas7: r.cs.n7, cas21: r.cs.n21, cum: r.cs.n, deces: r.cs.deces, jours: r.cs.jours, as: r.s ? r.s.a_suivre : null, taux: r.s ? r.s.taux : null, jmv: r.s ? r.s.jmv : null, pdv: r.s ? r.s.pdv : null,
+      altot: r.al ? r.al.total : null, alinv: r.al && r.al.total ? r.al.inv_pct : null, rt: r.z.rt ? r.z.rt.rt : null, rtlo: r.z.rt ? r.z.rt.lo : null, rthi: r.z.rt ? r.z.rt.hi : null,
+      posi: r.z.labo ? r.z.labo.p : null, pmpos: r.z.labo ? r.z.labo.pm_pos : null, pm: r.z.labo ? r.z.labo.pm : null, eds: r.al ? r.al.eds : null, swab: r.al ? r.al.swab : null, dcom: r.al ? r.al.deces : null, connus: r.ind.connus_pct ?? null, disol: r.ind.d_isol ?? null, dlist: r.ind.d_listage ?? null, pos: r.ind.positivite ?? null }));
+    const cnt = Object.fromEntries(CO.map(c => [c, ZONES.filter(z => zoneRow(z, t).cat === c).length]));
+    return `<p class="lead">${CO.filter(c => cnt[c]).map(c => `<b>${cnt[c]}</b> en ${c.toLowerCase()}`).join(", ")} au ${dfr(S.date)}. Chaque indicateur est comparé aux cibles : vert = atteinte, jaune = proche, rouge = loin de la cible. Cliquez une zone pour ouvrir son tableau de bord détaillé.</p>
+      ${panel("Bulletin des zones de santé", "Cas : liste labo provinciale · suivi des contacts : dernier jour saisi dans la base chiffrée · alertes : 7 derniers jours saisis · cas connus comme contacts, délais et positivité : analyses détaillées des zones",
+        table("t-zones", rows, [{ k: "nom", t: "Zone de santé", v: r => `${catSq(r.cat)}<b>${esc(r.nom)}</b>` }, { k: "cas7", t: "Cas 7 j", num: 1 }, { k: "cas21", t: "Cas 21 j", num: 1 }, { k: "cum", t: "Cumul", num: 1 }, { k: "deces", t: "Décès", num: 1 },
+          { k: "jours", t: "Jours depuis le dernier cas", num: 1 }, { k: "rt", t: "Rt (IC 95 %)", num: 1, v: r => r.rt === null ? `<span class="muted">—</span>` : `${pill(nf(r.rt, 2), r.rthi < 1 ? "ok" : r.rtlo > 1 ? "bad" : "warn")} <span class="muted small">${nf(r.rtlo, 2)}–${nf(r.rthi, 2)}</span>`, csv: r => r.rt },
+          { k: "posi", t: "Positivité (labo)", num: 1, v: r => pc(r.posi, 1) }, { k: "pmpos", t: "Post-mortem positifs", num: 1, v: r => r.pm ? `${nf(r.pmpos)} / ${nf(r.pm)}` : "—", csv: r => r.pmpos },
+          { k: "as", t: "Contacts à suivre", num: 1 }, { k: "taux", t: "Taux de suivi", num: 1, v: r => feu(r.taux, C.taux_suivi_pct, 75) }, { k: "jmv", t: "Jamais vus", num: 1 }, { k: "pdv", t: "PDV", num: 1 },
+          { k: "altot", t: "Alertes 7 j", num: 1 }, { k: "alinv", t: "Alertes investiguées", num: 1, v: r => feu(r.alinv, 95, 80) },
+          { k: "dcom", t: "Décès comm. 7 j (swabés · EDS)", num: 1, v: r => r.dcom ? `${nf(r.dcom)} <span class="muted small">(${nf(r.swab)} · ${nf(r.eds)})</span>` : (r.dcom === 0 ? "0" : "—"), csv: r => r.dcom }, { k: "connus", t: "Cas 21 j connus comme contacts", num: 1, v: r => feu(r.connus, C.cas_connus_contacts_pct, 50) },
+          { k: "disol", t: "Début des signes → isolement (j)", num: 1, v: r => feu(r.disol, C.delai_isolement_j, 5, false, x => nf(x, 0) + " j") }, { k: "dlist", t: "Délai de listage (j)", num: 1, v: r => feu(r.dlist, C.delai_listage_j || 1, 3, false, x => nf(x, 0) + " j") },
+          { k: "pos", t: "Positivité", num: 1, v: r => pc(r.pos, 1) }, { k: "code", t: "", v: r => zsBtn(r.code), csv: () => "" }], { sort: "cas21", rowClick: r => r.code, limit: 60 }), { csv: "t-zones" })}`;
+  }
+
+  /* ================================================================== CARTE ET RAPPORTS */
+  function pageCarte() {
+    const t = day(S.date);
+    after(() => drawMap($("#c-map"), S.mapInd, t));
+    const cm = (P.exports || {}).cartes || {};
+    const lab = { categorie: "Catégorie des zones de santé", cas21: "Cas des 21 derniers jours", cas7: "Cas des 7 derniers jours", inc: "Incidence cumulée", taux: "Taux de suivi des contacts", as: "Contacts à suivre" };
+    const ks = Object.keys(cm);
+    return `<div class="grid g21">
+        ${panel(MAPIND.find(x => x[0] === S.mapInd)[1], `Situation au ${dfr(S.date)} · couleurs : blanc = pas de problème ou pas de donnée fiable ; vert = données disponibles et paramètres contrôlés ; jaune = situation moyenne ; rouge (clair → sombre) = zones à problème puis critiques`,
+          `<div class="filters"><label>Indicateur <select data-state="mapInd">${MAPIND.map(([k, l]) => `<option value="${k}" ${S.mapInd === k ? "selected" : ""}>${l}</option>`).join("")}</select></label></div><div id="c-map"></div>`, { png: "carte_province" })}
+        ${panel("Rapport et tableaux de la province", `Situation au ${dfr(P.meta.date_rapport)}`, `<div class="quick" style="grid-template-columns:1fr">
+          ${P.exports && P.exports.rapport_pdf ? `<a href="${outp(P.exports.rapport_pdf)}" target="_blank" rel="noopener">${svgI("pdf")}<div><b>Rapport de situation provincial</b><span>PDF A4 : indicateurs, points d'attention, cartes, courbe, tableau par zone</span></div></a>` : ""}
+          ${P.exports && P.exports.classeur ? `<a href="${outp(P.exports.classeur)}" download>${svgI("zones")}<div><b>Classeur des tableaux</b><span>Excel : synthèse par zone, cas par semaine, suivi, alertes</span></div></a>` : ""}
+        </div><p class="note">Le rapport de chaque zone de santé se télécharge depuis son tableau de bord (« Carte et rapports »).</p>`)}
+      </div>
+      ${ks.length ? panel("Cartes pour rapport", "Format A4 paysage : titre, légende avec le nombre de zones par classe, flèche du nord, échelle, source", `<div class="maps-grid">${ks.map(k => `<div class="map-card"><a href="${outp("cartes/" + encodeURIComponent(cm[k]))}" target="_blank" rel="noopener"><img class="map-img" loading="lazy" src="${outp("cartes/" + encodeURIComponent(cm[k]))}" alt="${esc(lab[k] || k)}"></a><div class="flex between" style="margin-top:8px"><b class="small">${esc(lab[k] || k)}</b><button class="btn sm" type="button" data-map-png="${k}" data-map-file="${esc(cm[k])}" title="Carte et commentaire dans une seule image">⤓ PNG</button></div>${((P.exports || {}).commentaires || {})[k] ? `<p class="map-cap">${capHtml(P.exports.commentaires[k])}</p>` : ""}</div>`).join("")}</div>`) : ""}`;
+  }
+
+  /* ================================================================== SUIVI DES CONTACTS */
+  const NX = () => ({ esc, nf, pc, dfr, dshort, kpi, panel, table, notice, pill, after, G, col, unite: c => ZN[c] || c, dateChoisie: S.date, excel: P.meta.suivi_contacts_excel ? outp(P.meta.suivi_contacts_excel) : null });
+  function pageJourNat() { return P.jour ? window.NKNat.jour(P.jour, NX()) : notice("La situation du jour n'est pas disponible : lancez l'analyse avec les exports DHIS2.", "warn"); }
+  function pagePecNat() { return P.pec ? window.NKNat.pec(P.pec, NX()) : notice("Prise en charge : déposez l'export DHIS2 « Prise en charge » dans les fichiers provinciaux.", "warn"); }
+  function pageContacts() {
+    const t = day(S.date);
+    const nat = P.ct && window.NKNat && !S.zone ? window.NKNat.contacts(P.ct, NX()) : (P.ct && S.zone ? notice(`Les indicateurs nationaux du suivi des contacts de la zone sont dans son tableau de bord (menu « Suivi des contacts »).`, "") : "");
+    if (!SV.length) return nat || notice("<b>Suivi des contacts</b>, la base chiffrée provinciale (feuille « SaisieSuiviContact ») ou le suivi des contacts DHIS2 n'a pas été chargé.", "warn");
+    const codes = S.zone ? [S.zone] : Object.keys(SVZ);
+    const sp = suiviProv(t, codes);
+    const days = []; for (let d = day(S.from); d <= t; d++) days.push(d);
+    const serie = days.map(d => suiviProv(d, codes));
+    const zr = Object.keys(SVZ).map(c => { const s = suiviAt(c, t, 7), z = ZB[c]; if (!s || !z) return null;
+      const w = SVZ[c].filter(r => r._d > t - 7 && r._d <= t), a7 = w.reduce((x, r) => x + r.a_suivre, 0), v7 = w.reduce((x, r) => x + r.vus, 0);
+      return { code: c, nom: z.nom, cat: casZone(c, t).cat, date: s.date, retard: s.retard, as: s.a_suivre, vus: s.vus, taux: s.taux, taux7: ratio(v7, a7), jmv: s.jmv, pdv: s.pdv, nv48: s.nv48, ret: s.reticences, dep: s.deplaces, susp7: w.reduce((x, r) => x + r.suspects, 0), nouv7: w.reduce((x, r) => x + r.nouveaux, 0), cas21: casZone(c, t).n21 }; }).filter(Boolean);
+    after(() => {
+      G.lines($("#c-taux"), { labels: days.map(iso), series: [{ label: S.zone ? ZN[S.zone] : "Province", color: col("--s1"), values: serie.map(o => o.taux) }], pct: 1, max: 100, target: C.taux_suivi_pct, digits: 1, fmtX: (d, l) => l ? dfr(d) : dshort(d) });
+      G.bars($("#c-nv"), { labels: days.map(iso), series: [{ label: "Vus", color: col("--st-v24"), values: serie.map(o => o.vus) }, { label: "Jamais vus", color: col("--s7"), values: serie.map(o => o.jmv) }, { label: "Perdus de vue", color: col("--s2"), values: serie.map(o => o.pdv) }, { label: "Autres non vus", color: col("--st-nv"), values: serie.map(o => Math.max(0, o.a_suivre - o.vus - o.jmv - o.pdv)) }], fmtX: (d, l) => l ? dfr(d) : dshort(d) });
+      if (!S.zone) {
+        const d0 = Math.max(day(S.from), t - 89), dd = []; for (let d = d0; d <= t; d++) dd.push(d);
+        const zs = zr.sort((a, b) => b.as - a.as).map(r => r.code);
+        G.matrix($("#c-mat"), { cols: dd.map(iso), rows: zs.map(c => ({ label: ZN[c], values: dd.map(d => { const r = (SVZ[c] || []).find(x => x._d === d); return r && r.a_suivre ? 100 * r.vus / r.a_suivre : null; }) })),
+          color: v => v >= C.taux_suivi_pct ? TL[0] : v >= 80 ? TL[1] : v >= 65 ? TL[2] : v >= 50 ? TL[3] : TL[4], fmtX: (d, l) => l ? dfr(d) : dshort(d), fmt: v => pc(v, 0) + " de contacts vus" });
+      }
+    });
+    const late = zr.filter(r => r.retard > 1 && r.cas21);
+    return `${nat}${nat ? `<h2 style="margin:18px 0 8px">Suivi quotidien (séries journalières)</h2>` : ""}<p class="lead">${scope()}, le ${dfr(S.date)}, <b>${nf(sp.vus)} contacts vus sur ${nf(sp.a_suivre)} à suivre</b> (${pc(sp.taux, 1)}) dans ${nf(sp.zones)} zone(s) ayant rapporté ; ${nf(sp.jmv)} jamais vus et ${nf(sp.pdv)} perdus de vue.</p>
+      <div class="grid g5">
+        ${kpi("Contacts à suivre", nf(sp.a_suivre), `${nf(sp.zones)} zones rapportées`, { color: "--s1" })}
+        ${kpi("Taux de suivi", pc(sp.taux, 1), `cible ${nf(C.taux_suivi_pct)} %`, { color: "--st-v24", cls: sp.taux !== null && sp.taux < C.taux_suivi_pct ? "alert" : "good", meter: sp.taux, meterColor: sp.taux < C.taux_suivi_pct ? "--critical" : "--good" })}
+        ${kpi("Jamais vus", nf(sp.jmv), `${pc(ratio(sp.jmv, sp.a_suivre), 0)} des contacts à suivre`, { color: "--s7", cls: sp.jmv ? "alert" : "" })}
+        ${kpi("Perdus de vue", nf(sp.pdv), "non vus depuis 72 h ou plus", { color: "--s2", cls: sp.pdv ? "alert" : "" })}
+        ${kpi("Devenus suspects", nf(serie.slice(-7).reduce((a, o) => a + o.suspects, 0)), `7 derniers jours · ${nf(serie.slice(-7).reduce((a, o) => a + o.nouveaux, 0))} nouveaux contacts`, { color: "--st-susp" })}
+      </div>
+      ${late.length ? notice(`<b>Données de suivi en retard</b> pour des zones ayant eu des cas en 21 jours : ${late.map(r => `${esc(r.nom)} (dernier rapport le ${dfr(r.date, false)})`).join(", ")}.`, "warn") : ""}
+      <div class="grid g2">
+        ${panel("Taux de suivi quotidien", perTxt(), `<div id="c-taux"></div>`, { png: "taux_suivi" })}
+        ${panel("Contacts vus et non vus par jour", perTxt(), `<div id="c-nv"></div>`, { png: "contacts_non_vus" })}
+      </div>
+      ${S.zone ? "" : panel("Suivi des contacts par zone de santé", `Dernier jour rapporté dans la base chiffrée provinciale (au plus tard le ${dfr(S.date)})`, table("t-ct", zr, [{ k: "nom", t: "Zone de santé", v: r => `${catSq(r.cat)}${esc(r.nom)}` }, { k: "date", t: "Rapport du", v: r => `${dfr(r.date, false)}${r.retard > 1 ? ` <span class="pill warn">${r.retard} j</span>` : ""}` },
+        { k: "as", t: "À suivre", num: 1 }, { k: "vus", t: "Vus", num: 1 }, { k: "taux", t: "Taux de suivi", num: 1, v: r => feu(r.taux, C.taux_suivi_pct, 75) }, { k: "taux7", t: "Taux 7 j", num: 1, v: r => pc(r.taux7, 0) },
+        { k: "jmv", t: "Jamais vus", num: 1 }, { k: "pdv", t: "PDV", num: 1 }, { k: "nv48", t: "Non vus 0–48 h", num: 1 }, { k: "ret", t: "Réticences", num: 1 }, { k: "dep", t: "Déplacés", num: 1 }, { k: "susp7", t: "Devenus suspects (7 j)", num: 1 }, { k: "nouv7", t: "Nouveaux (7 j)", num: 1 }],
+        { sort: "as", rowClick: r => r.code, total: { nom: "Province", as: sp.a_suivre, vus: sp.vus, taux: sp.taux, jmv: sp.jmv, pdv: sp.pdv } }), { csv: "t-ct" })}
+      ${S.zone ? "" : panel("Taux de suivi par zone et par jour", `${perTxt()} (90 jours au plus) ; vert = cible atteinte → rouge = moins de 50 % de contacts vus ; blanc = pas de rapport`, `<div id="c-mat"></div>`, { png: "matrice_suivi" })}`;
+  }
+
+  /* ================================================================== ALERTES */
+  function pageAlertes() {
+    const t = day(S.date);
+    if (!AL.length) return notice("<b>Alertes</b>, la base chiffrée provinciale (feuille « DATA ENTRY ») n'a pas été chargée.", "warn");
+    const t1 = Math.min(t, lastAl), t0 = day(S.from);
+    const a = alertesPer(S.zone, t0, t1);
+    const stale = t - lastAl;
+    const ws = []; for (let w = wk(t0); w <= wk(t1); w += 7) ws.push(w);
+    after(() => {
+      const L = AL.filter(r => (!S.zone || r.zone === S.zone));
+      const sw = (w, k) => L.filter(r => r._d >= w && r._d < w + 7).reduce((x, r) => x + (+r[k] || 0), 0);
+      G.bars($("#c-al-src"), { labels: ws.map(iso), series: [{ label: "Formations sanitaires (ESS)", color: col("--s1"), values: ws.map(w => sw(w, "src_ess")) }, { label: "Recherche active", color: col("--s7"), values: ws.map(w => sw(w, "src_ra")) }, { label: "Communauté", color: col("--s3"), values: ws.map(w => sw(w, "src_comm")) }, { label: "Contacts", color: col("--st-susp"), values: ws.map(w => sw(w, "src_contacts")) }, { label: "Points d'entrée", color: col("--s4"), values: ws.map(w => sw(w, "src_poe")) }], h: 260, fmtX: (d, l) => l ? "Semaine du " + dfr(d) : dshort(d) });
+      G.lines($("#c-al-inv"), { labels: ws.map(iso), series: [{ label: "Alertes investiguées", color: col("--brand-2"), values: ws.map(w => ratio(sw(w, "inv"), sw(w, "total"))) }, { label: "Alertes validées", color: col("--st-susp"), values: ws.map(w => ratio(sw(w, "val"), sw(w, "total"))) }], pct: 1, max: 100, digits: 0, fmtX: (d, l) => l ? "Semaine du " + dfr(d) : dshort(d) });
+    });
+    const zr = ZONES.map(z => { const x = alertesPer(z.code, t0, t1); if (!x.total) return null; return { code: z.code, nom: z.nom, cat: casZone(z.code, t).cat, ...x, cas: CAS.filter(c => c.zone === z.code && c._d >= t0 && c._d <= t1).length }; }).filter(Boolean);
+    return `${stale > 3 ? notice(`<b>Base des alertes à jour au ${dfr(iso(lastAl))}</b> : les indicateurs portent sur la période ${perTxt().replace(dfr(S.date), dfr(iso(t1)))} ; les jours suivants n'ont pas encore été saisis.`, "warn") : ""}
+      <p class="lead">${scope()}, <b>${nf(a.total)} alertes</b> ${perTxt()} (dont ${nf(a.deces)} décès), <b>${pc(a.inv_pct, 0)} investiguées</b>, ${nf(a.val)} validées comme suspects et ${nf(a.prelev)} prélevées.</p>
+      <div class="grid g5">
+        ${kpi("Alertes notifiées", nf(a.total), `${nf(a.deces)} décès communautaires`, { color: "--s1" })}
+        ${kpi("Alertes investiguées", pc(a.inv_pct, 0), `${nf(a.inv)} investiguées · objectif 100 %`, { color: "--brand-2", cls: a.inv_pct !== null && a.inv_pct < 95 ? "alert" : "good", meter: a.inv_pct })}
+        ${kpi("Alertes validées (suspects)", nf(a.val), `${pc(ratio(a.val, a.total), 0)} des alertes`, { color: "--st-susp" })}
+        ${kpi("Suspects prélevés", nf(a.prelev), `${pc(ratio(a.prelev, a.val), 0)} des alertes validées`, { color: "--s3" })}
+        ${kpi("Alertes par cas confirmé", nf(ratio(a.total, CAS.filter(c => c._d >= t0 && c._d <= t1 && (!S.zone || c.zone === S.zone)).length) / 100, 1), "sensibilité de la surveillance", { color: "--s4" })}
+      </div>
+      ${panel("Alertes par semaine et par source", perTxt(), `<div id="c-al-src"></div>`, { png: "alertes_sources" })}
+      ${panel("Investigation et validation des alertes", "Part des alertes de la semaine", `<div id="c-al-inv"></div>`, { png: "alertes_investigation" })}
+      ${S.zone ? "" : panel("Alertes par zone de santé", perTxt(), table("t-al", zr, [{ k: "nom", t: "Zone de santé", v: r => `${catSq(r.cat)}${esc(r.nom)}` }, { k: "total", t: "Alertes", num: 1 }, { k: "deces", t: "dont décès", num: 1 }, { k: "inv_pct", t: "Investiguées", num: 1, v: r => feu(r.inv_pct, 95, 80) },
+        { k: "val", t: "Validées", num: 1 }, { k: "prelev", t: "Prélevées", num: 1 }, { k: "isolees", t: "Isolées", num: 1 }, { k: "cas", t: "Cas confirmés", num: 1 }, { k: "dernier", t: "Dernier jour saisi", v: r => dfr(r.dernier, false) }], { sort: "total", rowClick: r => r.code }), { csv: "t-al" })}`;
+  }
+
+  /* ================================================================== DONNÉES DES ZONES */
+  const KIND_LIB = { contacts: "Base de suivi des contacts", cas: "Liste des cas", notif: "Liste linéaire (alertes et suspects)", alertes: "Base des alertes", sbc: "SBC (CAC)", ra: "Recherche active", contours: "Contours des aires", aires: "Paramètres des aires" };
+  function guessZone(name) {
+    const n = name.normalize("NFD").replace(/[̀-ͯ]/g, "").toUpperCase();
+    const hits = ZONES.filter(z => new RegExp("(^|[^A-Z])" + z.nom.normalize("NFD").replace(/[̀-ͯ]/g, "").toUpperCase() + "([^A-Z]|$)").test(n));
+    return hits.length === 1 ? hits[0] : null;
+  }
+  function pageDonnees() {
+    const t = day(S.date);
+    const me = myZone();
+    if (!S.upZone) S.upZone = me ? me.code : (S.zone || "province");
+    const rows = ZONES.map(z => { const d = z.detail || {}, s = suiviAt(z.code, t, 400), al = AL.filter(r => r.zone === z.code); return { code: z.code, nom: z.nom, cat: casZone(z.code, t).cat, cas: casZone(z.code, t).n,
+      suivi: SVZ[z.code] ? SVZ[z.code][SVZ[z.code].length - 1].date : null, alertes: al.length ? iso(Math.max(...al.map(r => r._d))) : null, det: d.date_rapport || null,
+      propres: (d.propres || []).filter(k => k !== "cas" || !(d.cas_origine || "").startsWith("Liste labo")).map(k => (d.fichiers || {})[k]?.libelle || KIND_LIB[k] || k), warn: d.avertissements || 0 }; });
+    const can = USER && (isProv() || me);
+    const tgtOpts = isProv() ? [["province", "Fichiers provinciaux (liste labo, base chiffrée)"], ...ZONES.map(z => [z.code, "Zone de santé de " + z.nom])] : me ? [[me.code, "Zone de santé de " + me.nom]] : [];
+    const tgtName = S.upZone === "province" ? "la province" : `la zone de santé de ${ZN[S.upZone] || ""}`;
+    if (SERVED && can) after(() => loadFiles());
+    return `${SERVED && can ? panel("Charger les données", `Les fichiers sont copiés dans le dossier de ${esc(tgtName)} ; les originaux ne sont jamais modifiés. Seules les analyses des fichiers déposés sont refaites ; les autres analyses sont conservées.`,
+        `<div class="target"><label class="field">Destination<select data-state="upZone" ${tgtOpts.length < 2 ? "disabled" : ""}>${tgtOpts.map(([v, l]) => `<option value="${v}" ${S.upZone === v ? "selected" : ""}>${esc(l)}</option>`).join("")}</select></label>
+          <span class="note">${S.upZone === "province" ? "Liste labo des confirmés (toutes les zones), base chiffrée du suivi des contacts et des alertes." : "Base de suivi des contacts (J1–J21) ou listage des contacts, liste des cas, liste linéaire des suspects et confirmés, export DHIS2, base des alertes, SBC, recherche active, contours des aires de santé."}</span></div>
+        <label class="drop" id="drop"><input type="file" id="up" multiple hidden accept=".xlsx,.xlsb,.xls,.xlsm,.csv,.docx,.zip,.geojson,.json"><b>Déposez les fichiers ici</b><span class="muted small">ou cliquez pour les choisir · l'outil reconnaît chaque fichier par son contenu</span></label>
+        <div id="up-files" style="margin-top:12px"></div>
+        <p class="flex" style="gap:8px;margin-top:12px"><button class="btn primary" data-run="${S.upZone}">Analyser ${S.upZone === "province" ? "la province" : esc(ZN[S.upZone] || "")}</button>${isProv() ? `<button class="btn" data-run="tout">Tout analyser (toutes les zones)</button>` : ""}</p>
+        <div class="log" id="log" hidden></div>`) : PUBLIC ? notice("Version en ligne en lecture seule : les fichiers se chargent dans l'outil local de la coordination provinciale.") : !SERVED ? notice("Ouvrez l'outil avec « 00_OUVRIR_OUTIL » pour charger des fichiers ; sinon copiez-les dans donnees/zs/&lt;Zone&gt;/ ou donnees/province/ puis lancez « 02_ANALYSER ».") : ""}
+      ${panel("État des données par zone de santé", `Données provinciales : liste labo au ${dfr((P.meta.jusqu_au || {}).labo)} · suivi des contacts au ${dfr((P.meta.jusqu_au || {}).suivi)} · alertes au ${dfr((P.meta.jusqu_au || {}).alertes)}`,
+        table("t-data", rows.filter(r => r.cas || r.suivi || r.det || r.alertes), [{ k: "nom", t: "Zone de santé", v: r => `${catSq(r.cat)}${esc(r.nom)}` }, { k: "cas", t: "Cas (liste labo)", num: 1 },
+          { k: "suivi", t: "Suivi des contacts (base provinciale)", v: r => r.suivi ? dfr(r.suivi, false) + (t - day(r.suivi) > 2 ? ` <span class="pill warn">${t - day(r.suivi)} j</span>` : "") : "—" },
+          { k: "alertes", t: "Alertes (base provinciale)", v: r => r.alertes ? dfr(r.alertes, false) : "—" }, { k: "det", t: "Analyse détaillée", v: r => r.det ? dfr(r.det, false) : "—" },
+          { k: "propres", t: "Fichiers déposés par la zone", wrap: 1, v: r => r.propres.length ? esc(r.propres.join(" · ")) : `<span class="muted">aucun (liste labo provinciale)</span>`, csv: r => r.propres.join(", "), sortv: r => r.propres.length },
+          { k: "warn", t: "Avertissements", num: 1 }, { k: "code", t: "", v: r => zsBtn(r.code), csv: () => "" }], { sort: "cas", limit: 60 }), { csv: "t-data" })}
+      ${(P.meta.avertissements || []).length ? panel("Avertissements (fichiers provinciaux)", "", (P.meta.avertissements || []).map(w => `<p class="note warn">${esc(w)}</p>`).join("")) : ""}`;
+  }
+  async function loadFiles() {
+    const box = $("#up-files"); if (!box) return;
+    try {
+      const r = await (await fetch("/api/fichiers?zone=" + encodeURIComponent(S.upZone === "province" ? "province" : ZN[S.upZone]), { credentials: "same-origin" })).json();
+      box.innerHTML = r.fichiers && r.fichiers.length ? `<div class="table-wrap files-tbl"><table><thead><tr><th>Fichiers présents</th><th class="num">Taille</th><th>Déposé le</th><th></th></tr></thead><tbody>${r.fichiers.map(f => `<tr><td>${esc(f.nom)}</td><td class="num">${nf(f.taille / 1e6, 1)} Mo</td><td>${esc(f.modifie)}</td><td><button class="btn sm" data-retirer="${esc(f.nom)}" title="Retirer de l'analyse (le fichier est déplacé dans _retires, pas supprimé)">Retirer</button></td></tr>`).join("")}</tbody></table></div>` : `<p class="note">Aucun fichier pour l'instant.</p>`;
+      const ar = r.archives || [];
+      if (ar.length) box.innerHTML += `<details class="archives" style="margin-top:12px"><summary><b>Copies datées</b> <span class="muted small">— une copie de chaque fichier chargé est gardée dans ${S.upZone === "province" ? "donnees/province" : "donnees/zs/" + esc(ZN[S.upZone] || "")}/archives/&lt;date du jour&gt;</span></summary><div class="table-wrap files-tbl"><table><thead><tr><th>Date de chargement</th><th>Fichiers</th></tr></thead><tbody>${ar.map(x => `<tr><td style="white-space:nowrap">${esc(x.date.split("-").reverse().join("/"))}</td><td>${x.fichiers.map(esc).join("<br>")}</td></tr>`).join("")}</tbody></table></div></details>`;
+    } catch (e) { box.innerHTML = `<p class="note warn">Liste des fichiers indisponible.</p>`; }
+  }
+  async function upload(files) {
+    const log = $("#log"); log.hidden = false;
+    const zoneName = S.upZone === "province" ? "province" : ZN[S.upZone];
+    for (const f of files) {
+      if (S.upZone !== "province" && isProv()) { const g = guessZone(f.name); if (g && g.code !== S.upZone && !confirm(`Le nom du fichier « ${f.name} » évoque la zone de santé de ${g.nom}, mais la destination choisie est ${zoneName}. Continuer ?`)) { log.textContent += `Annulé : ${f.name}\n`; continue; } }
+      log.textContent += `Envoi de ${f.name} (${nf(f.size / 1e6, 1)} Mo)…\n`;
+      const r = await fetch(`/api/televerser?zone=${encodeURIComponent(zoneName)}&nom=${encodeURIComponent(f.name)}`, { method: "POST", body: f, credentials: "same-origin" });
+      const j = await r.json().catch(() => ({}));
+      log.textContent += r.ok ? `  ✓ copié (${S.upZone === "province" ? "donnees/province" : "donnees/zs/" + zoneName})\n` : `  ✗ ${j.erreur || r.status}\n`;
+    }
+    loadFiles();
+    log.textContent += "Mise à jour automatique : analyse lancée (tableaux de bord, présentations, indicateurs)…\n";
+    autoRun(S.upZone === "province" ? "tout" : S.upZone);
+  }
+  /* analyse lancée automatiquement après un chargement ; si une autre tâche tourne, nouvel essai toutes les 10 s */
+  async function autoRun(target, essais = 180) {
+    const body = { zone: target === "tout" || target === "province" ? target : ZN[target] };
+    const r = await fetch("/api/analyser", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body), credentials: "same-origin" });
+    if (r.status === 409 && essais > 0) { const log = $("#log"); if (log && essais === 180) log.textContent += "Une autre tâche est en cours : l'analyse démarrera juste après.\n"; setTimeout(() => autoRun(target, essais - 1), 10000); return; }
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) { alert(j.erreur || "Analyse impossible"); return; }
+    pollJob();
+  }
+  async function runJob(target) {
+    const body = { zone: target === "tout" || target === "province" ? target : ZN[target] };
+    const r = await fetch("/api/analyser", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body), credentials: "same-origin" });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) { alert(j.erreur || "Analyse impossible"); return; }
+    if (S.page !== "donnees") { S.page = "donnees"; render(); }
+    pollJob();
+  }
+  async function pollJob(reloadOnEnd = true) {
+    const s = await (await fetch("/api/etat", { credentials: "same-origin" })).json();
+    const log = $("#log") || $("#pub-log");
+    if (log) { log.hidden = false; log.textContent = (s.par ? `${s.type === "publication" ? "Publication" : "Analyse"} : ${s.par} (début ${s.debut})\n` : "") + s.log; log.scrollTop = log.scrollHeight; }
+    if (s.running) setTimeout(() => pollJob(reloadOnEnd), 1200); else if (s.ok && reloadOnEnd && s.type === "analyse") setTimeout(() => location.reload(), 900);
+  }
+
+  /* ================================================================== COMPTES */
+  async function pageComptesLoad() {
+    const box = $("#cpt"); if (!box) return;
+    const r = await fetch("/api/comptes", { credentials: "same-origin" });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) { box.innerHTML = notice(esc(j.erreur || "Accès refusé"), "warn"); return; }
+    box.innerHTML = `<div class="table-wrap"><table><thead><tr><th>Identifiant</th><th>Nom affiché</th><th>Zone de santé</th><th>État</th><th>Accès en ligne</th><th>Dernière connexion</th><th></th></tr></thead><tbody>${j.comptes.map(c => `<tr><td><b>${esc(c.identifiant)}</b></td><td>${esc(c.nom)}</td><td>${c.role === "zs" ? `<select data-cpt-zone="${esc(c.identifiant)}" aria-label="Zone de santé du compte">${ZONES.map(z => `<option ${z.nom === c.zone ? "selected" : ""}>${esc(z.nom)}</option>`).join("")}</select>${(() => { const g = guessZone(c.identifiant + " " + (c.nom || "")); return g && g.nom !== c.zone ? `<div class="msg err" style="margin-top:4px">Le nom évoque ${esc(g.nom)} : vérifiez la zone.</div>` : ""; })()}` : "<b>Province</b> (toutes les zones)"}</td><td>${c.actif === false ? badge("désactivé", "b-crit") : badge("actif", "b-good")}</td><td>${c.en_ligne ? badge("prêt", "b-good") : `<span class="muted small" title="L'accès en ligne se crée quand le mot de passe est saisi : connexion à l'outil local ou nouveau mot de passe">à la prochaine connexion</span>`}</td><td>${esc(c.derniere_connexion || "—")}</td>
+      <td style="min-width:150px"><div class="cpt-acts"><button class="btn sm" data-cpt-mdp="${esc(c.identifiant)}">Nouveau mot de passe</button><button class="btn sm" data-cpt-act="${esc(c.identifiant)}" data-v="${c.actif === false ? 1 : 0}">${c.actif === false ? "Activer" : "Désactiver"}</button>${c.identifiant !== USER.identifiant ? `<button class="btn sm" data-cpt-del="${esc(c.identifiant)}">Supprimer</button>` : ""}</div></td></tr>`).join("")}</tbody></table></div>`;
+  }
+  function pageComptes() {
+    if (!isProv()) return notice("Page réservée au compte provincial.", "warn");
+    after(pageComptesLoad);
+    return `<p class="lead">Créez un compte par zone de santé : la zone pourra se connecter, charger <b>uniquement ses propres fichiers</b> et lancer l'analyse de sa zone. Un compte de zone ne voit <b>que sa zone</b> : ses analyses, ses cartes, ses rapports et ses fichiers. Seul le compte provincial voit toutes les zones et la situation de la province. Vérifiez que chaque compte est rattaché à la bonne zone (colonne « Zone de santé », modifiable).</p>
+      ${panel("Nouveau compte", "Communiquez l'identifiant et le mot de passe à la personne concernée ; elle pourra changer son mot de passe depuis son menu.", `<form class="form" id="f-cpt">
+        <label>Rôle<select name="role" id="cpt-role"><option value="zs">Zone de santé</option><option value="province">Province (tous les droits)</option></select></label>
+        <label>Zone de santé<select name="zone" id="cpt-zone" required><option value="">— choisir la zone —</option>${ZONES.map(z => `<option>${esc(z.nom)}</option>`).join("")}</select></label>
+        <label>Identifiant<input name="identifiant" required pattern="[a-z0-9._\\-]{3,32}" placeholder="ex. zs-butembo"></label>
+        <label>Nom affiché<input name="nom" placeholder="ex. BCZ Butembo"></label>
+        <label>Mot de passe (8 caractères au moins)<input name="mot_de_passe" type="text" required minlength="8" autocomplete="off"></label>
+        <button class="btn primary" type="submit">Créer le compte</button></form><div class="msg" id="cpt-msg"></div>`)}
+      ${panel("Comptes existants", "", `<div id="cpt"><div class="empty">Chargement…</div></div>`)}`;
+  }
+  async function cptPost(body) {
+    const r = await fetch("/api/comptes", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body), credentials: "same-origin" });
+    const j = await r.json().catch(() => ({})); if (!r.ok) throw new Error(j.erreur || "Erreur"); return j;
+  }
+
+  /* ================================================================== PRÉSENTATION (réunions) */
+  function pagePresentation() {
+    if (!window.NKPres) return notice("Module de présentation non chargé : rechargez la page.", "warn");
+    const zs = ZONES.filter(z => casZone(z.code, day(P.meta.date_rapport)).n);
+    const cur = S.presZone && zs.find(z => z.code === S.presZone) ? zs.find(z => z.code === S.presZone) : null;
+    const base = cur ? "../sortie/zs/" + encodeURIComponent(cur.nom) + "/presentation/" : outp("presentation/");
+    const pptx = cur ? `Presentation_ZS_${cur.nom.replace(/ /g, "-")}.pptx` : `Presentation_Province_${P.meta.province.replace(/ /g, "-")}.pptx`;
+    after(() => NKPres.wire($("#main")));
+    return `<div class="target" style="margin-bottom:14px"><label class="field">Présentation de<select data-state="presZone">
+        <option value="">${esc(PT)}</option>${zs.map(z => `<option value="${z.code}" ${cur && cur.code === z.code ? "selected" : ""}>Zone de santé de ${esc(z.nom)}</option>`).join("")}</select></label>
+        <span class="note">Une présentation est produite pour la province et pour chaque zone de santé ayant des cas confirmés.</span></div>
+      ${!cur ? periodePanel() : ""}
+      ${NKPres.html(base, pptx, cur ? "Zone de santé de " + cur.nom : PT, "situation au " + dfr(P.meta.date_rapport))}`;
+  }
+
+  /* ---- rapport et présentation d'une période choisie (la production par défaut, situation complète, reste inchangée) */
+  function periodePanel() {
+    if (PUBLIC || !isProv()) return "";
+    const dmax = P.meta.date_rapport;
+    after(() => { periodeListe(); periodeWire(); });
+    return panel("Rapport et présentation d'une période", `Par défaut, le rapport et la présentation ci-dessous décrivent la situation complète au ${dfr(dmax)}. Choisissez un nombre de jours (ou des dates) pour produire en plus une version de la période : indicateurs clés (KPI) de la période en tête du PowerPoint, rapport PDF et tableaux Excel.`,
+      `<div class="per-form" style="display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end">
+        <div class="seg" id="per-presets">${[7, 14, 21, 28, 42].map(n => `<button type="button" class="btn sm" data-perj="${n}">${n} derniers jours</button>`).join("")}</div>
+        <label class="field" style="min-width:150px">Nombre de jours<input type="number" id="per-n" min="1" max="400" step="1" placeholder="ex. 10"></label>
+        <span class="note">ou</span>
+        <label class="field">Du<input type="date" id="per-d0" max="${dmax}"></label>
+        <label class="field">au<input type="date" id="per-d1" max="${dmax}" value="${dmax}"></label>
+        <button class="btn primary" type="button" id="per-go">Produire le rapport et la présentation</button></div>
+        <p class="note" id="per-etat" style="margin-top:8px"></p>
+        <div id="per-liste" style="margin-top:8px"></div>`);
+  }
+  async function periodeListe() {
+    const el = document.getElementById("per-liste"); if (!el) return;
+    let L = [];
+    try { const r = await fetch(outp("periodes/liste.json") + "?v=" + Date.now(), { credentials: "same-origin" }); if (r.ok) L = await r.json(); } catch (e) { L = []; }
+    if (!L.length) { el.innerHTML = `<p class="note">Aucune période produite pour l'instant.</p>`; return; }
+    const lien = (x, f, t, cls) => f ? `<a class="btn sm ${cls || ""}" href="../${x.base.split("/").map(encodeURIComponent).join("/")}${f.split("/").map(encodeURIComponent).join("/")}?v=${encodeURIComponent(x.produit_le)}" download="${esc(f.split("/").pop())}">⤓ ${t}</a>` : "";
+    const k = x => x.kpi || {};
+    el.innerHTML = `<div class="table-wrap"><table><thead><tr><th>Période</th><th class="num">Jours</th><th class="num">Cas</th><th class="num">Décès</th><th class="num">ZS touchées</th><th class="num">Taux de suivi</th><th class="num">Alertes</th><th>Téléchargements</th><th>Produit le</th></tr></thead><tbody>${L.map(x => `<tr>
+      <td>du ${dfr(x.debut)} au ${dfr(x.fin)}</td><td class="num">${x.jours}</td><td class="num">${nf(k(x).cas)}</td><td class="num">${nf(k(x).deces)}</td><td class="num">${nf(k(x).zones_touchees)}</td>
+      <td class="num">${k(x).suivi_taux == null ? "—" : nf(k(x).suivi_taux, 1) + " %"}</td><td class="num">${nf(k(x).alertes)}</td>
+      <td style="white-space:nowrap">${lien(x, x.presentation, "PowerPoint", "primary")} ${lien(x, x.rapport, "Rapport PDF")} ${lien(x, x.classeur, "Excel")}</td><td>${esc(x.produit_le)}</td></tr>`).join("")}</tbody></table></div>`;
+  }
+  function periodeWire() {
+    const go = async body => {
+      const st = document.getElementById("per-etat");
+      st.textContent = "Production en cours…";
+      try {
+        const r = await fetch("/api/periode", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body), credentials: "same-origin" });
+        const j = await r.json().catch(() => ({}));
+        if (!r.ok) { st.textContent = j.erreur || "Production impossible."; return; }
+        const poll = async () => {
+          const s = await (await fetch("/api/etat", { credentials: "same-origin" })).json();
+          const last = (s.log || "").trim().split("\n").filter(Boolean).pop() || "";
+          if (s.running) { st.textContent = "Production en cours… " + last; setTimeout(poll, 1200); return; }
+          st.textContent = s.ok ? "Terminé : téléchargez les fichiers de la période ci-dessous." : "Échec : " + last;
+          periodeListe();
+        };
+        poll();
+      } catch (e) { st.textContent = "Serveur injoignable : relancez l'outil."; }
+    };
+    document.querySelectorAll("[data-perj]").forEach(b => b.addEventListener("click", () => go({ jours: Number(b.dataset.perj) })));
+    const g = document.getElementById("per-go");
+    if (g) g.addEventListener("click", () => {
+      const n = Number(document.getElementById("per-n").value), d0 = document.getElementById("per-d0").value, d1 = document.getElementById("per-d1").value;
+      if (d0 && d1) go({ debut: d0, fin: d1 });
+      else if (n >= 1) go({ jours: Math.round(n) });
+      else document.getElementById("per-etat").textContent = "Indiquez un nombre de jours ou les deux dates.";
+    });
+  }
+
+  /* ================================================================== INDICATEURS DU PILIER SURVEILLANCE (canevas PID-MIO) */
+  function pageIndicateurs() {
+    const I = P.indicateurs_surveillance;
+    if (!I || !I.niveaux) return notice("Les indicateurs du pilier surveillance n'ont pas encore été calculés : relancez l'analyse provinciale (page « Données des zones »).", "warn");
+    const cur = S.indNiv && I.niveaux[S.indNiv] ? S.indNiv : "province", N = I.niveaux[cur], f = N.fichiers || {};
+    const href = n => "../" + (f.base || "").split("/").map(encodeURIComponent).join("/") + encodeURIComponent(n);
+    const zs = Object.entries(I.niveaux).filter(([k]) => k !== "province").sort((a, b) => a[1].nom.localeCompare(b[1].nom));
+    const cls = v => v.ok === true ? "ok" : v.ok === false ? "bad" : "";
+    const tbl = `<div class="table-wrap ind-wrap"><table class="ind-tab"><colgroup><col class="c-lib"><col class="c-seuil">${I.mois.map(() => "<col>").join("")}<col class="c-obs"></colgroup><thead><tr><th rowspan="2">Indicateurs</th><th rowspan="2">Seuil</th><th colspan="${I.mois.length}">Résultats mensuels ${esc(I.date.slice(0, 4))}</th><th rowspan="2">Observations</th></tr>
+        <tr>${I.mois.map(m => `<th>${esc(m.lib)}</th>`).join("")}</tr></thead><tbody>
+        ${N.lignes.map(r => `<tr><td class="ind-lib">${esc(r.lib)}</td><td class="ind-seuil">${esc(r.seuil)}</td>${r.valeurs.map(v => `<td class="ind-v ${cls(v)}">${esc(v.t)}</td>`).join("")}<td class="ind-obs">${esc(r.obs)}</td></tr>`).join("")}</tbody></table></div>`;
+    const prm = I.parametres || {}, pz = I.parametres_zones || {};
+    const reglages = !PUBLIC && isProv() ? panel("Paramètres des alertes attendues", "Alertes MVE attendues par jour = population × taux d'alertes MVE attendues (pour 10 000 habitants par semaine) ÷ 70 000 + décès communautaires attendus (population × taux brut de mortalité ÷ 1000 ÷ 365 ; tout décès communautaire est une alerte MVE). Saisissez les normes du SGI MVE ; une valeur propre à une zone remplace la valeur provinciale.",
+      `<form class="form" id="f-ind">
+        <label>Alertes MVE attendues (pour 10 000 habitants par semaine)<input name="alertes_ebola_pour_10000_par_semaine" type="number" step="any" min="0" value="${esc(prm.alertes_ebola_pour_10000_par_semaine ?? "")}"></label>
+        <label>Taux brut de mortalité (pour 1000 par an)<input name="mortalite_brute_pour_1000" type="number" step="any" min="0" value="${esc(prm.mortalite_brute_pour_1000 ?? "")}"></label>
+        <details class="ind-zones"><summary>Valeurs par zone de santé (facultatif)</summary><div class="table-wrap" style="max-height:360px"><table><thead><tr><th>Zone de santé</th><th>Population (base chiffrée)</th><th>Population corrigée</th><th>Alertes MVE /10 000/sem.</th><th>Mortalité ‰</th></tr></thead><tbody>
+          ${ZONES.map(z => { const o = pz[z.nom] || {}; return `<tr data-indz="${esc(z.nom)}"><td>${esc(z.nom)}</td><td class="num">${nf(z.population)}</td><td><input type="number" min="0" data-k="population" value="${o.population ?? ""}"></td><td><input type="number" step="any" min="0" data-k="alertes_ebola_pour_10000_par_semaine" value="${o.alertes_ebola_pour_10000_par_semaine ?? ""}"></td><td><input type="number" step="any" min="0" data-k="mortalite_brute_pour_1000" value="${o.mortalite_brute_pour_1000 ?? ""}"></td></tr>`; }).join("")}
+        </tbody></table></div></details>
+        <button class="btn primary" type="submit">Enregistrer et recalculer</button></form><div class="log" id="log" hidden></div>`) : "";
+    return `<div class="target" style="margin-bottom:14px"><label class="field">Niveau<select data-state="indNiv"><option value="province">${esc(PT)}</option>
+        ${zs.map(([k, n]) => `<option value="${k}" ${k === cur ? "selected" : ""}>${esc(n.nom)}</option>`).join("")}</select></label>
+        ${f.xlsx ? `<a class="btn" href="${href(f.xlsx)}" download="${esc(f.xlsx)}">⤓ Excel</a>` : ""}${f.docx ? `<a class="btn primary" href="${href(f.docx)}" download="${esc(f.docx)}">⤓ Word (canevas)</a>` : ""}
+        <span class="note">${cur === "province" ? "Les fichiers de la province contiennent aussi une page par zone de santé." : ""} Calculés le ${esc(I.genere_le)} · situation au ${dfr(I.date)}.</span></div>
+      ${panel(`Collecte des indicateurs du pilier surveillance, ${esc(N.nom)}`, "Vert : seuil atteint · rouge : seuil non atteint · n.d. : donnée non disponible dans les fichiers reçus. Les définitions de calcul figurent dans la colonne Observations.", tbl)}
+      ${reglages}`;
+  }
+
+  /* ================================================================== PUBLICATION */
+  function pagePublication() {
+    if (!isProv()) return notice("Page réservée au compte provincial.", "warn");
+    const url = P.meta.site_url;
+    return `<p class="lead">La version en ligne permet de partager un lien avec les zones de santé et les partenaires. Elle est <b>accessible uniquement après connexion</b>, avec les mêmes identifiants et mots de passe que l'outil local : toutes les données publiées sont chiffrées, chaque zone de santé ne peut ouvrir que la sienne et le compte provincial voit tout. Elle reste en lecture seule et pseudonymisée (aucun nom, équipes codées, pas de listes nominatives) ; un contrôle bloque la publication si un nom ou un numéro de téléphone est trouvé.</p>
+      <p class="note">Un compte obtient son accès en ligne dès que son mot de passe est saisi dans l'outil (création, nouveau mot de passe, ou connexion à l'outil local) : voir la colonne « Accès en ligne » de la page Comptes. Publiez à nouveau après avoir créé, désactivé ou modifié un compte.</p>
+      ${panel("Publier la version en ligne", url ? `Adresse : <a href="${esc(url)}" target="_blank" rel="noopener">${esc(url)}</a>` : "Adresse de publication : config/publication.json", `
+        <p class="note">La publication reprend la dernière analyse de la province et de chaque zone. Elle nécessite une connexion Internet et l'accès au dépôt GitHub configuré sur cet ordinateur (voir LISEZ-MOI).</p>
+        <p><button class="btn primary" data-publier>Publier maintenant</button></p><div class="log" id="pub-log" hidden></div>`)}`;
+  }
+
+
+  /* ================================================================== TABLEAUX DE LA RÉUNION (modèle de la DPS) */
+  // calculés à chaque analyse par scripts/tableaux_reunion.py ; mêmes valeurs que les diapositives de la présentation
+  function trHTML(t) {
+    const H = t.head.map(r => `<tr>${r.map(h => `<th ${h.cs > 1 ? `colspan="${h.cs}"` : ""} ${h.rs > 1 ? `rowspan="${h.rs}"` : ""} class="${h.cls === "g" ? "g" : ""}" style="${h.fill ? `background:#${h.fill};` : ""}${h.color ? `color:#${h.color};` : ""}">${esc(h.t)}</th>`).join("")}</tr>`).join("");
+    const B = t.rows.map(r => { const tot = /tot/.test(r[0].cls || ""), main = /main/.test(r[0].cls || ""), sub = /sub/.test(r[0].cls || "");
+      return `<tr class="${tot ? "tot" : ""}${main ? " main" : ""}${sub ? " sub" : ""}">${r.map((c, j) => `<td class="${j ? "num" : "lab"} ${/\bb\b/.test(c.cls || "") ? "b" : ""}" style="${c.fill ? `background:#${c.fill};` : ""}${c.color ? `color:#${c.color};` : ""}">${esc(c.v)}</td>`).join("")}</tr>`; }).join("");
+    return `<div class="table-wrap tr-wrap"><table class="tr-table"><thead>${H}</thead><tbody>${B}</tbody></table></div>${t.note ? `<p class="note">${esc(t.note)}</p>` : ""}`;
+  }
+  function trCSV(id) {
+    const t = (P.tableaux_reunion || {})[id]; if (!t) return;
+    const cols = t.rows[0].length, head = Array(cols).fill("");
+    const occ = new Set(); t.head.forEach((r, ri) => { let c = 0; r.forEach(h => { while (occ.has(ri + ":" + c)) c++; for (let a = 0; a < (h.rs || 1); a++) for (let b = 0; b < (h.cs || 1); b++) { occ.add((ri + a) + ":" + (c + b)); head[c + b] = (head[c + b] ? head[c + b] + " · " : "") + h.t; } c += h.cs || 1; }); });
+    const q = v => `"${String(v).replace(/"/g, '""')}"`;
+    const txt = "﻿" + [head.map(q).join(";"), ...t.rows.map(r => r.map(c => q(c.v)).join(";"))].join("\n");
+    const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([txt], { type: "text/csv;charset=utf-8" })); a.download = `${id}_${PROV}_${t.date}.csv`; a.click();
+  }
+  function pageReunion() {
+    const T = P.tableaux_reunion || {};
+    if (!Object.keys(T).length) return notice("Tableaux non disponibles : relancez l'analyse provinciale (liste labo et base chiffrée des alertes et des contacts).", "warn");
+    const tl = (k, extra = "") => T[k] ? panel(esc(T[k].titre), esc(T[k].sous_titre || ""), trHTML(T[k]) + extra, { png: `tableau_${k}`, tools: `<button class="btn sm" data-trcsv="${k}">⤓ CSV</button>` }) : "";
+    const src = T.alertes_3j && T.alertes_3j.sources;
+    const srcHTML = src ? `<div class="tr-src"><h3>Sources des alertes sur les 3 derniers jours</h3><div id="c-tr-src"></div></div>` : "";
+    if (src) after(() => { const el = $("#c-tr-src"); if (el) Ch.xy(el, { data: src.categories.map((c, i) => Object.assign({ c }, ...src.jours.map((j, k) => ({ ["d" + k]: src.series[k][i] })))), x: "c", height: 260,
+      series: src.jours.map((j, k) => ({ key: "d" + k, label: j, color: ["#AEB6BF", "#5D8AA8", "#1F3864"][3 - src.jours.length + k] })) }); });
+    return `${notice(`Tableaux au format de la réunion de coordination, recalculés à chaque analyse ; les mêmes tableaux figurent dans la <a href="#" data-go="presentation">présentation PowerPoint</a>.`)}
+      <h2 class="pil-q">1. Surveillance</h2>${tl("surveillance")}
+      <h2 class="pil-q">2. Alertes</h2>${tl("alertes_3j", srcHTML)}${tl("alertes_zs")}
+      <h2 class="pil-q">3. Suivi des contacts</h2>${tl("contacts_zs")}`;
+  }
+  /* ------------------------------------------------------------------ navigation */
+
+  /* ---- menu latéral en blocs dépliables (même présentation que l'outil national) ---- */
+  const NAVB_KEY = "zs-nav-ouverts";
+  const NAVB_IC = {
+    "Situation et risque": "M12 2 3 6v6c0 5 3.8 9.3 9 10 5.2-.7 9-5 9-10V6zm-1 14-4-4 1.4-1.4 2.6 2.6 5.6-5.6L18 9z",
+    "Contact tracing": "M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zm7 0a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM9 13c-3.3 0-7 1.7-7 4.5V20h14v-2.5C16 14.7 12.3 13 9 13zm7 0c-.5 0-1 0-1.5.1 1.5 1 2.5 2.5 2.5 4.4V20h5v-2.5c0-2.8-3.4-4.5-6-4.5z",
+    "Analyses": "M3 3h2v16h16v2H3zm4 10h3v5H7zm5-5h3v10h-3zm5 3h3v7h-3z",
+    "Surveillance et riposte": "M12 22a2 2 0 0 0 2-2h-4a2 2 0 0 0 2 2zm6-6V11a6 6 0 0 0-5-5.9V4h-2v1.1A6 6 0 0 0 6 11v5l-2 2v1h16v-1z",
+    "Communauté": "M12 3 2 9l10 6 10-6zm-6 9.2V16c0 1.7 2.7 3 6 3s6-1.3 6-3v-3.8l-6 3.6z",
+    "Réunions": "M3 4h18v2H3zm1 3h16v10H4zm7 11h2v3h-2zm-4 3h10v1H7z",
+    "Données et administration": "M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8zm9.4 5.5-1.9-1.1v-.8l1.9-1.1-2-3.5-2 1.1-.7-.4V5.5h-4v2.2l-.7.4-2-1.1-2 3.5 1.9 1.1v.8l-1.9 1.1 2 3.5 2-1.1.7.4v2.2h4v-2.2l.7-.4 2 1.1z",
+    "Zones de santé": "M12 2C8 2 5 5 5 9c0 5 7 13 7 13s7-8 7-13c0-4-3-7-7-7zm0 9.5A2.5 2.5 0 1 1 12 6a2.5 2.5 0 0 1 0 5.5z",
+  };
+  function navBlocs(groups) {   // barre de menus horizontale : un menu déroulant par groupe, pages dans la liste (même présentation que l'outil national)
+    return groups.filter(x => x.items.length).map((x, i) => {
+      const act = x.items.some(it => it.active), id = `nm-${i}`;
+      return `<div class="menu ${act ? "on" : ""}"><button class="menu-btn" type="button" data-ng="${esc(x.g)}" aria-haspopup="true" aria-expanded="false" aria-controls="${id}">${x.g} ▾</button><div class="menu-list" id="${id}">${x.items.map(it => it.html).join("")}</div></div>`;
+    }).join("");
+  }
+  function closeMenus() { document.querySelectorAll(".menu.open").forEach(m => { m.classList.remove("open"); const b = m.querySelector(".menu-btn"); if (b) b.setAttribute("aria-expanded", "false"); }); }
+  function navBlocToggle(btn) {   // un seul menu ouvert à la fois (clic ou toucher ; le survol est géré en CSS)
+    const sec = btn.closest(".menu"), on = !sec.classList.contains("open");
+    closeMenus(); sec.classList.toggle("open", on); btn.setAttribute("aria-expanded", on);
+  }
+  const PAGES = [["accueil", "Accueil", "Province"], ["pilotage", "Pilotage stratégique", "Province"], ["jour", "Situation du jour", "Province", () => !!P.jour], ["situation", "Situation épidémiologique", "Province"], ["zones", "Zones de santé", "Province"], ["carte", "Carte et rapports", "Province"],
+    ["contacts", "Suivi des contacts", "Riposte", () => !!(P.ct || SV.length)], ["alertes", "Surveillance des alertes", "Riposte"], ["pec", "Prise en charge (CTE)", "Riposte", () => !!P.pec], ["ecoles", "Milieu scolaire", "Analyses"], ["reunion", "Tableaux de la réunion", "Réunions"], ["presentation", "Présentation (diapositives)", "Réunions"], ["indicateurs", "Indicateurs du pilier surveillance", "Réunions"], ["donnees", PUBLIC ? "État des données" : "Données des zones", "Données"],
+    ["comptes", "Comptes", "Administration", () => isProv() && !PUBLIC], ["publication", "Publication en ligne", "Administration", () => isProv() && !PUBLIC]];
+  const DETAIL_PAGES = [["index", "Cas index", "M4 6h16v2H4zm0 5h16v2H4zm0 5h10v2H4z"], ["journey", "Parcours des cas", "M12 2a4 4 0 1 1 0 8 4 4 0 0 1 0-8zm-7 18c0-3.9 3.1-7 7-7s7 3.1 7 7H5zM19 3l3 3-3 3"],
+    ["chains", "Chaînes de transmission", "M7 7a3 3 0 1 1-2 5.2L10 15a3 3 0 1 1-.8 1.8L4.3 14A3 3 0 0 1 7 7zm10-4a3 3 0 1 1 0 6 3 3 0 0 1 0-6z"], ["recon", "Reconstruction de la transmission", "M4 5h4v4H4zm12 0h4v4h-4zM10 15h4v4h-4zM6 9v2h4v4h2v-4h4V9h-2v2H8V9z"],
+    ["dynamics", "Dynamique et Rt", "M3 19h18v2H3zM4 15l4-6 4 3 5-8 3 2-6.6 10.3-4-3L6.2 16.4z"], ["children", "Enfants (0–18 ans)", "M12 2a3 3 0 1 1 0 6 3 3 0 0 1 0-6zm-4 8h8l-1 6h-1v6h-4v-6H9z"],
+    ["deces", "Décès et EDS communautaires", "M10 2h4v6h6v4h-6v10h-4V12H4V8h6z"], ["labo", "Laboratoire et positivité", "M9 2h6v2h-1v5l5 9a2 2 0 0 1-2 3H7a2 2 0 0 1-2-3l5-9V4H9z"],
+["pec", "Prise en charge et expositions", "M19 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm-2 10h-4v4h-2v-4H7v-2h4V7h2v4h4z"]];
+  const VIEWS = { accueil: pageAccueil, pilotage: pageP, jour: pageJourNat, pec: pagePecNat, situation: pageSituation, zones: pageZones, carte: pageCarte, contacts: pageContacts, alertes: pageAlertes, donnees: pageDonnees, comptes: pageComptes, publication: pagePublication, presentation: pagePresentation, ecoles: pageEcoles, indicateurs: pageIndicateurs, reunion: pageReunion };
+  const PERIOD_PAGES = new Set(["accueil", "pilotage", "jour", "situation", "zones", "carte", "contacts", "alertes", "pec", "ecoles", "reunion", "presentation", "indicateurs"]);   // calendrier début / fin sur toutes les pages de données
+  const SUBT = { jour: () => `Cas de la journée, comme la situation du jour de l'outil national · situation au ${dfr((P.jour || {}).date || S.date)}`, pec: () => `Export DHIS2 « Prise en charge » · situation au ${dfr((P.pec || {}).date || S.date)}`, contacts: () => `${scope()} · ${perTxt()} · indicateurs nationaux au ${dfr((P.ct || {}).date || S.date)}`, ecoles: () => `Élèves et personnel des écoles touchés par la MVE · liste du ${esc((P.ecoles || {meta: {}}).meta.maj || "—")}`, accueil: () => `Situation au ${dfr(S.date)}`, pilotage: () => `Tableau de bord des décideurs · situation au ${dfr(S.date)}`, zones: () => `Bulletin au ${dfr(S.date)}`, donnees: () => `Analyse provinciale du ${esc(P.meta.genere_le)}`, indicateurs: () => `Canevas mensuel PID-MIO · situation au ${dfr(P.meta.date_rapport)}`, presentation: () => `Graphiques et diapositives prêts pour les réunions · situation au ${dfr(P.meta.date_rapport)}`, reunion: () => `Format de la réunion de coordination · situation au ${dfr(P.meta.date_rapport)}`, comptes: () => "Accès des zones de santé et de la province", publication: () => "Lien de partage en lecture seule" };
+  function shell() {
+    const pages = PAGES.filter(p => !p[3] || p[3]());
+    if (!pages.find(p => p[0] === S.page)) S.page = "accueil";
+    document.title = `Ebola : ${PT}`;
+    $("#brand-sub").textContent = `Outil provincial · ${PROV}`;
+    const zl = ZONES.filter(z => DETAIL.has(z.code));
+    const DET = P.meta.detail_province;
+    const PG = { accueil: "Situation et risque", pilotage: "Situation et risque", jour: "Situation et risque", contacts: "Contact tracing", pec: "Surveillance et riposte", situation: "Situation et risque", zones: "Situation et risque", carte: "Situation et risque",
+      alertes: "Surveillance et riposte", ecoles: "Analyses", reunion: "Réunions", presentation: "Réunions", indicateurs: "Réunions", donnees: "Données et administration", comptes: "Données et administration", publication: "Données et administration" };
+    const DG = { index: "Contact tracing", journey: "Contact tracing", chains: "Contact tracing", recon: "Contact tracing" };
+    const ORDRE = ["Situation et risque", "Contact tracing", "Analyses", "Surveillance et riposte", "Réunions", "Données et administration"];
+    const G = ORDRE.map(g => ({ g, items: [] }));
+    const put = (g, it) => (G.find(x => x.g === g) || G[G.push({ g, items: [] }) - 1]).items.push(it);
+    pages.forEach(([k, l, g]) => { if (k === "accueil") return; put(PG[k] || g, { active: S.page === k, html: `<button data-page="${k}" class="${S.page === k ? "active" : ""}" ${S.page === k ? 'aria-current="page"' : ""}>${svgI(k)}<span>${l}</span></button>` }); });
+    if (DET) DETAIL_PAGES.forEach(([k, l, ic]) => put(DG[k] || "Analyses", { active: false, html: `<a class="navlink" href="zs.html?zone=${encodeURIComponent(DET)}#p=${k}" title="Analyse détaillée de la province"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="${ic}"/></svg><span>${l}</span></a>` }));
+    if (zl.length) G.push({ g: "Zones de santé", compte: zl.length, ouvert: false, items: [{ active: false, html: `<div class="zs-switch"><select data-openzs aria-label="Ouvrir le tableau de bord d'une zone de santé"><option value="">Ouvrir une zone de santé…</option>${zl.map(z => `<option value="${z.code}">${esc(z.nom)}${myZone() && myZone().code === z.code ? " (ma zone)" : ""}</option>`).join("")}</select></div>` }] });
+    $("#nav").innerHTML = `<button class="nav-link ${S.page === "accueil" ? "on" : ""}" data-page="accueil" type="button">Accueil</button>` + navBlocs(G);
+    const tb = $("#theme"); if (tb) tb.textContent = `${document.documentElement.dataset.theme === "dark" ? "☀" : "◐"} Thème`;
+    const p = pages.find(x => x[0] === S.page);
+    $("#title").textContent = p[1];
+    $("#subtitle").innerHTML = (SUBT[S.page] || (() => `${scope()} · ${perTxt()}`))();
+    $("#zone-select").innerHTML = `<option value="">Toute la province</option>` + ZONES.filter(z => casZone(z.code, day(S.date)).n || SVZ[z.code]).map(z => `<option value="${z.code}" ${S.zone === z.code ? "selected" : ""}>${esc(z.nom)}</option>`).join("");
+    $("#zone-field").style.display = ["situation", "contacts", "alertes"].includes(S.page) ? "" : "none";
+    const t = day(S.date), pr = casZone(null, t), sp = suiviProv(t);
+    $("#side-status").innerHTML = `<b><span class="pulse"></span>${esc(PT)}</b><span>Situation au ${dfr(P.meta.date_rapport)}</span>
+      <div class="row"><span>Cas 7 j</span><b>${nf(pr.n7)}</b></div><div class="row"><span>Zones actives</span><b>${nf(ZONES.filter(z => ["Rouge", "Orange"].includes(casZone(z.code, t).cat)).length)}</b></div><div class="row"><span>Taux de suivi</span><b>${pc(sp.taux, 0)}</b></div>`;
+    $("#foot-l").textContent = `Ebola Outbreak, outil provincial du ${PROV} · analyse du ${P.meta.genere_le} · v${P.meta.version || ""}`;
+    $("#user").innerHTML = USER ? `<span class="avatar" aria-hidden="true">${esc((USER.nom || USER.identifiant).slice(0, 1).toUpperCase())}</span><button class="bandeau-qui" id="userchip" type="button" aria-haspopup="true"><b>${esc(USER.nom || USER.identifiant)}</b><small>${USER.role === "province" ? "Coordination provinciale" : "Zone de santé de " + esc(USER.zone)}${PUBLIC ? " · version en ligne" : ""}</small></button><button class="btn sm deco" type="button" data-logout>Déconnexion</button>
+      ${S.menu ? `<div class="menu-pop"><div class="who">Connecté : <b>${esc(USER.identifiant)}</b></div>${PUBLIC ? `<div class="who">Version en ligne, lecture seule. Le mot de passe se change dans l'outil local.</div>` : `<button data-mdp>Changer mon mot de passe</button>`}<button data-logout>Se déconnecter</button></div>` : ""}` : PUBLIC ? `<span class="badge b-info">Version en ligne · lecture seule</span>` : "";
+    const PR = [["7", "7 j"], ["14", "14 j"], ["21", "21 j"], ["28", "28 j"], ["42", "42 j"], ["90", "90 j"], ["tout", "Tout"]];
+    $("#periodbar").style.display = PERIOD_PAGES.has(S.page) ? "" : "none";
+    $("#periodbar").innerHTML = `<div class="pb-main"><span class="pb-title"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M7 2h2v2h6V2h2v2h3v18H4V4h3zm-1 8v10h12V10z"/></svg>Période d'analyse</span>
+      <label class="pb-date">Du <input type="date" id="pb-from" value="${S.from}" min="${firstDate}" max="${S.date}"></label>
+      <label class="pb-date">au <input type="date" id="pb-to" value="${S.date}" min="${firstDate}" max="${lastDate}"></label>
+      <div class="seg pb-presets">${PR.map(([v, t_]) => `<button data-preset="${v}" class="${S.preset === v ? "on" : ""}">${t_}</button>`).join("")}</div>
+      <span class="pb-state small">Les indicateurs, graphiques et tableaux se recalculent pour la période choisie.</span></div>`;
+    window.HUB_PERIOD = S.preset === "tout" ? null : { debut: S.from, fin: S.date };
+  }
+  function render() {
+    POST.length = 0;
+    Ch.clearRegistry();
+    shell();
+    let html;
+    try { html = (VIEWS[S.page] || pageAccueil)(); } catch (e) { console.error(e); html = `<div class="empty">Erreur d'affichage : ${esc(e.message)}</div>`; }
+    $("#main").innerHTML = html;
+    POST.forEach(fn => { try { fn(); } catch (e) { console.error(e); } });
+    const h = new URLSearchParams({ p: S.page, d: S.date, per: S.preset, du: S.from }); if (S.zone) h.set("z", S.zone);
+    history.replaceState(null, "", "#" + h.toString());
+    closeMenus(); $("#menubar").classList.remove("open");
+  }
+  function go(page) { S.page = page; S.menu = false; render(); scrollTo(0, 0); }
+  function modalMdp() {
+    const m = document.createElement("div"); m.className = "modal-back";
+    m.innerHTML = `<form class="modal"><h3>Changer mon mot de passe</h3><p>8 caractères au moins.</p><div class="form" style="grid-template-columns:1fr"><label>Mot de passe actuel<input type="password" name="a" required autocomplete="current-password"></label><label>Nouveau mot de passe<input type="password" name="n" required minlength="8" autocomplete="new-password"></label><label>Confirmer<input type="password" name="c" required minlength="8" autocomplete="new-password"></label></div><div class="msg" id="m-msg"></div><div class="acts"><button type="button" class="btn" data-close>Annuler</button><button class="btn primary">Enregistrer</button></div></form>`;
+    document.body.appendChild(m);
+    m.addEventListener("click", e => { if (e.target === m || e.target.closest("[data-close]")) m.remove(); });
+    m.querySelector("form").addEventListener("submit", async e => {
+      e.preventDefault(); const f = e.target, msg = m.querySelector("#m-msg");
+      if (f.n.value !== f.c.value) { msg.className = "msg err"; msg.textContent = "Les deux saisies diffèrent."; return; }
+      const r = await fetch("/api/mot-de-passe", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ancien: f.a.value, nouveau: f.n.value }), credentials: "same-origin" });
+      const j = await r.json().catch(() => ({})); msg.className = "msg " + (r.ok ? "ok" : "err"); msg.textContent = r.ok ? "Mot de passe modifié." : (j.erreur || "Erreur"); if (r.ok) setTimeout(() => m.remove(), 900);
+    });
+  }
+
+  /* ------------------------------------------------------------------ interactions */
+  document.addEventListener("click", async e => {
+    const t = e.target;
+    if (t.closest("#theme")) { document.documentElement.dataset.theme = document.documentElement.dataset.theme === "dark" ? "light" : "dark"; localSet("zs-theme", document.documentElement.dataset.theme); render(); return; }
+    if (t.closest("#menu")) { $("#menubar").classList.toggle("open"); return; }
+    if (t.closest("#userchip")) { S.menu = !S.menu; shell(); return; }
+    if (S.menu && !t.closest(".menu-pop")) { S.menu = false; shell(); }
+    if (t.closest("[data-logout]") && window.NK_DECONNEXION) { window.NK_DECONNEXION(); return; }
+    if (t.closest("[data-logout]")) { await fetch("/api/deconnexion", { method: "POST", credentials: "same-origin" }); location.href = "connexion.html"; return; }
+    if (t.closest("[data-mdp]")) { S.menu = false; shell(); modalMdp(); return; }
+    const ngh = t.closest(".menu > .menu-btn"); if (ngh) { navBlocToggle(ngh); return; }
+    if (!t.closest(".menu")) closeMenus();
+    const nav = t.closest("[data-page]"); if (nav) { go(nav.dataset.page); return; }
+    const gg = t.closest("[data-go]"); if (gg) { if (gg.dataset.upz) S.upZone = gg.dataset.upz; go(gg.dataset.go); return; }
+    const pr = t.closest("[data-preset]"); if (pr) { S.preset = pr.dataset.preset; applyPreset(); render(); return; }
+    const zr = t.closest("[data-zrow]"); if (zr && !t.closest("a")) { const k = zr.dataset.zrow; if (S.page === "accueil" || S.page === "zones" || S.page === "donnees") { if (DETAIL.has(k)) location.href = openZS(k); } else { S.zone = S.zone === k ? null : k; render(); } return; }
+    const srt = t.closest("th[data-sort]"); if (srt) { const [id, k] = srt.dataset.sort.split("|"); const st = S.tables[id]; if (st) { st.dir = st.sort === k ? -st.dir : -1; st.sort = k; render(); } return; }
+    const more = t.closest("[data-more]"); if (more) { const st = S.tables[more.dataset.more]; if (st) { st.limit += 100; render(); } return; }
+    const png = t.closest("[data-png]"); if (png) { const p = png.closest(".panel"); const name = `${png.dataset.png}_${S.zone ? ZN[S.zone] : PROV}_${S.date}`; if (p.querySelector(".chart svg")) G.panelPNG(p, name, `${scope()} · ${PERIOD_PAGES.has(S.page) ? perTxt() : "au " + dfr(S.date)} · Ebola Outbreak, outil provincial`); else Ch.downloadPanelPNG(p, name); return; }
+    const trc = t.closest("[data-trcsv]"); if (trc) { trCSV(trc.dataset.trcsv); return; }
+    const cv = t.closest("[data-csv]"); if (cv) { csvT(cv.dataset.csv); return; }
+    const rn = t.closest("[data-run]"); if (rn) { runJob(rn.dataset.run); return; }
+    const rt = t.closest("[data-retirer]"); if (rt) { if (!confirm(`Retirer « ${rt.dataset.retirer} » des analyses ? Le fichier est déplacé dans le sous-dossier _retires (il n'est pas supprimé).`)) return;
+      const r = await fetch("/api/retirer", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ zone: S.upZone === "province" ? "province" : ZN[S.upZone], nom: rt.dataset.retirer }), credentials: "same-origin" });
+      if (!r.ok) alert((await r.json().catch(() => ({}))).erreur || "Erreur"); loadFiles(); return; }
+    if (t.closest("[data-publier]")) { const r = await fetch("/api/publier", { method: "POST", credentials: "same-origin" }); const j = await r.json().catch(() => ({})); if (!r.ok) { alert(j.erreur || "Erreur"); return; } pollJob(false); return; }
+    const cm = t.closest("[data-cpt-mdp]"); if (cm) { const m = prompt(`Nouveau mot de passe pour « ${cm.dataset.cptMdp} » (8 caractères au moins) :`); if (!m) return; try { await cptPost({ action: "modifier", identifiant: cm.dataset.cptMdp, mot_de_passe: m }); alert("Mot de passe modifié : communiquez-le à la personne concernée."); } catch (err) { alert(err.message); } return; }
+    const ca = t.closest("[data-cpt-act]"); if (ca) { try { await cptPost({ action: "modifier", identifiant: ca.dataset.cptAct, actif: ca.dataset.v === "1" }); pageComptesLoad(); } catch (err) { alert(err.message); } return; }
+    const cd = t.closest("[data-cpt-del]"); if (cd) { if (!confirm(`Supprimer le compte « ${cd.dataset.cptDel} » ?`)) return; try { await cptPost({ action: "supprimer", identifiant: cd.dataset.cptDel }); pageComptesLoad(); } catch (err) { alert(err.message); } return; }
+  });
+  document.addEventListener("change", e => {
+    const t = e.target;
+    if (t.id === "zone-select") { S.zone = t.value || null; render(); return; }
+    if (t.id === "pil-zone") { S.zone = t.value || null; S.aire = null; render(); return; }
+    if (t.id === "pil-aire") { S.aire = t.value || null; render(); return; }
+    if (t.id === "pil-date") { if (t.value && t.value >= firstDate && t.value <= lastDate) { S.date = t.value; applyPreset(); } render(); return; }
+    if (t.id === "pb-to") { if (t.value && t.value >= firstDate && t.value <= lastDate) { S.date = t.value; if (S.preset === "custom") { if (S.from > S.date) S.from = S.date; } else applyPreset(); } render(); return; }
+    if (t.id === "pb-from") { if (t.value) { S.from = t.value > S.date ? S.date : t.value; S.preset = "custom"; } render(); return; }
+    if (t.dataset.openzs !== undefined && t.value) { location.href = openZS(t.value); return; }
+    if (t.dataset.state) { S[t.dataset.state] = t.value; render(); return; }
+    if (t.id === "up") upload(t.files);
+    if (t.id === "cpt-role") { const z = $("#cpt-zone"); if (z) { z.disabled = t.value === "province"; z.required = t.value === "zs"; } }
+    if (t.dataset.cptZone) { const id = t.dataset.cptZone; if (!confirm(`Rattacher le compte « ${id} » à la zone de santé de ${t.value} ? Il ne verra plus que les données de cette zone.`)) { pageComptesLoad(); return; }
+      cptPost({ action: "modifier", identifiant: id, zone: t.value }).then(() => pageComptesLoad()).catch(err => { alert(err.message); pageComptesLoad(); }); return; }
+  });
+  document.addEventListener("input", e => {
+    const f = e.target.form; if (!f || f.id !== "f-cpt" || !["identifiant", "nom"].includes(e.target.name)) return;
+    const z = f.zone; if (!z || (z.value && !z.dataset.auto)) return;
+    const g = guessZone(f.identifiant.value.replace(/[-_.]/g, " ") + " " + f.nom.value);
+    if (g) { z.value = g.nom; z.dataset.auto = "1"; } else if (z.dataset.auto) { z.value = ""; }
+  });
+  document.addEventListener("submit", async e => {
+    if (e.target.id === "f-ind") {
+      e.preventDefault();
+      const f = e.target, zones = {};
+      f.querySelectorAll("tr[data-indz]").forEach(tr => { const o = {}; tr.querySelectorAll("input[data-k]").forEach(i => { if (i.value !== "") o[i.dataset.k] = Number(i.value); }); if (Object.keys(o).length) zones[tr.dataset.indz] = o; });
+      const body = { alertes_ebola_pour_10000_par_semaine: f.alertes_ebola_pour_10000_par_semaine.value, mortalite_brute_pour_1000: f.mortalite_brute_pour_1000.value, zones };
+      const r = await fetch("/api/indicateurs", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body), credentials: "same-origin" });
+      const j = await r.json().catch(() => ({})); if (!r.ok) { alert(j.erreur || "Erreur"); return; }
+      pollJob(true); return;
+    }
+    if (e.target.id !== "f-cpt") return;
+    e.preventDefault();
+    const f = e.target, msg = $("#cpt-msg");
+    try {
+      const c = await cptPost({ action: "creer", role: f.role.value, zone: f.role.value === "zs" ? f.zone.value : null, identifiant: f.identifiant.value, nom: f.nom.value, mot_de_passe: f.mot_de_passe.value });
+      msg.className = "msg ok"; msg.textContent = `Compte « ${c.compte.identifiant} » créé (${c.compte.role === "zs" ? "zone de santé de " + c.compte.zone : "province"}).`; f.reset(); delete f.zone.dataset.auto; pageComptesLoad();
+    } catch (err) { msg.className = "msg err"; msg.textContent = err.message; }
+  });
+  document.addEventListener("dragover", e => { const d = e.target.closest("#drop"); if (d) { e.preventDefault(); d.classList.add("over"); } });
+  document.addEventListener("dragleave", e => { const d = e.target.closest("#drop"); if (d) d.classList.remove("over"); });
+  document.addEventListener("drop", e => { const d = e.target.closest("#drop"); if (d) { e.preventDefault(); d.classList.remove("over"); upload(e.dataTransfer.files); } });
+
+  /* ------------------------------------------------------------------ démarrage : session (outil local) puis rendu */
+  if (SERVED) {
+    fetch("/api/session", { credentials: "same-origin" }).then(r => r.json()).then(s => {
+      if (!s.connecte) { location.href = "connexion.html"; return; }
+      USER = s; render();
+      fetch("/api/etat", { credentials: "same-origin" }).then(r => r.json()).then(j => { if (j.running) { if (S.page !== "donnees" && j.type === "analyse") { S.page = "donnees"; render(); } pollJob(); } }).catch(() => {});
+    }).catch(() => render());
+  } else render();
+})();
