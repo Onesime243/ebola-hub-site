@@ -215,7 +215,8 @@
   function histogram(container, opt) { xy(container, Object.assign({ series: [{ key: opt.y, label: opt.label, color: opt.color || "--s1" }], barWidth: .86 }, opt)); }
 
   /* ---------------- Carte choroplèthe ----------------
-     Carte interactive : zoom (boutons, double-clic, Ctrl/⌘ + molette ou pincement), déplacement à la souris,
+     Carte interactive : zoom (boutons, Ctrl/⌘ + molette ou pincement), cadrage d'une zone (double-clic sur la zone,
+     champ « Zoomer sur une zone », bouton ⌖ pour la zone sélectionnée, container.mapZoomTo(nom)), déplacement à la souris,
      étiquettes posées sur la zone (jamais de trait de rappel : une étiquette qui ne tient pas est masquée et réapparaît
      en zoomant), limites de province, encart RDC (province(s) concernée(s) en orange, zone sélectionnée en rouge,
      emprise de la carte en rouge) et légende avec effectifs, comme les cartes de rapport. */
@@ -309,15 +310,24 @@
     const steps = ["--seq-1", "--seq-2", "--seq-3", "--seq-4", "--seq-5", "--seq-6", "--seq-7"].map(col);
     const colorOf = opt.colorFn ? ((v, f) => opt.colorFn(v, f)) : (v => !v ? col("--seq-0") : steps[Math.min(steps.length - 1, Math.floor(Math.sqrt(v / mx) * steps.length * .999))]);
     let dragged = false, selF = null;
+    const PATHF = new Map();                       // élément <path> → zone (double-clic : cadrage de la zone)
     feats.forEach(f => {
       const v = opt.value(f);
       const d = ringsOf(f.geometry).map(r => r.map((p, i) => { const q = P(p); return (i ? "L" : "M") + q[0].toFixed(1) + "," + q[1].toFixed(1); }).join("") + "Z").join("");
       if (opt.selected && opt.selected === f.data_zone) selF = { f, d };
       const p = el("path", { d, class: "zone", fill: colorOf(v, f), stroke: col("--map-stroke") || col("--surface"), "vector-effect": "non-scaling-stroke" }, geo);
+      PATHF.set(p, { f, d });
       if (!report) {
         p.addEventListener("mousemove", ev => { if (!st.drag) showTip(opt.tip(f, v), ev); });
         p.addEventListener("mouseleave", hideTip);
-        p.addEventListener("click", () => { if (dragged) return; opt.onClick && opt.onClick(f); });
+        p.addEventListener("click", () => {
+          if (dragged) return;
+          // double-clic détecté ici (et non par l'événement dblclick) : le premier clic peut redessiner la carte (sélection de la zone)
+          const now = Date.now(), lc = st.lastClick;
+          if (lc && now - lc.t < 400 && lc.z === f.data_zone) { st.lastClick = null; hideTip(); zoomToFeature(f, d); return; }
+          st.lastClick = { t: now, z: f.data_zone };
+          opt.onClick && opt.onClick(f);
+        });
       }
     });
     el("path", { d: provPath(feats, all, P), class: "prov-line", "vector-effect": "non-scaling-stroke", fill: "none", stroke: "#2f363d", "stroke-width": 1.6, "stroke-linejoin": "round" }, geo);
@@ -381,8 +391,22 @@
     const apply = () => { geo.setAttribute("transform", `translate(${st.tx.toFixed(2)} ${st.ty.toFixed(2)}) scale(${st.k.toFixed(4)})`); drawRect(); };
     const clampPan = () => { st.tx = Math.min(W * .25, Math.max(W * .75 - W * st.k, st.tx)); st.ty = Math.min(H * .25, Math.max(H * .75 - H * st.k, st.ty)); if (st.k <= 1.0001) { st.k = 1; st.tx = 0; st.ty = 0; } };
     let lt = null; const relayout = (ms) => { clearTimeout(lt); lt = setTimeout(layout, ms || 0); };
-    const zoomAt = (px, py, f) => { const k2 = Math.max(1, Math.min(16, st.k * f)); st.tx = px - (px - st.tx) * (k2 / st.k); st.ty = py - (py - st.ty) * (k2 / st.k); st.k = k2; clampPan(); apply(); relayout(120); };
+    const KMAX = 48;                               // zoom maximal : suffisant pour cadrer une petite zone ou aire de santé
+    const zoomAt = (px, py, f) => { const k2 = Math.max(1, Math.min(KMAX, st.k * f)); st.tx = px - (px - st.tx) * (k2 / st.k); st.ty = py - (py - st.ty) * (k2 / st.k); st.k = k2; clampPan(); apply(); relayout(120); };
     const toView = ev => { const r = svg.getBoundingClientRect(); return [(ev.clientX - r.left) * W / r.width, (ev.clientY - r.top) * H / r.height]; };
+    // cadrage d'une zone : la carte est zoomée et centrée sur l'emprise de la zone, qui est brièvement surlignée
+    const bboxOf = f => { const q = ringsOf(f.geometry).flat().map(P); const xs = q.map(p => p[0]), ys = q.map(p => p[1]); return [Math.min(...xs), Math.min(...ys), Math.max(...xs), Math.max(...ys)]; };
+    const zoomToFeature = (f, d) => {
+      const b = bboxOf(f), bw = Math.max(b[2] - b[0], 4), bh = Math.max(b[3] - b[1], 4);
+      const k2 = Math.max(1, Math.min(KMAX, Math.min(W / (bw * 1.7), H / (bh * 1.7))));
+      st.k = k2; st.tx = W / 2 - k2 * (b[0] + b[2]) / 2; st.ty = H / 2 - k2 * (b[1] + b[3]) / 2; clampPan(); apply(); layout();
+      geo.querySelectorAll(".zone-zoom-outline").forEach(e => e.remove());
+      const o = el("path", { d: d || ringsOf(f.geometry).map(r => r.map((p, i) => { const q = P(p); return (i ? "L" : "M") + q[0].toFixed(1) + "," + q[1].toFixed(1); }).join("") + "Z").join(""), class: "zone-zoom-outline", "vector-effect": "non-scaling-stroke", fill: "none", stroke: "#d03b3b", "stroke-width": 3, "pointer-events": "none" }, geo);
+      setTimeout(() => o.remove(), 2200);
+    };
+    const findFeature = name => { const n = String(name ?? "").normalize("NFD").replace(/[̀-ͯ]/g, "").toUpperCase().replace(/[^A-Z0-9]/g, ""); if (!n) return null;
+      let best = null; PATHF.forEach(({ f, d }) => { const z = String(f.data_zone ?? f.name ?? "").normalize("NFD").replace(/[̀-ͯ]/g, "").toUpperCase().replace(/[^A-Z0-9]/g, ""); if (z === n) best = { f, d, s: 3 }; else if (!best || best.s < 2) { if (z.startsWith(n)) best = { f, d, s: 2 }; else if (z.includes(n) && (!best || best.s < 1)) best = { f, d, s: 1 }; } }); return best; };
+    container.mapZoomTo = name => { const m = findFeature(name); if (m) zoomToFeature(m.f, m.d); return !!m; };
     let hintEl = null, rectEl = null, IB = null;
     function drawRect() {
       if (!rectEl || !IB) return;
@@ -393,8 +417,20 @@
     }
     if (!report) {
       const zb = document.createElement("div"); zb.className = "map-zoom";
-      zb.innerHTML = `<button type="button" data-z="in" title="${TT("Zoomer")}" aria-label="${TT("Zoomer")}">+</button><button type="button" data-z="out" title="${TT("Dézoomer")}" aria-label="${TT("Dézoomer")}">−</button><button type="button" data-z="reset" title="${TT("Vue d’ensemble")}" aria-label="${TT("Vue d’ensemble")}">⤢</button>`;
+      zb.innerHTML = `<button type="button" data-z="in" title="${TT("Zoomer")}" aria-label="${TT("Zoomer")}">+</button><button type="button" data-z="out" title="${TT("Dézoomer")}" aria-label="${TT("Dézoomer")}">−</button><button type="button" data-z="reset" title="${TT("Vue d’ensemble")}" aria-label="${TT("Vue d’ensemble")}">⤢</button>${selF ? `<button type="button" data-z="sel" title="${TT("Cadrer la zone sélectionnée")}" aria-label="${TT("Cadrer la zone sélectionnée")}">⌖</button>` : ""}`;
       main.appendChild(zb);
+      // champ « Zoomer sur une zone » : saisie du nom (liste déroulante des zones de la carte), Entrée ou choix = cadrage
+      const fb = document.createElement("div"); fb.className = "map-find";
+      const listId = "mapzones-" + (container.id || "map") + "-" + Math.floor(Math.random() * 1e6);
+      const names = [...new Set(feats.map(f => f.data_zone).filter(Boolean))].sort((a, b) => String(a).localeCompare(String(b), "fr"));
+      fb.innerHTML = `<input type="search" list="${listId}" placeholder="${TT("Zoomer sur une zone…")}" aria-label="${TT("Zoomer sur une zone…")}" autocomplete="off"><datalist id="${listId}">${names.map(n => `<option value="${esc(n)}"></option>`).join("")}</datalist>`;
+      main.appendChild(fb);
+      const inp = fb.querySelector("input");
+      const goFind = () => { const v = inp.value.trim(); if (!v) return; const ok = container.mapZoomTo(v); inp.classList.toggle("nf", !ok); if (ok) inp.blur(); };
+      inp.addEventListener("change", goFind);
+      inp.addEventListener("keydown", ev => { if (ev.key === "Enter") { ev.preventDefault(); goFind(); } if (ev.key === "Escape") { inp.value = ""; inp.classList.remove("nf"); inp.blur(); } ev.stopPropagation(); });
+      inp.addEventListener("input", () => inp.classList.remove("nf"));
+      fb.addEventListener("pointerdown", ev => ev.stopPropagation()); fb.addEventListener("click", ev => ev.stopPropagation()); fb.addEventListener("dblclick", ev => ev.stopPropagation());
       if (canFull) {   // deux vues : zones concernées (zoom automatique) ou RDC entière
         const vb = document.createElement("div"); vb.className = "map-view seg";
         vb.innerHTML = `<button type="button" data-mv="zone" class="${full ? "" : "on"}">${TT("Zones concernées")}</button><button type="button" data-mv="rdc" class="${full ? "on" : ""}">${TT("RDC entière")}</button>`;
@@ -403,9 +439,10 @@
           const v = b.dataset.mv; if ((v === "rdc") === full) return; MAPV.set(container.id || "map", v); MAPZ.delete(container.id || "map"); hideTip(); drawMap(container, opt); });
       }
       zb.addEventListener("click", ev => { const b = ev.target.closest("button"); if (!b) return; ev.stopPropagation(); const z = b.dataset.z;
-        if (z === "reset") { st.k = 1; st.tx = 0; st.ty = 0; apply(); layout(); } else zoomAt(W / 2, H / 2, z === "in" ? 1.6 : 1 / 1.6); });
+        if (z === "reset") { st.k = 1; st.tx = 0; st.ty = 0; apply(); layout(); } else if (z === "sel") { if (selF) zoomToFeature(selF.f, selF.d); } else zoomAt(W / 2, H / 2, z === "in" ? 1.6 : 1 / 1.6); });
       svg.addEventListener("wheel", ev => { if (!ev.ctrlKey && !ev.metaKey) return; ev.preventDefault(); const [x, y] = toView(ev); zoomAt(x, y, Math.exp(-ev.deltaY * .0025)); }, { passive: false });
-      svg.addEventListener("dblclick", ev => { ev.preventDefault(); const [x, y] = toView(ev); zoomAt(x, y, ev.shiftKey ? 1 / 1.8 : 1.8); });
+      // double-clic sur une zone : cadrage de cette zone ; ailleurs : zoom ×1,8 au point ; Maj + double-clic : dézoom
+      svg.addEventListener("dblclick", ev => { ev.preventDefault(); const z = !ev.shiftKey && ev.target.closest && PATHF.get(ev.target.closest("path.zone")); if (z) { hideTip(); zoomToFeature(z.f, z.d); return; } const [x, y] = toView(ev); zoomAt(x, y, ev.shiftKey ? 1 / 1.8 : 1.8); });
       let down = null;
       svg.addEventListener("pointerdown", ev => { if (ev.button !== 0) return; down = { x: ev.clientX, y: ev.clientY, tx: st.tx, ty: st.ty, id: ev.pointerId }; dragged = false; });
       svg.addEventListener("pointermove", ev => {
@@ -419,7 +456,7 @@
       svg.addEventListener("pointerup", up); svg.addEventListener("pointercancel", up);
       hintEl = document.createElement("div"); hintEl.className = "map-hint"; main.appendChild(hintEl);
       const how = document.createElement("div"); how.className = "map-hint how";
-      how.textContent = TT("Zoom : boutons + / −, double-clic ou Ctrl (⌘) + molette ; glisser pour déplacer la carte zoomée.");
+      how.textContent = TT("Zoom : boutons + / −, Ctrl (⌘) + molette, double-clic sur une zone pour la cadrer, ou saisir son nom dans « Zoomer sur une zone » ; glisser pour déplacer la carte zoomée.");
       main.appendChild(how);
     }
     // ----- encart RDC -----
