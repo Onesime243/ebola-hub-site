@@ -200,6 +200,9 @@
     const sitRows = Object.entries(s.labels || {}).filter(([kk]) => (s.indicateurs || {})[kk] !== null && (s.indicateurs || {})[kk] !== undefined);
     const alerts = buildAlerts();
     const zs = zones().filter(z => z.confirmes_14j > 0 || z.contacts_actifs > 0).sort((a, b) => b.confirmes_14j - a.confirmes_14j || b.contacts_actifs - a.contacts_actifs);
+    /* classification « Zones à risque » (grille de la riposte : Rouge / Orange / Jaune / Verte), la même que la page Zones à risque et les cartes */
+    const zrBy = new Map((zrData().zones || []).map(z => [norm(z.zone_sante), z])), zrOf = x => zrBy.get(norm(x.zone_sante));
+    const zrBadge = x => { const z = zrOf(x); return z && z.categorie ? `<span class="badge" title="${T("Score")} ${nf(z.score_risque, 0)} · ${esc(T(z.explication || ""))}"><i style="background:${ZCOL[z.categorie]}"></i>${esc(T(z.categorie))}</span>` : "—"; };
     const fromPdf = !PER && s.source_pdf;
     const plus = v => v === null || v === undefined ? "" : ` · <b>+${nf(v)}</b> ${T("en 24 h")}`;
     /* Province choisie : les tuiles et la courbe suivent le filtre (Linelist + suivi des contacts) ; les chiffres SitRep restent nationaux */
@@ -248,13 +251,13 @@
       ${panel("Points d’attention", T("Générés automatiquement à partir des données du jour"), `<div class="alerts">${alerts.map(a => `<div class="alert-item ${a.lvl}"><span class="ic">${a.lvl === "crit" ? "!" : a.lvl === "warn" ? "!" : a.lvl === "good" ? "✓" : "i"}</span><div>${a.html}</div></div>`).join("")}</div>`)}
     </div>
     <div class="grid g21">
-      ${panel("Zones de santé, 14 derniers jours", T("Cliquer une ligne pour ouvrir la zone"), table("ov-zones", zs, [
+      ${panel("Zones de santé, 14 derniers jours", `${T("Cliquer une ligne pour ouvrir la zone")} · ${T("Catégorie et score (0-100) de la grille Zones à risque")}`, table("ov-zones", zs, [
         { k: "zone_sante", t: "Zone de santé" }, { k: "province", t: "Province" },
         { k: "confirmes_14j", t: "Confirmés 14 j", num: true }, { k: "deces_14j", t: "Décès 14 j", num: true },
         { k: "pct_nouveaux_cas_connus_contacts", t: "% connus contacts", num: true, v: x => x.pct_nouveaux_cas_connus_contacts === null ? "—" : pc(x.pct_nouveaux_cas_connus_contacts, 0) },
         { k: "contacts_actifs", t: "Contacts actifs", num: true }, { k: "contacts_non_vus", t: "Non vus >3 j", num: true },
-        { k: "niveau_risque", t: "Risque", v: x => x.niveau_risque && x.niveau_risque !== "nan" ? badge(x.niveau_risque, RISK[x.niveau_risque]) : "—", sortv: x => x.risk_score }],
-        { sort: "confirmes_14j", rowClick: true, rowKey: x => x.zone_sante, limit: 15, maxh: 420 }), { csv: "ov-zones" })}
+        { k: "categorie_zr", t: "Catégorie", v: zrBadge, csv: x => { const z = zrOf(x); return z && z.categorie ? `${z.categorie} (${nf(z.score_risque, 0)})` : ""; }, sortv: x => { const z = zrOf(x); return z && z.categorie ? (ZORD.length - ZORD.indexOf(z.categorie)) * 1000 + (z.score_risque || 0) : null; } }],
+        { sort: "confirmes_14j", rowClick: true, rowKey: x => x.zone_sante, limit: 15, maxh: 420 }), { csv: "ov-zones", tools: `<button class="btn sm" data-go="riskzones" title="${T("Ouvrir la page Zones à risque (grille de la riposte)")}">${T("Zones à risque")}</button>` })}
       ${panel("Pyramide des âges", T("Cas confirmés par sexe et groupe d’âge"), pyramid())}
     </div>
     <div class="grid g2">
@@ -3877,7 +3880,7 @@
     if (t.closest("#method-link")) { go("method"); return; }
     const sbt = t.closest("[data-subtab]"); if (sbt && !sbt.disabled) { S[sbt.dataset.subtab] = sbt.dataset.v; render(); return; }
     const nav = t.closest("#navigation button[data-tab]"); if (nav) { go(nav.dataset.tab, nav.dataset.tab === "journey" ? S.caseKey : undefined); return; }
-    const kg = t.closest(".kpi[data-go]"); if (kg) { go(kg.dataset.go); return; }
+    const kg = t.closest(".kpi[data-go], .btn[data-go]"); if (kg) { go(kg.dataset.go); return; }
     const oq = t.closest("[data-opq]");
     if (oq) { const G = D.operations?.lignes; const last = G?.sources?.derniere_notification || D.meta.cutoff; S.opD2 = last;
       S.opD1 = oq.dataset.opq === "all" ? (D.meta.plage_donnees?.[0] || addDays(last, -365)) : addDays(last, -(Number(oq.dataset.opq) - 1)); render(); return; }
