@@ -3,9 +3,9 @@
  "niveau": "province",
  "nom": "Province : Sud Ubangi",
  "court": "Sud Ubangi",
- "date": "2026-11-17",
- "genere_le": "2026-11-18 07:41",
- "pptx": "Presentation_Reunion_Sud_Ubangi_20261117.pptx",
+ "date": "2026-11-20",
+ "genere_le": "2026-11-22 14:00",
+ "pptx": "Presentation_Reunion_Sud_Ubangi_20261120.pptx",
  "diapositives": 9,
  "slides": [
   {
@@ -49,7 +49,7 @@
  "images": {
   "01_indicateurs_cumul": {
    "fichier": "01_indicateurs_cumul.png",
-   "titre": "Situation de la MVE au 17 novembre 2026, Province : Sud Ubangi"
+   "titre": "Situation de la MVE au 20 novembre 2026, Province : Sud Ubangi"
   },
   "02_courbe_hebdomadaire": {
    "fichier": "02_courbe_hebdomadaire.png",
@@ -65,7 +65,7 @@
   },
   "03_indicateurs_jour": {
    "fichier": "03_indicateurs_jour.png",
-   "titre": "Situation épidémiologique du jour, 17 novembre 2026"
+   "titre": "Situation épidémiologique du jour, 20 novembre 2026"
   },
   "05_jours_sans_cas": {
    "fichier": "05_jours_sans_cas.png",
