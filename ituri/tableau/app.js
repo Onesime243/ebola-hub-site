@@ -68,13 +68,19 @@
   const S = { menu: false, page: "jour", date: lastDate, preset: "21", from: null, aire: null, cas: null,
               mapInd: "categorie", ctStat: "a_retrouver", supKind: "superviseur", tables: {} };
   S.from = addDays(S.date, -20);
+  /* période commune à tous les menus, partagée avec le tableau de bord provincial (mémorisée dans le navigateur) */
+  const PER_KEY = "it-periode";
+  const dateOk = d => { if (!d) return null; if (d >= lastDate) return lastDate; if (!DATES.length) return d < firstDate ? lastDate : d;
+    const ok = DATES.filter(x => x <= d); return ok.length ? ok[ok.length - 1] : DATES[0]; };   // jour saisi le plus proche (≤) dans la base de suivi
   try {
     const h = new URLSearchParams(location.hash.slice(1));
     if (h.get("p")) S.page = h.get("p"); if (h.get("a")) S.aire = h.get("a"); if (h.get("c")) S.cas = h.get("c");
-    if (h.get("d") && DATES.includes(h.get("d"))) S.date = h.get("d");
-    if (h.get("per")) S.preset = h.get("per");
-    if (h.get("du")) S.from = h.get("du"); else applyPreset();
-  } catch (e) { /* adresse invalide : valeurs par défaut */ }
+    const mem = h.get("per") || h.get("du") || h.get("d") ? null : JSON.parse(localGet(PER_KEY) || "null");
+    const per = h.get("per") || (mem && mem.per), au = h.get("d") || (mem && mem.au), du = h.get("du") || (mem && mem.per === "custom" ? mem.du : null);
+    if (per) S.preset = per;
+    if (au) S.date = dateOk(au) || S.date;
+    if (du) S.from = du > S.date ? S.date : du; else applyPreset();
+  } catch (e) { /* adresse ou mémoire invalide : valeurs par défaut */ }
   function applyPreset() {
     if (S.preset === "tout") S.from = firstDate;
     else if (/^\d+$/.test(S.preset)) S.from = addDays(S.date, -(Number(S.preset) - 1));
@@ -83,6 +89,7 @@
   const ti = () => DATES.indexOf(S.date);
   const W = () => days(S.from, S.date) + 1;                     // longueur de la période (jours)
   const inPer = d => !!d && d >= S.from && d <= S.date;
+  const perObj = () => S.preset === "tout" ? null : { debut: S.from, fin: S.date };
 
   /* ------------------------------------------------------------------ séries de suivi (date × aire) */
   const AIDX = SU ? Object.fromEntries(SU.aires.map((a, i) => [a, i])) : {};
@@ -403,16 +410,20 @@
     }
     return out;
   }
+  /* analyse provinciale détaillée : zones affichées en blanc par décision de la coordination (config/parametres.json → zones_carte_blanc) */
+  const nzs = x => String(x || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase().trim();
+  const BLANC = new Set(NIV_PROV ? AIRES.filter(a => (D.meta.zones_carte_blanc || []).some(b => nzs(b) === nzs(a.nom))).map(a => a.cle) : []);
   function mapValues() {
     const t = day(S.date);
     const B = Object.fromEntries(AIRES.map(a => [a.cle, bulletin(a.cle, t)]));
     const per = {}; CAS.forEach(c => { if (!c.hors_zs && inPer(c.date)) per[c.aire] = (per[c.aire] || 0) + 1; });
     const m = MAPIND.find(x => x[0] === S.mapInd) || MAPIND[0];
-    const val = k => { const b = B[k]; if (!b) return null; switch (S.mapInd) { case "categorie": return b.cat; case "casper": return per[k] || 0; case "cas21": return b.cs.n21; case "inc": return AINFO[k]?.population ? 1e4 * b.cs.n / AINFO[k].population : null; case "taux": return b.taux; case "pdv": return b.pdv; case "as": return b.as; } };
+    const val = k => BLANC.has(k) ? (S.mapInd === "categorie" ? "Non touchée" : ["taux", "pdv", "as"].includes(S.mapInd) ? null : 0) : val0(k);
+    const val0 = k => { const b = B[k]; if (!b) return null; switch (S.mapInd) { case "categorie": return b.cat; case "casper": return per[k] || 0; case "cas21": return b.cs.n21; case "inc": return AINFO[k]?.population ? 1e4 * b.cs.n / AINFO[k].population : null; case "taux": return b.taux; case "pdv": return b.pdv; case "as": return b.as; } };
     let cls = null, color, leg;
     if (m[2] === "cat") {
       color = v => CATMAP[v] || TL_NA;
-      const cnt = c => AIRES.filter(a => B[a.cle].cat === c).length;
+      const cnt = c => AIRES.filter(a => val(a.cle) === c).length;
       leg = Object.keys(CATMAP).map(c => ({ label: `${c}, ${CATDEF[c]} (${cnt(c)})`, color: CATMAP[c] }));
     } else if (m[2] === "down") {
       const tg = C.taux_suivi_pct, br = [50, 65, 80, tg];
@@ -424,21 +435,21 @@
       color = v => { if (v === null || v === undefined) return TL_NA; return (cls.find(c => v >= c.lo && v <= c.hi) || cls[cls.length - 1]).color; };
       leg = [...cls.map(c => ({ label: c.label, color: c.color })), { label: "aucune donnée", color: TL_NA }];
     }
-    leg.title = m[1] + (S.mapInd === "categorie" ? ", chiffre dans le cercle : cas confirmés des 7 derniers jours" : "");
+    leg.title = m[1] + (S.mapInd === "categorie" ? ", chiffre dans le cercle : cas confirmés des 7 derniers jours" : "") + (BLANC.size ? ` · en blanc par décision de la coordination : ${[...BLANC].map(k => AN[k] || k).join(", ")}` : "");
     return { B, val, color, leg, m };
   }
   function drawMap(el_) {
     const { B, val, color, leg, m } = mapValues();
     G.map(el_, { areas: AIRES.map(a => ({ key: a.cle, name: a.nom })), geo: D.geo, value: val, color: v => color(v), selected: S.aire,
       dark: v => color(v) === TL[4],
-      label: k => { const v = val(k); return S.mapInd === "categorie" ? (B[k].cs.n7 ? `${B[k].cs.n7}` : "") : (typeof v === "number" ? (S.mapInd === "taux" ? pc(v, 0) : nf(v, m[3] || 0)) : ""); },
+      label: k => { const v = val(k); if (BLANC.has(k)) return ""; return S.mapInd === "categorie" ? (B[k].cs.n7 ? `${B[k].cs.n7}` : "") : (typeof v === "number" ? (S.mapInd === "taux" ? pc(v, 0) : nf(v, m[3] || 0)) : ""); },
       tipHtml: k => { const b = B[k]; return `<b>${esc(AN[k] || k)}</b>${b.cat} · ${nf(b.cs.n)} cas (${nf(b.cs.n21)} en 21 j)<br>${nf(b.as)} contacts à suivre · ${pc(b.taux, 0)} vus · ${nf(b.pdv)} PDV`; },
       onClick: k => { S.aire = S.aire === k ? null : k; render(); }, legend: leg, valueLabel: m[1] });
   }
 
   /* ================================================================== SUIVI DES CONTACTS */
   const RETROUVER = ["PDV", "JMV", "Absence", "ReCo non passé", "Déplacé", "Refus"];
-  const NX = () => ({ esc, nf, pc, dfr, dshort, kpi, panel, table, notice: (t, cls = "") => `<div class="notice ${cls}">${t}</div>`, pill, after, G, col, unite: c => AN[c] || c, dateChoisie: S.date, excel: null });
+  const NX = () => ({ esc, nf, pc, dfr, dshort, kpi, panel, table, notice: (t, cls = "") => `<div class="notice ${cls}">${t}</div>`, pill, after, G, col, unite: c => AN[c] || c, dateChoisie: S.date, periode: perObj(), excel: null });
   function pageSitJour() { return D.jour && window.NKNat ? window.NKNat.jour(D.jour, NX()) : `<div class="empty">La situation du jour n'est pas disponible pour cette zone.</div>`; }
   function pageContacts() {
     const nat = D.ct && window.NKNat ? window.NKNat.contacts(D.ct, NX()) : "";
@@ -519,8 +530,8 @@
     const t = day(S.date);
     const key = S.supKind === "reco" ? "reco" : "sup";
     const L = CT.filter(c => !S.aire || c.aire === S.aire);
-    const agg = {};
-    for (let b = 0; b < 7; b++) {
+    const agg = {}, nb = Math.max(1, Math.min(W(), 90));   // jours de la période (90 au plus)
+    for (let b = 0; b < nb; b++) {
       const d = t - b;
       L.forEach(c => { const s = status(c, d); if (!s || s.sortie) return; const g = (c[key] || "Non renseigné"); const a = agg[g] = agg[g] || { nom: g, a_suivre: 0, vus: 0, pdv: 0, jmv: 0, abs: 0, refus: 0, s7: 0, v7: 0, aires: new Set() };
         a.s7++; if (SEEN.has(s.st)) a.v7++; a.aires.add(AN[c.aire] || c.aire);
@@ -528,14 +539,14 @@
     }
     const rows = Object.values(agg).filter(a => a.a_suivre || a.s7).map(a => ({ ...a, taux: ratio(a.vus, a.a_suivre), taux7: ratio(a.v7, a.s7), aires: [...a.aires].slice(0, 4).join(", ") }));
     const cols = [{ k: "nom", t: key === "reco" ? "ReCo" : "Superviseur" }, { k: "aires", t: "Aires de santé", wrap: 1 }, { k: "a_suivre", t: "À suivre", num: 1 }, { k: "vus", t: "Vus", num: 1 },
-      { k: "taux", t: "Taux du jour", num: 1, f: v => feuPill(v, C.taux_suivi_pct, 75) }, { k: "taux7", t: "Taux sur 7 jours", num: 1, f: v => feuPill(v, C.taux_suivi_pct, 75) },
+      { k: "taux", t: "Taux du jour", num: 1, f: v => feuPill(v, C.taux_suivi_pct, 75) }, { k: "taux7", t: `Taux moyen (${nb} j)`, num: 1, f: v => feuPill(v, C.taux_suivi_pct, 75) },
       { k: "pdv", t: "PDV", num: 1 }, { k: "jmv", t: "Jamais vus", num: 1 }, { k: "abs", t: "Absences", num: 1 }, { k: "refus", t: "Refus", num: 1 }];
     const low = rows.filter(r => r.a_suivre >= 10).sort((a, b) => (a.taux7 ?? 0) - (b.taux7 ?? 0)).slice(0, 15);
     after(() => G.hbars($("#c-eq"), { items: low.map(r => ({ label: r.nom, value: r.taux7 ?? 0, color: (r.taux7 ?? 0) >= C.taux_suivi_pct ? "#4f9d5d" : (r.taux7 ?? 0) >= 75 ? "#e8c23a" : "#c8452f", sub: `${nf(r.a_suivre)} à suivre` })), pct: 1, max: 100, digits: 1, target: C.taux_suivi_pct }));
     const miss = L.filter(c => { const s = status(c, t); return s && !s.sortie && !c[key]; }).length;
-    return `<p class="lead">Performance de chaque ${key === "reco" ? "relais communautaire (ReCo)" : "superviseur"} au ${dfr(S.date)} : taux de suivi du jour et moyenne des 7 derniers jours (contacts vus / contacts à suivre, jour par jour). ${miss ? `<b>${nf(miss)} contacts en suivi n'ont pas de ${key === "reco" ? "ReCo" : "superviseur"} renseigné.</b>` : ""}</p>
+    return `<p class="lead">Performance de chaque ${key === "reco" ? "relais communautaire (ReCo)" : "superviseur"} au ${dfr(S.date)} : taux de suivi du jour et moyenne sur la période choisie, ${nb} jours (contacts vus / contacts à suivre, jour par jour). ${miss ? `<b>${nf(miss)} contacts en suivi n'ont pas de ${key === "reco" ? "ReCo" : "superviseur"} renseigné.</b>` : ""}</p>
       <div class="filters">${segBtns("supKind", [["superviseur", "Superviseurs"], ["reco", "ReCo"]])}</div>
-      ${box(`${key === "reco" ? "ReCo" : "Superviseurs"} au taux de suivi le plus faible`, `7 derniers jours ; équipes ayant au moins 10 contacts à suivre ; trait = cible ${C.taux_suivi_pct} %`, `<div id="c-eq"></div>`, pngBtn("equipes_taux"))}
+      ${box(`${key === "reco" ? "ReCo" : "Superviseurs"} au taux de suivi le plus faible`, `Moyenne sur la période (${nb} jours jusqu'au ${dfr(S.date)}) ; équipes ayant au moins 10 contacts à suivre ; trait = cible ${C.taux_suivi_pct} %`, `<div id="c-eq"></div>`, pngBtn("equipes_taux"))}
       ${box(`Tableau des ${key === "reco" ? "ReCo" : "superviseurs"}`, "", tableHTML("t-eq", cols, rows, { sort: "a_suivre", name: `equipes_${key}_${S.date}` }), csvBtn("t-eq"))}`;
   }
 
@@ -718,11 +729,22 @@
       <label class="pb-date">Du <input type="date" id="pb-from" value="${S.from}" min="${firstDate}" max="${S.date}"></label>
       <label class="pb-date">au <input type="date" id="pb-to" value="${S.date}" min="${DATES[0] || firstDate}" max="${lastDate}"></label>
       <div class="seg pb-presets">${PR.map(([v, t]) => `<button data-preset="${v}" class="${S.preset === v ? "on" : ""}">${t}</button>`).join("")}</div>
-      <span class="pb-state small">Choisissez les dates : tous les menus se recalculent automatiquement.</span></div>`;
-    window.HUB_PERIOD = S.preset === "tout" ? null : { debut: S.from, fin: S.date };
+      <span class="pb-state small">${PERNOTE[S.page] ? PERNOTE[S.page]() : "Choisissez les dates : les indicateurs, graphiques et tableaux de cette page portent sur la période."}</span></div>`;
+    window.HUB_PERIOD = perObj();
   }
 
   /* ------------------------------------------------------------------ rendu et interactions */
+  /* ce que le calendrier change sur chaque page (pages non citées : tout est filtré sur la période) */
+  const PERNOTE = {
+    jour: () => `Bulletin au ${dfr(S.date)} (7 et 21 derniers jours, jour du suivi) ; courbes et indicateurs « période » suivent le calendrier.`,
+    aires: () => `Bulletin des aires au ${dfr(S.date)} (date de fin) ; la matrice du suivi par aire et par jour couvre la période.`,
+    sitjour: () => `Situation du jour à date fixe (exports DHIS2) ; le bloc « Sur la période choisie » et les graphiques journaliers suivent le calendrier.`,
+    contacts: () => `Statuts du suivi au ${dfr(S.date)} (date de fin) ; séries journalières sur la période.`,
+    equipes: () => `Taux du jour au ${dfr(S.date)} ; taux moyen calculé sur la période (90 derniers jours au plus).`,
+    carte: () => `Carte interactive : « Cas (période) » suit le calendrier, les autres indicateurs sont au ${dfr(S.date)} ; cartes et rapports produits : ${dfr(D.meta.date_rapport)}.`,
+    presentation: () => `Diapositives à date fixe (dernière analyse) : non filtrées par le calendrier.`,
+    fichiers: () => `Page administrative : le calendrier n'a pas d'effet ici ; la période reste mémorisée pour les autres menus.`,
+  };
   const VIEWS = { jour: pageJour, sitjour: pageSitJour, aires: pageAires, contacts: pageContacts, cas: pageCas, equipes: pageEquipes, sbc: pageSbc, ra: pageRa, carte: pageCarte, fichiers: pageFichiers, presentation: pagePresentation };
   const H = { D, S, CAS, CT, AIRES, AN, AINFO, DATES, nf, pc, esc, col, dfr, dshort, day, iso, addDays, days, inPer, perTxt, scope, W, status, EXIT, SEEN,
               panel, kpi, badge, legend, segBtns, table, tableHTML, pill, strip, miniGrid, jLegend, ccls, CODE_LAB, after, go, render: () => render(), Ch, $, $$, firstDate, lastDate };
@@ -748,6 +770,7 @@
     if (v && v.charts) { try { v.charts(); } catch (e) { console.error(e); } }
     if (NIV_PROV) { relabel($("#main")); relabel($("#menubar")); relabel(document.querySelector(".topbar")); relabel($("#periodbar")); setTimeout(() => relabel($("#main")), 400); }
     const h = new URLSearchParams({ p: S.page, d: S.date, per: S.preset, du: S.from }); if (S.aire) h.set("a", S.aire); if (S.cas) h.set("c", S.cas);
+    localSet(PER_KEY, JSON.stringify({ per: S.preset, du: S.from, au: S.date }));
     history.replaceState(null, "", "#" + h.toString());
     closeMenus(); $("#menubar").classList.remove("open");
   }
@@ -785,7 +808,7 @@
     const t = e.target;
     if (t.id === "aire-select") { S.aire = t.value || null; render(); return; }
     if (t.dataset.openzs !== undefined && t.value) { location.href = "zs.html?zone=" + encodeURIComponent(t.value); return; }
-    if (t.id === "pb-to") { if (t.value && t.value >= (DATES[0] || firstDate) && t.value <= lastDate) { S.date = DATES.includes(t.value) || !DATES.length ? t.value : S.date; if (S.preset === "custom") { if (S.from > S.date) S.from = S.date; } else applyPreset(); } render(); return; }
+    if (t.id === "pb-to") { if (t.value && t.value >= (DATES[0] || firstDate) && t.value <= lastDate) { S.date = dateOk(t.value); if (S.preset === "custom") { if (S.from > S.date) S.from = S.date; } else applyPreset(); } render(); return; }
     if (t.id === "pb-from") { if (t.value) { S.from = t.value > S.date ? S.date : t.value; S.preset = "custom"; } render(); return; }
     if (t.dataset.state) { S[t.dataset.state] = t.value; render(); return; }
     if (t.dataset.check) { S[t.dataset.check] = t.checked; render(); return; }

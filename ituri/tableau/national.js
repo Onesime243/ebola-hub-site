@@ -10,6 +10,13 @@
   const STC = { "Vu ≤24 h": "--st-v24", "Vu 1–3 j": "--s1", "Non vu >3 j": "--st-nv", "Jamais vu": "--s7", "Devenu suspect": "--st-susp", "Devenu confirmé": "--critical",
     "Suivi terminé (21 j)": "--st-done", "Suivi clôturé incomplet": "--s4", "Décédé": "--s2", "Doublon": "--s5", "Recyclé": "--s3", "Transféré": "--s6", "Pas encore suivi": "--st-inc" };
   const stPill = (X, s) => X.pill(s, /Non vu|Jamais|Devenu/.test(s) ? "bad" : /Vu ≤24/.test(s) ? "ok" : /Vu 1|incomplet/.test(s) ? "warn" : "");
+  /* période choisie dans le calendrier commun (X.periode = { debut, fin } ; null = toute l'épidémie) : filtre des séries journalières */
+  const perSerie = (serie, X) => { const p = X.periode; return p ? (serie || []).filter(x => x.date >= p.debut && x.date <= p.fin) : (serie || []); };
+  const perLib = (serie, X) => X.periode ? `du ${X.dfr(X.periode.debut)} au ${X.dfr(X.periode.fin)}` : `depuis le ${X.dfr((serie[0] || {}).date)}`;
+  const somme = (L, k) => L.reduce((a, x) => a + (x[k] === null || x[k] === undefined ? 0 : +x[k]), 0);
+  const horsSerie = (serie, X) => X.periode && serie.length && (X.periode.debut < serie[0].date || X.periode.fin > serie[serie.length - 1].date)
+    ? X.notice(`Séries disponibles du ${X.dfr(serie[0].date)} au ${X.dfr(serie[serie.length - 1].date)} : la partie de la période en dehors de ces dates n'est pas comptée.`, "") : "";
+  const fixeTxt = (X, d, quoi) => X.periode ? X.notice(`<b>${quoi} : situation à date fixe, au ${X.dfr(d)}</b> (date de référence des exports DHIS2), indépendante du calendrier. Le bloc « Sur la période choisie » et les graphiques journaliers suivent la période.`, "") : "";
   const tri = (X, v) => v === null || v === undefined ? `<span class="muted">—</span>` : X.pill(v ? "Oui" : "Non", v ? "ok" : "warn");
 
   function contacts(ct, X) {
@@ -38,9 +45,10 @@
       { k: "vus_24h", t: "Vus ≤24 h", num: 1 }, { k: "pct_vus_24h", t: "% vus ≤24 h", num: 1, v: r => pc(r.pct_vus_24h, 0) }, { k: "non_vus_3j", t: "Non vus >3 j", num: 1 }, { k: "suspects", t: "Suspects", num: 1 }, { k: "devenus_cas", t: "Devenus cas", num: 1 },
       { k: "taux_attaque_sec", t: "Taux d'attaque secondaire", num: 1, v: r => pc(r.taux_attaque_sec, 1) }, { k: "termines", t: "Suivis terminés", num: 1 }, { k: "dernier_listage", t: "Dernier listage", v: r => X.dfr(r.dernier_listage, false) }].filter(c => zc || c.k !== "zone");
     const nv = (k.non_vus_3j || 0) + (k.jamais_vus || 0);
+    const fixeCt = X.periode ? X.notice(`<b>Statuts du suivi : situation à date fixe, au ${X.dfr(ct.date_situation || ct.date)}</b> (date de référence du suivi DHIS2) ; ils ne dépendent pas du calendrier. Les séries journalières plus bas suivent la période choisie.`, "") : "";
     const retard = ct.retard_j ? X.notice(`<b>Date de référence du suivi : ${X.dfr(ct.date)}</b> (${nf(ct.retard_j)} jour${ct.retard_j > 1 ? "s" : ""} avant la date de situation du ${X.dfr(ct.date_situation)}) : les visites saisies dans DHIS2 après cette date sont encore incomplètes ; les statuts sont calculés à cette date, comme dans l'outil national.`, "warn") : "";
     const fixe = X.dateChoisie && X.dateChoisie !== ct.date_situation ? X.notice(`Ces indicateurs sont calculés à la date de l'analyse (${X.dfr(ct.date)}) ; la période choisie en haut de page s'applique aux séries journalières plus bas.`, "") : "";
-    return `${retard}${fixe}<p class="lead">Suivi des contacts au <b>${X.dfr(ct.date)}</b>, indicateurs de l'outil national calculés sur la grille J1–J21 des exports DHIS2 : <b>${nf(k.actifs)}</b> contacts en suivi actif, <b>${nf(k.vus_24h)}</b> vus dans les 24 h (${pc(k.pct_vus_24h, 0)}), <b>${nf(nv)}</b> à rechercher (non vus depuis plus de 3 jours ou jamais vus).
+    return `${retard}${fixe}${fixeCt}<p class="lead">Suivi des contacts au <b>${X.dfr(ct.date)}</b>, indicateurs de l'outil national calculés sur la grille J1–J21 des exports DHIS2 : <b>${nf(k.actifs)}</b> contacts en suivi actif, <b>${nf(k.vus_24h)}</b> vus dans les 24 h (${pc(k.pct_vus_24h, 0)}), <b>${nf(nv)}</b> à rechercher (non vus depuis plus de 3 jours ou jamais vus).
         ${X.excel ? ` <a class="btn sm" href="${X.excel}" download>⤓ Classeur Excel (listes)</a>` : ""}</p>
       <div class="grid g5">
         ${X.kpi("Contacts en suivi actif", nf(k.actifs), `${nf(k.contacts)} contacts listés · ${nf(k.cas_index)} cas index`, { color: "--s1" })}
@@ -73,11 +81,12 @@
     const s = j.synthese, nf = X.nf, pc = X.pc, esc = X.esc, u = j.unite === "zone" ? "Zone de santé" : "Aire de santé", up = n => j.unite === "zone" ? (n > 1 ? "zones de santé" : "zone de santé") : (n > 1 ? "aires de santé" : "aire de santé");
     const un = c => esc(X.unite ? X.unite(c) : c);
     const ids = { s: "nat-jour-serie", a: "nat-jour-alertes" };
+    const js = perSerie(j.serie, X);
     X.after(() => {
       const el = document.getElementById(ids.s);
-      if (el) X.G.bars(el, { labels: j.serie.map(x => x.date), series: [{ label: "Cas confirmés", color: X.col("--critical"), values: j.serie.map(x => x.cas) }, { label: "Décès", color: X.col("--ink"), values: j.serie.map(x => x.deces) }], fmtX: (d, l) => l ? X.dfr(d) : X.dshort(d) });
+      if (el && js.length) X.G.bars(el, { labels: js.map(x => x.date), series: [{ label: "Cas confirmés", color: X.col("--critical"), values: js.map(x => x.cas) }, { label: "Décès", color: X.col("--ink"), values: js.map(x => x.deces) }], fmtX: (d, l) => l ? X.dfr(d) : X.dshort(d) });
       const ea = document.getElementById(ids.a);
-      if (ea && j.serie.some(x => x.alertes !== null || x.a_suivre !== null)) X.G.lines(ea, { labels: j.serie.map(x => x.date), series: [{ label: "Alertes notifiées", color: X.col("--s4"), values: j.serie.map(x => x.alertes) }, { label: "Contacts à suivre", color: X.col("--s1"), values: j.serie.map(x => x.a_suivre) }, { label: "Contacts vus", color: X.col("--st-v24"), values: j.serie.map(x => x.vus) }], fmtX: (d, l) => l ? X.dfr(d) : X.dshort(d) });
+      if (ea && js.some(x => x.alertes !== null || x.a_suivre !== null)) X.G.lines(ea, { labels: js.map(x => x.date), series: [{ label: "Alertes notifiées", color: X.col("--s4"), values: js.map(x => x.alertes) }, { label: "Contacts à suivre", color: X.col("--s1"), values: js.map(x => x.a_suivre) }, { label: "Contacts vus", color: X.col("--st-v24"), values: js.map(x => x.vus) }], fmtX: (d, l) => l ? X.dfr(d) : X.dshort(d) });
     });
     const d7 = s.j7 - s.j7p, trend = d7 > 0 ? `▲ +${nf(d7)} par rapport aux 7 jours précédents` : d7 < 0 ? `▼ ${nf(d7)} par rapport aux 7 jours précédents` : "= 7 jours précédents";
     const sv = s.suivi_j0;
@@ -90,7 +99,15 @@
     const colsC = [{ k: "date", t: "Date", v: r => X.dfr(r.date, false) }, { k: "unite_nom", t: u }, { k: "id", t: "Identifiant" }, { k: "ini", t: "Initiales" }, { k: "classe", t: "Classe" }, { k: "sexe", t: "Sexe" }, { k: "age", t: "Âge", num: 1 },
       { k: "debut", t: "Début des signes", v: r => X.dfr(r.debut, false) }, { k: "deces", t: "Décès", v: r => r.deces ? X.pill("Décédé", "bad") : "—" }, { k: "issue", t: "Issue" }, { k: "connu", t: "Contact connu", v: r => tri(X, r.connu) }, { k: "ppl", t: "Personnel de santé", v: r => esc(r.ppl || "—") }];
     const fixe = X.dateChoisie && X.dateChoisie !== j.date ? X.notice(`La situation du jour est calculée au dernier jour des exports (${X.dfr(j.date)}) ; choisissez la date de fin de période égale à cette date pour la comparer aux autres pages.`, "") : "";
-    return `${fixe}<p class="lead">Situation du <b>${X.dfr(j.date)}</b> (cas de la journée, comme la « situation du jour » de l'outil national) : <b>${nf(s.j0)}</b> nouveau(x) cas confirmé(s) dans ${nf(s.unites_j0)} ${up(s.unites_j0)}, ${nf(s.deces_j0)} décès ; ${nf(s.j7)} cas en 7 jours (${trend}) ; ${nf(s.j21)} en 21 jours dans ${nf(s.unites_21j)} ${up(s.unites_21j)}.</p>
+    const pj = { cas: somme(js, "cas"), dec: somme(js, "deces"), al: somme(js, "alertes"), ald: somme(js, "alertes_deces"), as: somme(js, "a_suivre"), vus: somme(js, "vus"), nc: somme(js, "nouveaux_contacts") };
+    const blocPer = `<h3 style="margin:14px 0 6px">Sur la période choisie (${perLib(js, X)})</h3>${horsSerie(j.serie, X)}<div class="grid g5">
+        ${X.kpi("Cas confirmés", nf(pj.cas), `${nf(js.filter(x => x.cas).length)} jours avec au moins un cas`, { color: "--critical" })}
+        ${X.kpi("Décès parmi les cas", nf(pj.dec), `létalité ${pc(pj.cas ? 100 * pj.dec / pj.cas : null, 1)}`, { color: "--ink" })}
+        ${X.kpi("Alertes notifiées", nf(pj.al), `dont ${nf(pj.ald)} décès`, { color: "--s4" })}
+        ${X.kpi("Taux de suivi moyen", pc(pj.as ? 100 * pj.vus / pj.as : null, 0), `contacts vus / à suivre, jours saisis de la période`, { color: "--st-v24" })}
+        ${X.kpi("Nouveaux contacts", nf(pj.nc), "listés sur la période", { color: "--s1" })}
+      </div>`;
+    return `${fixe}${fixeTxt(X, j.date, "Situation du jour")}${blocPer}<h3 style="margin:14px 0 6px">Situation du jour (${X.dfr(j.date)})</h3><p class="lead">Situation du <b>${X.dfr(j.date)}</b> (cas de la journée, comme la « situation du jour » de l'outil national) : <b>${nf(s.j0)}</b> nouveau(x) cas confirmé(s) dans ${nf(s.unites_j0)} ${up(s.unites_j0)}, ${nf(s.deces_j0)} décès ; ${nf(s.j7)} cas en 7 jours (${trend}) ; ${nf(s.j21)} en 21 jours dans ${nf(s.unites_21j)} ${up(s.unites_21j)}.</p>
       <div class="grid g5">
         ${X.kpi("Cas confirmés du jour", nf(s.j0), `veille ${nf(s.j1)} · avant-veille ${nf(s.j2)}`, { color: "--critical", cls: s.j0 ? "alert" : "good" })}
         ${X.kpi("Cas en 7 jours", nf(s.j7), trend, { color: "--s2" })}
@@ -106,8 +123,8 @@
         ${X.kpi("Nouveaux cas connus comme contacts", pc(s.pct_connus_contacts_14j, 0), `${nf(s.connus_contacts_14j ?? 0)} des ${nf(s.nouveaux_14j)} cas des 14 derniers jours · cible 80 %`, { color: "--s3", meter: s.pct_connus_contacts_14j })}
       </div>
       <div class="grid g2">
-        ${X.panel("Cas confirmés et décès par jour", `${nf(j.serie.length)} derniers jours`, `<div id="${ids.s}"></div>`, { png: "cas_par_jour" })}
-        ${X.panel("Alertes et suivi des contacts par jour", "Alertes notifiées, contacts à suivre et contacts vus", `<div id="${ids.a}"></div>`, { png: "alertes_suivi_par_jour" })}
+        ${X.panel("Cas confirmés et décès par jour", perLib(js, X), `<div id="${ids.s}"></div>`, { png: "cas_par_jour" })}
+        ${X.panel("Alertes et suivi des contacts par jour", `Alertes notifiées, contacts à suivre et contacts vus · ${perLib(js, X)}`, `<div id="${ids.a}"></div>`, { png: "alertes_suivi_par_jour" })}
       </div>
       ${X.panel(`Situation du jour par ${u.toLowerCase()}`, `Cas confirmés par date de confirmation (ou de prélèvement / notification) ; ${up(2)} ayant eu au moins un cas ou un suivi`, X.table("nat-jour-unites", j.unites, cols, { sort: "j0", maxh: 520, total: { nom: "Total", j0: s.j0, j1: s.j1, j2: s.j2, j7: s.j7, j7p: s.j7p, j21: s.j21, cumul: s.cumul, deces_j0: s.deces_j0, deces_cumul: s.deces_cumul, alertes_j0: s.alertes_j0, alertes_7j: s.alertes_7j, a_suivre: sv ? sv.a_suivre : null, vus: sv ? sv.vus : null, taux_suivi: sv ? sv.taux : null } }), { csv: "nat-jour-unites" })}
       ${X.panel(`Cas confirmés des 3 derniers jours : ${nf(cas.length)}`, "Liste pseudonymisée (identifiant, initiales)", X.table("nat-jour-cas", cas, colsC, { sort: "date", maxh: 420 }), { csv: "nat-jour-cas" })}`;
@@ -117,9 +134,10 @@
     if (!p || !p.confirmes) return "";
     const c = p.confirmes, n = p.non_cas, nf = X.nf, pc = X.pc, esc = X.esc;
     const ids = { s: "nat-pec-serie", st: "nat-pec-statuts" };
+    const ps = perSerie(p.serie, X);
     X.after(() => {
       const el = document.getElementById(ids.s);
-      if (el) X.G.bars(el, { labels: p.serie.map(x => x.date), series: [{ label: "Admissions (confirmés)", color: X.col("--s1"), values: p.serie.map(x => x.admis) }, { label: "Sorties", color: X.col("--st-done"), values: p.serie.map(x => x.sortis) }, { label: "Décès", color: X.col("--ink"), values: p.serie.map(x => x.deces) }], fmtX: (d, l) => l ? X.dfr(d) : X.dshort(d) });
+      if (el && ps.length) X.G.bars(el, { labels: ps.map(x => x.date), series: [{ label: "Admissions (confirmés)", color: X.col("--s1"), values: ps.map(x => x.admis) }, { label: "Sorties", color: X.col("--st-done"), values: ps.map(x => x.sortis) }, { label: "Décès", color: X.col("--ink"), values: ps.map(x => x.deces) }], fmtX: (d, l) => l ? X.dfr(d) : X.dshort(d) });
       const es = document.getElementById(ids.st);
       if (es) X.G.hbars(es, { items: c.statuts.map(s => ({ label: s.statut, value: s.n, color: X.col(s.statut === "Décédé" ? "--critical" : s.statut === "Guéri" ? "--good" : s.statut.startsWith("En cours") ? "--s1" : "--s4"), sub: pc(100 * s.n / Math.max(1, c.admis), 0) })) });
     });
@@ -127,7 +145,14 @@
       { k: "letalite_cte", t: "Létalité en CTE", num: 1, v: r => pc(r.letalite_cte, 0) }, { k: "sejour_median", t: "Séjour médian (j)", num: 1 }];
     const colsU = [{ k: "cle", t: "Unité", v: r => esc(X.unite ? X.unite(r.cle) : (r.cle || "Non renseignée")) }, { k: "admis", t: "Admis", num: 1 }, { k: "admis_7j", t: "Admis 7 j", num: 1 }, { k: "en_cours", t: "En cours", num: 1 }, { k: "sortis", t: "Sortis", num: 1 }, { k: "gueris", t: "Guéris", num: 1 }, { k: "deces", t: "Décès", num: 1 },
       { k: "letalite_cte", t: "Létalité en CTE", num: 1, v: r => pc(r.letalite_cte, 0) }];
-    return `<p class="lead">Prise en charge (export DHIS2 « Prise en charge », rapproché des notifications par numéro EPID) au <b>${X.dfr(p.date)}</b> : <b>${nf(c.admis)}</b> cas confirmés admis, ${nf(c.en_cours)} en cours de prise en charge, ${nf(c.gueris)} guéris et ${nf(c.deces)} décédés (létalité en structure ${pc(c.letalite_cte, 0)}) ; ${nf(n.admis)} non-cas admis.</p>
+    const pp = { adm: somme(ps, "admis"), nc: somme(ps, "admis_non_cas"), sor: somme(ps, "sortis"), dec: somme(ps, "deces") };
+    const blocPer = `<h3 style="margin:14px 0 6px">Sur la période choisie (${perLib(ps, X)})</h3>${horsSerie(p.serie, X)}<div class="grid g4">
+        ${X.kpi("Admissions de confirmés", nf(pp.adm), "date d'admission dans la période", { color: "--s1" })}
+        ${X.kpi("Admissions de non-cas", nf(pp.nc), "suspects admis puis infirmés", { color: "--s4" })}
+        ${X.kpi("Sorties de confirmés", nf(pp.sor), "date de sortie dans la période", { color: "--good" })}
+        ${X.kpi("Décès en structure", nf(pp.dec), `parmi les sorties de la période · ${pc(pp.sor ? 100 * pp.dec / pp.sor : null, 0)} des sorties`, { color: "--critical" })}
+      </div><h3 style="margin:14px 0 6px">Situation au ${X.dfr(p.date)} (cumul)</h3>`;
+    return `${fixeTxt(X, p.date, "Indicateurs cumulés de la prise en charge")}${blocPer}<p class="lead">Prise en charge (export DHIS2 « Prise en charge », rapproché des notifications par numéro EPID) au <b>${X.dfr(p.date)}</b> : <b>${nf(c.admis)}</b> cas confirmés admis, ${nf(c.en_cours)} en cours de prise en charge, ${nf(c.gueris)} guéris et ${nf(c.deces)} décédés (létalité en structure ${pc(c.letalite_cte, 0)}) ; ${nf(n.admis)} non-cas admis.</p>
       <div class="grid g5">
         ${X.kpi("Confirmés admis", nf(c.admis), `${nf(c.admis_7j)} admissions en 7 jours · ${nf(c.admis_j0)} le jour J`, { color: "--s1" })}
         ${X.kpi("En cours de prise en charge", nf(c.en_cours), "admis sans date ni statut de sortie (60 derniers jours)", { color: "--s4" })}
@@ -136,7 +161,7 @@
         ${X.kpi("Délai notification → admission", c.delai_adm_median === null ? "—" : nf(c.delai_adm_median, 1) + " j", `médiane · ${pc(c.delai_adm_pct_24h, 0)} admis en ≤ 24 h · séjour médian ${nf(c.sejour_median, 0)} j`, { color: "--s3" })}
       </div>
       <div class="grid g2">
-        ${X.panel("Admissions, sorties et décès par jour (confirmés)", `${nf(p.serie.length)} derniers jours`, `<div id="${ids.s}"></div>`, { png: "pec_par_jour" })}
+        ${X.panel("Admissions, sorties et décès par jour (confirmés)", perLib(ps, X), `<div id="${ids.s}"></div>`, { png: "pec_par_jour" })}
         ${X.panel("Statut à la sortie (confirmés)", "GR = guéri, DCD = décédé, EVD = évadé, TRF = transféré", `<div id="${ids.st}"></div>`, { png: "pec_statuts" })}
       </div>
       <div class="grid g2">
