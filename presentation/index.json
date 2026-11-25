@@ -1,14 +1,14 @@
 {
- "date": "2026-11-22",
- "genere_le": "2026-11-22 14:00",
+ "date": "2026-11-24",
+ "genere_le": "2026-11-25 09:09",
  "niveaux": [
   {
    "code": "national",
    "niveau": "national",
    "nom": "Niveau national : RDC",
    "court": "RDC",
-   "date": "2026-11-20",
-   "pptx": "Presentation_Reunion_National_20261120.pptx",
+   "date": "2026-11-24",
+   "pptx": "Presentation_Reunion_National_20261124.pptx",
    "diapositives": 22,
    "images": [
     "01_indicateurs_cumul",
@@ -87,7 +87,7 @@
     },
     {
      "titre": "Alertes",
-     "date": "2026-11-20",
+     "date": "2026-11-24",
      "images": [
       "07_indicateurs_alertes",
       "07b_alertes_comparatif_3j",
@@ -107,7 +107,7 @@
       "13_contacts_suivre_vus",
       "14_tableau_contacts"
      ],
-     "date": "2026-11-20"
+     "date": "2026-11-24"
     },
     {
      "titre": "Laboratoire",
@@ -116,7 +116,7 @@
       "16_labo_resultats",
       "17_labo_positivite"
      ],
-     "date": "2026-11-20"
+     "date": "2026-11-24"
     }
    ]
   },
@@ -125,8 +125,8 @@
    "niveau": "province",
    "nom": "Province : Ituri",
    "court": "Ituri",
-   "date": "2026-11-20",
-   "pptx": "Presentation_Reunion_Ituri_20261120.pptx",
+   "date": "2026-11-24",
+   "pptx": "Presentation_Reunion_Ituri_20261124.pptx",
    "diapositives": 40,
    "images": [
     "01_indicateurs_cumul",
@@ -142,8 +142,8 @@
     "02c_tendances_LITA",
     "02c_tendances_BAMBU",
     "02c_tendances_KOMANDA",
-    "02c_tendances_NYANKUNDE",
     "02c_tendances_MAMBASA",
+    "02c_tendances_NYANKUNDE",
     "02c_tendances_TCHOMIA",
     "02c_tendances_FATAKI",
     "02c_tendances_KILO",
@@ -154,11 +154,11 @@
     "02c_tendances_DRODRO",
     "02c_tendances_LOGO",
     "02c_tendances_AUNGBA",
-    "02c_tendances_ADJA",
     "02c_tendances_ARIWARA",
+    "02c_tendances_ADJA",
     "02c_tendances_GETY",
-    "02c_tendances_MAHAGI",
     "02c_tendances_KAMBALA",
+    "02c_tendances_MAHAGI",
     "02c_tendances_BOGA",
     "02c_tendances_ADI",
     "03_indicateurs_jour",
@@ -199,8 +199,8 @@
       "02c_tendances_LITA",
       "02c_tendances_BAMBU",
       "02c_tendances_KOMANDA",
-      "02c_tendances_NYANKUNDE",
       "02c_tendances_MAMBASA",
+      "02c_tendances_NYANKUNDE",
       "02c_tendances_TCHOMIA",
       "02c_tendances_FATAKI",
       "02c_tendances_KILO",
@@ -211,11 +211,11 @@
       "02c_tendances_DRODRO",
       "02c_tendances_LOGO",
       "02c_tendances_AUNGBA",
-      "02c_tendances_ADJA",
       "02c_tendances_ARIWARA",
+      "02c_tendances_ADJA",
       "02c_tendances_GETY",
-      "02c_tendances_MAHAGI",
       "02c_tendances_KAMBALA",
+      "02c_tendances_MAHAGI",
       "02c_tendances_BOGA",
       "02c_tendances_ADI"
      ]
@@ -235,7 +235,7 @@
     },
     {
      "titre": "Alertes",
-     "date": "2026-11-20",
+     "date": "2026-11-24",
      "images": [
       "07_indicateurs_alertes",
       "07b_alertes_comparatif_3j",
@@ -255,7 +255,7 @@
       "13_contacts_suivre_vus",
       "14_tableau_contacts"
      ],
-     "date": "2026-11-20"
+     "date": "2026-11-24"
     }
    ]
   },
@@ -264,8 +264,8 @@
    "niveau": "province",
    "nom": "Province : Nord Kivu",
    "court": "Nord Kivu",
-   "date": "2026-11-20",
-   "pptx": "Presentation_Reunion_Nord_Kivu_20261120.pptx",
+   "date": "2026-11-24",
+   "pptx": "Presentation_Reunion_Nord_Kivu_20261124.pptx",
    "diapositives": 27,
    "images": [
     "01_indicateurs_cumul",
@@ -348,7 +348,7 @@
     },
     {
      "titre": "Alertes",
-     "date": "2026-11-20",
+     "date": "2026-11-24",
      "images": [
       "07_indicateurs_alertes",
       "07b_alertes_comparatif_3j",
@@ -368,7 +368,7 @@
       "13_contacts_suivre_vus",
       "14_tableau_contacts"
      ],
-     "date": "2026-11-20"
+     "date": "2026-11-24"
     }
    ]
   },
@@ -377,8 +377,8 @@
    "niveau": "province",
    "nom": "Province : Haut Uele",
    "court": "Haut Uele",
-   "date": "2026-11-20",
-   "pptx": "Presentation_Reunion_Haut_Uele_20261120.pptx",
+   "date": "2026-11-24",
+   "pptx": "Presentation_Reunion_Haut_Uele_20261124.pptx",
    "diapositives": 19,
    "images": [
     "01_indicateurs_cumul",
@@ -393,6 +393,7 @@
     "02c_tendances_GOMBARI",
     "02c_tendances_DUNGU",
     "03_indicateurs_jour",
+    "04_cas_du_jour",
     "05_jours_sans_cas",
     "07_indicateurs_alertes",
     "08_alertes_sources",
@@ -432,7 +433,8 @@
     {
      "titre": "Situation du jour",
      "images": [
-      "03_indicateurs_jour"
+      "03_indicateurs_jour",
+      "04_cas_du_jour"
      ]
     },
     {
@@ -443,7 +445,7 @@
     },
     {
      "titre": "Alertes",
-     "date": "2026-11-20",
+     "date": "2026-11-24",
      "images": [
       "07_indicateurs_alertes",
       "07b_alertes_comparatif_3j",
@@ -463,7 +465,7 @@
       "13_contacts_suivre_vus",
       "14_tableau_contacts"
      ],
-     "date": "2026-11-20"
+     "date": "2026-11-24"
     }
    ]
   },
@@ -472,8 +474,8 @@
    "niveau": "province",
    "nom": "Province : Tshopo",
    "court": "Tshopo",
-   "date": "2026-11-20",
-   "pptx": "Presentation_Reunion_Tshopo_20261120.pptx",
+   "date": "2026-11-24",
+   "pptx": "Presentation_Reunion_Tshopo_20261124.pptx",
    "diapositives": 18,
    "images": [
     "01_indicateurs_cumul",
@@ -487,6 +489,7 @@
     "02c_tendances_LUBUNGA",
     "02c_tendances_WANIERUKULA",
     "03_indicateurs_jour",
+    "04_cas_du_jour",
     "05_jours_sans_cas",
     "07_indicateurs_alertes",
     "08_alertes_sources",
@@ -525,7 +528,8 @@
     {
      "titre": "Situation du jour",
      "images": [
-      "03_indicateurs_jour"
+      "03_indicateurs_jour",
+      "04_cas_du_jour"
      ]
     },
     {
@@ -536,7 +540,7 @@
     },
     {
      "titre": "Alertes",
-     "date": "2026-11-20",
+     "date": "2026-11-24",
      "images": [
       "07_indicateurs_alertes",
       "07b_alertes_comparatif_3j",
@@ -556,7 +560,7 @@
       "13_contacts_suivre_vus",
       "14_tableau_contacts"
      ],
-     "date": "2026-11-20"
+     "date": "2026-11-24"
     }
    ]
   },
@@ -565,8 +569,8 @@
    "niveau": "province",
    "nom": "Province : Bas Uele",
    "court": "Bas Uele",
-   "date": "2026-11-20",
-   "pptx": "Presentation_Reunion_Bas_Uele_20261120.pptx",
+   "date": "2026-11-24",
+   "pptx": "Presentation_Reunion_Bas_Uele_20261124.pptx",
    "diapositives": 14,
    "images": [
     "01_indicateurs_cumul",
@@ -621,7 +625,7 @@
     },
     {
      "titre": "Alertes",
-     "date": "2026-11-20",
+     "date": "2026-11-24",
      "images": [
       "07_indicateurs_alertes",
       "07b_alertes_comparatif_3j",
@@ -639,7 +643,7 @@
       "12_contacts_tendance",
       "14_tableau_contacts"
      ],
-     "date": "2026-10-29"
+     "date": "2026-10-31"
     }
    ]
   },
@@ -648,8 +652,8 @@
    "niveau": "province",
    "nom": "Province : Nord Ubangi",
    "court": "Nord Ubangi",
-   "date": "2026-11-20",
-   "pptx": "Presentation_Reunion_Nord_Ubangi_20261120.pptx",
+   "date": "2026-11-24",
+   "pptx": "Presentation_Reunion_Nord_Ubangi_20261124.pptx",
    "diapositives": 10,
    "images": [
     "01_indicateurs_cumul",
@@ -658,7 +662,6 @@
     "02c_tendances_WAPINDA",
     "02c_tendances_YAKOMA",
     "03_indicateurs_jour",
-    "04_cas_du_jour",
     "05_jours_sans_cas",
     "07_indicateurs_alertes",
     "08_alertes_sources",
@@ -687,8 +690,7 @@
     {
      "titre": "Situation du jour",
      "images": [
-      "03_indicateurs_jour",
-      "04_cas_du_jour"
+      "03_indicateurs_jour"
      ]
     },
     {
@@ -699,7 +701,7 @@
     },
     {
      "titre": "Alertes",
-     "date": "2026-11-20",
+     "date": "2026-11-23",
      "images": [
       "07_indicateurs_alertes",
       "07b_alertes_comparatif_3j",
@@ -717,8 +719,8 @@
    "niveau": "province",
    "nom": "Province : Sud Kivu",
    "court": "Sud Kivu",
-   "date": "2026-11-20",
-   "pptx": "Presentation_Reunion_Sud_Kivu_20261120.pptx",
+   "date": "2026-11-24",
+   "pptx": "Presentation_Reunion_Sud_Kivu_20261124.pptx",
    "diapositives": 9,
    "images": [
     "01_indicateurs_cumul",
@@ -778,8 +780,8 @@
    "niveau": "province",
    "nom": "Province : Sud Ubangi",
    "court": "Sud Ubangi",
-   "date": "2026-11-20",
-   "pptx": "Presentation_Reunion_Sud_Ubangi_20261120.pptx",
+   "date": "2026-11-24",
+   "pptx": "Presentation_Reunion_Sud_Ubangi_20261124.pptx",
    "diapositives": 9,
    "images": [
     "01_indicateurs_cumul",

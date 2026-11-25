@@ -3,9 +3,9 @@
  "niveau": "province",
  "nom": "Province : Ituri",
  "court": "Ituri",
- "date": "2026-11-20",
- "genere_le": "2026-11-22 14:00",
- "pptx": "Presentation_Reunion_Ituri_20261120.pptx",
+ "date": "2026-11-24",
+ "genere_le": "2026-11-25 09:08",
+ "pptx": "Presentation_Reunion_Ituri_20261124.pptx",
  "diapositives": 40,
  "slides": [
   {
@@ -29,8 +29,8 @@
     "02c_tendances_LITA",
     "02c_tendances_BAMBU",
     "02c_tendances_KOMANDA",
-    "02c_tendances_NYANKUNDE",
     "02c_tendances_MAMBASA",
+    "02c_tendances_NYANKUNDE",
     "02c_tendances_TCHOMIA",
     "02c_tendances_FATAKI",
     "02c_tendances_KILO",
@@ -41,11 +41,11 @@
     "02c_tendances_DRODRO",
     "02c_tendances_LOGO",
     "02c_tendances_AUNGBA",
-    "02c_tendances_ADJA",
     "02c_tendances_ARIWARA",
+    "02c_tendances_ADJA",
     "02c_tendances_GETY",
-    "02c_tendances_MAHAGI",
     "02c_tendances_KAMBALA",
+    "02c_tendances_MAHAGI",
     "02c_tendances_BOGA",
     "02c_tendances_ADI"
    ]
@@ -65,7 +65,7 @@
   },
   {
    "titre": "Alertes",
-   "date": "2026-11-20",
+   "date": "2026-11-24",
    "images": [
     "07_indicateurs_alertes",
     "07b_alertes_comparatif_3j",
@@ -85,13 +85,13 @@
     "13_contacts_suivre_vus",
     "14_tableau_contacts"
    ],
-   "date": "2026-11-20"
+   "date": "2026-11-24"
   }
  ],
  "images": {
   "01_indicateurs_cumul": {
    "fichier": "01_indicateurs_cumul.png",
-   "titre": "Situation de la MVE au 20 novembre 2026, Province : Ituri"
+   "titre": "Situation de la MVE au 24 novembre 2026, Province : Ituri"
   },
   "02_courbe_hebdomadaire": {
    "fichier": "02_courbe_hebdomadaire.png",
@@ -141,13 +141,13 @@
    "fichier": "02c_tendances_KOMANDA.png",
    "titre": "Tendances, ZS Komanda"
   },
-  "02c_tendances_NYANKUNDE": {
-   "fichier": "02c_tendances_NYANKUNDE.png",
-   "titre": "Tendances, ZS Nyankunde"
-  },
   "02c_tendances_MAMBASA": {
    "fichier": "02c_tendances_MAMBASA.png",
    "titre": "Tendances, ZS Mambasa"
+  },
+  "02c_tendances_NYANKUNDE": {
+   "fichier": "02c_tendances_NYANKUNDE.png",
+   "titre": "Tendances, ZS Nyankunde"
   },
   "02c_tendances_TCHOMIA": {
    "fichier": "02c_tendances_TCHOMIA.png",
@@ -189,25 +189,25 @@
    "fichier": "02c_tendances_AUNGBA.png",
    "titre": "Tendances, ZS Aungba"
   },
-  "02c_tendances_ADJA": {
-   "fichier": "02c_tendances_ADJA.png",
-   "titre": "Tendances, ZS Adja"
-  },
   "02c_tendances_ARIWARA": {
    "fichier": "02c_tendances_ARIWARA.png",
    "titre": "Tendances, ZS Ariwara"
+  },
+  "02c_tendances_ADJA": {
+   "fichier": "02c_tendances_ADJA.png",
+   "titre": "Tendances, ZS Adja"
   },
   "02c_tendances_GETY": {
    "fichier": "02c_tendances_GETY.png",
    "titre": "Tendances, ZS Gety"
   },
-  "02c_tendances_MAHAGI": {
-   "fichier": "02c_tendances_MAHAGI.png",
-   "titre": "Tendances, ZS Mahagi"
-  },
   "02c_tendances_KAMBALA": {
    "fichier": "02c_tendances_KAMBALA.png",
    "titre": "Tendances, ZS Kambala"
+  },
+  "02c_tendances_MAHAGI": {
+   "fichier": "02c_tendances_MAHAGI.png",
+   "titre": "Tendances, ZS Mahagi"
   },
   "02c_tendances_BOGA": {
    "fichier": "02c_tendances_BOGA.png",
@@ -219,11 +219,11 @@
   },
   "03_indicateurs_jour": {
    "fichier": "03_indicateurs_jour.png",
-   "titre": "Situation épidémiologique du jour, 20 novembre 2026"
+   "titre": "Situation épidémiologique du jour, 24 novembre 2026"
   },
   "04_cas_du_jour": {
    "fichier": "04_cas_du_jour.png",
-   "titre": "Répartition des 25 nouveaux cas par zone de santé"
+   "titre": "Répartition des 24 nouveaux cas par zone de santé"
   },
   "05_jours_sans_cas": {
    "fichier": "05_jours_sans_cas.png",
@@ -231,11 +231,11 @@
   },
   "07_indicateurs_alertes": {
    "fichier": "07_indicateurs_alertes.png",
-   "titre": "Situation des alertes au 20 novembre 2026"
+   "titre": "Situation des alertes au 24 novembre 2026"
   },
   "08_alertes_sources": {
    "fichier": "08_alertes_sources.png",
-   "titre": "Sources des alertes du jour, 1 030 alertes"
+   "titre": "Sources des alertes du jour, 702 alertes"
   },
   "07b_alertes_comparatif_3j": {
    "fichier": "07b_alertes_comparatif_3j.png",
@@ -259,7 +259,7 @@
   },
   "10_indicateurs_contacts": {
    "fichier": "10_indicateurs_contacts.png",
-   "titre": "Situation du suivi des contacts au 20 novembre 2026"
+   "titre": "Situation du suivi des contacts au 24 novembre 2026"
   },
   "12_contacts_tendance": {
    "fichier": "12_contacts_tendance.png",
