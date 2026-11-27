@@ -1,0 +1,78 @@
+province,zone_sante,aire_sante,cas_cumules,nouveaux_7j,nouveaux_21j,nb_criteres,soutenu,hausse_pct,forte_charge,deces_communautaires_7j
+Ituri,Mandima,Biakato Mines,220,52,55,3,,+31%,oui,6
+Ituri,Mandima,Babombi,180,52,53,3,,+41%,oui,1
+Ituri,Mangala,Mandje,177,25,72,3,oui,+16%,oui,
+Nord-Kivu,Beni,Benengule,69,14,22,3,oui,+25%,,2
+Nord-Kivu,Mutwanga,La Frontière,34,11,20,3,oui,+48%,,2
+Ituri,Nizi,Heritage,329,9,38,3,oui,,oui,3
+Nord-Kivu,Beni,Bundji,102,5,13,3,oui,,oui,1
+Ituri,Mambasa,Binase,32,5,18,3,oui,+19%,,1
+Ituri,Nizi,Lopa,144,4,13,3,oui,,oui,1
+Ituri,Rwampara,Rwampara,363,3,13,3,oui,,oui,2
+Nord-Kivu,Beni,Butanuka,19,3,11,3,oui,+19%,,1
+Ituri,Mandima,Katanga,85,41,46,2,,+93%,,3
+Ituri,Bunia,Bora Uzima,96,16,30,2,oui,+20%,,
+Nord-Kivu,Oicha,Pakanza,46,16,32,2,oui,+53%,,
+Ituri,Nyankunde,Nyankunde,237,11,25,2,oui,,oui,
+Nord-Kivu,Beni,Ngongolio,100,7,20,2,oui,,oui,
+Ituri,Bunia,Bigo,440,6,20,2,oui,,oui,
+Ituri,Nizi,Baimani,18,6,6,2,,+50%,,1
+Nord-Kivu,Oicha,Masosi,17,6,10,2,,+55%,,2
+Ituri,Nizi,Nizi,272,5,13,2,oui,,oui,
+Nord-Kivu,Beni,Kanzulinzuli,130,5,32,2,oui,,oui,
+Ituri,Mambasa,Mambasa,58,5,26,2,oui,,,2
+Nord-Kivu,Katwa,Vungi,224,4,13,2,oui,,oui,
+Ituri,Bunia,Rwambuzi,145,4,19,2,oui,,oui,
+Haut-Uele,Wamba,Bakandja,28,4,5,2,,+17%,,1
+Ituri,Mandima,Bakaeku Kenya,6,4,4,2,,+200%,,1
+Ituri,Bunia,Mudzi Maria,187,3,9,2,oui,,oui,
+Ituri,Bunia,Simbiliabo,45,3,7,2,oui,,,1
+Nord-Kivu,Mabalako,Bingo,15,3,7,2,oui,+25%,,
+Haut-Uele,Wamba,Mambati,11,3,7,2,oui,+38%,,
+Ituri,Mandima,Teturi,10,3,3,2,,+43%,,1
+Haut-Uele,Watsa,Bethanie,17,17,17,1,,from 0,,
+Ituri,Mandima,Lukaya,17,15,15,1,,+750%,,
+Ituri,Mandima,Lwemba,16,14,14,1,,+700%,,
+Nord-Kivu,Katwa,Masuli,130,6,11,1,,,oui,
+Nord-Kivu,Mutwanga,Lubiriha,41,6,18,1,,+17%,,
+Ituri,Mambasa,Mputu,42,5,15,1,oui,,,
+Nord-Kivu,Beni,Madrandele,32,5,9,1,,+19%,,
+Nord-Kivu,Mutwanga,Bulongo,22,5,6,1,,+29%,,
+Nord-Kivu,Beni,Kasanga,38,4,14,1,oui,,,
+Ituri,Bunia,Muhito,36,4,8,1,oui,,,
+Ituri,Lita,Lita,71,3,11,1,oui,,,
+Ituri,Bunia,Betokomba,27,3,4,1,,,,1
+Nord-Kivu,Beni,Malepe,24,3,6,1,oui,,,
+Nord-Kivu,Vuhovi,Bunyuka,21,3,6,1,,+17%,,
+Nord-Kivu,Beni,Rwangoma,21,3,5,1,,+17%,,
+Nord-Kivu,Katwa,Vighole,16,3,4,1,,+23%,,
+Ituri,Mandima,Mayuano,12,3,3,1,,+33%,,
+Ituri,Mandima,Makeke,8,3,3,1,,+60%,,
+Ituri,Bunia,Ndibakodu,77,2,3,1,,,,1
+Ituri,Lita,Katoto,57,2,12,1,,,,1
+Ituri,Rwampara,Shari,57,2,2,1,,,,2
+Ituri,Bunia,Cnca Saio,34,2,6,1,,,,1
+Nord-Kivu,Beni,Kuka,31,2,20,1,,,,1
+Nord-Kivu,Beni,Boikene,28,2,8,1,,,,1
+Nord-Kivu,Katwa,Mitoya,11,2,2,1,,,,1
+Ituri,Mandima,Biakato May,10,2,2,1,,,,1
+Haut-Uele,Pawa,Bamoka,2,2,2,1,,,,1
+Ituri,Rwampara,Hoho,251,1,1,1,,,oui,
+Ituri,Mongbwalu,CECA 20,176,1,9,1,,,oui,
+Ituri,Mongbwalu,Mongbwalu,173,1,4,1,,,oui,
+Ituri,Bunia,Nzere,127,1,6,1,,,oui,
+Ituri,Lita,Bahwere,115,1,8,1,,,oui,
+Ituri,Nia Nia,Bafwabango,85,1,3,1,,,,1
+Nord-Kivu,Beni,Butsili,72,1,3,1,,,,1
+Nord-Kivu,Butembo,Katsya,32,1,2,1,,,,1
+Nord-Kivu,Beni,Ngilinga,30,1,4,1,,,,1
+Nord-Kivu,Katwa,Rughenda,25,1,1,1,,,,1
+Ituri,Drodro,Drodro,14,1,1,1,,,,1
+Nord-Kivu,Katwa,Muchanga,13,1,1,1,,,,1
+Ituri,Rimba,Avu,2,1,2,1,,,,1
+Ituri,Rwampara,Ntoma,2,1,1,1,,,,1
+Ituri,Bunia,Aero,519,0,0,1,,,oui,
+Ituri,Nia Nia,Juhudi,116,0,0,1,,,oui,
+Ituri,Mongbwalu,Saïo,115,0,1,1,,,oui,
+Ituri,Mangala,Tchele,114,0,0,1,,,oui,
+Ituri,Mongbwalu,Pluto,107,0,1,1,,,oui,
