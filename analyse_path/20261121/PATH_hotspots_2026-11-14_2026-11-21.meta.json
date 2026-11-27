@@ -1,0 +1,47 @@
+{
+  "source": "PATH",
+  "titre": "BVD Hotspots by Health Area",
+  "semaine_debut": "2026-11-14",
+  "semaine_fin": "2026-11-21",
+  "date_donnees": "2026-11-21",
+  "source_donnees": "INSP linelist as of Nov 21, 2026",
+  "tri": "Health areas are ranked by number of criteria met, then by number of new cases in the last 7 days.",
+  "inclusion": "Health areas with at least 1 new case in the last 42 days that also meet at least one of the following criteria.",
+  "criteres": {
+    "soutenu": "Sustained = 3+ new cases per week, in each of the last 2 weeks",
+    "hausse": "15%+ increase = at least 3 new cases AND 15%+ increase in the last 7 days",
+    "forte_charge": "High burden = 100+ cumulative cases all-time",
+    "deces_communautaires": "Community deaths = 1+ confirmed death(s) with alert source 'Communauté' in the last 7 days"
+  },
+  "note_deces_communautaires": "Community deaths are a linelist proxy (confirmed case, alert source = Communauté, alert nature = Décès). They count deaths alerted by the community, not necessarily deaths occurring in the community, and miss records with missing or misentered source.",
+  "totaux": {
+    "national": {
+      "hotspots_cumules": 6825,
+      "nouveaux_7j": 475,
+      "nouveaux_21j": 936,
+      "cumul_toutes_aires": 11725,
+      "part_pct": 58
+    },
+    "Ituri": {
+      "hotspots_cumules": 5424,
+      "nouveaux_7j": 326,
+      "nouveaux_21j": 605,
+      "cumul_toutes_aires": 7964,
+      "part_pct": 68
+    },
+    "Nord-Kivu": {
+      "hotspots_cumules": 1343,
+      "nouveaux_7j": 123,
+      "nouveaux_21j": 300,
+      "cumul_toutes_aires": 3070,
+      "part_pct": 44
+    },
+    "Haut-Uele": {
+      "hotspots_cumules": 58,
+      "nouveaux_7j": 26,
+      "nouveaux_21j": 31,
+      "cumul_toutes_aires": 559,
+      "part_pct": 10
+    }
+  }
+}

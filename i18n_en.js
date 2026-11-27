@@ -997,6 +997,24 @@ window.HUB_EN_RX = [
   [/^les plus actives sont (.+)\.$/, "the most active are $1."], [/^les zones les plus létales sont (.+)\.$/, "the most lethal zones are $1."],
 ];
 
+/* ---- Analyse PATH : hotspots par aire de santé (contenu du fichier PATH seulement) ---- */
+Object.assign(window.HUB_EN_TPL, {
+  "Analyse PATH": "PATH analysis", "Aucune analyse PATH chargée.": "No PATH analysis loaded.",
+  "Déposez dans « Charger les données » (ou dans data/) le tableau hebdomadaire « BVD Hotspots by Health Area » envoyé par PATH (CSV ou Excel, en-têtes en français ou en anglais) et, si possible, son fichier de métadonnées « .meta.json » de même nom, puis relancez l'analyse : les fichiers sont reconnus par leur contenu.": "Upload in “Upload data” (or in data/) the weekly “BVD Hotspots by Health Area” table sent by PATH (CSV or Excel, French or English headers) and, if possible, its “.meta.json” metadata file with the same name, then rerun the analysis: files are recognised by their content.",
+  "Semaine": "Week", "la plus récente": "most recent", "Classeur Excel (national et provinces)": "Excel workbook (national and provinces)", "Tableau reçu (CSV)": "Table as received (CSV)",
+  "source": "source", "semaine du": "week of", "données : linelist INSP au": "data: INSP linelist as of", "contenu du fichier PATH seulement, sans autre donnée": "content of the PATH file only, no other data",
+  "Aires de santé hotspot": "Hotspot health areas", "Aires à 3 critères": "Areas meeting 3 criteria", "soutenu, hausse de 15 %+ et forte charge": "sustained, 15%+ increase and high burden",
+  "Nouveaux cas dans les hotspots (7 jours)": "New cases in hotspots (7 days)", "sur 21 jours": "over 21 days", "Part des cas cumulés dans les hotspots": "Share of cumulative cases in hotspots",
+  "sur": "of", "cas confirmés cumulés": "cumulative confirmed cases", "cumul de toutes les aires non fourni": "all-areas cumulative total not provided",
+  "Hotspots par aire de santé": "Hotspots by health area", "National": "National",
+  "Mêmes colonnes et même ordre que PATH : nombre de critères décroissant puis nouveaux cas des 7 derniers jours ; ligne Total en bas": "Same columns and order as PATH: number of criteria descending, then new cases in the last 7 days; Total row at the bottom",
+  "Tableau affiché au format Excel": "Displayed table as Excel", "Définitions (PATH)": "Definitions (PATH)",
+  "Les aires hotspot représentent": "Hotspot areas account for", "cas confirmés cumulés sur les": "cumulative confirmed cases out of the", "de toutes les aires de santé": "across all health areas",
+  "Cas cumulés": "Cumulative cases", "Nouveaux cas (7 derniers jours)": "New cases (last 7 days)", "Nouveaux cas (21 derniers jours)": "New cases (last 21 days)",
+  "Nombre de critères remplis": "Number of criteria met", "Soutenu": "Sustained", "Hausse de 15 %+": "15%+ increase", "Forte charge": "High burden",
+  "Décès communautaires (7 derniers jours)": "Community deaths (last 7 days)", "nouvelle": "new", "Absente du tableau de la semaine précédente": "Not in the previous week's table",
+});
+
 /* ---- Google Invasion Spatial Risque, période « N derniers jours », textes des cartes ---- */
 Object.assign(window.HUB_EN_TPL, {
   "Google Invasion Spatial Risque": "Google Spatial Invasion Risk",
