@@ -88,7 +88,7 @@
     lab: "Tous", labTab: "act", nowH: 30, fLevel: "National", fTerr: "National", pcT: "National", pcZ: "", fTarget: "confirmes", fH: 30, tables: {},
     ovStack: "aucun", netIcons: true, gen: "0", idxPeriod: "0", ssSet: "", ssPlace: "Tous", ssMin: "2", ssCases: true, dynG: "National", growBase: "dds", growWin: "12s", dyStack: "sexe", dyBase: "o", dyDays: "60", rtDays: "120",
     siCmp: false, rlWin: "28j", projH: "30", distK: "dds_notification", recZone: "", recSup: "0.3", recColor: "issue", recX: "onset", recIcons: true, recDoc: false, epiMin: "3", resZone: "", perfG: "National",
-    rtmG: "National", rtmSet: "all", rtmDays: "120", zrCat: "Toutes", rtmMode: "zones", iclG: "National", rtzProv: "Toutes", rtzG: "National", rtzTau: "7", rtzDays: "60", opTab: "deces", opProv: "Toutes", opWin: "cumul", opZone: "Toutes", opCte: "Tous", opD1: "", opD2: "", opCls: "c", opMapK: "dec", opChamp: "Tous", iclTau: "14", pilT: "National", pilZ: "", pilA: "", jlD1: "", jlD2: "", jlBase: "exp", jlZone: "Toutes", jlSt: "Tous", zrColor: "categorie", zrLab: "score", zrSel: "", zrZone: "", zrAire: "", zrLet: false, rgPrio: "P1-P2", rgStat: "actifs", rgSel: "", gsProv: "Toutes", gsSel: "", gsNiv: "Prioritaires", gsLab: "rang", gsDate: "", pplProv: "Toutes", sitNiv: "national"
+    rtmG: "National", rtmSet: "all", rtmDays: "120", zrCat: "Toutes", rtmMode: "zones", iclG: "National", rtzProv: "Toutes", rtzG: "National", rtzTau: "7", rtzDays: "60", opTab: "deces", opProv: "Toutes", opWin: "cumul", opZone: "Toutes", opCte: "Tous", opD1: "", opD2: "", opCls: "c", opMapK: "dec", opChamp: "Tous", iclTau: "14", pilT: "National", pilZ: "", pilA: "", jlD1: "", jlD2: "", jlBase: "exp", jlZone: "Toutes", jlSt: "Tous", zrColor: "categorie", zrLab: "score", zrSel: "", zrZone: "", zrAire: "", zrLet: false, rgPrio: "P1-P2", rgStat: "actifs", rgSel: "", gsProv: "Toutes", gsSel: "", gsNiv: "Prioritaires", gsLab: "rang", gsDate: "", pplProv: "Toutes", sitNiv: "national", apDate: "", apProv: "National"
   };
   const TABS = [
     { id: "incident", t: "Incident Manager", g: "Situation et risque", priv: true, i: "M12 2a4 4 0 0 1 4 4v1h3a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h3V6a4 4 0 0 1 4-4zm0 2a2 2 0 0 0-2 2v1h4V6a2 2 0 0 0-2-2zm-1 7v3H8v2h3v3h2v-3h3v-2h-3v-3z" },
@@ -98,6 +98,7 @@
     { id: "maps", t: "Cartes pour rapport", g: "Situation et risque", i: "M15 4 9 2 3 4v18l6-2 6 2 6-2V2zM9 4.4l6 2v13.2l-6-2z" },
     { id: "riskzones", t: "Zones à risque", g: "Situation et risque", i: "M12 2 1 21h22L12 2zm1 15h-2v2h2zm0-7h-2v5h2z" },
     { id: "spatialrisk", t: "Google Invasion Spatial Risque", g: "Situation et risque", i: "M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm0 2a8 8 0 0 1 7.7 6h-3.2l-2-3-3 6-2-3H4.3A8 8 0 0 1 12 4zm0 16a8 8 0 0 1-7.7-6h3.2l2 3 3-6 2 3h5.2A8 8 0 0 1 12 20z" },
+    { id: "analysepath", t: "Analyse PATH", g: "Situation et risque", i: "M3 4h18v3H3zm0 5h18v2H3zm0 4h18v2H3zm0 4h12v2H3zm14 0h4v2h-4z" },
     { id: "index", t: "Cas index", g: "Contact tracing", i: "M4 6h16v2H4zm0 5h16v2H4zm0 5h10v2H4z", priv: true },
     { id: "journey", t: "Parcours du cas", g: "Contact tracing", i: "M12 2a4 4 0 1 1 0 8 4 4 0 0 1 0-8zm-7 18c0-3.9 3.1-7 7-7s7 3.1 7 7H5zM19 3l3 3-3 3", priv: true },
     { id: "followup", t: "Suivi des contacts", g: "Contact tracing", i: "M12 2a5 5 0 1 1 0 10 5 5 0 0 1 0-10zm-8 19c0-4.4 3.6-8 8-8s8 3.6 8 8H4zm12.5-7.5 2 2 4-4-1.4-1.4-2.6 2.6-.6-.6z" },
@@ -3101,6 +3102,77 @@
   const RG_COL = { P1: "#8f2d2a", P2: "#d9673f", P3: "#f0b48a", Veille: "#f3e6d8" };
   const rgPill = p => `<span class="score-pill" style="background:${RG_COL[p] || "#eee"};color:${p === "P1" || p === "P2" ? "#fff" : "#3a2a20"}">${esc(p)}</span>`;
   const ringData = () => PER ? D.anneaux : ((window.HUB_ANNEAUX && (!D.anneaux || (window.HUB_ANNEAUX.date || "") >= (D.anneaux.date || ""))) ? window.HUB_ANNEAUX : D.anneaux);
+  /* ================= ANALYSE PATH : hotspots par aire de santé (contenu du fichier PATH de la semaine seulement) ================= */
+  const AP_CRIT = { 3: ["#b2182b", "#ffffff"], 2: ["#e8766f", "#1a1a1a"], 1: ["#fbd3cf", "#1a1a1a"] };
+  const apAll = () => { const R = window.ANALYSE_PATH || D.analyse_path; return R && (R.profils || []).length ? R : null; };
+  const apData = () => { const A = apAll(); if (!A) return null; return A.profils.find(p => p.semaine_fin === S.apDate) || A.profils[0]; };
+  const apCrit = n => { const c = AP_CRIT[Math.min(3, Number(n) || 0)]; return c ? `<span class="ap-crit" style="background:${c[0]};color:${c[1]}">${nf(n)}</span>` : `<span class="ap-crit">${nf(n || 0)}</span>`; };
+  const apCk = v => v ? `<span class="ap-ck">✓</span>` : "";
+  const apRows = R => S.apProv === "National" ? (R.lignes || []) : (R.lignes || []).filter(z => z.province === S.apProv);
+  const apTot = R => (R.totaux || {})[S.apProv === "National" ? "national" : S.apProv] || {};
+  const apId = () => "PATH_hotspots_" + String(S.apProv).replace(/\W+/g, "_") + "_au_" + ((apData() || {}).semaine_fin || "");
+  const apScope = () => S.apProv === "National" ? T("National") : esc(S.apProv);
+  const apSum = (rows, k) => rows.reduce((s, z) => s + (Number(z[k]) || 0), 0);
+  const apTotalRow = rows => ({ _total: true, cas_cumules: apSum(rows, "cas_cumules"), nouveaux_7j: apSum(rows, "nouveaux_7j"), nouveaux_21j: apSum(rows, "nouveaux_21j") });
+  /* colonnes de PATH, dans l'ordre ; la ligne Total reste en bas quel que soit le tri (valeurs nulles = dernières) */
+  function apCols() {
+    const t = x => !!x._total, nul = (x, v) => t(x) ? null : v, b = (x, v) => t(x) ? `<b>${v}</b>` : v;
+    return [
+      { k: "province", t: "Province", v: x => t(x) ? `<b>${T("Total")}</b>` : esc(x.province), sortv: x => nul(x, x.province), csv: x => t(x) ? T("Total") : x.province },
+      { k: "zone_sante", t: "Zone de santé", v: x => t(x) ? "" : esc(x.zone_sante), sortv: x => nul(x, x.zone_sante), csv: x => t(x) ? "" : x.zone_sante },
+      { k: "aire_sante", t: "Aire de santé", v: x => t(x) ? "" : `${esc(x.aire_sante)}${x.nouvelle ? ` <span class="badge b-info" title="${T("Absente du tableau de la semaine précédente")}">${T("nouvelle")}</span>` : ""}`, sortv: x => nul(x, x.aire_sante), csv: x => t(x) ? "" : x.aire_sante },
+      { k: "cas_cumules", t: "Cas cumulés", num: true, v: x => b(x, nf(x.cas_cumules)), sortv: x => nul(x, x.cas_cumules), csv: x => x.cas_cumules },
+      { k: "nouveaux_7j", t: "Nouveaux cas (7 derniers jours)", num: true, v: x => b(x, nf(x.nouveaux_7j)), sortv: x => nul(x, x.nouveaux_7j), csv: x => x.nouveaux_7j },
+      { k: "nouveaux_21j", t: "Nouveaux cas (21 derniers jours)", num: true, v: x => b(x, nf(x.nouveaux_21j)), sortv: x => nul(x, x.nouveaux_21j), csv: x => x.nouveaux_21j },
+      { k: "nb_criteres", t: "Nombre de critères remplis", num: true, v: x => t(x) ? "" : apCrit(x.nb_criteres), sortv: x => nul(x, (x.nb_criteres || 0) * 100000 + (x.nouveaux_7j || 0)), csv: x => t(x) ? "" : x.nb_criteres },
+      { k: "soutenu", t: "Soutenu", v: x => t(x) ? "" : apCk(x.soutenu), sortv: x => nul(x, x.soutenu ? 1 : 0), csv: x => !t(x) && x.soutenu ? "✓" : "" },
+      { k: "hausse_pct", t: "Hausse de 15 %+", v: x => t(x) ? "" : `<span class="ap-ck" style="color:inherit">${esc(x.hausse_pct || "")}</span>`, sortv: x => nul(x, x.hausse_pct ? 1 : 0), csv: x => t(x) ? "" : (x.hausse_pct || "") },
+      { k: "forte_charge", t: "Forte charge", v: x => t(x) ? "" : apCk(x.forte_charge), sortv: x => nul(x, x.forte_charge ? 1 : 0), csv: x => !t(x) && x.forte_charge ? "✓" : "" },
+      { k: "deces_communautaires_7j", t: "Décès communautaires (7 derniers jours)", num: true, v: x => t(x) || x.deces_communautaires_7j === null || x.deces_communautaires_7j === undefined ? "" : nf(x.deces_communautaires_7j), sortv: x => nul(x, x.deces_communautaires_7j), csv: x => t(x) ? "" : (x.deces_communautaires_7j ?? "") }
+    ];
+  }
+  function apView() {
+    const A = apAll(), R = apData();
+    if (!R) return `<div class="notice"><b>${T("Aucune analyse PATH chargée.")}</b> ${T("Déposez dans « Charger les données » (ou dans data/) le tableau hebdomadaire « BVD Hotspots by Health Area » envoyé par PATH (CSV ou Excel, en-têtes en français ou en anglais) et, si possible, son fichier de métadonnées « .meta.json » de même nom, puis relancez l’analyse : les fichiers sont reconnus par leur contenu.")}</div>`;
+    if (!S.apDate || !A.profils.some(p => p.semaine_fin === S.apDate)) S.apDate = R.semaine_fin;
+    const provs = R.provinces || [];
+    const apK = x => norm(x);   // « Nord Kivu » (filtre global) = « Nord-Kivu » (fichier PATH) : majuscules sans accents ni séparateurs
+    if (S._apGP !== S.province) { S._apGP = S.province; S.apProv = provs.find(p => apK(p) === apK(S.province)) || "National"; }   // filtre province global de l'outil
+    if (S.apProv !== "National" && !provs.includes(S.apProv)) S.apProv = "National";
+    const rows = apRows(R), tot = apTot(R), F = R.fichiers || {}, base = F.base || `../reports/analyse_path/${R.semaine_fin.replace(/-/g, "")}/`;
+    const tx = lang === "en" ? (R.textes_en || R.textes_fr || {}) : (R.textes_fr || {});
+    const n3 = rows.filter(z => (z.nb_criteres || 0) >= 3).length, cum = tot.hotspots_cumules ?? apSum(rows, "cas_cumules");
+    const dl = (f, t, cls = "") => f ? `<a class="btn ${cls}" href="${base}${encodeURIComponent(f)}${VQ()}" download="${esc(f)}">⤓ <span>${T(t)}</span></a>` : "";
+    const part = tot.cumul_toutes_aires ? `${T("Les aires hotspot représentent")} <b>${nf(cum)}</b> ${T("cas confirmés cumulés sur les")} <b>${nf(tot.cumul_toutes_aires)}</b> ${T("de toutes les aires de santé")} (<b>${nf(tot.part_pct, 0)} %</b>).` : "";
+    return `
+    <div class="flex" style="gap:12px;flex-wrap:wrap;align-items:flex-end;margin-bottom:10px">
+      <label class="field" style="min-width:260px"><span>${T("Semaine")}</span><select data-state="apDate">${A.profils.map((p, i) => `<option value="${p.semaine_fin}" ${p.semaine_fin === R.semaine_fin ? "selected" : ""}>${dfmt(p.semaine_debut)} – ${dfmt(p.semaine_fin)}${i === 0 ? " · " + T("la plus récente") : ""}</option>`).join("")}</select></label>
+      <div class="flex" style="gap:8px;flex-wrap:wrap">${dl(F.xlsx, "Classeur Excel (national et provinces)", "primary")}${dl(F.csv, "Tableau reçu (CSV)")}</div>
+    </div>
+    <p class="small muted" style="margin:0 0 12px"><b>${esc(R.titre || "BVD Hotspots by Health Area")}</b> · ${T("source")} : ${esc(R.source || "PATH")} · ${T("semaine du")} ${dfmt(R.semaine_debut)} ${T("au")} ${dfmt(R.semaine_fin)} · ${T("données : linelist INSP au")} ${dfmt(R.date_donnees)} · ${T("contenu du fichier PATH seulement, sans autre donnée")}</p>
+    <div class="grid g4">
+      ${kpi("Aires de santé hotspot", nf(rows.length), apScope(), { color: "--critical" })}
+      ${kpi("Aires à 3 critères", nf(n3), T("soutenu, hausse de 15 %+ et forte charge"), { color: "--serious" })}
+      ${kpi("Nouveaux cas dans les hotspots (7 jours)", nf(apSum(rows, "nouveaux_7j")), `${nf(apSum(rows, "nouveaux_21j"))} ${T("sur 21 jours")}`, { color: "--st-conf" })}
+      ${kpi("Part des cas cumulés dans les hotspots", tot.part_pct === null || tot.part_pct === undefined ? "—" : pc(tot.part_pct, 0), tot.cumul_toutes_aires ? `${nf(cum)} ${T("sur")} ${nf(tot.cumul_toutes_aires)} ${T("cas confirmés cumulés")}` : T("cumul de toutes les aires non fourni"), { color: "--brand-2" })}
+    </div>
+    ${panel(`${T("Hotspots par aire de santé")}, ${apScope()}`, T("Mêmes colonnes et même ordre que PATH : nombre de critères décroissant puis nouveaux cas des 7 derniers jours ; ligne Total en bas"), `
+      <div style="margin-bottom:8px">${segBtns("apProv", [["National", "National"], ...provs.map(p => [p, p])])}</div>
+      ${table(apId(), [...rows, apTotalRow(rows)], apCols(), { sort: null, limit: 200, maxh: 720, searchText: x => x._total ? "" : `${x.province} ${x.zone_sante} ${x.aire_sante}` })}
+      ${part ? `<p class="ap-part">${part}</p>` : ""}`, { csv: apId(), tools: `<button class="btn sm" type="button" data-ap-xlsx title="${T("Tableau affiché au format Excel")}">⤓ Excel</button>` })}
+    ${gsProse("Définitions (PATH)", [esc(tx.inclusion || "")], [tx.soutenu, tx.hausse, tx.forte_charge, tx.deces_communautaires].filter(Boolean),
+      `${tx.note_deces ? `<p>${esc(tx.note_deces)}</p>` : ""}${tx.tri ? `<p class="small muted">${esc(tx.tri)}</p>` : ""}`)}`;
+  }
+  /* tableau affiché (même tri, ligne Total) au format Excel */
+  function apExcel() {
+    const R = apData(); if (!R) return;
+    const t = TABLES[apId()], cols = t ? t.cols : apCols(), rows = t ? t.rows : [...apRows(R), apTotalRow(apRows(R))];
+    const strip = h => String(h ?? "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+    const sheet = { name: S.apProv === "National" ? T("National") : S.apProv, columns: cols.map((c, i) => ({ t: T(c.t), w: i < 3 ? 20 : 14 })),
+      title: `${R.titre || "BVD Hotspots by Health Area"} (${R.source || "PATH"}) · ${strip(apScope())} · ${T("semaine du")} ${dfmt(R.semaine_debut)} ${T("au")} ${dfmt(R.semaine_fin)} · ${T("données : linelist INSP au")} ${dfmt(R.date_donnees)}`,
+      rows: rows.map(x => cols.map(c => { const v = c.csv ? c.csv(x) : strip(c.v ? c.v(x) : x[c.k]); return v === null || v === undefined ? "" : v; })) };
+    window.HubXLSX.download(apId(), [sheet]);
+  }
   function ringsView() {
     const R = ringData();
     if (!R) return `<div class="empty">${T("Analyse des anneaux indisponible : relancez l’analyse complète (Linelist et suivi des contacts).")}</div>`;
@@ -3822,7 +3894,7 @@
     doc.open(); doc.write(`<!doctype html><html lang="${lang}"><head><meta charset="utf-8"><title>${T("Bulletin décisionnel")} ${D.meta.cutoff}</title>${css}<style>body{background:#fff;padding:18px}.panel{box-shadow:none;border:1px solid #ccc}</style></head><body><div style="font:700 18px system-ui;margin-bottom:4px">Ebola Outbreak, SGI-TASK FORCE</div><div style="font:13px system-ui;color:#555;margin-bottom:12px">${T("Situation au")} ${dfmt(D.meta.cutoff)}</div>${clone.outerHTML}</body></html>`); doc.close();
     setTimeout(() => { ifr.contentWindow.focus(); ifr.contentWindow.print(); setTimeout(() => ifr.remove(), 2000); }, 400);
   }
-  const VIEWS = { incident: [imView, imCharts], pilotage: [pilotageView, pilotageCharts], overview: [overview, overviewCharts], territories: [territories, territoriesCharts], followup: [followup, followupCharts], index: [indexView, indexCharts], journey: [journey, journeyCharts], chains: [chainsView, chainsCharts], recon: [reconView, reconCharts], dynamics: [dynamicsView, dynamicsCharts], children: [kidsView, kidsCharts], vaccycles: [vcView, vcCharts], superspreading: [superView, superCharts], resurgence: [resurgenceView, resurgenceCharts], labs: [labsAllView, labsAllCharts], nowcast: [nowcastView, nowcastCharts], forecast: [forecastView, forecastCharts], priority: [priorityView], rtm: [rtmView, rtmCharts], riskzones: [riskZonesView, riskZonesCharts], spatialrisk: [gsView, gsCharts], rings: [ringsView, ringsCharts], alerts: [alertsView, alertsCharts], eds: [edsView, edsCharts], clinic: [clinicView, clinicCharts], pec: [pecView, pecCharts], fusion: [fusionView], maps: [mapsView], ops: [opsView, opsCharts], ppl: [pplView, pplCharts], situation: [sitView], upload: [O.uploadView, O.uploadWire], presentation: [O.presView, O.presWire], indicateurs: [() => O.indView(D), O.indWire], comptes: [O.comptesView, O.comptesWire], publication: [O.pubView, O.pubWire], quality: [qualityView], method: [methodView], terms: [termsView] };
+  const VIEWS = { incident: [imView, imCharts], pilotage: [pilotageView, pilotageCharts], overview: [overview, overviewCharts], territories: [territories, territoriesCharts], followup: [followup, followupCharts], index: [indexView, indexCharts], journey: [journey, journeyCharts], chains: [chainsView, chainsCharts], recon: [reconView, reconCharts], dynamics: [dynamicsView, dynamicsCharts], children: [kidsView, kidsCharts], vaccycles: [vcView, vcCharts], superspreading: [superView, superCharts], resurgence: [resurgenceView, resurgenceCharts], labs: [labsAllView, labsAllCharts], nowcast: [nowcastView, nowcastCharts], forecast: [forecastView, forecastCharts], priority: [priorityView], rtm: [rtmView, rtmCharts], riskzones: [riskZonesView, riskZonesCharts], spatialrisk: [gsView, gsCharts], analysepath: [apView], rings: [ringsView, ringsCharts], alerts: [alertsView, alertsCharts], eds: [edsView, edsCharts], clinic: [clinicView, clinicCharts], pec: [pecView, pecCharts], fusion: [fusionView], maps: [mapsView], ops: [opsView, opsCharts], ppl: [pplView, pplCharts], situation: [sitView], upload: [O.uploadView, O.uploadWire], presentation: [O.presView, O.presWire], indicateurs: [() => O.indView(D), O.indWire], comptes: [O.comptesView, O.comptesWire], publication: [O.pubView, O.pubWire], quality: [qualityView], method: [methodView], terms: [termsView] };
   /* Menu latéral en blocs dépliables : un bloc par thème, le bloc de la page ouverte est toujours déplié ;
      les blocs ouverts par l'utilisateur sont mémorisés (navigateur). */
   const NAV_G = {
@@ -3901,6 +3973,7 @@
     if (t.closest("[data-zr-report]")) { zrReportPNG(); return; }
     const gn = t.closest("[data-gsniv]"); if (gn) { S.gsNiv = gn.dataset.gsniv === "Déjà touchée" ? S.gsNiv : (S.gsNiv === gn.dataset.gsniv ? "Prioritaires" : gn.dataset.gsniv); if (gn.dataset.gsniv === "Déjà touchée") { render(); document.getElementById("gs-touched")?.scrollIntoView({ behavior: "smooth" }); return; } render(); return; }
     if (t.closest("[data-gs-report]")) { gsReportPNG(); return; }
+    if (t.closest("[data-ap-xlsx]")) { apExcel(); return; }
     const pn = t.closest("[data-png]"); if (pn) { Ch.downloadPNG(pn.closest(".panel"), pn.dataset.png); return; }
     if (t.closest("[data-print]")) { print(); return; }
     if (t.closest("[data-pil-print]")) { pilPrint(); return; }
