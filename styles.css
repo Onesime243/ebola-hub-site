@@ -534,6 +534,10 @@ table.pil-20 td{white-space:normal}
 .pil-tile.txt b{font-size:14px;line-height:1.25}
 
 /* Google Invasion Spatial Risque : facteurs (barres divergentes) */
+/* Analyse PATH : cellule du nombre de critères (3 = rouge foncé, 2 = rouge moyen, 1 = rose pâle), coches, phrase sous le tableau */
+.ap-crit{display:block;min-width:28px;text-align:center;font-weight:700;border-radius:4px;padding:2px 6px;font-variant-numeric:tabular-nums}
+.ap-ck{display:block;text-align:center;font-weight:700;color:var(--good)}
+.ap-part{margin:10px 2px 0;font-size:13px;color:var(--ink-2)}
 .gs-fac{display:grid;gap:5px}
 .gs-f{display:grid;grid-template-columns:minmax(120px,1.3fr) 1fr 56px;gap:8px;align-items:center;font-size:12px}
 .gs-f span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
