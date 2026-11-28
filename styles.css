@@ -707,3 +707,19 @@ table.pil-20 td{white-space:normal}
 @media (max-width:1200px){.g6.brief-kpis{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media (max-width:860px){.g6.brief-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.brief-changed b{font-size:18px}}
 @media print{.toc,.help-btn,.fold-btn{display:none}.panel.folded>:not(.panel-head){display:block}}
+
+/* ---- Phases 2-3 (2026-11-28) : signaux, phases, cascade, lecture, mode réunion ---- */
+.nav-badge{display:inline-block;min-width:18px;padding:0 5px;margin-left:6px;border-radius:999px;background:var(--critical);color:#fff;font-size:11px;font-weight:700;text-align:center;line-height:18px}
+.phase-tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px}
+.phase-tile{border:1px solid var(--line);border-left-width:5px;border-radius:8px;padding:8px 10px;background:var(--surface-2)}.phase-tile b{font-size:22px;display:block;line-height:1.1}.phase-tile span{font-size:11.5px;color:var(--ink-2)}
+.cascade{display:flex;flex-direction:column;gap:8px;margin-bottom:8px}
+.casc-row{display:grid;grid-template-columns:220px 1fr 64px auto auto;gap:10px;align-items:center;font-size:13px}
+.casc-lbl{font-weight:600;color:var(--ink-2)}.casc-bar{position:relative;height:14px;background:var(--surface-3);border-radius:7px;overflow:visible}.casc-bar i{display:block;height:100%;border-radius:7px}.casc-bar em{position:absolute;top:-4px;bottom:-4px;width:2px;background:var(--ink);opacity:.6}
+.lecture{margin-top:8px}.lecture b.good{color:var(--good)}.lecture b.crit{color:var(--critical)}
+.alert-item.sig-clos{opacity:.55}
+@media (max-width:860px){.casc-row{grid-template-columns:1fr 64px;row-gap:4px}.casc-lbl{grid-column:1/-1}.casc-bar{grid-column:1}}
+/* mode réunion : projection en salle */
+:root.reunion body{font-size:16px}:root.reunion .kpi .value{font-size:40px}:root.reunion .kpi2 .value{font-size:44px}:root.reunion .kpi .label{font-size:14px}:root.reunion .kpi .note{font-size:13.5px}
+:root.reunion .panel-head h2{font-size:20px}:root.reunion .panel-head p{font-size:14px}:root.reunion table{font-size:15px}:root.reunion .notice{font-size:15px}:root.reunion .im-lead{font-size:18px}:root.reunion .im-head h2{font-size:28px}
+:root.reunion .periodbar,:root.reunion .toc,:root.reunion .foot{display:none}:root.reunion .badge{font-size:13px}:root.reunion .brief-changed b{font-size:30px}
+#reunion-toggle.on{background:var(--surface-3);border-radius:8px}
