@@ -957,3 +957,72 @@ window.HUB_MISS = window.HUB_MISS || new Set();
   const start = () => { obs.observe(document.body, { childList: true, subtree: true, characterData: true }); walk(document.body); };
   if (document.body) start(); else document.addEventListener("DOMContentLoaded", start);
 })();
+
+/* ---- Tendances multi-modèles (2026-11-28) ---- */
+Object.assign(window.HUB_EN, {
+  "Tendances multi-modèles": "Multi-model trends", "Tendances multi-modèles non calculées : relancez l’actualisation complète.": "Multi-model trends not computed: run the full update again.",
+  "Niveau": "Level", "Unité": "Unit", "Fenêtre": "Window", "Zone de santé": "Health zone", "Aire de santé": "Health area", "National": "National",
+  "6 semaines": "6 weeks", "12 semaines": "12 weeks", "Toute l’épidémie": "Whole epidemic", "Classeur Excel": "Excel workbook", "dernière semaine complète": "last complete week",
+  "Aucune unité à ce niveau pour la province choisie.": "No unit at this level for the selected province.", "Trop peu de cas sur cette fenêtre pour ajuster les modèles": "Too few cases in this window to fit the models",
+  "cas": "cases", "semaines": "weeks", "Verdict (consensus)": "Verdict (consensus)", "Méthodes": "Methods", "sur": "of", "Signal récent": "Recent signal",
+  "GAM, Joinpoint, Pettitt, rupture bayésienne": "GAM, Joinpoint, Pettitt, Bayesian change point", "Variation observée": "Observed change", "sem. précédentes vs": "previous wk vs", "dernières": "last",
+  "Cas sur la fenêtre": "Cases in the window", "semaines complètes": "complete weeks", "dernière": "last", "Lecture": "Reading", "Signal de vigilance épidémiologique": "Epidemiological vigilance signal",
+  "La tendance globale et le signal récent divergent : une investigation est recommandée.": "The overall trend and the recent signal diverge: an investigation is recommended.",
+  "Cas confirmés par semaine et courbes ajustées": "Confirmed cases per week and fitted curves",
+  "Barres : cas observés ; ligne sombre : corrigés des retards de saisie ; autres lignes : Theil-Sen, binomiale négative, GAM, Joinpoint, espace-état": "Bars: observed cases; dark line: corrected for reporting delays; other lines: Theil-Sen, negative binomial, GAM, Joinpoint, state space",
+  "Verdict de chaque méthode": "Verdict of each method", "Significatif si p < 0,05 (probabilité a posteriori ≥ 0,95 pour la rupture bayésienne) ; les méthodes ne répondent pas toutes à la même question": "Significant if p < 0.05 (posterior probability ≥ 0.95 for the Bayesian change point); the methods do not all answer the same question",
+  "Méthode": "Method", "Famille": "Family", "Verdict": "Verdict", "Estimation": "Estimate", "IC 95 %": "95% CI", "p / probabilité": "p / probability", "Détail": "Detail",
+  "tendance": "trend", "amplitude": "magnitude", "non linéaire": "non-linear", "latente": "latent", "rupture": "change point",
+  "Croissance significative": "Significant increase", "Décroissance significative": "Significant decrease", "Stable / non significatif": "Stable / not significant", "Non applicable": "Not applicable", "Indéterminé": "Undetermined",
+  "hausse non significative": "non-significant rise", "baisse non significative": "non-significant fall", "Reprise récente possible": "Possible recent resurgence", "Ralentissement récent": "Recent slowdown", "Aucun signal récent": "No recent signal",
+  "Toutes les unités du niveau": "All units at this level", "Cliquer une ligne pour afficher son détail ; flèches = verdict de chaque méthode (↑ croissance, ↓ décroissance, → stable, · non applicable)": "Click a row to show its detail; arrows = verdict of each method (↑ increase, ↓ decrease, → stable, · not applicable)",
+  "Cas (fenêtre)": "Cases (window)", "Semaines": "Weeks", "Consensus": "Consensus", "↑ / ↓ / total": "↑ / ↓ / total", "Divergence entre tendance globale et signal récent": "Divergence between overall trend and recent signal",
+  "Banc d’essai par simulation : fiabilité de chaque méthode": "Simulation benchmark: reliability of each method", "Par scénario : verdicts corrects % / faux positifs %.": "Per scenario: correct verdicts % / false positives %.",
+  "Stable": "Stable", "Croissance": "Increase", "Décroissance": "Decrease", "Résurgence": "Resurgence", "Fortes fluctuations": "Strong fluctuations", "Faible incidence": "Low incidence", "non noté": "not scored",
+  "Délai de détection (sem.)": "Detection delay (wk)", "Résurgence détectée": "Resurgence detected", "Série": "Series",
+  "Cas confirmés observés": "Observed confirmed cases", "Corrigés des retards": "Corrected for delays", "Binomiale négative": "Negative binomial", "Espace-état": "State space",
+  "Sur {0}, la majorité des méthodes ({1} sur {2}) conclut à une croissance significative des cas confirmés.": "Over {0}, most methods ({1} of {2}) conclude that confirmed cases are significantly increasing.",
+  "Sur {0}, la majorité des méthodes ({1} sur {2}) conclut à une décroissance significative des cas confirmés.": "Over {0}, most methods ({1} of {2}) conclude that confirmed cases are significantly decreasing.",
+  "Sur {0}, aucune tendance significative ne se dégage ({1} méthodes en hausse, {2} en baisse sur {3}) : situation stable ou fluctuante.": "Over {0}, no significant trend emerges ({1} methods up, {2} down out of {3}): stable or fluctuating situation.",
+  "Données insuffisantes pour conclure.": "Insufficient data to conclude.",
+  "Les méthodes sensibles aux changements récents (GAM, Joinpoint, ruptures) signalent une reprise sur les dernières semaines.": "Methods sensitive to recent changes (GAM, Joinpoint, change points) signal a resurgence over the last weeks.",
+  "Les méthodes sensibles aux changements récents (GAM, Joinpoint, ruptures) signalent un ralentissement sur les dernières semaines.": "Methods sensitive to recent changes (GAM, Joinpoint, change points) signal a slowdown over the last weeks.",
+  "Variation observée : {0} entre les {1} semaines précédentes et les {1} dernières.": "Observed change: {0} between the previous {1} weeks and the last {1}.",
+  "cas/sem": "cases/wk", "%/sem": "%/wk", "% sur 3 sem": "% over 3 wk", "%/sem (dernier segment)": "%/wk (last segment)", "cas/sem (après − avant)": "cases/wk (after − before)", "% (après / avant)": "% (after / before)", "signes (+ − −)": "signs (+ − −)", "rho": "rho"
+});
+Object.assign(window.HUB_EN, {
+  "Tendance monotone (non paramétrique)": "Monotonic trend (non-parametric)", "Tendance monotone, variance corrigée de l'autocorrélation": "Monotonic trend, variance corrected for autocorrelation",
+  "Corrélation monotone entre le temps et les cas": "Monotonic correlation between time and cases", "Seconde moitié de la série plus haute ou plus basse que la première": "Second half of the series higher or lower than the first",
+  "Comparaison des deux moitiés ordonnées de la série (test réputé très sensible)": "Comparison of the two sorted halves of the series (test known to be very sensitive)", "Pente moyenne en cas par semaine": "Average slope in cases per week",
+  "Pente médiane, robuste aux valeurs aberrantes": "Median slope, robust to outliers", "Variation relative hebdomadaire des cas (comptage)": "Weekly relative change in cases (counts)",
+  "Variation relative hebdomadaire, surdispersion prise en compte": "Weekly relative change, overdispersion accounted for", "Pente log-linéaire avec autocorrélation des résidus": "Log-linear slope with autocorrelated residuals",
+  "Tendance non linéaire ; verdict sur les 3 dernières semaines": "Non-linear trend; verdict on the last 3 weeks", "Pente latente actuelle, débarrassée du bruit": "Current latent slope, free of noise",
+  "Changements de trajectoire ; verdict sur le dernier segment": "Changes of trajectory; verdict on the last segment", "Rupture de niveau la plus probable (non paramétrique)": "Most likely level shift (non-parametric)",
+  "Probabilité d'une rupture et sens du changement": "Probability of a change point and direction of the change"
+});
+
+/* ---- Phase 1 (2026-11-28) : Briefing du jour, KPI v2, glossaire, libellés métier ---- */
+Object.assign(window.HUB_EN, {
+  "Briefing du jour": "Daily briefing", "Briefing indisponible : relancez l’analyse complète.": "Briefing unavailable: run the full analysis again.", "Riposte nationale": "National response",
+  "Surveillance": "Surveillance", "Où l’épidémie peut arriver (risque spatial)": "Where the epidemic may spread (spatial risk)", "Aires de santé prioritaires (PATH)": "Priority health areas (PATH)",
+  "Qui a contaminé qui (reconstruction)": "Who infected whom (reconstruction)", "Cas non encore notifiés (nowcasting)": "Cases not yet notified (nowcasting)", "Combien de cas demain (prévisions)": "How many cases tomorrow (forecasts)",
+  "Croissance ou décroissance ? (tendances)": "Increasing or decreasing? (trends)", "Rt par zone de santé": "Rt by health zone",
+  "Période précédente": "Previous period", "cible": "target", "même valeur sur toutes les pages": "same value on every page", "Non disponible": "Not available", "Rt de référence": "Reference Rt", "Rt EpiEstim 7 j (expert)": "Rt EpiEstim 7 d (expert)",
+  "12 semaines": "12 weeks", "des cas confirmés sur": "of confirmed cases over", "méthodes": "methods", "Situation stable": "Stable situation", "aucune tendance significative": "no significant trend", "de référence": "reference",
+  "transmission en croissance": "transmission increasing", "transmission en recul": "transmission receding", "transmission au seuil": "transmission at threshold", "zones en croissance significative": "zones in significant growth",
+  "reprise récente possible": "possible recent resurgence", "chaîne de transmission peu visible": "transmission chain poorly visible", "des cas issus de contacts listés": "of cases from listed contacts", "attendus sur 7 jours": "expected over 7 days",
+  "bulletin": "bulletin", "tendances": "trends", "pilotage": "steering", "qualité des données": "data quality", "Croissance significative sur 12 semaines (consensus multi-modèles)": "Significant growth over 12 weeks (multi-model consensus)",
+  "Vérifier la dynamique locale, renforcer la recherche active et le listage des contacts": "Check local dynamics, strengthen active case search and contact listing", "Investiguer les nouveaux cas et leurs liens": "Investigate new cases and their links",
+  "Zones nouvellement touchées (7 j)": "Newly affected zones (7 d)", "Déployer une équipe d’intervention rapide et la vaccination en anneau": "Deploy a rapid response team and ring vaccination", "Zones actives sans notification récente": "Active zones without recent notification", "Vérifier la transmission des données": "Check data transmission",
+  "Données": "Data", "qualité": "quality", "dernière notification": "last notification", "Cumuls officiels": "Official cumulative figures", "dynamique et contacts": "dynamics and contacts", "Linelist du": "Line list of", "écart SitRep − Linelist": "SitRep − line list gap", "Qu’est-ce que c’est ?": "What is this?",
+  "Cas confirmés (7 j)": "Confirmed cases (7 d)", "8 dernières semaines": "last 8 weeks", "au total": "in total", "Décès confirmés (7 j)": "Confirmed deaths (7 d)", "hors CTE": "outside ETC", "Cas issus des contacts": "Cases from contacts", "14 derniers jours": "last 14 days",
+  "Contacts vus ≤ 24 h": "Contacts seen ≤ 24 h", "8 derniers jours": "last 8 days", "Délai symptômes → isolement": "Onset → isolation delay", "médiane": "median", "cas isolés": "isolated cases",
+  "Zones de santé par catégorie de risque": "Health zones by risk category", "Grille de la riposte : rouge = hotspot, orange < 21 j, jaune 21–42 j, verte > 42 j ; cliquer une zone pour l’ouvrir": "Response grid: red = hotspot, orange < 21 d, yellow 21–42 d, green > 42 d; click a zone to open it",
+  "Signaux du jour": "Signals of the day", "Classés par gravité ; issus du bulletin, des tendances multi-modèles et du pilotage": "Ranked by severity; from the bulletin, the multi-model trends and the steering page", "Décision": "Decision", "délai": "deadline", "source": "source", "Aucun signal particulier.": "No particular signal.",
+  "Zones de santé les plus actives (7 jours)": "Most active health zones (7 days)", "Cas confirmés des 7 derniers jours, incidence pour 100 000 habitants (population GRID3), Rt, catégorie de risque et verdict des tendances sur 12 semaines ; cliquer pour ouvrir la zone": "Confirmed cases in the last 7 days, incidence per 100,000 (GRID3 population), Rt, risk category and 12-week trend verdict; click to open the zone",
+  "Cas 7 j": "Cases 7 d", "7 j précédents": "Previous 7 d", "Incidence 7 j / 100 000": "7-day incidence / 100,000", "Tendance 12 sem.": "12-wk trend", "Score de risque": "Risk score",
+  "Ce qui a changé depuis hier": "What changed since yesterday", "Dernier jour de notification": "Last notification day", "cas confirmés en 24 h": "confirmed cases in 24 h", "décès en 24 h": "deaths in 24 h", "alertes en 24 h": "alerts in 24 h", "nouveaux contacts en 24 h": "new contacts in 24 h", "zones nouvellement touchées (7 j)": "newly affected zones (7 d)", "PPL infectés (7 j)": "HCWs infected (7 d)", "Nouvelles zones": "New zones",
+  "Aller plus loin": "Go further", "Pages thématiques et analyses avancées": "Thematic pages and advanced analyses", "Transmission et dynamique": "Transmission and dynamics", "Contacts et suivi": "Contacts and follow-up", "Territoires et risque": "Territories and risk", "Surveillance et alertes": "Surveillance and alerts", "Prise en charge et expositions": "Case management and exposures", "Tendances multi-modèles": "Multi-model trends", "Prévisions": "Forecasts", "Qualité des données": "Data quality",
+  "Afficher": "Show", "Masquer": "Hide", "Sommaire": "Contents", "Incidence / 100 000": "Incidence / 100,000", "Taux d’attaque cumulé / 100 000": "Cumulative attack rate / 100,000", "Sources et écarts": "Sources and gaps"
+});
+Object.assign(window.HUB_EN, { "sur les": "over the" });
