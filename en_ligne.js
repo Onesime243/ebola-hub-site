@@ -53,7 +53,7 @@
   window.HUB_DECONNEXION = () => { try { sessionStorage.removeItem(SK); } catch (e) { /* rien */ } location.href = "connexion.html"; };
   let KEY = null;
   const key = async () => KEY || (KEY = await crypto.subtle.importKey("raw", hex(S.cle), "AES-GCM", false, ["decrypt"]));
-  const PROT = /\/(?:dashboard-data\.js|(?:periodes|cartes|rapports|assets|indicateurs|situation)\/.+|presentation\/.+\.(?:png|pptx))$/;
+  const PROT = /\/(?:dashboard-data\.js|(?:periodes|cartes|rapports|assets|indicateurs|situation|data)\/.+|presentation\/.+\.(?:png|pptx))$/;
   const isProt = u => PROT.test(decodeURIComponent(new URL(u, location.href).pathname));
   async function fetchPlain(url) {
     const r = await fetch(url, { cache: "no-cache" }); if (!r.ok) throw new Error("Fichier introuvable (" + r.status + ")");
@@ -97,6 +97,10 @@
       const m = /[?&]p=(\d{4}-\d{2}-\d{2}_\d{4}-\d{2}-\d{2})/.exec(location.search), st = window.HUB_STATIC;
       const per = m && st && (st.periodes || []).some(x => x.cle === m[1]) ? "periodes/" + m[1] + ".js" : null;
       window.DASHBOARD_DATA = parseData(await fetchPlain(per || "dashboard-data.js"));
+      /* parties chargées à la demande (parcours, prévisions, indicateurs) : même mécanisme que l'outil installé */
+      if (!per) { let f = []; try { f = JSON.parse(sessionStorage.getItem("hub-parts") || "[]"); } catch (e) { f = []; }
+        const parts = (window.DASHBOARD_DATA.meta || {}).parts || {};
+        for (const nm of f) { if (!parts[nm]) continue; try { Object.assign(window.DASHBOARD_DATA, parseData(await fetchPlain("data/" + nm + ".js"))); } catch (e) { console.warn("partie", nm, e); } } }
       loadScripts(["i18n.js", "i18n_en.js", "charts.js", "xlsx.js", "outil.js", "app.js"]);
     } catch (e) {
       if (e && e.cle) { toLogin("La version en ligne a été mise à jour : reconnectez-vous."); return; }
